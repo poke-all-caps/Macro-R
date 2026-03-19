@@ -15,6 +15,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AccountsProvider } from "@/context/AccountsContext";
+import { QueriesProvider } from "@/context/QueriesContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -49,6 +50,15 @@ function RootLayoutNav() {
           gestureEnabled: false,
         }}
       />
+      <Stack.Screen
+        name="search-runner"
+        options={{
+          presentation: "transparentModal",
+          headerShown: false,
+          animation: "slide_from_bottom",
+          gestureEnabled: false,
+        }}
+      />
     </Stack>
   );
 }
@@ -76,9 +86,11 @@ export default function RootLayout() {
           <GestureHandlerRootView>
             <KeyboardProvider>
               <AccountsProvider>
-                <SettingsProvider>
-                  <RootLayoutNav />
-                </SettingsProvider>
+                <QueriesProvider>
+                  <SettingsProvider>
+                    <RootLayoutNav />
+                  </SettingsProvider>
+                </QueriesProvider>
               </AccountsProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
