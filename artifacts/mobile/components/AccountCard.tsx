@@ -136,9 +136,13 @@ export function AccountCard({ account, onPress, onRun, isRunningGlobal }: Props)
 
             <View style={styles.stats}>
               <View style={styles.statItem}>
-                <Feather name="star" size={11} color={colors.warning} />
-                <Text style={[styles.statText, { color: colors.textSecondary }]}>
-                  {account.todayPoints} today
+                <Feather
+                  name={Object.keys(account.cookies).length > 0 ? "shield" : "shield-off"}
+                  size={11}
+                  color={Object.keys(account.cookies).length > 0 ? colors.success : colors.warning}
+                />
+                <Text style={[styles.statText, { color: Object.keys(account.cookies).length > 0 ? colors.success : colors.warning }]}>
+                  {Object.keys(account.cookies).length > 0 ? "Cookies set" : "No cookies"}
                 </Text>
               </View>
               <View style={styles.statDot} />

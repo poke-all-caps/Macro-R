@@ -1,14 +1,14 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   View,
@@ -27,25 +27,24 @@ export default function AddAccountScreen() {
   const { addAccount } = useAccounts();
   const { settings } = useSettings();
 
+  const [showManual, setShowManual] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [searchCount, setSearchCount] = useState(settings.defaultSearchCount);
-  const [dailySetEnabled, setDailySetEnabled] = useState(settings.dailySetEnabled);
   const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
 
-  const emailRef = useRef<TextInput>(null);
+  const handleLoginWithMicrosoft = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push("/login-webview");
+  };
 
-  const validate = () => {
+  const validateAndSaveManual = () => {
     const errs: { name?: string; email?: string } = {};
     if (!name.trim()) errs.name = "Name is required";
     if (!email.trim()) errs.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Invalid email address";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      errs.email = "Invalid email address";
     setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleSave = () => {
-    if (!validate()) {
+    if (Object.keys(errs).length > 0) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
@@ -53,17 +52,12 @@ export default function AddAccountScreen() {
     addAccount({
       name: name.trim(),
       email: email.trim().toLowerCase(),
-      searchCount,
-      dailySetEnabled,
+      searchCount: settings.defaultSearchCount,
+      dailySetEnabled: settings.dailySetEnabled,
       lastRun: null,
       cookies: {},
     });
     router.back();
-  };
-
-  const handleSearchCount = (delta: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSearchCount((v) => Math.max(5, Math.min(50, v + delta)));
   };
 
   return (
@@ -86,112 +80,171 @@ export default function AddAccountScreen() {
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={styles.content}
       >
-        <View style={styles.infoNote}>
-          <Feather name="info" size={14} color={colors.tint} />
-          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-            Add your Microsoft account details. Cookies are managed via the login flow.
-          </Text>
-        </View>
-
-        <Field label="Display Name" error={errors.name} colors={colors}>
-          <TextInput
-            style={[styles.input, { color: colors.text, backgroundColor: colors.surfaceSecondary, borderColor: errors.name ? colors.error : colors.border }]}
-            value={name}
-            onChangeText={(t) => { setName(t); setErrors((e) => ({ ...e, name: undefined })); }}
-            placeholder="e.g. My Main Account"
-            placeholderTextColor={colors.textMuted}
-            returnKeyType="next"
-            onSubmitEditing={() => emailRef.current?.focus()}
-            autoCapitalize="words"
-            autoCorrect={false}
-          />
-        </Field>
-
-        <Field label="Microsoft Email" error={errors.email} colors={colors}>
-          <TextInput
-            ref={emailRef}
-            style={[styles.input, { color: colors.text, backgroundColor: colors.surfaceSecondary, borderColor: errors.email ? colors.error : colors.border }]}
-            value={email}
-            onChangeText={(t) => { setEmail(t); setErrors((e) => ({ ...e, email: undefined })); }}
-            placeholder="account@outlook.com"
-            placeholderTextColor={colors.textMuted}
-            returnKeyType="done"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </Field>
-
-        <View style={styles.fieldGroup}>
-          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Daily Searches</Text>
-          <View style={[styles.counterCard, { backgroundColor: colors.surfaceSecondary }]}>
+        {!showManual ? (
+          <>
+            {/* Primary — Real Login */}
             <Pressable
-              onPress={() => handleSearchCount(-5)}
-              style={({ pressed }) => [styles.counterBtn, { opacity: pressed ? 0.6 : 1 }]}
+              onPress={handleLoginWithMicrosoft}
+              style={({ pressed }) => [{ opacity: pressed ? 0.92 : 1 }]}
             >
-              <Feather name="minus" size={20} color={colors.text} />
+              <LinearGradient
+                colors={["#1565C0", "#1976D2", "#2196F3"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.loginCard}
+              >
+                <View style={styles.msLogo}>
+                  <View style={styles.msGrid}>
+                    <View style={[styles.msCell, { backgroundColor: "#F25022" }]} />
+                    <View style={[styles.msCell, { backgroundColor: "#7FBA00" }]} />
+                    <View style={[styles.msCell, { backgroundColor: "#00A4EF" }]} />
+                    <View style={[styles.msCell, { backgroundColor: "#FFB900" }]} />
+                  </View>
+                </View>
+                <View style={styles.loginCardText}>
+                  <Text style={styles.loginCardTitle}>Sign in with Microsoft</Text>
+                  <Text style={styles.loginCardSub}>
+                    Opens a secure Microsoft login. Cookies are captured automatically when you reach Rewards.
+                  </Text>
+                </View>
+                <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.8)" />
+              </LinearGradient>
             </Pressable>
-            <View style={styles.counterCenter}>
-              <Text style={[styles.counterVal, { color: colors.text }]}>{searchCount}</Text>
-              <Text style={[styles.counterUnit, { color: colors.textSecondary }]}>searches / day</Text>
-            </View>
-            <Pressable
-              onPress={() => handleSearchCount(5)}
-              style={({ pressed }) => [styles.counterBtn, { opacity: pressed ? 0.6 : 1 }]}
-            >
-              <Feather name="plus" size={20} color={colors.text} />
-            </Pressable>
-          </View>
-          <View style={styles.sliderHint}>
-            {[5, 10, 20, 30, 40, 50].map((v) => (
-              <Pressable key={v} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); setSearchCount(v); }}>
-                <Text style={[styles.hintChip, { color: searchCount === v ? colors.tint : colors.textMuted, fontFamily: searchCount === v ? "Inter_600SemiBold" : "Inter_400Regular" }]}>
-                  {v}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
 
-        <View style={[styles.switchCard, { backgroundColor: colors.surfaceSecondary }]}>
-          <View style={styles.switchLeft}>
-            <View style={[styles.iconBg, { backgroundColor: "#F0FDF4" }]}>
-              <Feather name="check-square" size={16} color={colors.success} />
+            {/* How it works */}
+            <View style={[styles.stepsCard, { backgroundColor: colors.surfaceSecondary }]}>
+              <Text style={[styles.stepsTitle, { color: colors.textSecondary }]}>HOW IT WORKS</Text>
+              <Step number="1" text="Tap Sign in with Microsoft above" colors={colors} />
+              <Step number="2" text="Log in with your Microsoft account credentials" colors={colors} />
+              <Step number="3" text='When you reach Rewards, tap "Save Account"' colors={colors} />
+              <Step number="4" text="Automation uses your session cookies to run daily searches" colors={colors} />
             </View>
-            <View>
-              <Text style={[styles.switchTitle, { color: colors.text }]}>Enable Daily Set</Text>
-              <Text style={[styles.switchDesc, { color: colors.textSecondary }]}>
-                Auto-complete daily challenges
+
+            <View style={styles.orDivider}>
+              <View style={[styles.orLine, { backgroundColor: colors.border }]} />
+              <Text style={[styles.orText, { color: colors.textMuted }]}>or</Text>
+              <View style={[styles.orLine, { backgroundColor: colors.border }]} />
+            </View>
+
+            {/* Manual / Demo option */}
+            <Pressable
+              onPress={() => setShowManual(true)}
+              style={({ pressed }) => [
+                styles.manualBtn,
+                { borderColor: colors.border, backgroundColor: colors.surfaceSecondary, opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Feather name="edit-3" size={16} color={colors.textSecondary} />
+              <Text style={[styles.manualBtnText, { color: colors.textSecondary }]}>
+                Add account without login (no cookies)
+              </Text>
+            </Pressable>
+
+            <Text style={[styles.privacyNote, { color: colors.textMuted }]}>
+              Cookies are stored locally on your device only. Nothing is sent to external servers.
+            </Text>
+          </>
+        ) : (
+          <>
+            <Pressable
+              onPress={() => setShowManual(false)}
+              style={styles.backRow}
+            >
+              <Feather name="arrow-left" size={16} color={colors.tint} />
+              <Text style={[styles.backText, { color: colors.tint }]}>Back</Text>
+            </Pressable>
+
+            <View style={[styles.warningBox, { backgroundColor: "#FEF3C7" }]}>
+              <Feather name="alert-triangle" size={14} color="#D97706" />
+              <Text style={[styles.warningText, { color: "#92400E" }]}>
+                Without login cookies, automation cannot authenticate with Microsoft. Use "Sign in with Microsoft" for full functionality.
               </Text>
             </View>
-          </View>
-          <Switch
-            value={dailySetEnabled}
-            onValueChange={(v) => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setDailySetEnabled(v);
-            }}
-            trackColor={{ false: colors.border, true: colors.tint }}
-            thumbColor="#fff"
-          />
-        </View>
 
-        <Pressable
-          onPress={handleSave}
-          style={({ pressed }) => [
-            styles.saveBtn,
-            { backgroundColor: colors.tint, opacity: pressed ? 0.85 : 1 },
-          ]}
-        >
-          <Feather name="user-plus" size={18} color="#fff" />
-          <Text style={styles.saveBtnText}>Add Account</Text>
-        </Pressable>
+            <Field label="Display Name" error={errors.name} colors={colors}>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    color: colors.text,
+                    backgroundColor: colors.surfaceSecondary,
+                    borderColor: errors.name ? colors.error : colors.border,
+                  },
+                ]}
+                value={name}
+                onChangeText={(t) => {
+                  setName(t);
+                  setErrors((e) => ({ ...e, name: undefined }));
+                }}
+                placeholder="e.g. My Main Account"
+                placeholderTextColor={colors.textMuted}
+                returnKeyType="next"
+                autoCapitalize="words"
+              />
+            </Field>
+
+            <Field label="Microsoft Email" error={errors.email} colors={colors}>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    color: colors.text,
+                    backgroundColor: colors.surfaceSecondary,
+                    borderColor: errors.email ? colors.error : colors.border,
+                  },
+                ]}
+                value={email}
+                onChangeText={(t) => {
+                  setEmail(t);
+                  setErrors((e) => ({ ...e, email: undefined }));
+                }}
+                placeholder="account@outlook.com"
+                placeholderTextColor={colors.textMuted}
+                returnKeyType="done"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </Field>
+
+            <Pressable
+              onPress={validateAndSaveManual}
+              style={({ pressed }) => [
+                styles.saveBtn,
+                { backgroundColor: colors.tint, opacity: pressed ? 0.85 : 1 },
+              ]}
+            >
+              <Feather name="user-plus" size={18} color="#fff" />
+              <Text style={styles.saveBtnText}>Add Account</Text>
+            </Pressable>
+          </>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
-function Field({ label, error, colors, children }: { label: string; error?: string; colors: any; children: React.ReactNode }) {
+function Step({ number, text, colors }: { number: string; text: string; colors: any }) {
+  return (
+    <View style={styles.stepRow}>
+      <View style={[styles.stepNum, { backgroundColor: colors.tint + "22" }]}>
+        <Text style={[styles.stepNumText, { color: colors.tint }]}>{number}</Text>
+      </View>
+      <Text style={[styles.stepText, { color: colors.textSecondary }]}>{text}</Text>
+    </View>
+  );
+}
+
+function Field({
+  label,
+  error,
+  colors,
+  children,
+}: {
+  label: string;
+  error?: string;
+  colors: any;
+  children: React.ReactNode;
+}) {
   return (
     <View style={styles.fieldGroup}>
       <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{label}</Text>
@@ -227,26 +280,136 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    gap: 20,
+    gap: 16,
     paddingBottom: 40,
   },
-  infoNote: {
+  loginCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 18,
+    gap: 16,
+  },
+  msLogo: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  msGrid: {
+    width: 28,
+    height: 28,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 2,
+  },
+  msCell: {
+    width: 13,
+    height: 13,
+  },
+  loginCardText: {
+    flex: 1,
+    gap: 4,
+  },
+  loginCardTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+  },
+  loginCardSub: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 17,
+  },
+  stepsCard: {
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+  },
+  stepsTitle: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.8,
+    marginBottom: 2,
+  },
+  stepRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 8,
-    backgroundColor: "#EFF6FF",
-    padding: 12,
+    gap: 12,
+  },
+  stepNum: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  stepNumText: {
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
+  },
+  stepText: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 18,
+    flex: 1,
+    paddingTop: 3,
+  },
+  orDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  orLine: { flex: 1, height: 1 },
+  orText: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+  },
+  manualBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  manualBtnText: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+  },
+  privacyNote: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    textAlign: "center",
+    lineHeight: 16,
+  },
+  backRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  backText: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+  },
+  warningBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: 14,
     borderRadius: 12,
   },
-  infoText: {
+  warningText: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
     flex: 1,
     lineHeight: 18,
   },
-  fieldGroup: {
-    gap: 8,
-  },
+  fieldGroup: { gap: 8 },
   fieldLabel: {
     fontSize: 13,
     fontFamily: "Inter_500Medium",
@@ -264,66 +427,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   errorText: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-  },
-  counterCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 14,
-    overflow: "hidden",
-  },
-  counterBtn: {
-    padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  counterCenter: {
-    flex: 1,
-    alignItems: "center",
-  },
-  counterVal: {
-    fontSize: 28,
-    fontFamily: "Inter_700Bold",
-  },
-  counterUnit: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-  },
-  sliderHint: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  hintChip: {
-    fontSize: 13,
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-  },
-  switchCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-    borderRadius: 14,
-  },
-  switchLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  iconBg: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  switchTitle: {
-    fontSize: 15,
-    fontFamily: "Inter_500Medium",
-  },
-  switchDesc: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
   },

@@ -204,6 +204,51 @@ export default function AccountDetailScreen() {
         )}
 
         <View style={[styles.section, { marginHorizontal: 16, marginBottom: 16 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>SESSION</Text>
+          <View style={[styles.card, { backgroundColor: colors.surface }]}>
+            <View style={styles.configRow}>
+              <View style={styles.configLeft}>
+                <Feather
+                  name={Object.keys(account.cookies).length > 0 ? "shield" : "shield-off"}
+                  size={16}
+                  color={Object.keys(account.cookies).length > 0 ? colors.success : colors.warning}
+                />
+                <View>
+                  <Text style={[styles.configLabel, { color: colors.text }]}>
+                    {Object.keys(account.cookies).length > 0 ? "Session Active" : "No Session"}
+                  </Text>
+                  <Text style={{ fontSize: 11, color: colors.textMuted, fontFamily: "Inter_400Regular" }}>
+                    {Object.keys(account.cookies).length > 0
+                      ? `${Object.keys(account.cookies).length} cookies stored`
+                      : "Login required for automation"}
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => router.push({ pathname: "/login-webview", params: { accountId: account.id } })}
+                style={({ pressed }) => [
+                  {
+                    backgroundColor: Object.keys(account.cookies).length > 0 ? colors.surfaceSecondary : colors.tint,
+                    paddingHorizontal: 12,
+                    paddingVertical: 7,
+                    borderRadius: 20,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}
+              >
+                <Text style={{
+                  fontSize: 12,
+                  fontFamily: "Inter_600SemiBold",
+                  color: Object.keys(account.cookies).length > 0 ? colors.tint : "#fff",
+                }}>
+                  {Object.keys(account.cookies).length > 0 ? "Re-login" : "Login"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
+        <View style={[styles.section, { marginHorizontal: 16, marginBottom: 16 }]}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>CONFIGURATION</Text>
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
             <ConfigRow
