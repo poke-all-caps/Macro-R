@@ -390,17 +390,19 @@ export default function SearchRunnerScreen() {
         </Text>
       </View>
 
-      {/* Live Bing WebView */}
+      {/* Live Bing WebView — incognito isolates each account's cookie store so
+          the shared device store (which holds the most-recently-logged-in account)
+          cannot bleed into a different account's session. Only our injected
+          Cookie header via source.headers is used for the initial request. */}
       <WebViewComponent
         ref={webViewRef}
         key={webViewKey}
         source={webViewSource}
         userAgent={BING_UA}
         style={styles.webView}
+        incognito
         javaScriptEnabled
         domStorageEnabled
-        sharedCookiesEnabled
-        thirdPartyCookiesEnabled
         allowsBackForwardNavigationGestures={false}
         startInLoadingState
       />
