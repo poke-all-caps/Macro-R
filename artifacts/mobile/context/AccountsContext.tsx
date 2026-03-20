@@ -68,7 +68,16 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
           AsyncStorage.getItem(ACCOUNTS_KEY),
           AsyncStorage.getItem(LOGS_KEY),
         ]);
-        if (accsRaw) setAccounts(JSON.parse(accsRaw));
+        if (accsRaw) {
+          // Migrate old accounts that were saved before dailySetEnabled was added
+          const parsed: Account[] = JSON.parse(accsRaw);
+          setAccounts(
+            parsed.map((a) => ({
+              ...a,
+              dailySetEnabled: a.dailySetEnabled ?? true,
+            }))
+          );
+        }
         if (logsRaw) setLogs(JSON.parse(logsRaw));
       } catch (e) {
         console.error("Failed to load data", e);

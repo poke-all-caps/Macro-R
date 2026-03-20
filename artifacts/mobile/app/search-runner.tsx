@@ -223,14 +223,19 @@ async function performDailySet(
   const pending = activities.filter((a) => !a.complete);
 
   if (activities.length === 0) {
-    onStatus("Daily Set: no activities found");
+    onStatus("Daily Set: no activities found (session may need re-login)");
+    await sleep(3000);
     return { completed: 0, total: 0, alreadyDone: false };
   }
 
   if (pending.length === 0) {
     onStatus("Daily Set: already completed ✓");
+    await sleep(2000);
     return { completed: activities.length, total: activities.length, alreadyDone: true };
   }
+
+  onStatus(`Daily Set: found ${pending.length} activities`);
+  await sleep(1000);
 
   let completed = 0;
   for (let i = 0; i < pending.length; i++) {
@@ -241,9 +246,11 @@ async function performDailySet(
     const ok = await completeActivity(activity, cookies);
     if (ok) completed++;
 
-    // Short human-like pause between activities
     await sleep(1500 + Math.random() * 1000);
   }
+
+  onStatus(`Daily Set: ${completed}/${pending.length} activities completed`);
+  await sleep(2000);
 
   return { completed, total: pending.length, alreadyDone: false };
 }
@@ -397,10 +404,12 @@ export default function SearchRunnerScreen() {
 
         // ── Daily Set ────────────────────────────────────────────────────────
         let dailySetDone = false;
+        // account.dailySetEnabled may be undefined for accounts created before
+        // this field was added — treat undefined as true (opt-in by default).
         const shouldRunDailySet =
           !networkLost &&
           settings.dailySetEnabled &&
-          account.dailySetEnabled;
+          (account.dailySetEnabled ?? true);
 
         if (shouldRunDailySet) {
           setPhase("dailyset");
