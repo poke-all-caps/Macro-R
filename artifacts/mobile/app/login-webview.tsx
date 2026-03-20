@@ -24,6 +24,13 @@ import { useAccounts } from "@/context/AccountsContext";
 const MOBILE_USER_AGENT =
   "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
 
+// When adding a NEW account, always start with a sign-out so the WebView doesn't
+// silently reuse an existing session from a previous account login.
+const SIGNOUT_URL =
+  "https://login.live.com/logout.srf?ct=1&rver=7&uaid=&lc=1033&mkt=EN-US&lru=" +
+  encodeURIComponent(
+    "https://login.live.com/login.srf?wa=wsignin1.0&wreply=https://rewards.bing.com/"
+  );
 const LOGIN_URL = "https://login.live.com/login.srf?wa=wsignin1.0&wreply=https://rewards.bing.com/";
 const REWARDS_DOMAINS = ["rewards.bing.com", "bing.com/rewards"];
 
@@ -245,8 +252,14 @@ export default function LoginWebViewScreen() {
 
       <WebViewComponent
         ref={webViewRef}
-        source={{ uri: LOGIN_URL }}
+        // New accounts start at the sign-out URL so any existing WebView session
+        // is cleared server-side before the login page appears.
+        // Refreshing an existing account skips sign-out so the session stays valid.
+        source={{ uri: existingAccount ? LOGIN_URL : SIGNOUT_URL }}
         userAgent={MOBILE_USER_AGENT}
+        // On Android, incognito mode gives each login a fresh, isolated cookie store
+        // so old session cookies can never leak into a new account login.
+        incognito={Platform.OS === "android" && !existingAccount}
         onNavigationStateChange={handleNavigationStateChange}
         onMessage={handleMessage}
         onLoadStart={() => setIsLoading(true)}

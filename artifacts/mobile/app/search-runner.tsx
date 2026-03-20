@@ -86,6 +86,9 @@ async function performBingSearch(
   try {
     const resp = await fetch(url, {
       method: "GET",
+      // 'omit' prevents the OS cookie jar from injecting or overriding cookies.
+      // We supply the account's cookies explicitly via the Cookie header only.
+      credentials: "omit",
       headers: {
         Cookie: cookieStr,
         "User-Agent": BING_UA,
@@ -113,6 +116,8 @@ async function fetchRewardsPoints(
     const resp = await fetch(
       "https://rewards.bing.com/api/getuserinfo?type=1&X-Requested-With=XMLHttpRequest",
       {
+        // 'omit' prevents the OS cookie jar from contaminating this request
+        credentials: "omit",
         headers: {
           Cookie: cookieStr,
           "User-Agent": BING_UA,
