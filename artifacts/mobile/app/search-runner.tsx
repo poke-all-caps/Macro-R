@@ -173,7 +173,7 @@ export default function SearchRunnerScreen() {
 
   const { accountIds: rawIds } = useLocalSearchParams<{ accountIds: string }>();
   const { accounts, updateAccount, addLog, stopRun } = useAccounts();
-  const { consumeQueries } = useQueries();
+  const { pickQueries: consumeQueries } = useQueries();
   const { settings } = useSettings();
 
   const accountIds: string[] = rawIds ? JSON.parse(rawIds) : [];
@@ -441,7 +441,7 @@ export default function SearchRunnerScreen() {
         accountId: account.id,
         accountName: account.name,
         timestamp: new Date().toISOString(),
-        status: finalStatus,
+        status: finalStatus === "done" ? "success" : "failed",
         searchesDone,
         dailySetDone: account.dailySetEnabled && searchesDone > 0,
         pointsEarned,

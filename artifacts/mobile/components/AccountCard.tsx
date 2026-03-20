@@ -213,7 +213,7 @@ export function AccountCard({ account, onPress, onRun, onRefreshSession, isRunni
               {
                 backgroundColor:
                   account.status === "running" ? colors.border : pressed ? colors.tintDark : colors.tint,
-                opacity: account.status === "running" || (isRunningGlobal && account.status !== "running") ? 0.5 : 1,
+                opacity: account.status === "running" || isRunningGlobal ? 0.5 : 1,
               },
             ]}
           >
