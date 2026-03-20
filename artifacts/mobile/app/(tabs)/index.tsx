@@ -1,6 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import { CheckSquare, Play, Plus, Square, Users } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
@@ -23,6 +24,7 @@ import { StatsBar } from "@/components/StatsBar";
 import Colors from "@/constants/colors";
 import { Account, useAccounts } from "@/context/AccountsContext";
 import { useSettings } from "@/context/SettingsContext";
+import { consumePendingRun } from "@/utils/notifications";
 
 export default function HomeScreen() {
   const scheme = useColorScheme() ?? "light";
@@ -37,6 +39,22 @@ export default function HomeScreen() {
     await new Promise((r) => setTimeout(r, 500));
     setRefreshing(false);
   }, []);
+
+  // Auto-start run when navigated here from a scheduled notification tap
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      consumePendingRun().then((pending) => {
+        if (!active || !pending || isRunning || accounts.length === 0) return;
+        startRun();
+        router.push({
+          pathname: "/search-runner",
+          params: { accountIds: JSON.stringify(accounts.map((a) => a.id)) },
+        });
+      });
+      return () => { active = false; };
+    }, [isRunning, accounts])
+  );
 
   const handleRunAll = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -178,7 +196,7 @@ export default function HomeScreen() {
                 { color: colors.textSecondary },
               ]}
             >
-              Searches / account
+              Search Count
             </Text>
             <View style={styles.stepperRow}>
               <Pressable

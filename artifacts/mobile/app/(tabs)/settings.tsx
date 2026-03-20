@@ -17,14 +17,21 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { useSettings } from "@/context/SettingsContext";
+import {
+  cancelAllScheduledNotifications,
+  getScheduledCount,
+  requestNotificationPermission,
+  scheduleRewardsNotifications,
+} from "@/utils/notifications";
 
 export default function SettingsScreen() {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
+  const [scheduling, setScheduling] = useState(false);
+  const [scheduledCount, setScheduledCount] = useState<number | null>(null);
 
-  // Local text state so the field stays editable while typing
   const [searchCountText, setSearchCountText] = useState(
     String(settings.defaultSearchCount)
   );
@@ -52,6 +59,28 @@ export default function SettingsScreen() {
     }
   };
 
+  // ── First run time editor ────────────────────────────────────────────────
+  const { hour, minute } = settings.firstRunTime;
+  const isAm = hour < 12;
+  const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+
+  const adjustHour = (delta: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    let h = hour + delta;
+    if (h < 0) h = 23;
+    if (h > 23) h = 0;
+    updateSettings({ firstRunTime: { hour: h, minute } });
+    setScheduledCount(null);
+  };
+
+  const toggleAmPm = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const newHour = isAm ? hour + 12 : hour - 12;
+    updateSettings({ firstRunTime: { hour: Math.max(0, Math.min(23, newHour)), minute } });
+    setScheduledCount(null);
+  };
+
+  // ── Retry schedule (fixed) ───────────────────────────────────────────────
   const retryTimes = [
     { hour: 22, minute: 0, label: "10:00 PM" },
     { hour: 22, minute: 30, label: "10:30 PM" },
@@ -60,15 +89,48 @@ export default function SettingsScreen() {
     { hour: 0, minute: 0, label: "12:00 AM (Final)" },
   ];
 
-  const handleApplySchedule = () => {
+  // ── Apply Schedule ───────────────────────────────────────────────────────
+  const handleApplySchedule = async () => {
+    if (Platform.OS === "web") {
+      Alert.alert("Not Available", "Notifications require a real device.");
+      return;
+    }
+    setScheduling(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert(
-      "Schedule Applied",
-      Platform.OS === "web"
-        ? "Background scheduling is not available in web mode."
-        : "The automation schedule has been configured. Your accounts will run automatically at the scheduled times.",
-      [{ text: "OK" }]
+
+    const granted = await requestNotificationPermission();
+    if (!granted) {
+      setScheduling(false);
+      Alert.alert(
+        "Permission Required",
+        "Please allow notifications in your device settings so the schedule can alert you.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    const { scheduled } = await scheduleRewardsNotifications(
+      settings.firstRunTime,
+      retryTimes
     );
+    setScheduledCount(scheduled);
+    setScheduling(false);
+
+    const fmt = (h: number, m: number) =>
+      `${h % 12 === 0 ? 12 : h % 12}:${m.toString().padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+
+    Alert.alert(
+      "Schedule Active ✓",
+      `${scheduled} daily notification${scheduled !== 1 ? "s" : ""} scheduled.\n\nFirst run: ${fmt(settings.firstRunTime.hour, settings.firstRunTime.minute)}\n\nTap the notification when it fires — the app will start your run automatically.`,
+      [{ text: "Got it" }]
+    );
+  };
+
+  const handleClearSchedule = async () => {
+    await cancelAllScheduledNotifications();
+    setScheduledCount(0);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    Alert.alert("Schedule Cleared", "All scheduled notifications have been removed.", [{ text: "OK" }]);
   };
 
   const formatTime = (h: number, m: number) =>
@@ -103,7 +165,6 @@ export default function SettingsScreen() {
 
         <Section title="SEARCH" colors={colors}>
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
-            {/* Searches per account */}
             <View style={styles.settingRow}>
               <View style={styles.settingLabel}>
                 <View style={[styles.iconBg, { backgroundColor: "#EFF6FF" }]}>
@@ -133,7 +194,6 @@ export default function SettingsScreen() {
 
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-            {/* Delay between searches */}
             <View style={styles.settingRow}>
               <View style={styles.settingLabel}>
                 <View style={[styles.iconBg, { backgroundColor: "#F0F9FF" }]}>
@@ -166,19 +226,10 @@ export default function SettingsScreen() {
           </View>
         </Section>
 
-
         <Section title="SCHEDULE" colors={colors}>
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
-            <View
-              style={[
-                styles.settingRow,
-                {
-                  paddingBottom: 12,
-                  borderBottomWidth: 1,
-                  borderBottomColor: colors.border,
-                },
-              ]}
-            >
+            {/* First run time — editable */}
+            <View style={[styles.settingRow, styles.settingRowBottom, { borderBottomColor: colors.border }]}>
               <View style={styles.settingLabel}>
                 <View style={[styles.iconBg, { backgroundColor: "#FFF7ED" }]}>
                   <Play size={16} color={colors.warning} />
@@ -188,23 +239,42 @@ export default function SettingsScreen() {
                     First Run
                   </Text>
                   <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                    Initial daily automation attempt
+                    Daily notification trigger
                   </Text>
                 </View>
               </View>
-              <Text style={[styles.timeText, { color: colors.tint }]}>
-                {formatTime(
-                  settings.firstRunTime.hour,
-                  settings.firstRunTime.minute
-                )}
-              </Text>
+
+              <View style={styles.timePicker}>
+                <Pressable
+                  onPress={() => adjustHour(-1)}
+                  style={[styles.timeStepBtn, { backgroundColor: colors.surfaceSecondary }]}
+                >
+                  <Text style={[styles.timeStepText, { color: colors.text }]}>−</Text>
+                </Pressable>
+                <Text style={[styles.timeDisplay, { color: colors.text }]}>
+                  {displayHour}:00
+                </Text>
+                <Pressable
+                  onPress={() => adjustHour(1)}
+                  style={[styles.timeStepBtn, { backgroundColor: colors.surfaceSecondary }]}
+                >
+                  <Text style={[styles.timeStepText, { color: colors.text }]}>+</Text>
+                </Pressable>
+                <Pressable
+                  onPress={toggleAmPm}
+                  style={[styles.amPmBtn, { backgroundColor: colors.tint }]}
+                >
+                  <Text style={styles.amPmText}>{isAm ? "AM" : "PM"}</Text>
+                </Pressable>
+              </View>
             </View>
 
+            {/* Retry schedule — informational */}
             <View style={styles.retrySection}>
               <View style={styles.retryHeader}>
                 <RefreshCw size={14} color={colors.running} />
                 <Text style={[styles.retryLabel, { color: colors.textSecondary }]}>
-                  Retry schedule for failed accounts
+                  Auto-retry schedule for failed accounts
                 </Text>
               </View>
               {retryTimes.map((t, i) => (
@@ -214,9 +284,7 @@ export default function SettingsScreen() {
                       styles.retryDot,
                       {
                         backgroundColor:
-                          i === retryTimes.length - 1
-                            ? colors.error
-                            : colors.running,
+                          i === retryTimes.length - 1 ? colors.error : colors.running,
                       },
                     ]}
                   />
@@ -224,17 +292,8 @@ export default function SettingsScreen() {
                     {t.label}
                   </Text>
                   {i === retryTimes.length - 1 && (
-                    <View
-                      style={[
-                        styles.finalBadge,
-                        { backgroundColor: "#FEE2E2" },
-                      ]}
-                    >
-                      <Text
-                        style={[styles.finalText, { color: colors.error }]}
-                      >
-                        Final
-                      </Text>
+                    <View style={[styles.finalBadge, { backgroundColor: "#FEE2E2" }]}>
+                      <Text style={[styles.finalText, { color: colors.error }]}>Final</Text>
                     </View>
                   )}
                 </View>
@@ -244,20 +303,46 @@ export default function SettingsScreen() {
         </Section>
 
         <Section title="ACTIONS" colors={colors}>
+          {scheduledCount !== null && (
+            <View style={[styles.statusBanner, {
+              backgroundColor: scheduledCount > 0 ? "#F0FDF4" : "#FFF7ED",
+              borderColor: scheduledCount > 0 ? "#BBF7D0" : "#FDE68A",
+            }]}>
+              <Text style={{ color: scheduledCount > 0 ? "#166534" : "#92400E", fontSize: 13, fontFamily: "Inter_500Medium" }}>
+                {scheduledCount > 0
+                  ? `✓ ${scheduledCount} notification${scheduledCount !== 1 ? "s" : ""} scheduled`
+                  : "No active notifications"}
+              </Text>
+            </View>
+          )}
+
           <Pressable
             onPress={handleApplySchedule}
+            disabled={scheduling}
             style={({ pressed }) => [
               styles.applyBtn,
-              { backgroundColor: colors.tint, opacity: pressed ? 0.85 : 1 },
+              { backgroundColor: colors.tint, opacity: pressed || scheduling ? 0.75 : 1 },
             ]}
           >
             <Calendar size={18} color="#fff" />
-            <Text style={styles.applyText}>Apply Schedule</Text>
+            <Text style={styles.applyText}>
+              {scheduling ? "Scheduling…" : "Apply Schedule"}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={handleClearSchedule}
+            style={({ pressed }) => [
+              styles.clearBtn,
+              { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 },
+            ]}
+          >
+            <Text style={[styles.clearText, { color: colors.textSecondary }]}>Clear Schedule</Text>
           </Pressable>
 
           {Platform.OS === "web" && (
             <Text style={[styles.webNote, { color: colors.textMuted }]}>
-              Background scheduling requires Android with WorkManager
+              Notifications require a real Android or iOS device
             </Text>
           )}
         </Section>
@@ -279,9 +364,7 @@ function Section({
 }) {
   return (
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
-        {title}
-      </Text>
+      <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{title}</Text>
       {children}
     </View>
   );
@@ -307,6 +390,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     gap: 12,
+  },
+  settingRowBottom: {
+    borderBottomWidth: 1,
+    paddingBottom: 16,
   },
   settingLabel: {
     flexDirection: "row",
@@ -339,12 +426,45 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-  unit: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-  },
+  unit: { fontSize: 14, fontFamily: "Inter_500Medium" },
   divider: { height: 1, marginHorizontal: 16 },
-  timeText: { fontSize: 15, fontFamily: "Inter_600SemiBold" },
+  // Time picker
+  timePicker: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  timeStepBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timeStepText: {
+    fontSize: 18,
+    fontFamily: "Inter_600SemiBold",
+    lineHeight: 20,
+  },
+  timeDisplay: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+    minWidth: 52,
+    textAlign: "center",
+  },
+  amPmBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  amPmText: {
+    fontSize: 12,
+    fontFamily: "Inter_700Bold",
+    color: "#fff",
+  },
+  // Retry section
   retrySection: { padding: 16, paddingTop: 12, gap: 10 },
   retryHeader: {
     flexDirection: "row",
@@ -358,6 +478,14 @@ const styles = StyleSheet.create({
   retryTime: { fontSize: 14, fontFamily: "Inter_400Regular", flex: 1 },
   finalBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },
   finalText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  // Buttons
+  statusBanner: {
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+    alignItems: "center",
+  },
   applyBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -365,8 +493,18 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 16,
     borderRadius: 14,
+    marginBottom: 10,
   },
   applyText: { color: "#fff", fontSize: 16, fontFamily: "Inter_600SemiBold" },
+  clearBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  clearText: { fontSize: 15, fontFamily: "Inter_500Medium" },
   webNote: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
