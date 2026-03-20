@@ -27,32 +27,53 @@ const MOBILE_USER_AGENT =
 const LOGIN_URL = "https://login.live.com/login.srf?wa=wsignin1.0&wreply=https://rewards.bing.com/";
 const REWARDS_DOMAINS = ["rewards.bing.com", "bing.com/rewards"];
 
+// Injected on every page load — captures cookies for that domain and any detectable account info
 const INJECT_COOKIES_JS = `
 (function() {
   try {
     var data = {
       cookies: document.cookie,
       url: window.location.href,
-      title: document.title,
+      domain: window.location.hostname,
       username: '',
+      email: '',
       localStorageTokens: {},
     };
-    var nameEl = document.querySelector('[data-testid="user-name"], .id_accountName, #mHamburgerFlyout .id_accountName, .ms-Icon--Contact');
-    if (nameEl) data.username = nameEl.innerText || nameEl.textContent || '';
-    var metaUser = document.querySelector('meta[name="og:title"], meta[property="og:title"]');
-    if (metaUser && !data.username) data.username = metaUser.getAttribute('content') || '';
+    // Detect account name
+    var nameSelectors = [
+      '[data-testid="user-name"]', '.id_accountName',
+      '#mHamburgerFlyout .id_accountName', '.ms-Icon--Contact',
+      '.mectrl_accountinfo_name', '.mectrl_name',
+      '#mectrl_currentAccount_name',
+    ];
+    for (var ns = 0; ns < nameSelectors.length; ns++) {
+      var el = document.querySelector(nameSelectors[ns]);
+      if (el && el.innerText) { data.username = el.innerText.trim(); break; }
+    }
+    // Detect email
+    var emailSelectors = [
+      '.id_email', '[data-testid="user-email"]',
+      '.account-header-email', '#mectrl_currentAccount_subtitle',
+      '.mectrl_accountinfo_email',
+    ];
+    for (var es = 0; es < emailSelectors.length; es++) {
+      var ee = document.querySelector(emailSelectors[es]);
+      if (ee && ee.innerText) { data.email = ee.innerText.trim(); break; }
+    }
+    // Relevant localStorage tokens
     try {
       var lsKeys = Object.keys(localStorage);
       for (var i = 0; i < lsKeys.length; i++) {
         var k = lsKeys[i];
-        if (k.indexOf('token') !== -1 || k.indexOf('auth') !== -1 || k.indexOf('MUID') !== -1 || k.indexOf('session') !== -1) {
+        var kl = k.toLowerCase();
+        if (kl.indexOf('token') !== -1 || kl.indexOf('auth') !== -1 ||
+            kl.indexOf('muid') !== -1 || kl.indexOf('session') !== -1 ||
+            kl.indexOf('rewards') !== -1) {
           var val = localStorage.getItem(k);
-          if (val && val.length < 2000) data.localStorageTokens[k] = val;
+          if (val && val.length < 4000) data.localStorageTokens[k] = val;
         }
       }
     } catch(lsErr) {}
-    var emailEl = document.querySelector('.id_email, [data-testid="user-email"], .account-header-email');
-    if (emailEl) data.username = emailEl.innerText || emailEl.textContent || data.username;
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'cookies', data: data }));
   } catch(e) {
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'error', message: e.message }));
@@ -100,11 +121,15 @@ export default function LoginWebViewScreen() {
     (navState: WebViewNavigation) => {
       setPageUrl(navState.url);
       setIsLoading(navState.loading);
+      // Capture cookies from EVERY page the user visits during login
+      // so we get cookies from login.live.com, bing.com, rewards.bing.com, etc.
+      if (!navState.loading && navState.url.startsWith("http")) {
+        webViewRef.current?.injectJavaScript(INJECT_COOKIES_JS);
+      }
       const isOnRewards = REWARDS_DOMAINS.some((d) => navState.url.includes(d));
       if (isOnRewards && status !== "loggedIn") {
         setStatus("loggedIn");
         showSuccessBanner();
-        webViewRef.current?.injectJavaScript(INJECT_COOKIES_JS);
       } else if (!navState.loading && status === "loading") {
         setStatus("browsing");
       }
@@ -118,17 +143,19 @@ export default function LoginWebViewScreen() {
       if (msg.type === "cookies" && msg.data) {
         const parsed = parseCookieString(msg.data.cookies || "");
         const lsTokens: Record<string, string> = msg.data.localStorageTokens || {};
-        const merged = { ...parsed };
-        Object.entries(lsTokens).forEach(([k, v]) => { merged[`_ls_${k}`] = v; });
-        setCapturedCookies(merged);
-        const url = msg.data.url || "";
-        const emailMatch = url.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-        if (emailMatch) setDetectedEmail(emailMatch[0]);
+        const lsPrefixed: Record<string, string> = {};
+        Object.entries(lsTokens).forEach(([k, v]) => { lsPrefixed[`_ls_${k}`] = v; });
+        // Merge: never discard previously captured cookies — accumulate across all visited domains
+        setCapturedCookies((prev) => ({ ...prev, ...parsed, ...lsPrefixed }));
+        // Pick up email
+        const email = (msg.data.email || "").trim();
+        if (email && email.includes("@")) setDetectedEmail(email);
+        // Pick up username
         const username = (msg.data.username || "").trim();
-        if (username && !accountName) setAccountName(username.split(" ")[0] || "My Account");
+        if (username) setAccountName((prev) => prev || username.split(" ")[0] || "My Account");
       }
     } catch {}
-  }, [accountName]);
+  }, []);
 
   const handleSave = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

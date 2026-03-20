@@ -24,7 +24,7 @@ import { useAccounts } from "@/context/AccountsContext";
 
 export default function AccountDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { accounts, updateAccount, deleteAccount } = useAccounts();
+  const { accounts, updateAccount, removeAccount } = useAccounts();
   const account = accounts.find((a) => a.id === id);
 
   const scheme = useColorScheme() ?? "light";
@@ -95,7 +95,7 @@ export default function AccountDetailScreen() {
         text: "Delete",
         style: "destructive",
         onPress: () => {
-          deleteAccount(id);
+          removeAccount(id);
           router.back();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         },
