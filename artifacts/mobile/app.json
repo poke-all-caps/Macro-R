@@ -14,9 +14,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.msrewards.automation"
     },
-    "android": {},
+    "android": {
+      "package": "com.msrewards.automation"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
