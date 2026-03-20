@@ -2,7 +2,7 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Contains a MS Rewards Automation mobile app built with Expo React Native.
+pnpm workspace monorepo using TypeScript. Contains MS Rewards Automation v2, a mobile app built with Expo React Native.
 
 ## Stack
 
