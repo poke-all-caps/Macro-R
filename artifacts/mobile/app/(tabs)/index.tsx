@@ -1,7 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { CheckSquare, Play, Plus, Square, Users } from "lucide-react-native";
+import { CheckSquare, Clock, Play, Plus, Search, Square, Users } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
   Alert,
@@ -22,12 +22,14 @@ import { EmptyState } from "@/components/EmptyState";
 import { StatsBar } from "@/components/StatsBar";
 import Colors from "@/constants/colors";
 import { Account, useAccounts } from "@/context/AccountsContext";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function HomeScreen() {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
   const { accounts, isRunning, startRun, stopRun } = useAccounts();
+  const { settings } = useSettings();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -136,6 +138,26 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* Settings quick-view strip */}
+      <View style={[styles.settingsStrip, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
+        <Pressable
+          onPress={() => router.push("/(tabs)/settings")}
+          style={styles.settingsStripInner}
+        >
+          <View style={styles.settingsItem}>
+            <Search size={14} color={colors.tint} />
+            <Text style={[styles.settingsValue, { color: colors.text }]}>{settings.defaultSearchCount}</Text>
+            <Text style={[styles.settingsLabel, { color: colors.textSecondary }]}>Searches / account</Text>
+          </View>
+          <View style={[styles.settingsDivider, { backgroundColor: colors.border }]} />
+          <View style={styles.settingsItem}>
+            <Clock size={14} color={colors.tint} />
+            <Text style={[styles.settingsValue, { color: colors.text }]}>{settings.searchDelay}s</Text>
+            <Text style={[styles.settingsLabel, { color: colors.textSecondary }]}>Delay between searches</Text>
+          </View>
+        </Pressable>
+      </View>
+
       {accounts.length > 0 && <StatsBar accounts={accounts} />}
     </View>
   );
@@ -224,6 +246,38 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+  },
+  settingsStrip: {
+    marginHorizontal: 16,
+    marginBottom: 10,
+    borderRadius: 14,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  settingsStripInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  settingsItem: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  settingsValue: {
+    fontSize: 15,
+    fontFamily: "Inter_700Bold",
+  },
+  settingsLabel: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+  },
+  settingsDivider: {
+    width: 1,
+    height: 24,
+    marginHorizontal: 12,
   },
   fab: { position: "absolute", right: 20, flexDirection: "row", gap: 10, alignItems: "center" },
   fabBtn: {
