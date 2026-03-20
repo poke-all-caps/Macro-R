@@ -1,25 +1,64 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 export const PENDING_RUN_KEY = "@ms_rewards_pending_run";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// expo-notifications was removed from Expo Go in SDK 53.
+// All functions here are safe to call — they no-op gracefully when the module
+// is unavailable, so the rest of the app never crashes.
+
+type NotificationsModule = typeof import("expo-notifications");
+
+function getNotifications(): NotificationsModule | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require("expo-notifications") as NotificationsModule;
+  } catch {
+    return null;
+  }
+}
+
+export function isNotificationsAvailable(): boolean {
+  if (Platform.OS === "web") return false;
+  const mod = getNotifications();
+  if (!mod) return false;
+  try {
+    // If the module loaded but throws on first use, catch it
+    mod.getPermissionsAsync;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function setupNotificationHandler(): void {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+  try {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowAlert: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  } catch {}
+}
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (Platform.OS === "web") return false;
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  if (existing === "granted") return true;
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === "granted";
+  const Notifications = getNotifications();
+  if (!Notifications) return false;
+  try {
+    const { status: existing } = await Notifications.getPermissionsAsync();
+    if (existing === "granted") return true;
+    const { status } = await Notifications.requestPermissionsAsync();
+    return status === "granted";
+  } catch {
+    return false;
+  }
 }
 
 interface ScheduleTime {
@@ -32,8 +71,12 @@ export async function scheduleRewardsNotifications(
   retryTimes: ScheduleTime[]
 ): Promise<{ scheduled: number }> {
   if (Platform.OS === "web") return { scheduled: 0 };
+  const Notifications = getNotifications();
+  if (!Notifications) return { scheduled: 0 };
 
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch {}
 
   const allTimes = [firstRun, ...retryTimes];
   let count = 0;
@@ -61,13 +104,23 @@ export async function scheduleRewardsNotifications(
 }
 
 export async function cancelAllScheduledNotifications(): Promise<void> {
-  await Notifications.cancelAllScheduledNotificationsAsync();
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+  try {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch {}
 }
 
-export async function getScheduledCount(): Promise<number> {
-  if (Platform.OS === "web") return 0;
-  const all = await Notifications.getAllScheduledNotificationsAsync();
-  return all.length;
+export function addNotificationResponseListener(
+  callback: (response: any) => void
+): { remove: () => void } {
+  const Notifications = getNotifications();
+  if (!Notifications) return { remove: () => {} };
+  try {
+    return Notifications.addNotificationResponseReceivedListener(callback);
+  } catch {
+    return { remove: () => {} };
+  }
 }
 
 export async function setPendingRun(): Promise<void> {

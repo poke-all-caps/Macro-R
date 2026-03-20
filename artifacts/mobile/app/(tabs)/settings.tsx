@@ -19,7 +19,7 @@ import Colors from "@/constants/colors";
 import { useSettings } from "@/context/SettingsContext";
 import {
   cancelAllScheduledNotifications,
-  getScheduledCount,
+  isNotificationsAvailable,
   requestNotificationPermission,
   scheduleRewardsNotifications,
 } from "@/utils/notifications";
@@ -338,47 +338,54 @@ export default function SettingsScreen() {
         </Section>
 
         <Section title="ACTIONS" colors={colors}>
-          {scheduledCount !== null && (
-            <View style={[styles.statusBanner, {
-              backgroundColor: scheduledCount > 0 ? "#F0FDF4" : "#FFF7ED",
-              borderColor: scheduledCount > 0 ? "#BBF7D0" : "#FDE68A",
-            }]}>
-              <Text style={{ color: scheduledCount > 0 ? "#166534" : "#92400E", fontSize: 13, fontFamily: "Inter_500Medium" }}>
-                {scheduledCount > 0
-                  ? `✓ ${scheduledCount} notification${scheduledCount !== 1 ? "s" : ""} scheduled`
-                  : "No active notifications"}
+          {!isNotificationsAvailable() ? (
+            <View style={[styles.unavailableCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.unavailableTitle, { color: colors.text }]}>
+                Scheduling unavailable in Expo Go
+              </Text>
+              <Text style={[styles.unavailableDesc, { color: colors.textSecondary }]}>
+                Expo Go removed notification scheduling in SDK 53. To use the schedule, you need a development build (EAS Build). The time picker above is saved and will be used once you switch to a development build.
               </Text>
             </View>
-          )}
+          ) : (
+            <>
+              {scheduledCount !== null && (
+                <View style={[styles.statusBanner, {
+                  backgroundColor: scheduledCount > 0 ? "#F0FDF4" : "#FFF7ED",
+                  borderColor: scheduledCount > 0 ? "#BBF7D0" : "#FDE68A",
+                }]}>
+                  <Text style={{ color: scheduledCount > 0 ? "#166534" : "#92400E", fontSize: 13, fontFamily: "Inter_500Medium" }}>
+                    {scheduledCount > 0
+                      ? `✓ ${scheduledCount} notification${scheduledCount !== 1 ? "s" : ""} scheduled`
+                      : "No active notifications"}
+                  </Text>
+                </View>
+              )}
 
-          <Pressable
-            onPress={handleApplySchedule}
-            disabled={scheduling}
-            style={({ pressed }) => [
-              styles.applyBtn,
-              { backgroundColor: colors.tint, opacity: pressed || scheduling ? 0.75 : 1 },
-            ]}
-          >
-            <Calendar size={18} color="#fff" />
-            <Text style={styles.applyText}>
-              {scheduling ? "Scheduling…" : "Apply Schedule"}
-            </Text>
-          </Pressable>
+              <Pressable
+                onPress={handleApplySchedule}
+                disabled={scheduling}
+                style={({ pressed }) => [
+                  styles.applyBtn,
+                  { backgroundColor: colors.tint, opacity: pressed || scheduling ? 0.75 : 1 },
+                ]}
+              >
+                <Calendar size={18} color="#fff" />
+                <Text style={styles.applyText}>
+                  {scheduling ? "Scheduling…" : "Apply Schedule"}
+                </Text>
+              </Pressable>
 
-          <Pressable
-            onPress={handleClearSchedule}
-            style={({ pressed }) => [
-              styles.clearBtn,
-              { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 },
-            ]}
-          >
-            <Text style={[styles.clearText, { color: colors.textSecondary }]}>Clear Schedule</Text>
-          </Pressable>
-
-          {Platform.OS === "web" && (
-            <Text style={[styles.webNote, { color: colors.textMuted }]}>
-              Notifications require a real Android or iOS device
-            </Text>
+              <Pressable
+                onPress={handleClearSchedule}
+                style={({ pressed }) => [
+                  styles.clearBtn,
+                  { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 },
+                ]}
+              >
+                <Text style={[styles.clearText, { color: colors.textSecondary }]}>Clear Schedule</Text>
+              </Pressable>
+            </>
           )}
         </Section>
 
@@ -526,6 +533,22 @@ const styles = StyleSheet.create({
   finalBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },
   finalText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
   // Buttons
+  unavailableCard: {
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 16,
+    gap: 8,
+    marginBottom: 12,
+  },
+  unavailableTitle: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+  },
+  unavailableDesc: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    lineHeight: 19,
+  },
   statusBanner: {
     borderWidth: 1,
     borderRadius: 10,

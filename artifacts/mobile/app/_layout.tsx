@@ -6,7 +6,6 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import * as Notifications from "expo-notifications";
 import { router, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
@@ -19,7 +18,8 @@ import { AccountsProvider } from "@/context/AccountsContext";
 import { QueriesProvider } from "@/context/QueriesContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import {
-  requestNotificationPermission,
+  addNotificationResponseListener,
+  setupNotificationHandler,
   setPendingRun,
 } from "@/utils/notifications";
 
@@ -29,17 +29,15 @@ const queryClient = new QueryClient();
 
 function NotificationHandler() {
   useEffect(() => {
-    requestNotificationPermission();
+    setupNotificationHandler();
 
-    const sub = Notifications.addNotificationResponseReceivedListener(
-      async (response) => {
-        const action = response.notification.request.content.data?.action;
-        if (action === "start_run") {
-          await setPendingRun();
-          router.navigate("/(tabs)/");
-        }
+    const sub = addNotificationResponseListener(async (response: any) => {
+      const action = response?.notification?.request?.content?.data?.action;
+      if (action === "start_run") {
+        await setPendingRun();
+        router.navigate("/(tabs)/");
       }
-    );
+    });
     return () => sub.remove();
   }, []);
 
