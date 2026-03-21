@@ -504,10 +504,12 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: "absolute",
-    right: 16,
+    left: 0,
+    right: 0,
     flexDirection: "row",
     gap: 8,
     alignItems: "center",
+    justifyContent: "center",
   },
   fabBtn: {
     flexDirection: "row",
