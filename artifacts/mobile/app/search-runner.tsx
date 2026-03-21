@@ -481,10 +481,8 @@ export default function SearchRunnerScreen() {
         const acctCookies = account.cookies ?? {};
         const cookieCount = Object.keys(acctCookies).filter(k => !k.startsWith("_ls_")).length;
         const hasU = "_U" in acctCookies;
-        console.log(
-          `[AccountSwitch] ${account.name}: ${cookieCount} cookies, _U: ${hasU}`
-        );
 
+        setStatusLine(`[${account.name}] Loading ${cookieCount} cookies (_U: ${hasU ? "yes" : "no"})…`);
         await injectAccountCookies(acctCookies);
         await sleep(500);
 

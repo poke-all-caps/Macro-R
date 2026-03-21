@@ -230,8 +230,11 @@ export default function LoginWebViewScreen() {
     const totalCount = Object.keys(allCookies).length;
     const hasU = "_U" in allCookies;
     const hasMUID = "MUID" in allCookies;
-    console.log(
-      `[CookieSave] JS: ${jsCount}, Native: ${nativeCount}, Total: ${totalCount}, _U: ${hasU}, MUID: ${hasMUID}`
+
+    Alert.alert(
+      "Cookie Capture Result",
+      `JS cookies: ${jsCount}\nNative cookies: ${nativeCount}\nTotal: ${totalCount}\n_U token: ${hasU ? "YES ✓" : "MISSING ✗"}\nMUID: ${hasMUID ? "YES ✓" : "MISSING ✗"}`,
+      [{ text: "OK" }]
     );
 
     if (existingAccount) {
