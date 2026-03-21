@@ -24,7 +24,6 @@ export function isNotificationsAvailable(): boolean {
   const mod = getNotifications();
   if (!mod) return false;
   try {
-    // If the module loaded but throws on first use, catch it
     mod.getPermissionsAsync;
     return true;
   } catch {
@@ -62,14 +61,13 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 }
 
-interface ScheduleTime {
+export interface ScheduleSlot {
   hour: number;
   minute: number;
 }
 
-export async function scheduleRewardsNotifications(
-  firstRun: ScheduleTime,
-  retryTimes: ScheduleTime[]
+export async function scheduleOvernightNotifications(
+  slots: ScheduleSlot[]
 ): Promise<{ scheduled: number }> {
   if (Platform.OS === "web") return { scheduled: 0 };
   const Notifications = getNotifications();
@@ -79,22 +77,21 @@ export async function scheduleRewardsNotifications(
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {}
 
-  const allTimes = [firstRun, ...retryTimes];
   let count = 0;
 
-  for (const t of allTimes) {
+  for (const slot of slots) {
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "MS Rewards — Daily Run",
-          body: "Tap to automatically run your daily Bing searches and earn points.",
+          title: "MS Rewards — Overnight Run",
+          body: "Tap to start your overnight Bing searches and earn points.",
           data: { action: "start_run" },
           sound: true,
         },
         trigger: {
           type: "daily",
-          hour: t.hour,
-          minute: t.minute,
+          hour: slot.hour,
+          minute: slot.minute,
         } as any,
       });
       count++;

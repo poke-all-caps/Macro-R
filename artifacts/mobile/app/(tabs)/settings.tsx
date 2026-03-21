@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
-import { Calendar, CheckSquare, Clock, Play, RefreshCw, Search } from "lucide-react-native";
-import React, { useState } from "react";
+import { Calendar, CheckSquare, Clock, Moon, Search, Zap } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -17,13 +17,32 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
-import { useSettings } from "@/context/SettingsContext";
+import { DEFAULT_OVERNIGHT_SLOTS, OvernightSlot, useSettings } from "@/context/SettingsContext";
 import {
   cancelAllScheduledNotifications,
   isNotificationsAvailable,
   requestNotificationPermission,
-  scheduleRewardsNotifications,
+  scheduleOvernightNotifications,
 } from "@/utils/notifications";
+
+function to24h(hour12: number, isAm: boolean): number {
+  if (isAm) return hour12 === 12 ? 0 : hour12;
+  return hour12 === 12 ? 12 : hour12 + 12;
+}
+
+function from24h(hour24: number): { hour: number; isAm: boolean } {
+  return {
+    hour: hour24 % 12 === 0 ? 12 : hour24 % 12,
+    isAm: hour24 < 12,
+  };
+}
+
+function formatSlot(slot: OvernightSlot): string {
+  const { hour, isAm } = from24h(slot.hour);
+  return `${hour}:00 ${isAm ? "AM" : "PM"}`;
+}
+
+const SLOT_LABELS = ["Run 1", "Run 2", "Run 3", "Run 4"];
 
 export default function SettingsScreen() {
   const scheme = useColorScheme() ?? "light";
@@ -40,9 +59,21 @@ export default function SettingsScreen() {
     String(settings.searchDelay ?? 5)
   );
 
+  const [slotHourTexts, setSlotHourTexts] = useState<string[]>(() =>
+    settings.overnightSlots.map((s) => String(from24h(s.hour).hour))
+  );
+
+  useEffect(() => {
+    setSlotHourTexts(
+      settings.overnightSlots.map((s) => String(from24h(s.hour).hour))
+    );
+  }, []);
+
   const commitSearchCount = () => {
     const parsed = parseInt(searchCountText, 10);
-    const clamped = isNaN(parsed) ? settings.defaultSearchCount : Math.max(5, Math.min(50, parsed));
+    const clamped = isNaN(parsed)
+      ? settings.defaultSearchCount
+      : Math.max(5, Math.min(50, parsed));
     setSearchCountText(String(clamped));
     if (clamped !== settings.defaultSearchCount) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -52,7 +83,9 @@ export default function SettingsScreen() {
 
   const commitDelay = () => {
     const parsed = parseInt(delayText, 10);
-    const clamped = isNaN(parsed) ? (settings.searchDelay ?? 5) : Math.max(3, Math.min(30, parsed));
+    const clamped = isNaN(parsed)
+      ? settings.searchDelay ?? 5
+      : Math.max(3, Math.min(30, parsed));
     setDelayText(String(clamped));
     if (clamped !== (settings.searchDelay ?? 5)) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -60,46 +93,49 @@ export default function SettingsScreen() {
     }
   };
 
-  // ── First run time editor ────────────────────────────────────────────────
-  const { hour, minute } = settings.firstRunTime;
-  const isAm = hour < 12;
-  const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+  const updateSlotHourText = (index: number, text: string) => {
+    const next = [...slotHourTexts];
+    next[index] = text;
+    setSlotHourTexts(next);
+  };
 
-  const adjustHour = (delta: number) => {
+  const commitSlotHour = (index: number) => {
+    const parsed = parseInt(slotHourTexts[index], 10);
+    const clamped = isNaN(parsed) ? 12 : Math.max(1, Math.min(12, parsed));
+    const next = [...slotHourTexts];
+    next[index] = String(clamped);
+    setSlotHourTexts(next);
+
+    const slot = settings.overnightSlots[index];
+    const { isAm } = from24h(slot.hour);
+    const newHour24 = to24h(clamped, isAm);
+
+    if (newHour24 !== slot.hour) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const updated = [...settings.overnightSlots];
+      updated[index] = { ...slot, hour: newHour24 };
+      updateSettings({ overnightSlots: updated });
+    }
+  };
+
+  const toggleSlotAmPm = (index: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    let h = hour + delta;
-    if (h < 0) h = 23;
-    if (h > 23) h = 0;
-    updateSettings({ firstRunTime: { hour: h, minute } });
+    const slot = settings.overnightSlots[index];
+    const { hour, isAm } = from24h(slot.hour);
+    const newHour24 = to24h(hour, !isAm);
+    const updated = [...settings.overnightSlots];
+    updated[index] = { ...slot, hour: newHour24 };
+    updateSettings({ overnightSlots: updated });
     setScheduledCount(null);
   };
 
-  const adjustMinute = (delta: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    let m = minute + delta * 5;
-    if (m < 0) m = 55;
-    if (m > 55) m = 0;
-    updateSettings({ firstRunTime: { hour, minute: m } });
+  const applyDefaultSlots = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    updateSettings({ overnightSlots: DEFAULT_OVERNIGHT_SLOTS });
+    setSlotHourTexts(DEFAULT_OVERNIGHT_SLOTS.map((s) => String(from24h(s.hour).hour)));
     setScheduledCount(null);
   };
 
-  const toggleAmPm = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const newHour = isAm ? hour + 12 : hour - 12;
-    updateSettings({ firstRunTime: { hour: Math.max(0, Math.min(23, newHour)), minute } });
-    setScheduledCount(null);
-  };
-
-  // ── Retry schedule (fixed) ───────────────────────────────────────────────
-  const retryTimes = [
-    { hour: 22, minute: 0, label: "10:00 PM" },
-    { hour: 22, minute: 30, label: "10:30 PM" },
-    { hour: 23, minute: 0, label: "11:00 PM" },
-    { hour: 23, minute: 30, label: "11:30 PM" },
-    { hour: 0, minute: 0, label: "12:00 AM (Final)" },
-  ];
-
-  // ── Apply Schedule ───────────────────────────────────────────────────────
   const handleApplySchedule = async () => {
     if (Platform.OS === "web") {
       Alert.alert("Not Available", "Notifications require a real device.");
@@ -113,25 +149,25 @@ export default function SettingsScreen() {
       setScheduling(false);
       Alert.alert(
         "Permission Required",
-        "Please allow notifications in your device settings so the schedule can alert you.",
+        "Please allow notifications in your device settings so the overnight schedule can alert you.",
         [{ text: "OK" }]
       );
       return;
     }
 
-    const { scheduled } = await scheduleRewardsNotifications(
-      settings.firstRunTime,
-      retryTimes
+    const { scheduled } = await scheduleOvernightNotifications(
+      settings.overnightSlots
     );
     setScheduledCount(scheduled);
     setScheduling(false);
 
-    const fmt = (h: number, m: number) =>
-      `${h % 12 === 0 ? 12 : h % 12}:${m.toString().padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+    const slotList = settings.overnightSlots
+      .map((s, i) => `  Run ${i + 1}: ${formatSlot(s)}`)
+      .join("\n");
 
     Alert.alert(
-      "Schedule Active ✓",
-      `${scheduled} daily notification${scheduled !== 1 ? "s" : ""} scheduled.\n\nFirst run: ${fmt(settings.firstRunTime.hour, settings.firstRunTime.minute)}\n\nTap the notification when it fires — the app will start your run automatically.`,
+      "Overnight Schedule Active",
+      `${scheduled} daily notification${scheduled !== 1 ? "s" : ""} scheduled.\n\n${slotList}\n\nTap the notification when it fires — the app will start automatically.`,
       [{ text: "Got it" }]
     );
   };
@@ -140,14 +176,22 @@ export default function SettingsScreen() {
     await cancelAllScheduledNotifications();
     setScheduledCount(0);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    Alert.alert("Schedule Cleared", "All scheduled notifications have been removed.", [{ text: "OK" }]);
+    Alert.alert("Schedule Cleared", "All overnight notifications have been removed.", [
+      { text: "OK" },
+    ]);
   };
-
-  const formatTime = (h: number, m: number) =>
-    `${h === 0 ? 12 : h > 12 ? h - 12 : h}:${m.toString().padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
 
   const inputStyle = [
     styles.numberInput,
+    {
+      color: colors.text,
+      backgroundColor: colors.surfaceSecondary,
+      borderColor: colors.border,
+    },
+  ];
+
+  const hourInputStyle = [
+    styles.hourInput,
     {
       color: colors.text,
       backgroundColor: colors.surfaceSecondary,
@@ -173,6 +217,7 @@ export default function SettingsScreen() {
           </Text>
         </View>
 
+        {/* ── SEARCH ────────────────────────────────────────── */}
         <Section title="SEARCH" colors={colors}>
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
             <View style={styles.settingRow}>
@@ -265,128 +310,156 @@ export default function SettingsScreen() {
           </View>
         </Section>
 
-        <Section title="SCHEDULE" colors={colors}>
+        {/* ── OVERNIGHT MODE ────────────────────────────────── */}
+        <Section title="OVERNIGHT MODE" colors={colors}>
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
-            {/* First run time — editable */}
-            <View style={[styles.settingRow, styles.settingRowBottom, { borderBottomColor: colors.border }]}>
+
+            {/* Info banner */}
+            <View style={[styles.infoBanner, { backgroundColor: "#EFF6FF", borderColor: "#BFDBFE" }]}>
+              <Moon size={14} color={colors.tint} />
+              <Text style={[styles.infoText, { color: "#1E40AF" }]}>
+                Microsoft resets search points at midnight. Runs before (10 PM, 11 PM) and after (1 AM, 2 AM) the reset to double your daily points.
+              </Text>
+            </View>
+
+            {/* 4 slot rows */}
+            {settings.overnightSlots.map((slot, i) => {
+              const { hour, isAm } = from24h(slot.hour);
+              return (
+                <View key={i}>
+                  {i > 0 && (
+                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                  )}
+                  <View style={styles.slotRow}>
+                    <View style={styles.slotLabelWrap}>
+                      <View style={[styles.slotBadge, { backgroundColor: colors.surfaceSecondary }]}>
+                        <Text style={[styles.slotBadgeText, { color: colors.textMuted }]}>
+                          {i + 1}
+                        </Text>
+                      </View>
+                      <Text style={[styles.slotLabel, { color: colors.textSecondary }]}>
+                        {SLOT_LABELS[i]}
+                      </Text>
+                    </View>
+
+                    <View style={styles.slotPicker}>
+                      <TextInput
+                        style={hourInputStyle}
+                        value={slotHourTexts[i] ?? String(hour)}
+                        onChangeText={(t) => updateSlotHourText(i, t)}
+                        onBlur={() => commitSlotHour(i)}
+                        onSubmitEditing={() => commitSlotHour(i)}
+                        keyboardType="number-pad"
+                        returnKeyType="done"
+                        maxLength={2}
+                        selectTextOnFocus
+                      />
+                      <Text style={[styles.colonZero, { color: colors.textMuted }]}>
+                        :00
+                      </Text>
+                      <Pressable
+                        onPress={() => toggleSlotAmPm(i)}
+                        style={[
+                          styles.amPmBtn,
+                          { backgroundColor: isAm ? "#0EA5E9" : "#7C3AED" },
+                        ]}
+                      >
+                        <Text style={styles.amPmText}>{isAm ? "AM" : "PM"}</Text>
+                      </Pressable>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+            {/* Default button */}
+            <Pressable
+              onPress={applyDefaultSlots}
+              style={({ pressed }) => [
+                styles.defaultBtn,
+                { backgroundColor: colors.surfaceSecondary, opacity: pressed ? 0.7 : 1 },
+              ]}
+            >
+              <Zap size={15} color={colors.tint} />
+              <Text style={[styles.defaultBtnText, { color: colors.tint }]}>
+                Default  (10 PM · 11 PM · 1 AM · 2 AM)
+              </Text>
+            </Pressable>
+
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+            {/* Daily Sets in overnight toggle */}
+            <View style={styles.settingRow}>
               <View style={styles.settingLabel}>
-                <View style={[styles.iconBg, { backgroundColor: "#FFF7ED" }]}>
-                  <Play size={16} color={colors.warning} />
+                <View style={[styles.iconBg, { backgroundColor: "#F5F3FF" }]}>
+                  <CheckSquare size={16} color="#7C3AED" />
                 </View>
                 <View style={styles.labelText}>
                   <Text style={[styles.settingTitle, { color: colors.text }]}>
-                    First Run
+                    Daily Sets in overnight runs
                   </Text>
                   <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                    Daily notification trigger
+                    {settings.overnightDailySet
+                      ? "Daily Set will run after searches"
+                      : "Searches only — Daily Set skipped"}
                   </Text>
                 </View>
               </View>
-
-              <View style={styles.timePicker}>
-                {/* Hour column */}
-                <View style={styles.timeColumn}>
-                  <Pressable
-                    onPress={() => adjustHour(1)}
-                    style={[styles.timeStepBtn, { backgroundColor: colors.surfaceSecondary }]}
-                  >
-                    <Text style={[styles.timeStepText, { color: colors.text }]}>+</Text>
-                  </Pressable>
-                  <Text style={[styles.timeDisplay, { color: colors.text }]}>
-                    {displayHour}
-                  </Text>
-                  <Pressable
-                    onPress={() => adjustHour(-1)}
-                    style={[styles.timeStepBtn, { backgroundColor: colors.surfaceSecondary }]}
-                  >
-                    <Text style={[styles.timeStepText, { color: colors.text }]}>−</Text>
-                  </Pressable>
-                </View>
-
-                <Text style={[styles.timeColon, { color: colors.text }]}>:</Text>
-
-                {/* Minute column */}
-                <View style={styles.timeColumn}>
-                  <Pressable
-                    onPress={() => adjustMinute(1)}
-                    style={[styles.timeStepBtn, { backgroundColor: colors.surfaceSecondary }]}
-                  >
-                    <Text style={[styles.timeStepText, { color: colors.text }]}>+</Text>
-                  </Pressable>
-                  <Text style={[styles.timeDisplay, { color: colors.text }]}>
-                    {minute.toString().padStart(2, "0")}
-                  </Text>
-                  <Pressable
-                    onPress={() => adjustMinute(-1)}
-                    style={[styles.timeStepBtn, { backgroundColor: colors.surfaceSecondary }]}
-                  >
-                    <Text style={[styles.timeStepText, { color: colors.text }]}>−</Text>
-                  </Pressable>
-                </View>
-
-                {/* AM / PM */}
-                <Pressable
-                  onPress={toggleAmPm}
-                  style={[styles.amPmBtn, { backgroundColor: colors.tint }]}
-                >
-                  <Text style={styles.amPmText}>{isAm ? "AM" : "PM"}</Text>
-                </Pressable>
-              </View>
-            </View>
-
-            {/* Retry schedule — informational */}
-            <View style={styles.retrySection}>
-              <View style={styles.retryHeader}>
-                <RefreshCw size={14} color={colors.running} />
-                <Text style={[styles.retryLabel, { color: colors.textSecondary }]}>
-                  Auto-retry schedule for failed accounts
-                </Text>
-              </View>
-              {retryTimes.map((t, i) => (
-                <View key={i} style={styles.retryItem}>
-                  <View
-                    style={[
-                      styles.retryDot,
-                      {
-                        backgroundColor:
-                          i === retryTimes.length - 1 ? colors.error : colors.running,
-                      },
-                    ]}
-                  />
-                  <Text style={[styles.retryTime, { color: colors.text }]}>
-                    {t.label}
-                  </Text>
-                  {i === retryTimes.length - 1 && (
-                    <View style={[styles.finalBadge, { backgroundColor: "#FEE2E2" }]}>
-                      <Text style={[styles.finalText, { color: colors.error }]}>Final</Text>
-                    </View>
-                  )}
-                </View>
-              ))}
+              <Switch
+                value={settings.overnightDailySet}
+                onValueChange={(val) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  updateSettings({ overnightDailySet: val });
+                }}
+                trackColor={{ false: colors.border, true: "#7C3AED" }}
+                thumbColor="#fff"
+              />
             </View>
           </View>
         </Section>
 
-        <Section title="ACTIONS" colors={colors}>
+        {/* ── SCHEDULE ACTIONS ──────────────────────────────── */}
+        <Section title="SCHEDULE" colors={colors}>
           {!isNotificationsAvailable() ? (
-            <View style={[styles.unavailableCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View
+              style={[
+                styles.unavailableCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
               <Text style={[styles.unavailableTitle, { color: colors.text }]}>
                 Scheduling unavailable in Expo Go
               </Text>
               <Text style={[styles.unavailableDesc, { color: colors.textSecondary }]}>
-                Expo Go removed notification scheduling in SDK 53. To use the schedule, you need a development build (EAS Build). The time picker above is saved and will be used once you switch to a development build.
+                Expo Go removed notification scheduling in SDK 53. To use the
+                overnight schedule, you need a development build (EAS Build).
+                Your times above are saved and will be used once you switch to a
+                development build.
               </Text>
             </View>
           ) : (
             <>
               {scheduledCount !== null && (
-                <View style={[styles.statusBanner, {
-                  backgroundColor: scheduledCount > 0 ? "#F0FDF4" : "#FFF7ED",
-                  borderColor: scheduledCount > 0 ? "#BBF7D0" : "#FDE68A",
-                }]}>
-                  <Text style={{ color: scheduledCount > 0 ? "#166534" : "#92400E", fontSize: 13, fontFamily: "Inter_500Medium" }}>
+                <View
+                  style={[
+                    styles.statusBanner,
+                    {
+                      backgroundColor: scheduledCount > 0 ? "#F0FDF4" : "#FFF7ED",
+                      borderColor: scheduledCount > 0 ? "#BBF7D0" : "#FDE68A",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      color: scheduledCount > 0 ? "#166534" : "#92400E",
+                      fontSize: 13,
+                      fontFamily: "Inter_500Medium",
+                    }}
+                  >
                     {scheduledCount > 0
-                      ? `✓ ${scheduledCount} notification${scheduledCount !== 1 ? "s" : ""} scheduled`
+                      ? `✓ ${scheduledCount} overnight notification${scheduledCount !== 1 ? "s" : ""} scheduled`
                       : "No active notifications"}
                   </Text>
                 </View>
@@ -397,12 +470,15 @@ export default function SettingsScreen() {
                 disabled={scheduling}
                 style={({ pressed }) => [
                   styles.applyBtn,
-                  { backgroundColor: colors.tint, opacity: pressed || scheduling ? 0.75 : 1 },
+                  {
+                    backgroundColor: colors.tint,
+                    opacity: pressed || scheduling ? 0.75 : 1,
+                  },
                 ]}
               >
                 <Calendar size={18} color="#fff" />
                 <Text style={styles.applyText}>
-                  {scheduling ? "Scheduling…" : "Apply Schedule"}
+                  {scheduling ? "Scheduling…" : "Apply Overnight Schedule"}
                 </Text>
               </Pressable>
 
@@ -410,10 +486,16 @@ export default function SettingsScreen() {
                 onPress={handleClearSchedule}
                 style={({ pressed }) => [
                   styles.clearBtn,
-                  { borderColor: colors.border, backgroundColor: colors.surface, opacity: pressed ? 0.7 : 1 },
+                  {
+                    borderColor: colors.border,
+                    backgroundColor: colors.surface,
+                    opacity: pressed ? 0.7 : 1,
+                  },
                 ]}
               >
-                <Text style={[styles.clearText, { color: colors.textSecondary }]}>Clear Schedule</Text>
+                <Text style={[styles.clearText, { color: colors.textSecondary }]}>
+                  Clear Schedule
+                </Text>
               </Pressable>
             </>
           )}
@@ -463,10 +545,6 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
-  settingRowBottom: {
-    borderBottomWidth: 1,
-    paddingBottom: 16,
-  },
   settingLabel: {
     flexDirection: "row",
     alignItems: "center",
@@ -500,69 +578,98 @@ const styles = StyleSheet.create({
   },
   unit: { fontSize: 14, fontFamily: "Inter_500Medium" },
   divider: { height: 1, marginHorizontal: 16 },
-  // Time picker
-  timePicker: {
+  // Overnight slots
+  infoBanner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    margin: 12,
+    marginBottom: 4,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  infoText: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    flex: 1,
+    lineHeight: 17,
+  },
+  slotRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  slotLabelWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  slotBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  slotBadgeText: {
+    fontSize: 13,
+    fontFamily: "Inter_700Bold",
+  },
+  slotLabel: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+  },
+  slotPicker: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
-  timeColumn: {
-    alignItems: "center",
-    gap: 4,
-  },
-  timeColon: {
-    fontSize: 22,
-    fontFamily: "Inter_700Bold",
-    marginBottom: 2,
-    marginHorizontal: 2,
-  },
-  timeStepBtn: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timeStepText: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-    lineHeight: 20,
-  },
-  timeDisplay: {
-    fontSize: 20,
-    fontFamily: "Inter_700Bold",
-    minWidth: 32,
+  hourInput: {
+    width: 48,
+    height: 40,
+    borderRadius: 10,
+    borderWidth: 1,
     textAlign: "center",
+    fontSize: 18,
+    fontFamily: "Inter_700Bold",
+  },
+  colonZero: {
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
   },
   amPmBtn: {
     paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingVertical: 8,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 4,
-    alignSelf: "center",
+    minWidth: 46,
   },
   amPmText: {
     fontSize: 12,
     fontFamily: "Inter_700Bold",
     color: "#fff",
   },
-  // Retry section
-  retrySection: { padding: 16, paddingTop: 12, gap: 10 },
-  retryHeader: {
+  defaultBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginBottom: 4,
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 13,
+    marginHorizontal: 16,
+    marginVertical: 12,
+    borderRadius: 10,
   },
-  retryLabel: { fontSize: 12, fontFamily: "Inter_400Regular" },
-  retryItem: { flexDirection: "row", alignItems: "center", gap: 10 },
-  retryDot: { width: 6, height: 6, borderRadius: 3 },
-  retryTime: { fontSize: 14, fontFamily: "Inter_400Regular", flex: 1 },
-  finalBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },
-  finalText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
-  // Buttons
+  defaultBtnText: {
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+  },
+  // Schedule actions
   unavailableCard: {
     borderWidth: 1,
     borderRadius: 14,
@@ -605,10 +712,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   clearText: { fontSize: 15, fontFamily: "Inter_500Medium" },
-  webNote: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    textAlign: "center",
-    marginTop: 8,
-  },
 });

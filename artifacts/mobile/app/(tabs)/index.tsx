@@ -49,11 +49,14 @@ export default function HomeScreen() {
         startRun();
         router.push({
           pathname: "/search-runner",
-          params: { accountIds: JSON.stringify(accounts.map((a) => a.id)) },
+          params: {
+            accountIds: JSON.stringify(accounts.map((a) => a.id)),
+            mode: settings.overnightDailySet ? "both" : "searchonly",
+          },
         });
       });
       return () => { active = false; };
-    }, [isRunning, accounts])
+    }, [isRunning, accounts, settings.overnightDailySet])
   );
 
   const handleRunAll = () => {

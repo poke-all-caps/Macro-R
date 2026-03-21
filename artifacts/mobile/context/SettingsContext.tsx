@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-interface ScheduleTime {
+export interface OvernightSlot {
   hour: number;
   minute: number;
 }
@@ -9,23 +9,24 @@ interface ScheduleTime {
 interface Settings {
   defaultSearchCount: number;
   searchDelay: number;
-  firstRunTime: ScheduleTime;
   dailySetEnabled: boolean;
-  retrySchedule: ScheduleTime[];
+  overnightSlots: OvernightSlot[];
+  overnightDailySet: boolean;
 }
+
+const DEFAULT_OVERNIGHT_SLOTS: OvernightSlot[] = [
+  { hour: 22, minute: 0 },
+  { hour: 23, minute: 0 },
+  { hour: 1,  minute: 0 },
+  { hour: 2,  minute: 0 },
+];
 
 const DEFAULT_SETTINGS: Settings = {
   defaultSearchCount: 30,
   searchDelay: 5,
-  firstRunTime: { hour: 13, minute: 0 },
   dailySetEnabled: true,
-  retrySchedule: [
-    { hour: 22, minute: 0 },
-    { hour: 22, minute: 30 },
-    { hour: 23, minute: 0 },
-    { hour: 23, minute: 30 },
-    { hour: 0, minute: 0 },
-  ],
+  overnightSlots: DEFAULT_OVERNIGHT_SLOTS,
+  overnightDailySet: false,
 };
 
 interface SettingsContextType {
@@ -34,7 +35,7 @@ interface SettingsContextType {
 }
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
-const SETTINGS_KEY = "@ms_rewards_settings";
+const SETTINGS_KEY = "@ms_rewards_settings_v2";
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
@@ -69,3 +70,5 @@ export function useSettings() {
   if (!ctx) throw new Error("useSettings must be used within SettingsProvider");
   return ctx;
 }
+
+export { DEFAULT_OVERNIGHT_SLOTS };
