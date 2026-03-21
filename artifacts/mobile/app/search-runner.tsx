@@ -66,7 +66,9 @@ function randomHex(len: number): string {
   ).join("");
 }
 
-// Bing search via fetch — uses the account's explicit cookies, bypasses OS jar
+// Bing search via fetch — uses the OS cookie jar (set by injectAccountCookies)
+// so httpOnly cookies like _U are included automatically by the platform.
+// Falls back to manual Cookie header for extra safety.
 async function performBingSearch(
   query: string,
   cookies: Record<string, string>
@@ -77,7 +79,7 @@ async function performBingSearch(
   try {
     const resp = await fetch(url, {
       method: "GET",
-      credentials: "omit",
+      credentials: "include",
       headers: {
         Cookie: cookieStr,
         "User-Agent": BING_UA,
@@ -94,7 +96,7 @@ async function performBingSearch(
   }
 }
 
-// Points via fetch — best-effort, limited by httpOnly cookie availability
+// Points via fetch — uses OS cookie jar for httpOnly cookie access
 async function fetchRewardsPoints(
   cookies: Record<string, string>
 ): Promise<number> {
@@ -103,7 +105,7 @@ async function fetchRewardsPoints(
     const resp = await fetch(
       "https://rewards.bing.com/api/getuserinfo?type=1&X-Requested-With=XMLHttpRequest",
       {
-        credentials: "omit",
+        credentials: "include",
         headers: {
           Cookie: cookieStr,
           "User-Agent": BING_UA,
@@ -455,6 +457,7 @@ export default function SearchRunnerScreen() {
         updateAccount(account.id, { status: "running", searchesCompleted: 0 });
         setStatusLine(`[${account.name}]  Preparing session…`);
         await injectAccountCookies(account.cookies ?? {});
+        await sleep(500);
 
         if (!hasCookies) {
           setStatusLine(`${account.name}: no session — skipping`);
