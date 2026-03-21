@@ -1,3 +1,4 @@
+import CookieManager from "@react-native-cookies/cookies";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import { CheckCircle, Square, Wifi, WifiOff } from "lucide-react-native";
@@ -29,6 +30,27 @@ function buildCookieHeader(cookies: Record<string, string>): string {
     .filter(([k]) => !k.startsWith("_ls_"))
     .map(([k, v]) => `${k}=${v}`)
     .join("; ");
+}
+
+// Flushes the WebView OS cookie jar and loads the given account's cookies into
+// it so the Daily Set WebView is always authenticated as the correct account.
+async function injectAccountCookies(cookies: Record<string, string>): Promise<void> {
+  try {
+    await CookieManager.clearAll(true);
+    const domains = [
+      "https://www.bing.com",
+      "https://rewards.bing.com",
+      "https://login.live.com",
+    ];
+    for (const [name, value] of Object.entries(cookies)) {
+      if (name.startsWith("_ls_") || !value) continue;
+      for (const domain of domains) {
+        try {
+          await CookieManager.set(domain, { name, value, path: "/" }, true);
+        } catch {}
+      }
+    }
+  } catch {}
 }
 
 function sleep(ms: number) {
@@ -505,6 +527,8 @@ export default function SearchRunnerScreen() {
 
         if (shouldRunDailySet) {
           setPhase("dailyset");
+          setStatusLine(`[${account.name}]  Preparing session…`);
+          await injectAccountCookies(account.cookies ?? {});
 
           const ds = await runDailySetViaWebView(setStatusLine);
           dailySetDone = ds.completed > 0 || ds.alreadyDone;
