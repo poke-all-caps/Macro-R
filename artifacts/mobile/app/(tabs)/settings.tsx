@@ -260,9 +260,10 @@ export default function SettingsScreen() {
         {/* ── APPEARANCE ───────────────────────────────────── */}
         <Section title="APPEARANCE" colors={colors}>
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
+            {/* Title row */}
             <View style={styles.settingRow}>
               <View style={styles.settingLabel}>
-                <View style={[styles.iconBg, { backgroundColor: scheme === "dark" ? "#1E1B4B" : "#EFF6FF" }]}>
+                <View style={[styles.iconBg, { backgroundColor: scheme === "dark" ? "#1E1B4B" : "#FEF9C3" }]}>
                   {scheme === "dark" ? (
                     <Moon size={16} color="#818CF8" />
                   ) : (
@@ -276,8 +277,13 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
               </View>
-              <View style={[styles.themeSegment, { backgroundColor: colors.surfaceSecondary }]}>
-                {(["system", "light", "dark"] as const).map((mode) => (
+            </View>
+
+            {/* Full-width segment row */}
+            <View style={[styles.themeSegmentRow, { backgroundColor: colors.surfaceSecondary }]}>
+              {(["system", "light", "dark"] as const).map((mode) => {
+                const active = themeMode === mode;
+                return (
                   <Pressable
                     key={mode}
                     onPress={() => {
@@ -285,20 +291,37 @@ export default function SettingsScreen() {
                       setThemeMode(mode);
                     }}
                     style={[
-                      styles.themeOption,
-                      themeMode === mode && { backgroundColor: colors.surface, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+                      styles.themeSegmentOption,
+                      active && {
+                        backgroundColor: colors.surface,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.12,
+                        shadowRadius: 3,
+                        elevation: 2,
+                      },
                     ]}
                   >
+                    {mode === "system" ? (
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                        <Sun size={13} color={active ? "#F59E0B" : colors.textMuted} />
+                        <Moon size={13} color={active ? "#818CF8" : colors.textMuted} />
+                      </View>
+                    ) : mode === "light" ? (
+                      <Sun size={14} color={active ? "#F59E0B" : colors.textMuted} />
+                    ) : (
+                      <Moon size={14} color={active ? "#818CF8" : colors.textMuted} />
+                    )}
                     <Text style={[
-                      styles.themeOptionText,
-                      { color: themeMode === mode ? colors.text : colors.textMuted },
-                      themeMode === mode && { fontFamily: "Inter_600SemiBold" },
+                      styles.themeSegmentText,
+                      { color: active ? colors.text : colors.textMuted },
+                      active && { fontFamily: "Inter_600SemiBold" },
                     ]}>
                       {mode === "system" ? "Auto" : mode === "light" ? "Light" : "Dark"}
                     </Text>
                   </Pressable>
-                ))}
-              </View>
+                );
+              })}
             </View>
           </View>
         </Section>
@@ -408,14 +431,6 @@ export default function SettingsScreen() {
               </Text>
             </View>
 
-            {/* Column header labels */}
-            <View style={styles.slotHeaderRow}>
-              <View style={{ width: 72 }} />
-              <Text style={[styles.slotHeaderLabel, { color: colors.textMuted }]}>Hour</Text>
-              <Text style={[styles.slotHeaderLabel, { color: colors.textMuted }]}>Min</Text>
-              <View style={{ width: 50 }} />
-            </View>
-
             {/* 4 slot rows */}
             {settings.overnightSlots.map((slot, i) => {
               const { isAm } = from24h(slot.hour);
@@ -437,44 +452,56 @@ export default function SettingsScreen() {
                     </View>
 
                     <View style={styles.slotPicker}>
-                      {/* Hour */}
-                      <TextInput
-                        style={slotInputStyle}
-                        value={slotHourTexts[i] ?? "12"}
-                        onChangeText={(t) => updateSlotHourText(i, t)}
-                        onBlur={() => commitSlotHour(i)}
-                        onSubmitEditing={() => commitSlotHour(i)}
-                        keyboardType="number-pad"
-                        returnKeyType="next"
-                        maxLength={2}
-                        selectTextOnFocus
-                      />
+                      {/* Hour column */}
+                      <View style={styles.slotInputCol}>
+                        {i === 0 && (
+                          <Text style={[styles.slotColLabel, { color: colors.textMuted }]}>Hour</Text>
+                        )}
+                        <TextInput
+                          style={slotInputStyle}
+                          value={slotHourTexts[i] ?? "12"}
+                          onChangeText={(t) => updateSlotHourText(i, t)}
+                          onBlur={() => commitSlotHour(i)}
+                          onSubmitEditing={() => commitSlotHour(i)}
+                          keyboardType="number-pad"
+                          returnKeyType="next"
+                          maxLength={2}
+                          selectTextOnFocus
+                        />
+                      </View>
 
-                      <Text style={[styles.colonSep, { color: colors.textMuted }]}>:</Text>
+                      <Text style={[styles.colonSep, { color: colors.textMuted }, i === 0 && { marginTop: 17 }]}>:</Text>
 
-                      {/* Minute */}
-                      <TextInput
-                        style={slotInputStyle}
-                        value={slotMinuteTexts[i] ?? "00"}
-                        onChangeText={(t) => updateSlotMinuteText(i, t)}
-                        onBlur={() => commitSlotMinute(i)}
-                        onSubmitEditing={() => commitSlotMinute(i)}
-                        keyboardType="number-pad"
-                        returnKeyType="done"
-                        maxLength={2}
-                        selectTextOnFocus
-                      />
+                      {/* Minute column */}
+                      <View style={styles.slotInputCol}>
+                        {i === 0 && (
+                          <Text style={[styles.slotColLabel, { color: colors.textMuted }]}>Min</Text>
+                        )}
+                        <TextInput
+                          style={slotInputStyle}
+                          value={slotMinuteTexts[i] ?? "00"}
+                          onChangeText={(t) => updateSlotMinuteText(i, t)}
+                          onBlur={() => commitSlotMinute(i)}
+                          onSubmitEditing={() => commitSlotMinute(i)}
+                          keyboardType="number-pad"
+                          returnKeyType="done"
+                          maxLength={2}
+                          selectTextOnFocus
+                        />
+                      </View>
 
                       {/* AM / PM */}
-                      <Pressable
-                        onPress={() => toggleSlotAmPm(i)}
-                        style={[
-                          styles.amPmBtn,
-                          { backgroundColor: isAm ? "#0EA5E9" : "#7C3AED" },
-                        ]}
-                      >
-                        <Text style={styles.amPmText}>{isAm ? "AM" : "PM"}</Text>
-                      </Pressable>
+                      <View style={i === 0 ? { marginTop: 17 } : undefined}>
+                        <Pressable
+                          onPress={() => toggleSlotAmPm(i)}
+                          style={[
+                            styles.amPmBtn,
+                            { backgroundColor: isAm ? "#0EA5E9" : "#7C3AED" },
+                          ]}
+                        >
+                          <Text style={styles.amPmText}>{isAm ? "AM" : "PM"}</Text>
+                        </Pressable>
+                      </View>
                     </View>
                   </View>
                 </View>
@@ -719,22 +746,6 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 17,
   },
-  slotHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 4,
-    gap: 6,
-  },
-  slotHeaderLabel: {
-    fontSize: 11,
-    fontFamily: "Inter_600SemiBold",
-    letterSpacing: 0.5,
-    width: 44,
-    textAlign: "center",
-  },
   slotRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -835,21 +846,36 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   clearText: { fontSize: 15, fontFamily: "Inter_500Medium" },
-  themeSegment: {
+  themeSegmentRow: {
     flexDirection: "row",
-    borderRadius: 10,
-    padding: 3,
-    gap: 2,
+    borderRadius: 12,
+    padding: 4,
+    marginHorizontal: 16,
+    marginBottom: 14,
+    gap: 4,
   },
-  themeOption: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+  themeSegmentOption: {
+    flex: 1,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    gap: 5,
+    paddingVertical: 10,
+    borderRadius: 9,
   },
-  themeOptionText: {
-    fontSize: 12,
+  themeSegmentText: {
+    fontSize: 13,
     fontFamily: "Inter_500Medium",
+  },
+  slotInputCol: {
+    alignItems: "center",
+    gap: 2,
+  },
+  slotColLabel: {
+    fontSize: 10,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+    textAlign: "center",
   },
 });
