@@ -2,11 +2,12 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useFocusEffect } from "expo-router";
-import { CheckSquare, Play, PlayCircle, Plus, Square, Users } from "lucide-react-native";
+import { CheckSquare, Grid3X3, List, Play, PlayCircle, Plus, Square, Users } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
   Alert,
   Animated,
+  Dimensions,
   FlatList,
   Platform,
   Pressable,
@@ -19,6 +20,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AccountCard } from "@/components/AccountCard";
+import { AccountGridTile } from "@/components/AccountGridTile";
 import { EmptyState } from "@/components/EmptyState";
 import { StatsBar } from "@/components/StatsBar";
 import Colors from "@/constants/colors";
@@ -33,6 +35,7 @@ export default function HomeScreen() {
   const { accounts, isRunning, startRun, stopRun } = useAccounts();
   const { settings, updateSettings } = useSettings();
   const [refreshing, setRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -152,7 +155,7 @@ export default function HomeScreen() {
     });
   };
 
-  const renderItem = useCallback(
+  const renderListItem = useCallback(
     ({ item }: { item: Account }) => (
       <AccountCard
         account={item}
@@ -174,6 +177,26 @@ export default function HomeScreen() {
     [isRunning, settings.dailySetEnabled],
   );
 
+  const { width: screenWidth } = Dimensions.get("window");
+  const gridGutter = 8;
+  const gridPadding = 12;
+  const tileWidth = Math.floor((screenWidth - gridPadding * 2 - gridGutter * 2) / 3);
+
+  const renderGridItem = useCallback(
+    ({ item, index }: { item: Account; index: number }) => (
+      <AccountGridTile
+        account={item}
+        width={tileWidth}
+        onPress={() =>
+          router.push({ pathname: "/account/[id]", params: { id: item.id } })
+        }
+        onRun={() => handleRunAccount(item.id)}
+        isRunningGlobal={isRunning}
+      />
+    ),
+    [isRunning, tileWidth],
+  );
+
   const ListHeader = (
     <View>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
@@ -186,6 +209,25 @@ export default function HomeScreen() {
           </Text>
         </View>
         <View style={styles.headerActions}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setViewMode((m) => (m === "list" ? "grid" : "list"));
+            }}
+            style={({ pressed }) => [
+              styles.headerBtn,
+              {
+                backgroundColor: colors.surfaceSecondary,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+          >
+            {viewMode === "list" ? (
+              <Grid3X3 size={20} color={colors.text} />
+            ) : (
+              <List size={20} color={colors.text} />
+            )}
+          </Pressable>
           <Pressable
             onPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -323,29 +365,59 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <FlatList
-        data={accounts}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        ListHeaderComponent={ListHeader}
-        ListFooterComponent={ListFooter}
-        ListEmptyComponent={
-          <EmptyState
-            icon={Users}
-            title="No accounts yet"
-            subtitle="Tap the + button above to add your first account"
-          />
-        }
-        contentInsetAdjustmentBehavior="automatic"
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.tint}
-          />
-        }
-      />
+      {viewMode === "list" ? (
+        <FlatList
+          key="list"
+          data={accounts}
+          keyExtractor={(item) => item.id}
+          renderItem={renderListItem}
+          ListHeaderComponent={ListHeader}
+          ListFooterComponent={ListFooter}
+          ListEmptyComponent={
+            <EmptyState
+              icon={Users}
+              title="No accounts yet"
+              subtitle="Tap the + button above to add your first account"
+            />
+          }
+          contentInsetAdjustmentBehavior="automatic"
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.tint}
+            />
+          }
+        />
+      ) : (
+        <FlatList
+          key="grid"
+          data={accounts}
+          keyExtractor={(item) => item.id}
+          renderItem={renderGridItem}
+          numColumns={3}
+          ListHeaderComponent={ListHeader}
+          ListFooterComponent={ListFooter}
+          ListEmptyComponent={
+            <EmptyState
+              icon={Users}
+              title="No accounts yet"
+              subtitle="Tap the + button above to add your first account"
+            />
+          }
+          columnWrapperStyle={{ paddingHorizontal: gridPadding, gap: gridGutter }}
+          contentInsetAdjustmentBehavior="automatic"
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.tint}
+            />
+          }
+        />
+      )}
 
       <View
         style={[
