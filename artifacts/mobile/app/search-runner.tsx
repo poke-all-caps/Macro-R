@@ -84,9 +84,11 @@ function randomHex(len: number): string {
   ).join("");
 }
 
-// Bing search via fetch — uses the OS cookie jar (set by injectAccountCookies)
-// so httpOnly cookies like _U are included automatically by the platform.
-// Falls back to manual Cookie header for extra safety.
+// Bing search via fetch — uses credentials:"omit" so Android's OkHttp does NOT
+// touch the OS cookie store at all (no reads, no writes from Set-Cookie responses).
+// The manual Cookie header carries the account's full cookie set (including httpOnly
+// tokens captured during login via CookieManager.get).
+// This keeps the WebView cookie store clean for the Daily Set automation.
 async function performBingSearch(
   query: string,
   cookies: Record<string, string>
@@ -97,7 +99,7 @@ async function performBingSearch(
   try {
     const resp = await fetch(url, {
       method: "GET",
-      credentials: "include",
+      credentials: "omit",
       headers: {
         Cookie: cookieStr,
         "User-Agent": BING_UA,
@@ -114,7 +116,8 @@ async function performBingSearch(
   }
 }
 
-// Points via fetch — uses OS cookie jar for httpOnly cookie access
+// Points via fetch — credentials:"omit" to avoid cookie store contamination.
+// Manual Cookie header has the full set (including httpOnly) from login capture.
 async function fetchRewardsPoints(
   cookies: Record<string, string>
 ): Promise<number> {
@@ -123,7 +126,7 @@ async function fetchRewardsPoints(
     const resp = await fetch(
       "https://rewards.bing.com/api/getuserinfo?type=1&X-Requested-With=XMLHttpRequest",
       {
-        credentials: "include",
+        credentials: "omit",
         headers: {
           Cookie: cookieStr,
           "User-Agent": BING_UA,
@@ -474,7 +477,15 @@ export default function SearchRunnerScreen() {
 
         updateAccount(account.id, { status: "running", searchesCompleted: 0 });
         setStatusLine(`[${account.name}]  Preparing session…`);
-        await injectAccountCookies(account.cookies ?? {});
+
+        const acctCookies = account.cookies ?? {};
+        const cookieCount = Object.keys(acctCookies).filter(k => !k.startsWith("_ls_")).length;
+        const hasU = "_U" in acctCookies;
+        console.log(
+          `[AccountSwitch] ${account.name}: ${cookieCount} cookies, _U: ${hasU}`
+        );
+
+        await injectAccountCookies(acctCookies);
         await sleep(500);
 
         if (!hasCookies) {

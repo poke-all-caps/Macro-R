@@ -225,6 +225,15 @@ export default function LoginWebViewScreen() {
 
     const allCookies = { ...capturedCookies, ...nativeCookies };
 
+    const jsCount = Object.keys(capturedCookies).length;
+    const nativeCount = Object.keys(nativeCookies).length;
+    const totalCount = Object.keys(allCookies).length;
+    const hasU = "_U" in allCookies;
+    const hasMUID = "MUID" in allCookies;
+    console.log(
+      `[CookieSave] JS: ${jsCount}, Native: ${nativeCount}, Total: ${totalCount}, _U: ${hasU}, MUID: ${hasMUID}`
+    );
+
     if (existingAccount) {
       updateAccount(existingAccount.id, { cookies: allCookies, email: detectedEmail.trim() || existingAccount.email });
       router.back();
