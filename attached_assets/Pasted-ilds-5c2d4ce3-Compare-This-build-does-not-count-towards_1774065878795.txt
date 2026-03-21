@@ -1,0 +1,586 @@
+ilds
+
+5c2d4ce3
+
+
+Compare
+This build does not count towards your EAS Build usage.
+Android internal distribution build
+9cdb2af · Fix Android build failures by using the preview profile Remove the EAS CLI version constraint from eas.json and update the build profile to "preview" to resolve Kotlin compatibility issues. Replit-Commit-Author: Agent Replit-Commit-Session-Id: ed98f6ce-b9c0-46d6-b3c4-646674a3c4b9 Replit-Commit-Checkpoint-Type: full_checkpoint Replit-Commit-Event-Id: 768a22fe-6684-4d1d-8b03-5f27eaa58a45 Replit-Helium-Checkpoint-Created: true
+
+
+Profile
+
+
+Environment
+
+SDK version
+
+Version
+
+Fingerprint
+
+Commit
+
+Created by
+
+preview
+
+preview
+
+54.0.0
+
+ 1.2.0 (1)
+
+9282448
+
+9cdb2af
+
+shroud.dev account icon
+shroud.dev
+
+Build artifact
+
+Status
+
+Start time
+
+Wait time
+
+Queue time
+
+
+Build time
+
+Total time
+
+Availability
+
+
+Errored
+
+Mar 21, 2026 9:42 AM
+120ms
+
+39s
+
+2m 29s
+
+3m 8s
+
+13 days
+
+Logs
+
+Waiting to start
+
+2s
+
+
+Build is waiting in the queue
+Spin up build environment
+
+37s
+
+
+Creating new worker instance
+AMD, 4 vCPUs, 16 GB RAM
+Using image "ubuntu-24.04-jdk-17-ndk-r27b" based on "ubuntu-2404-noble-amd64-v20250805"
+Installed software:
+- NDK 27.1.12297006
+- Node.js 20.19.4
+- Bun 1.2.20
+- Yarn 1.22.22
+- pnpm 10.14.0
+- npm 10.9.3
+- Java 17
+- node-gyp 11.3.0
+- Maestro 2.0.2
+Project environment variables:
+  EAS_USE_CACHE=1
+  __API_SERVER_URL=https://api.expo.dev/
+Environment secrets:
+  EXPO_TOKEN=********
+EAS Build environment variables:
+  SHELL=/bin/sh
+  NVM_INC=/home/expo/.nvm/versions/node/v20.19.4/include/node
+  JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+  MEMORY_PRESSURE_WRITE=c29tZSAyMDAwMDAgMjAwMDAwMAA=
+  PWD=/usr/local/eas-build-worker
+  LOGNAME=expo
+  SYSTEMD_EXEC_PID=1089
+  HOME=/home/expo
+  LANG=en_US.UTF-8
+  MEMORY_PRESSURE_WATCH=/sys/fs/cgroup/system.slice/eas-build-worker.service/memory.pressure
+  INVOCATION_ID=22a755c351bc4f05ae0ba47d685d73d4
+  ANDROID_NDK_HOME=/home/expo/Android/Sdk/ndk/27.1.12297006
+  NVM_DIR=/home/expo/.nvm
+  ANDROID_HOME=/home/expo/Android/Sdk
+  USER=expo
+  SHLVL=0
+  ANDROID_SDK_ROOT=/home/expo/Android/Sdk
+  JOURNAL_STREAM=9:7022
+  PATH=/home/expo/workingdir/bin:/home/expo/.nvm/versions/node/v20.19.4/bin:/opt/bundletool:/home/expo/Android/Sdk/build-tools/29.0.3:/home/expo/Android/Sdk/build-tools/35.0.0:/home/expo/Android/Sdk/ndk/27.1.12297006:/home/expo/Android/Sdk/cmdline-tools/tools/bin:/home/expo/Android/Sdk/tools:/home/expo/Android/Sdk/tools/bin:/home/expo/Android/Sdk/platform-tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin:/home/expo/.bun/bin:/home/expo/.maestro/bin
+  LOGGER_LEVEL=info
+  NVM_BIN=/home/expo/.nvm/versions/node/v20.19.4/bin
+  EAS_BUILD_WORKER_DIR=/home/expo/eas-build-worker
+  _=/home/expo/.nvm/versions/node/v20.19.4/bin/node
+  CI=1
+  MAESTRO_DRIVER_STARTUP_TIMEOUT=120000
+  MAESTRO_CLI_NO_ANALYTICS=1
+  EAS_BUILD=true
+  EAS_BUILD_RUNNER=eas-build
+  EAS_BUILD_PLATFORM=android
+  NVM_NODEJS_ORG_MIRROR=http://nodejs.production.caches.eas-build.internal
+  EAS_BUILD_PROFILE=preview
+  EAS_BUILD_GIT_COMMIT_HASH=9cdb2af629ccc232a99b2a170855e85f5158adc4
+  EAS_BUILD_ID=5c2d4ce3-446f-45dd-97c3-2dcca14dd9f0
+  EAS_BUILD_WORKINGDIR=/home/expo/workingdir/build
+  EAS_BUILD_PROJECT_ID=bde8726b-e427-47c3-bfef-bac4d4e46de4
+  ANDROID_CCACHE=/usr/bin/ccache
+  EAS_BUILD_MAVEN_CACHE_URL=http://maven.production.caches.eas-build.internal
+  GRADLE_OPTS=-Dorg.gradle.jvmargs="-XX:MaxMetaspaceSize=1g -Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" -Dorg.gradle.parallel=true -Dorg.gradle.daemon=false
+  EAS_BUILD_USERNAME=shroud.dev
+  __EAS_BUILD_ENVS_DIR=/home/expo/workingdir/env
+Builder is ready, starting build
+Prepare project
+
+302ms
+
+
+.npmrc found at .npmrc
+Read eas.json
+
+0ms
+
+
+Using eas.json:
+{
+  "cli": {
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "gradleCommand": ":app:assembleDebug",
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
+Read package.json
+
+1ms
+
+
+Using package.json:
+{
+  "name": "@workspace/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "EXPO_PACKAGER_PROXY_URL=https://$REPLIT_EXPO_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_REPL_ID=$REPL_ID REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN pnpm exec expo start --localhost --port $PORT",
+    "build": "node scripts/build.js",
+    "serve": "node server/serve.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@expo-google-fonts/inter": "^0.4.0",
+    "@expo/cli": "54.0.23",
+    "@expo/ngrok": "^4.1.0",
+    "@expo/vector-icons": "^15.0.3",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@stardazed/streams-text-encoding": "^1.0.2",
+    "@tanstack/react-query": "^5.90.21",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
+    "@ungap/structured-clone": "^1.3.0",
+    "babel-plugin-react-compiler": "^19.0.0-beta-e993439-20250117",
+    "expo": "~54.0.27",
+    "expo-blur": "~15.0.8",
+    "expo-constants": "~18.0.11",
+    "expo-font": "~14.0.10",
+    "expo-glass-effect": "~0.1.4",
+    "expo-haptics": "~15.0.8",
+    "expo-image": "~3.0.11",
+    "expo-image-picker": "~17.0.9",
+    "expo-linear-gradient": "~15.0.8",
+    "expo-linking": "~8.0.10",
+    "expo-location": "~19.0.8",
+    "expo-router": "~6.0.17",
+    "expo-splash-screen": "~31.0.12",
+    "expo-status-bar": "~3.0.9",
+    "expo-symbols": "~1.0.8",
+    "expo-system-ui": "~6.0.9",
+    "expo-web-browser": "~15.0.10",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-keyboard-controller": "^1.20.6",
+    "react-native-reanimated": "~4.1.1",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-svg": "15.12.1",
+    "react-native-web": "^0.21.0",
+    "react-native-worklets": "0.5.1",
+    "typescript": "~5.9.2",
+    "zod": "^3.25.76",
+    "zod-validation-error": "^3.4.0"
+  },
+  "dependencies": {
+    "@react-native-cookies/cookies": "^6.2.1",
+    "expo-dev-client": "~5.0.0",
+    "expo-notifications": "^0.32.16",
+    "lucide-react-native": "^0.577.0",
+    "react-native-webview": "^13.16.1"
+  }
+}
+Install dependencies
+
+7s
+
+
+We detected that 'artifacts/mobile' is a pnpm workspace
+Running "pnpm install --frozen-lockfile" in /home/expo/workingdir/build directory
+Scope: all 9 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1125
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1125, reused 0, downloaded 184, added 183
+Progress: resolved 1125, reused 0, downloaded 423, added 422
+Progress: resolved 1125, reused 0, downloaded 696, added 720
+Progress: resolved 1125, reused 0, downloaded 866, added 890
+Progress: resolved 1125, reused 0, downloaded 941, added 934
+Progress: resolved 1125, reused 0, downloaded 1099, added 1124
+Progress: resolved 1125, reused 0, downloaded 1099, added 1125, done
+.../esbuild@0.27.3/node_modules/esbuild postinstall$ node install.js
+.../esbuild@0.27.3/node_modules/esbuild postinstall: Done
+devDependencies:
++ prettier 3.8.1
++ typescript 5.9.3
+. preinstall$ sh -c 'if [ "$EAS_BUILD" = "1" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+. preinstall: Done
+Done in 7.3s using pnpm v10.14.0
+Read app config
+
+78ms
+
+
+Using app configuration:
+{
+  "name": "MS Rewards Automation v1.2",
+  "slug": "mobile",
+  "version": "1.2.0",
+  "orientation": "portrait",
+  "icon": "./assets/images/icon.png",
+  "scheme": "mobile",
+  "userInterfaceStyle": "automatic",
+  "newArchEnabled": true,
+  "splash": {
+    "image": "./assets/images/splash-icon.png",
+    "resizeMode": "contain",
+    "backgroundColor": "#ffffff"
+  },
+  "ios": {
+    "supportsTablet": false,
+    "bundleIdentifier": "com.msrewards.automation"
+  },
+  "android": {
+    "package": "com.msrewards.automation"
+  },
+  "web": {
+    "favicon": "./assets/images/icon.png"
+  },
+  "plugins": [
+    [
+      "expo-router",
+      {
+        "origin": "https://replit.com/"
+      }
+    ],
+    "expo-font",
+    "expo-web-browser",
+    [
+      "expo-notifications",
+      {
+        "icon": "./assets/images/icon.png",
+        "color": "#3B82F6",
+        "sounds": []
+      }
+    ]
+  ],
+  "experiments": {
+    "typedRoutes": true,
+    "reactCompiler": true
+  },
+  "extra": {
+    "eas": {
+      "projectId": "bde8726b-e427-47c3-bfef-bac4d4e46de4"
+    },
+    "router": {
+      "origin": "https://replit.com/"
+    }
+  },
+  "owner": "shroud.dev",
+  "sdkVersion": "54.0.0",
+  "platforms": [
+    "ios",
+    "android",
+    "web"
+  ]
+}
+Prebuild
+
+7s
+
+
+- Creating native directory (./android)
+✔ Created native directory
+- Updating package.json
+✔ Updated package.json
+- Running prebuild
+✔ Finished prebuild
+We detected that 'artifacts/mobile' is a pnpm workspace
+Running "pnpm install --no-frozen-lockfile" in /home/expo/workingdir/build directory
+Scope: all 9 workspace projects
+Progress: resolved 0, reused 1, downloaded 0, added 0
+artifacts/mobile                         |  WARN  deprecated @react-native-cookies/cookies@6.2.1
+Progress: resolved 357, reused 355, downloaded 0, added 0
+Progress: resolved 1071, reused 1069, downloaded 0, added 0
+WARN  Skip adding @types/node to the default catalog because it already exists as ^25.3.3. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding tsx to the default catalog because it already exists as ^4.21.0. Please use `pnpm update` to update the catalogs.
+WARN  Skip adding drizzle-orm to the default catalog because it already exists as ^0.45.1. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @tanstack/react-query to the default catalog because it already exists as ^5.90.21. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @types/react to the default catalog because it already exists as ^19.2.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @types/react-dom to the default catalog because it already exists as ^19.2.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding react to the default catalog because it already exists as 19.1.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding react-dom to the default catalog because it already exists as 19.1.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding zod to the default catalog because it already exists as ^3.25.76. Please use `pnpm update` to update the catalogs.
+WARN  Skip adding @replit/vite-plugin-cartographer to the default catalog because it already exists as ^0.5.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @replit/vite-plugin-runtime-error-modal to the default catalog because it already exists as ^0.0.6. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @tailwindcss/vite to the default catalog because it already exists as ^4.1.14. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @types/node to the default catalog because it already exists as ^25.3.3. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @types/react to the default catalog because it already exists as ^19.2.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @types/react-dom to the default catalog because it already exists as ^19.2.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @vitejs/plugin-react to the default catalog because it already exists as ^5.0.4. Please use `pnpm update` to update the catalogs.
+WARN  Skip adding class-variance-authority to the default catalog because it already exists as ^0.7.1. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding clsx to the default catalog because it already exists as ^2.1.1. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding framer-motion to the default catalog because it already exists as ^12.23.24. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding lucide-react to the default catalog because it already exists as ^0.545.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding react to the default catalog because it already exists as 19.1.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding react-dom to the default catalog because it already exists as 19.1.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding tailwind-merge to the default catalog because it already exists as ^3.3.1. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding tailwindcss to the default catalog because it already exists as ^4.1.14. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding vite to the default catalog because it already exists as ^7.3.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding zod to the default catalog because it already exists as ^3.25.76. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding tsx to the default catalog because it already exists as ^4.21.0. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @tanstack/react-query to the default catalog because it already exists as ^5.90.21. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding zod to the default catalog because it already exists as ^3.25.76. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @types/node to the default catalog because it already exists as ^25.3.3. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding drizzle-orm to the default catalog because it already exists as ^0.45.1. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding zod to the default catalog because it already exists as ^3.25.76. Please use `pnpm update` to update the catalogs.
+ WARN  Skip adding @types/node to the default catalog because it already exists as ^25.3.3. Please use `pnpm update` to update the catalogs.
+WARN  Skip adding tsx to the default catalog because it already exists as ^4.21.0. Please use `pnpm update` to update the catalogs.
+WARN  6 deprecated subdependencies found: @xmldom/xmldom@0.7.13, glob@10.5.0, glob@7.2.3, inflight@1.0.6, rimraf@3.0.2, uuid@3.4.0
+Already up to date
+Progress: resolved 1101, reused 1099, downloaded 0, added 0
+Progress: resolved 1101, reused 1099, downloaded 0, added 0, done
+. preinstall$ sh -c 'if [ "$EAS_BUILD" = "1" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+. preinstall: Done
+Done in 4s using pnpm v10.14.0
+Restore cache
+
+3s
+
+
+Restoring cache key: android-ccache-b999bd55412974a53406577db2907c620ff0acab111349314bd7b849d5316811
+No cache found for this key
+Prepare credentials
+
+5ms
+
+
+Writing secrets to the project's directory
+Injecting signing config into build.gradle
+Signing config injected
+Bundle JavaScript
+
+30s
+
+
+React Compiler enabled
+Starting Metro Bundler
+Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓░░░░░░░░░░░░░ 21.8% (34/93)
+Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 43.0% (389/593)
+Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓░░░░░░ 67.5% (616/754)
+Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 71.7% ( 873/2742)
+Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓░░░░░ 73.7% (2383/2775)
+Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 94.6% (2956/3040)
+Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 97.3% (3398/3445)
+Android Bundled 23407ms node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js (3501 modules)
+Writing bundle output to: /tmp/m4svaf1ande/index.js
+Copying 44 asset files
+Done writing bundle output
+Run gradlew
+
+
+12
+1m 32s
+
+
+Running 'gradlew :app:assembleRelease' in /home/expo/workingdir/build/artifacts/mobile/android
+Downloading https://services.gradle.org/distributions/gradle-8.14.3-bin.zip
+10%
+20%.
+30%.
+40%.
+50%.
+60%
+70
+%.
+80%.
+90%.
+100%
+Welcome to Gradle 8.14.3!
+Here are the highlights of this release:
+ - Java 24 support
+ - GraalVM Native Image toolchain selection
+ - Enhancements to test reporting
+- Build Authoring improvements
+For more details see https://docs.gradle.org/8.14.3/release-notes.html
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Configure project :expo-gradle-plugin:expo-autolinking-plugin
+w: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-modules-autolinking@3.0.24/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-plugin/build.gradle.kts:25:3: 'kotlinOptions(KotlinJvmOptionsDeprecated /* = KotlinJvmOptions */.() -> Unit): Unit' is deprecated. Please migrate to the compilerOptions DSL. More details are here: https://kotl.in/u1r8ln
+> Configure project :expo-gradle-plugin:expo-autolinking-settings-plugin
+w: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-modules-autolinking@3.0.24/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-settings-plugin/build.gradle.kts:30:3: 'kotlinOptions(KotlinJvmOptionsDeprecated /* = KotlinJvmOptions */.() -> Unit): Unit' is deprecated. Please migrate to the compilerOptions DSL. More details are here: https://kotl.in/u1r8ln
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:settings-plugin:pluginDescriptors
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:pluginDescriptors
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:processResources
+> Task :gradle-plugin:settings-plugin:processResources
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:compileKotlin
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileKotlin
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:classes UP-TO-DATE
+> Task :expo-gradle-plugin:expo-autolinking-plugin-shared:jar
+> Task :gradle-plugin:settings-plugin:compileKotlin
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:classes
+> Task :gradle-plugin:settings-plugin:jar
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileKotlin
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:classes
+> Task :expo-gradle-plugin:expo-autolinking-settings-plugin:jar
+> Configure project :expo-module-gradle-plugin
+w: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-modules-core@3.0.29_react-native@0.81.5_@babel+core@7.29.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/expo-modules-core/expo-module-gradle-plugin/build.gradle.kts:58:3: 'kotlinOptions(KotlinJvmOptionsDeprecated /* = KotlinJvmOptions */.() -> Unit): Unit' is deprecated. Please migrate to the compilerOptions DSL. More details are here: https://kotl.in/u1r8ln
+> Task :expo-gradle-plugin:expo-autolinking-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-dev-launcher-gradle-plugin:checkKotlinGradlePluginConfigurationErrors
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-module-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :expo-dev-launcher-gradle-plugin:pluginDescriptors
+> Task :expo-module-gradle-plugin:pluginDescriptors
+> Task :expo-dev-launcher-gradle-plugin:processResources
+> Task :expo-module-gradle-plugin:processResources
+> Task :expo-gradle-plugin:expo-autolinking-plugin:pluginDescriptors
+> Task :expo-gradle-plugin:expo-autolinking-plugin:processResources
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors
+> Task :gradle-plugin:react-native-gradle-plugin:processResources
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileKotlin
+> Task :expo-gradle-plugin:expo-autolinking-plugin:compileJava NO-SOURCE
+> Task :expo-gradle-plugin:expo-autolinking-plugin:classes
+> Task :expo-gradle-plugin:expo-autolinking-plugin:jar
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:classes
+> Task :gradle-plugin:react-native-gradle-plugin:jar
+> Task :expo-module-gradle-plugin:compileKotlin
+w: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-modules-core@3.0.29_react-native@0.81.5_@babel+core@7.29.0_@types+react@19.1.17_react@19.1.0__react@19.1.0/node_modules/expo-modules-core/expo-module-gradle-plugin/src/main/kotlin/expo/modules/plugin/android/AndroidLibraryExtension.kt:9:24 'var targetSdk: Int?' is deprecated. Will be removed from library DSL in v9.0. Use testOptions.targetSdk or/and lint.targetSdk instead.
+> Task :expo-module-gradle-plugin:compileJava NO-SOURCE
+> Task :expo-module-gradle-plugin:classes
+> Task :expo-module-gradle-plugin:jar
+> Task :expo-dev-launcher-gradle-plugin:compileKotlin FAILED
+e: Incompatible classes were found in dependencies. Remove them from the classpath or use '-Xskip-metadata-version-check' to suppress errors
+e: file:///home/expo/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.1.20/aa8ca79cd50578314f6d1180c47cbe14c0fee567/kotlin-stdlib-2.1.20.jar!/META-INF/kotlin-stdlib-jdk7.kotlin_moduleModule was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.1.0, expected version is 1.9.0.
+e: file:///home/expo/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.1.20/aa8ca79cd50578314f6d1180c47cbe14c0fee567/kotlin-stdlib-2.1.20.jar!/META-INF/kotlin-stdlib-jdk8.kotlin_moduleModule was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.1.0, expected version is 1.9.0.
+e: file:///home/expo/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.1.20/aa8ca79cd50578314f6d1180c47cbe14c0fee567/kotlin-stdlib-2.1.20.jar!/META-INF/kotlin-stdlib.kotlin_moduleModule was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.1.0, expected version is 1.9.0.
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/META-INF/react-native-gradle-plugin.kotlin_moduleModule was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.1.0, expected version is 1.9.0.
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-dev-launcher@5.0.35_expo@54.0.33/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin/src/main/kotlin/expo/modules/devlauncher/DevLauncherPlugin.kt:13:27 Class 'com.facebook.react.ReactExtension' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.1.0, but the compiler version 1.9.0 can read versions up to 2.0.0.
+The class is loaded from /home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/com/facebook/react/ReactExtension.class
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-dev-launcher@5.0.35_expo@54.0.33/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin/src/main/kotlin/expo/modules/devlauncher/DevLauncherPlugin.kt:37:47 Class 'com.facebook.react.ReactExtension' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.1.0, but the compiler version 1.9.0 can read versions up to 2.0.0.
+The class is loaded from /home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/com/facebook/react/ReactExtension.class
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-dev-launcher@5.0.35_expo@54.0.33/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin/src/main/kotlin/expo/modules/devlauncher/DevLauncherPlugin.kt:37:58 Class 'com.facebook.react.ReactExtension' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.1.0, but the compiler version 1.9.0 can read versions up to 2.0.0.
+The class is loaded from /home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/com/facebook/react/ReactExtension.class
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-dev-launcher@5.0.35_expo@54.0.33/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin/src/main/kotlin/expo/modules/devlauncher/DevLauncherPlugin.kt:39:14 Class 'com.facebook.react.ReactExtension' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.1.0, but the compiler version 1.9.0 can read versions up to 2.0.0.
+The class is loaded from /home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/com/facebook/react/ReactExtension.class
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-dev-launcher@5.0.35_expo@54.0.33/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin/src/main/kotlin/expo/modules/devlauncher/DevLauncherPlugin.kt:39:38 Class 'com.facebook.react.ReactExtension' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.1.0, but the compiler version 1.9.0 can read versions up to 2.0.0.
+The class is loaded from /home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/com/facebook/react/ReactExtension.class
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-dev-launcher@5.0.35_expo@54.0.33/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin/src/main/kotlin/expo/modules/devlauncher/DevLauncherPlugin.kt:50:64 Class 'com.facebook.react.ReactExtension' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.1.0, but the compiler version 1.9.0 can read versions up to 2.0.0.
+The class is loaded from /home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/com/facebook/react/ReactExtension.class
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-dev-launcher@5.0.35_expo@54.0.33/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin/src/main/kotlin/expo/modules/devlauncher/DevLauncherPlugin.kt:51:67 Class 'com.facebook.react.ReactExtension' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.1.0, but the compiler version 1.9.0 can read versions up to 2.0.0.
+The class is loaded from /home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/com/facebook/react/ReactExtension.class
+e: file:///home/expo/workingdir/build/node_modules/.pnpm/expo-dev-launcher@5.0.35_expo@54.0.33/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin/src/main/kotlin/expo/modules/devlauncher/DevLauncherPlugin.kt:52:7 Class 'com.facebook.react.ReactExtension' was compiled with an incompatible version of Kotlin. The actual metadata version is 2.1.0, but the compiler version 1.9.0 can read versions up to 2.0.0.
+The class is loaded from /home/expo/workingdir/build/node_modules/.pnpm/@react-native+gradle-plugin@0.81.5/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/classes/kotlin/main/com/facebook/react/ReactExtension.class
+[Incubating] Problems report is available at: file:///home/expo/workingdir/build/artifacts/mobile/android/build/reports/problems/problems-report.html
+FAILURE:
+Build failed with an exception.
+* What went wrong:
+Execution failed for task ':expo-dev-launcher-gradle-plugin:compileKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+   > Compilation error. See log for more details
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+BUILD FAILED in 1m 32s
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/8.14.3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+28 actionable tasks: 28 executed
+Error: Gradle build failed with unknown error. See logs for the "Run gradlew" phase for more information.
+Fail job
+
+1ms
+
+
+Build failed: Gradle build failed with unknown error. See logs for the "Run gradlew" phase for more information.
