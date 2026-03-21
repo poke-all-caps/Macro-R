@@ -1,210 +1,298 @@
-# MS Rewards Automation — Senior Developer Report
+# MS Rewards Automation — Complete Project Report
 
-**From:** Agent (acting Sr. Dev)
 **Date:** March 21, 2026
 **Project:** MS Rewards Automation — React Native (Expo SDK 54), pnpm monorepo
+**Location:** `artifacts/mobile/`
 
 ---
 
-## 1. Project Overview
+## 1. What This App Does
 
-This is a mobile automation app that runs Microsoft Rewards daily Bing searches and Daily Set activities across multiple user accounts without manual interaction. It is built with:
+This Android app automates Microsoft Rewards point earning. You add your Microsoft accounts, and the app:
 
-- **React Native** via **Expo SDK 54** with Expo Router (file-based navigation)
-- **TypeScript** throughout
-- **pnpm monorepo** at the repo root (`artifacts/mobile` is the app)
-- **EAS Build** (Expo's cloud build service) for producing Android APKs
+1. **Runs Bing searches** — sends fake search queries to Bing using your account's session cookies, earning you ~5 points per search
+2. **Completes Daily Set activities** — opens the Rewards dashboard in a WebView and clicks on daily activity cards (quizzes, polls, etc.)
+3. **Runs on a schedule** — you set a daily time and the app fires a notification; tapping it auto-starts the run
 
-### Core Features
-
-| Feature | File | Status |
-|---|---|---|
-| Multi-account management | `app/(tabs)/index.tsx`, `context/AccountsContext.tsx` | Working |
-| Microsoft login + cookie capture | `app/login-webview.tsx` | Working |
-| Bing search automation (fetch-based) | `app/search-runner.tsx` | Working — do not touch |
-| Daily Set automation (WebView injection) | `app/search-runner.tsx` | Working after fixes below |
-| Scheduled daily notifications | `utils/notifications.ts` | Working in APK (not Expo Go) |
-| Query pool management | `context/QueriesContext.tsx`, `constants/defaultQueries.ts` | Working |
-| Settings screen | `app/(tabs)/settings.tsx` | Working, extended |
+It supports **multiple accounts** — you can add 2, 5, or 10 Microsoft accounts and the app runs through each one sequentially.
 
 ---
 
-## 2. How Account Switching Works
+## 2. How Account Switching Works (The Core Mechanism)
 
-### Login Phase (`app/login-webview.tsx`)
+This is the most important part of the architecture. The app manages multiple Microsoft accounts on a single device, and each account needs to be authenticated as a different Microsoft user. Here's exactly how it works, step by step.
 
-When a user adds an account:
+### 2.1 — Two Completely Separate Systems Handle Authentication
 
-1. A WebView opens in **incognito mode** (`incognito={true}`) to give it a clean, isolated cookie store — this prevents any existing session from leaking into the new login.
-2. The user logs into `login.live.com` and is redirected to `rewards.bing.com`.
-3. JavaScript is injected on every page load that reads `document.cookie` and relevant `localStorage` tokens.
-4. These cookies are accumulated across all visited domains (login.live.com, bing.com, rewards.bing.com) and merged into a single `Record<string, string>`.
-5. On save, this cookie map is stored in `AccountsContext` (persisted to AsyncStorage) against that account's ID.
+The app uses **two different methods** to talk to Microsoft, and they authenticate in completely different ways:
 
-**Key point:** The incognito WebView is discarded after login. The device's main OS cookie jar is **not** written to during new account login.
+| System | Used For | How It Authenticates |
+|--------|----------|---------------------|
+| **`fetch()` requests** | Bing searches, points checking | Manual `Cookie:` header — the app builds a cookie string from stored data and sends it directly in the HTTP request |
+| **WebView** (embedded browser) | Daily Set card clicking | OS cookie jar — Android's built-in cookie store that all WebViews share |
 
-### Search Phase (`app/search-runner.tsx` — `performBingSearch`)
+This distinction is critical. Understanding why these are separate is the key to understanding the whole app.
 
-Searches use `fetch` with `credentials: "omit"` and manually build a `Cookie:` header string from the account's stored cookies. This completely bypasses the device OS cookie jar and is entirely per-account — it was already correct before any changes were made.
+### 2.2 — How Accounts Are Stored
 
-### Daily Set Phase (`app/search-runner.tsx` — `runDailySetViaWebView`)
+Each account is a JavaScript object stored in AsyncStorage (phone's local storage):
 
-This is where the account-switching bug lived. The Daily Set uses a visible WebView that loads `rewards.bing.com` and injects JavaScript to click reward activity cards. Unlike the fetch-based searches, a WebView uses the **device's OS cookie jar** (shared system-wide) — not the per-account stored cookies.
-
-**The bug:** When the user logged into Account 2 (even in incognito mode), refreshing an existing account session used a non-incognito WebView which wrote Account 2's session to the OS cookie jar. The Daily Set WebView then authenticated as Account 2 regardless of which account was selected to run.
-
----
-
-## 3. Changes Made This Session
-
-### Fix 1 — EAS Build: Missing Project ID (`app.json`)
-
-The junior dev ran `eas init` and got a project ID but never saved it to `app.json`. Added:
-
-```json
-"extra": {
-  "eas": {
-    "projectId": "bde8726b-e427-47c3-bfef-bac4d4e46de4"
-  }
-},
-"owner": "shroud.dev"
+```
+{
+  id: "172...",
+  name: "User 1",
+  email: "user@outlook.com",
+  cookies: {
+    "MUID": "abc123...",
+    "_U": "eyJ0eX...",        <-- THE critical auth token
+    "ANON": "A=s:abc...",
+    "SRCHHPGUSR": "...",
+    ... (30-40 cookies total)
+  },
+  status: "idle",
+  searchCount: 30,
+  ...
+}
 ```
 
-### Fix 2 — EAS Build: CLI Version Constraint (`eas.json`)
+The `cookies` field is a flat key-value map of ALL cookies captured during login — including httpOnly cookies that normal JavaScript can't see. These cookies ARE the session. Whoever holds these cookies IS that user, as far as Microsoft is concerned.
 
-Removed `"cli": { "version": ">= 16.0.0" }` which was causing EAS to silently reject the build request when the installed CLI version didn't satisfy it.
+### 2.3 — How Login Captures Cookies (`login-webview.tsx`)
 
-### Fix 3 — EAS Build: Kotlin Incompatibility (`package.json`)
+When you tap "Add Account" → "Sign in with Microsoft":
 
-`expo-dev-client@~5.0.0` brings in `expo-dev-launcher@5.0.35` which has its Gradle plugin compiled with Kotlin 1.9.0. React Native 0.81.5's Gradle plugin is compiled with Kotlin 2.1.0 — these two are binary-incompatible and crash the entire Gradle build.
+```
+Step 1:  Clear the entire OS cookie jar
+         └── CookieManager.clearAll(true)
+         └── This ensures no previous account's session leaks in
 
-**Fix:** Removed `expo-dev-client` from `dependencies`. Switched from the `development` EAS profile to the `preview` profile, which produces a standard APK without the dev client. All native features still work.
+Step 2:  Open a WebView pointing to Microsoft sign-out page
+         └── Forces a clean start — any cached session is destroyed
 
-### Fix 4 — Account Cookie Isolation (Full Rewrite)
+Step 3:  User types their email + password + 2FA
+         └── Microsoft redirects through several domains:
+             login.live.com → login.microsoftonline.com → bing.com → rewards.bing.com
 
-Wired up `@react-native-cookies/cookies` (already installed, not connected) across both the login and the search runner to fully solve multi-account session conflicts.
+Step 4:  On every page load, inject JavaScript to read document.cookie
+         └── Captures: MUID, NAP, ANON, etc. (non-httpOnly cookies)
+         └── Also reads localStorage tokens and the account name/email
 
-**Problem root cause:** The original architecture had two conflicting approaches:
-- `document.cookie` was used to capture cookies during login, but this cannot read httpOnly cookies (which contain the real auth tokens like `_U`)
-- Incognito WebView mode was used to isolate login sessions, but `CookieManager` cannot read cookies from incognito WebViews
+Step 5:  Before saving, navigate WebView to www.bing.com
+         └── Forces the auth redirect chain that sets _U cookie
 
-This meant the stored cookies were always incomplete — missing the httpOnly tokens that Bing actually uses for authentication.
+Step 6:  Read the OS cookie jar using CookieManager.get()
+         └── Reads from: bing.com, rewards.bing.com, login.live.com,
+             login.microsoftonline.com, account.microsoft.com, etc.
+         └── This captures httpOnly cookies like _U that JavaScript can't see
 
-**Login phase fix (`app/login-webview.tsx`):**
-1. Removed incognito mode from the login WebView
-2. Added `CookieManager.clearAll(true)` before each new account login to replace incognito isolation — the cookie jar is flushed before the WebView loads, preventing any prior session from leaking
-3. Added a `cookiesReady` gate so the WebView doesn't render until the cookie jar is confirmed clear
-4. On save, `CookieManager.get()` is called across `bing.com`, `rewards.bing.com`, and `login.live.com` to capture ALL cookies including httpOnly — these are merged with the JS-captured cookies for a complete set
+Step 7:  Merge JS cookies + native cookies → store in account object
+         └── The complete set (35-40 cookies) is saved to AsyncStorage
+```
 
-**Run phase fix (`app/search-runner.tsx`):**
-Added `injectAccountCookies(cookies)` — before every account's run begins (covering both searches and the Daily Set), this function:
-1. Calls `CookieManager.clearAll(true)` — flushes the entire WebView OS cookie jar
-2. Calls `CookieManager.set()` for each stored cookie (now including httpOnly) across `bing.com`, `rewards.bing.com`, and `login.live.com`
+**Why this matters:** The `_U` cookie is the main authentication token. It's httpOnly (invisible to `document.cookie`). Without Step 6 (native cookie capture), the stored cookies would be incomplete and searches would silently fail — they'd return HTTP 200 but earn zero points.
 
-This ensures the WebView always reflects the correct account's session at the start of every run, regardless of what was previously in the OS jar.
+### 2.4 — How Searches Switch Between Accounts (`search-runner.tsx`)
 
-**Dynamic require pattern:** Both files load `@react-native-cookies/cookies` via `require()` inside functions rather than top-level imports. This is intentional — it's a native module that crashes Expo Go on import. The dynamic require catches the error silently in Expo Go while working fully in the compiled APK.
+When the user taps "Search All", the app loops through accounts one at a time:
 
-### Fix 5 — Daily Set Toggle (`settings.tsx`, `index.tsx`, `AccountCard.tsx`)
+```
+FOR each account in the list:
+│
+├── 1. Read this account's stored cookies from memory
+│       └── acctCookies = account.cookies
+│       └── These were captured during login (Section 2.3)
+│
+├── 2. Inject cookies into OS cookie jar (for Daily Set later)
+│       └── CookieManager.clearAll(true)     ← wipe previous account
+│       └── CookieManager.set(cookie, ...)   ← write THIS account's cookies
+│       └── CookieManager.flush()            ← force write to disk
+│       └── Verify: CookieManager.get("bing.com") → check count > 0
+│
+├── 3. Run Bing searches via fetch()
+│       └── For each of the 30 search queries:
+│           │
+│           │   fetch("https://www.bing.com/search?q=...", {
+│           │     credentials: "omit",          ← CRITICAL: don't touch OS jar
+│           │     headers: {
+│           │       Cookie: "MUID=abc; _U=eyJ...; ANON=...",  ← manual header
+│           │       "User-Agent": "Mozilla/5.0 (Pixel 7)..."
+│           │     }
+│           │   })
+│           │
+│           └── credentials: "omit" means:
+│               • fetch() does NOT read from OS cookie jar
+│               • fetch() does NOT write Set-Cookie responses to OS jar
+│               • The Cookie header is 100% from THIS account's stored data
+│               • This is what makes multi-account searches work
+│
+├── 4. Run Daily Set via WebView (if enabled)
+│       └── WebView loads rewards.bing.com
+│       └── WebView uses the OS cookie jar (written in step 2)
+│       └── So it's authenticated as THIS account
+│       └── JavaScript is injected to find and click activity cards
+│
+├── 5. Fetch points earned
+│       └── Same fetch() + credentials:"omit" pattern as searches
+│       └── Calls rewards.bing.com/api/getuserinfo
+│
+├── 6. Log results, update account status
+│
+├── 7. Pause 3 seconds before next account
+│
+└── NEXT account
+```
 
-Added a user-facing toggle in Settings → Search section to enable or disable Daily Set globally.
+### 2.5 — Why `credentials: "omit"` Is the Whole Trick
 
-- **Off:** "Run All" only performs Bing searches. The purple "Daily Set" FAB button on the home screen is hidden. The per-account Daily Set icon button on each card is hidden.
-- **On:** Full behavior — searches run first, then Daily Set. Both buttons are visible.
+This one line is what makes multi-account work:
 
-The `dailySetEnabled` field already existed in `SettingsContext` but had no UI. The search runner already read it. This change wired up the UI and propagated the setting to `AccountCard` via a new `showDailySet` prop.
+```javascript
+fetch(url, { credentials: "omit", headers: { Cookie: cookieString } })
+```
 
-### Fix 6 — Screen Routing Crash (`app/search-runner.tsx`)
+Without `credentials: "omit"`, here's what would happen:
+- Android's OkHttp (the HTTP engine) would READ cookies from the OS jar and ADD them to the request
+- The response's `Set-Cookie` headers would WRITE back to the OS jar
+- After Account 1's searches, the OS jar would contain Account 1's response cookies
+- Account 2's searches would then send a MIX of Account 1 (from jar) and Account 2 (from header) cookies
+- Microsoft would get confused and credit points to the wrong account (or none)
 
-The top-level `import CookieManager from "@react-native-cookies/cookies"` was added in Fix 4 and immediately caused the search-runner module to throw on load in Expo Go (`react-native link` error). This caused Expo Router to report the route as missing ("Oops, this screen doesn't exist").
+With `credentials: "omit"`:
+- OkHttp ignores the OS jar completely for fetch requests
+- The only cookies sent are the ones in the manual `Cookie:` header
+- The OS jar stays clean for the WebView (Daily Set) to use
+- Each account is completely isolated
 
-**Fix:** Removed the top-level import and moved the `require` inside `injectAccountCookies` where it's wrapped in `try/catch`.
+### 2.6 — How Daily Set Card Clicking Works
+
+The Daily Set automation is entirely different from searches. It uses a real WebView (embedded Chrome browser) because Microsoft's Daily Set activities require JavaScript execution, redirects, and DOM interaction that `fetch()` can't do.
+
+```
+Step 1:  WebView navigates to rewards.bing.com
+         └── Authenticated via OS cookie jar (injected in step 2 above)
+
+Step 2:  Wait for page to fully load
+
+Step 3:  Inject JavaScript that:
+         a) Finds all activity card links using CSS selectors:
+            - [data-activity-id] a[href]
+            - [data-bi-id*="dailyset"] a[href]
+            - .ds-card-sec a[href]
+            - a[href*="rewards.bing.com/go/"]
+            - ... (12 different selectors to cover Microsoft's changing HTML)
+
+         b) Skips cards that are already completed:
+            - Checks for CSS classes like "complete", "done", "checked", "earned"
+            - Checks for aria-checked="true"
+
+         c) Skips cards that were already clicked in this run:
+            - Keeps a list of clicked card IDs to avoid loops
+
+         d) Fires a real MouseEvent('click') on the first uncompleted card:
+            - Uses dispatchEvent(), not window.location navigation
+            - This is the same event path as a real user tap
+            - Microsoft's own click handlers run and register the activity
+
+Step 4:  After the click, wait for the page to navigate (card opens a new page)
+
+Step 5:  Navigate back to rewards.bing.com
+
+Step 6:  Repeat steps 3-5 until no more uncompleted cards are found
+
+Step 7:  Report results: { completed: 3, total: 4, alreadyDone: false }
+```
 
 ---
 
-## 4. Current State
+## 3. The Three Run Modes
 
-### What Works (on the APK)
-- All searches run correctly per-account using stored cookies
-- Daily Set now runs under the correct account's session after cookie injection
-- Scheduled notifications trigger daily and auto-start the run
-- Daily Set can be toggled on/off globally from Settings
-- Session refresh (re-login) properly updates stored cookies for an account
+The app now has three distinct ways to run, triggered by different buttons:
 
-### Known Limitations / Remaining Work
-- **Cookie capture completeness:** `document.cookie` only captures non-httpOnly cookies. httpOnly cookies (which Bing uses for some auth tokens) are captured only during active WebView sessions and may not persist across OS-level cookie jar flushes. If Daily Set shows "not authenticated" after the fix, the user needs to refresh their session.
-- **No expired session detection:** Before a run starts, there is no check whether the stored cookies are still valid. If they've expired, searches will fail silently (returning 200 but earning no points). The `isSessionExpired` function in AccountCard only estimates based on time — it does not make a real auth check.
-- **No retry logic:** If a search request fails mid-run (non-network error), it does not retry. Failed accounts are logged and the run continues to the next account.
-- **Shared User-Agent:** All accounts use the same Pixel 7 User-Agent string. Long-term, Microsoft may detect the pattern if running many accounts from one device.
-- **Session refresh uses non-incognito WebView:** When a user refreshes an existing account's session (not adding new), `incognito` is `false`, so the device's OS cookie jar gets written to. This is by design (the real httpOnly cookies need to reach the jar for Daily Set), but it means whichever account was refreshed last "owns" the OS jar until the next `injectAccountCookies` call clears it.
+| Button | Color | Mode | What It Does |
+|--------|-------|------|-------------|
+| **Search All** | Blue | `searchonly` | Runs Bing searches only. No Daily Set. |
+| **Daily Set** | Purple | `dailyset` | Runs Daily Set card clicking only. No searches. |
+| **Run All** | Green | `both` | Runs searches first, then Daily Set. |
+| **Stop** | Red | — | Stops any running operation. |
 
-### Build Configuration
-- **EAS Profile in use:** `preview` (not `development`)
-- **Build command:** `eas build --platform android --profile preview --non-interactive`
-- **EAS Account:** shroud.dev
-- **Project ID:** bde8726b-e427-47c3-bfef-bac4d4e46de4
-- **Bundle ID:** com.msrewards.automation
-- **Build time:** ~2.5 minutes on EAS free tier
-- **Remaining Android builds:** 14 of 15 (free tier)
+The same three modes apply to per-account buttons on each account card:
+- Blue play button → searches only for that account
+- Purple checkbox button → Daily Set only for that account
+
+**The Daily Set toggle** in Settings controls visibility of all daily-set-related buttons:
+- **Toggle ON:** All three FAB buttons visible, purple checkbox on each card visible
+- **Toggle OFF:** Only the blue "Search All" button visible, only blue play on cards
+
+**Scheduled auto-runs** (from notifications) always use `both` mode — they run searches AND Daily Set regardless of the toggle.
 
 ---
 
-## 5. Full Codebase Audit — March 21, 2026
+## 4. All Bugs Fixed
 
-### Bugs Fixed in This Audit
+### Critical Bugs (App Was Broken Without These)
 
-| # | Severity | File | Issue | Fix |
-|---|----------|------|-------|-----|
-| 1 | **CRITICAL** | `login-webview.tsx`, `search-runner.tsx` | `require("@react-native-cookies/cookies").default` returns `undefined` — module uses CommonJS `module.exports`, not ES default export. Native CookieManager was never loaded. | Changed to `mod.default \|\| mod` |
-| 2 | **CRITICAL** | `login-webview.tsx` | `Alert.alert()` is non-blocking; `router.back()` fires immediately, navigating away before user sees diagnostic alert | Moved save + `router.back()` into Alert's `onPress` callback |
-| 3 | **MEDIUM** | `search-runner.tsx` | `performBingSearch` and `fetchRewardsPoints` used `account.cookies` directly instead of the null-safe `acctCookies` variable | Changed both calls to use `acctCookies` |
-| 4 | **MEDIUM** | `search-runner.tsx` | `injectAccountCookies` swallowed all errors silently — impossible to debug injection failures in release builds | Function now returns `{ ok, injected, verified, error }` and caller surfaces results via status line |
-| 5 | **MEDIUM** | `search-runner.tsx` | Runner always used `settings.defaultSearchCount`, ignoring per-account `searchCount` | Runner now uses `account.searchCount > 0 ? account.searchCount : settings.defaultSearchCount` |
+| # | Bug | Root Cause | Fix |
+|---|-----|-----------|-----|
+| 1 | **CookieManager never loaded** — native cookie capture returned 0 cookies every time | `@react-native-cookies/cookies` uses CommonJS `module.exports = {...}`. Code accessed `.default` which returned `undefined`. | Changed `require(...).default` to `const mod = require(...); mod.default \|\| mod` in both `login-webview.tsx` and `search-runner.tsx` |
+| 2 | **Cookie save alert invisible on Android** — user could never see the diagnostic popup showing cookie counts | `Alert.alert()` is non-blocking on Android. `router.back()` executed immediately, navigating away before the alert rendered. | Moved account save + `router.back()` into the Alert's `onPress` callback. Later removed the alert entirely (diagnostics now go to console only). |
+| 3 | **EAS build failed — missing project ID** | `eas init` was run but the project ID was never saved to `app.json` | Added `extra.eas.projectId` and `owner` to `app.json` |
+| 4 | **EAS build failed — Kotlin version mismatch** | `expo-dev-client` brings `expo-dev-launcher@5.0.35` compiled with Kotlin 1.9.0, but RN 0.81.5 uses Kotlin 2.1.0. Binary incompatible. | Removed `expo-dev-client`, switched to `preview` EAS profile |
+| 5 | **EAS build failed — CLI version constraint** | `eas.json` had `"cli": { "version": ">= 16.0.0" }` which silently rejected builds | Removed the constraint |
 
-### Reviewed & Confirmed Correct (No Changes Needed)
+### Medium Bugs (App Worked But With Wrong Behavior)
 
-| File | Notes |
-|---|---|
-| `context/AccountsContext.tsx` | Clean. AsyncStorage fire-and-forget writes inside setState is an anti-pattern but works reliably. |
-| `context/QueriesContext.tsx` | Pool exhaustion is by design (user restores via UI). Ref+state dual-track pattern is correct. |
-| `context/SettingsContext.tsx` | Clean. Proper merge of defaults with persisted values. |
-| `app/(tabs)/index.tsx` | Clean. Notification auto-run, FAB gating, and account card rendering all correct. |
-| `app/(tabs)/settings.tsx` | Clean. Time picker, schedule, and toggle all correct. |
-| `app/(tabs)/queries.tsx` | Clean. Edit/restore/clear flows all correct. |
-| `app/(tabs)/logs.tsx` | Clean. |
-| `app/add-account.tsx` | Clean. Validation, manual add flow, login redirect all correct. |
-| `app/account/[id].tsx` | Clean. Edit, delete, session refresh flows all correct. |
-| `app/_layout.tsx` | Clean. Provider nesting order is correct. |
-| `app/(tabs)/_layout.tsx` | Clean. Native/classic tab layout branching correct. |
-| `components/AccountCard.tsx` | Clean. Session expiry heuristic, status badge, and progress bar all correct. |
-| `components/StatsBar.tsx` | Clean. |
-| `components/EmptyState.tsx` | Clean. |
-| `components/LogItem.tsx` | Clean. |
-| `components/ErrorBoundary.tsx` | Clean. Class-based error boundary is required by React's API. |
-| `components/ErrorFallback.tsx` | Clean. |
-| `constants/colors.ts` | Clean. |
-| `constants/defaultQueries.ts` | Clean. 3000+ queries, well-categorized. |
-| `utils/notifications.ts` | Clean. Dynamic require, permission flow, schedule/cancel, pending run flag all correct. |
-
-### Known Issues Not Fixed (Documented)
-
-| Issue | Severity | Notes |
-|---|----------|-------|
-| Cookies stored in AsyncStorage (plaintext) | Low for this use case | SecureStore would be more appropriate but adds complexity. Acceptable for personal automation tool. |
-| No pre-run session validity check | Low | `isSessionExpired` in AccountCard is time-based only. A real auth check (HEAD to rewards.bing.com) could be added. |
-| `login-webview.tsx` hardcodes `searchCount: 30` for new accounts | Low | Should use `settings.defaultSearchCount` but requires importing `useSettings`. Runner now correctly prefers per-account value. |
+| # | Bug | Root Cause | Fix |
+|---|-----|-----------|-----|
+| 6 | **Cookie variable inconsistency** | `performBingSearch()` and `fetchRewardsPoints()` used `account.cookies` directly instead of the prepared, null-safe `acctCookies` variable | Changed both to use `acctCookies` |
+| 7 | **Silent cookie injection failures** | All `catch` blocks in `injectAccountCookies` were empty. In release builds, `console.log` is suppressed, making debugging impossible. | Function now returns `{ ok, injected, verified, error }` and the caller displays injection results in the status line |
+| 8 | **Search count setting ignored** | Home screen stepper changed `settings.defaultSearchCount`, but runner used `account.searchCount` (hardcoded to 30 on creation). User changed it to 40 in settings but the app always ran 30. | Runner now always uses `settings.defaultSearchCount` |
+| 9 | **`_U` cookie not captured** — searches ran but earned zero points | The WebView only visited `rewards.bing.com` during login. The `_U` cookie is set by Microsoft during a redirect chain that only fires when `www.bing.com` is loaded directly. | Added a navigation step: before capturing cookies, the WebView navigates to `www.bing.com` and waits 3 seconds for the redirect chain to set `_U`. Also expanded capture domains. |
 
 ---
 
-## 6. File Map — What Was Changed
+## 5. File Map
 
-| File | Change |
-|---|---|
-| `app.json` | Added `extra.eas.projectId` and `owner` |
-| `eas.json` | Removed `cli.version` constraint |
-| `package.json` | Removed `expo-dev-client` dependency |
-| `app/search-runner.tsx` | Fixed CookieManager import, added error return from `injectAccountCookies`, used `acctCookies` consistently, honored per-account searchCount |
-| `app/login-webview.tsx` | Fixed CookieManager import, moved save logic into Alert callback |
-| `app/(tabs)/settings.tsx` | Added Daily Set toggle (Switch) in Search section |
-| `app/(tabs)/index.tsx` | Gated Daily Set FAB on `settings.dailySetEnabled`, passed `showDailySet` to AccountCard |
-| `components/AccountCard.tsx` | Added `showDailySet` prop, conditionally renders Daily Set button |
+| File | Purpose |
+|------|---------|
+| `app/(tabs)/index.tsx` | Home screen — account list, settings stepper, three FAB buttons |
+| `app/(tabs)/settings.tsx` | Settings — search count, delay, Daily Set toggle, schedule picker |
+| `app/(tabs)/queries.tsx` | Query pool editor — view/edit/restore the 3000+ search queries |
+| `app/(tabs)/logs.tsx` | Run history log viewer |
+| `app/login-webview.tsx` | Microsoft login WebView + cookie capture |
+| `app/search-runner.tsx` | The main automation engine — searches, Daily Set, account switching |
+| `app/add-account.tsx` | Add account form + "Sign in with Microsoft" button |
+| `app/account/[id].tsx` | Account detail screen — edit, delete, session refresh |
+| `app/_layout.tsx` | Root layout with context providers |
+| `context/AccountsContext.tsx` | Account state, persistence, run tracking |
+| `context/SettingsContext.tsx` | Settings state and persistence |
+| `context/QueriesContext.tsx` | Search query pool management |
+| `components/AccountCard.tsx` | Account card with status badge, play/daily-set buttons |
+| `components/StatsBar.tsx` | Total points summary bar |
+| `utils/notifications.ts` | Scheduled notification management |
+| `constants/defaultQueries.ts` | 3000+ default Bing search queries |
+| `constants/colors.ts` | Light/dark theme color definitions |
+
+---
+
+## 6. Build & Deploy
+
+| Setting | Value |
+|---------|-------|
+| EAS Profile | `preview` (release APK, not dev client) |
+| Build Command | `cd artifacts/mobile && eas build --platform android --profile preview --non-interactive` |
+| EAS Account | shroud.dev |
+| Project ID | bde8726b-e427-47c3-bfef-bac4d4e46de4 |
+| Bundle ID | com.msrewards.automation |
+| Build Time | ~2.5 minutes on EAS free tier |
+
+---
+
+## 7. Known Limitations
+
+| Issue | Impact | Notes |
+|-------|--------|-------|
+| Cookies in AsyncStorage (plaintext) | Low | Acceptable for personal use. SecureStore would be better for shared devices. |
+| No session expiry check before runs | Low | `isSessionExpired` in AccountCard is time-based (>24h). No real auth check. Expired sessions fail silently. |
+| No per-search retry | Low | If a single search fails (non-network), it's skipped. The run continues to the next search/account. |
+| Shared User-Agent across accounts | Low | All accounts use the same Pixel 7 UA string. Microsoft could potentially detect the pattern. |
+| `login-webview.tsx` hardcodes `searchCount: 30` | Cosmetic | New accounts get 30 as default. The runner correctly uses `settings.defaultSearchCount` for actual execution. |
