@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
-import { Calendar, CheckSquare, Clock, Moon, Search, Zap } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { Calendar, CheckSquare, Clock, Moon, RotateCcw, Search, Zap } from "lucide-react-native";
+import React, { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -39,10 +39,18 @@ function from24h(hour24: number): { hour: number; isAm: boolean } {
 
 function formatSlot(slot: OvernightSlot): string {
   const { hour, isAm } = from24h(slot.hour);
-  return `${hour}:00 ${isAm ? "AM" : "PM"}`;
+  const mm = slot.minute.toString().padStart(2, "0");
+  return `${hour}:${mm} ${isAm ? "AM" : "PM"}`;
 }
 
 const SLOT_LABELS = ["Run 1", "Run 2", "Run 3", "Run 4"];
+
+function initHourTexts(slots: OvernightSlot[]): string[] {
+  return slots.map((s) => String(from24h(s.hour).hour));
+}
+function initMinuteTexts(slots: OvernightSlot[]): string[] {
+  return slots.map((s) => s.minute.toString().padStart(2, "0"));
+}
 
 export default function SettingsScreen() {
   const scheme = useColorScheme() ?? "light";
@@ -55,19 +63,17 @@ export default function SettingsScreen() {
   const [searchCountText, setSearchCountText] = useState(
     String(settings.defaultSearchCount)
   );
-  const [delayText, setDelayText] = useState(
-    String(settings.searchDelay ?? 5)
-  );
+  const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
 
   const [slotHourTexts, setSlotHourTexts] = useState<string[]>(() =>
-    settings.overnightSlots.map((s) => String(from24h(s.hour).hour))
+    initHourTexts(settings.overnightSlots)
+  );
+  const [slotMinuteTexts, setSlotMinuteTexts] = useState<string[]>(() =>
+    initMinuteTexts(settings.overnightSlots)
   );
 
-  useEffect(() => {
-    setSlotHourTexts(
-      settings.overnightSlots.map((s) => String(from24h(s.hour).hour))
-    );
-  }, []);
+  const [previousUserSlots, setPreviousUserSlots] = useState<OvernightSlot[] | null>(null);
+  const isShowingDefaults = previousUserSlots !== null;
 
   const commitSearchCount = () => {
     const parsed = parseInt(searchCountText, 10);
@@ -93,6 +99,7 @@ export default function SettingsScreen() {
     }
   };
 
+  // ── Slot hour ────────────────────────────────────────────────────────────
   const updateSlotHourText = (index: number, text: string) => {
     const next = [...slotHourTexts];
     next[index] = text;
@@ -109,7 +116,6 @@ export default function SettingsScreen() {
     const slot = settings.overnightSlots[index];
     const { isAm } = from24h(slot.hour);
     const newHour24 = to24h(clamped, isAm);
-
     if (newHour24 !== slot.hour) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const updated = [...settings.overnightSlots];
@@ -118,6 +124,30 @@ export default function SettingsScreen() {
     }
   };
 
+  // ── Slot minute ──────────────────────────────────────────────────────────
+  const updateSlotMinuteText = (index: number, text: string) => {
+    const next = [...slotMinuteTexts];
+    next[index] = text;
+    setSlotMinuteTexts(next);
+  };
+
+  const commitSlotMinute = (index: number) => {
+    const parsed = parseInt(slotMinuteTexts[index], 10);
+    const clamped = isNaN(parsed) ? 0 : Math.max(0, Math.min(59, parsed));
+    const next = [...slotMinuteTexts];
+    next[index] = clamped.toString().padStart(2, "0");
+    setSlotMinuteTexts(next);
+
+    const slot = settings.overnightSlots[index];
+    if (clamped !== slot.minute) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const updated = [...settings.overnightSlots];
+      updated[index] = { ...slot, minute: clamped };
+      updateSettings({ overnightSlots: updated });
+    }
+  };
+
+  // ── AM / PM ──────────────────────────────────────────────────────────────
   const toggleSlotAmPm = (index: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const slot = settings.overnightSlots[index];
@@ -129,13 +159,25 @@ export default function SettingsScreen() {
     setScheduledCount(null);
   };
 
-  const applyDefaultSlots = () => {
+  // ── Default / Restore toggle ─────────────────────────────────────────────
+  const handleDefaultToggle = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    updateSettings({ overnightSlots: DEFAULT_OVERNIGHT_SLOTS });
-    setSlotHourTexts(DEFAULT_OVERNIGHT_SLOTS.map((s) => String(from24h(s.hour).hour)));
+    if (!isShowingDefaults) {
+      setPreviousUserSlots([...settings.overnightSlots]);
+      updateSettings({ overnightSlots: DEFAULT_OVERNIGHT_SLOTS });
+      setSlotHourTexts(initHourTexts(DEFAULT_OVERNIGHT_SLOTS));
+      setSlotMinuteTexts(initMinuteTexts(DEFAULT_OVERNIGHT_SLOTS));
+    } else {
+      const restored = previousUserSlots!;
+      updateSettings({ overnightSlots: restored });
+      setSlotHourTexts(initHourTexts(restored));
+      setSlotMinuteTexts(initMinuteTexts(restored));
+      setPreviousUserSlots(null);
+    }
     setScheduledCount(null);
   };
 
+  // ── Schedule actions ─────────────────────────────────────────────────────
   const handleApplySchedule = async () => {
     if (Platform.OS === "web") {
       Alert.alert("Not Available", "Notifications require a real device.");
@@ -155,9 +197,7 @@ export default function SettingsScreen() {
       return;
     }
 
-    const { scheduled } = await scheduleOvernightNotifications(
-      settings.overnightSlots
-    );
+    const { scheduled } = await scheduleOvernightNotifications(settings.overnightSlots);
     setScheduledCount(scheduled);
     setScheduling(false);
 
@@ -190,8 +230,8 @@ export default function SettingsScreen() {
     },
   ];
 
-  const hourInputStyle = [
-    styles.hourInput,
+  const slotInputStyle = [
+    styles.slotInput,
     {
       color: colors.text,
       backgroundColor: colors.surfaceSecondary,
@@ -318,13 +358,21 @@ export default function SettingsScreen() {
             <View style={[styles.infoBanner, { backgroundColor: "#EFF6FF", borderColor: "#BFDBFE" }]}>
               <Moon size={14} color={colors.tint} />
               <Text style={[styles.infoText, { color: "#1E40AF" }]}>
-                Microsoft resets search points at midnight. Runs before (10 PM, 11 PM) and after (1 AM, 2 AM) the reset to double your daily points.
+                Microsoft resets search points at midnight. Runs before (10 PM, 11 PM) and after (1 AM, 2 AM) to maximize daily points.
               </Text>
+            </View>
+
+            {/* Column header labels */}
+            <View style={styles.slotHeaderRow}>
+              <View style={{ width: 72 }} />
+              <Text style={[styles.slotHeaderLabel, { color: colors.textMuted }]}>Hour</Text>
+              <Text style={[styles.slotHeaderLabel, { color: colors.textMuted }]}>Min</Text>
+              <View style={{ width: 50 }} />
             </View>
 
             {/* 4 slot rows */}
             {settings.overnightSlots.map((slot, i) => {
-              const { hour, isAm } = from24h(slot.hour);
+              const { isAm } = from24h(slot.hour);
               return (
                 <View key={i}>
                   {i > 0 && (
@@ -343,20 +391,35 @@ export default function SettingsScreen() {
                     </View>
 
                     <View style={styles.slotPicker}>
+                      {/* Hour */}
                       <TextInput
-                        style={hourInputStyle}
-                        value={slotHourTexts[i] ?? String(hour)}
+                        style={slotInputStyle}
+                        value={slotHourTexts[i] ?? "12"}
                         onChangeText={(t) => updateSlotHourText(i, t)}
                         onBlur={() => commitSlotHour(i)}
                         onSubmitEditing={() => commitSlotHour(i)}
+                        keyboardType="number-pad"
+                        returnKeyType="next"
+                        maxLength={2}
+                        selectTextOnFocus
+                      />
+
+                      <Text style={[styles.colonSep, { color: colors.textMuted }]}>:</Text>
+
+                      {/* Minute */}
+                      <TextInput
+                        style={slotInputStyle}
+                        value={slotMinuteTexts[i] ?? "00"}
+                        onChangeText={(t) => updateSlotMinuteText(i, t)}
+                        onBlur={() => commitSlotMinute(i)}
+                        onSubmitEditing={() => commitSlotMinute(i)}
                         keyboardType="number-pad"
                         returnKeyType="done"
                         maxLength={2}
                         selectTextOnFocus
                       />
-                      <Text style={[styles.colonZero, { color: colors.textMuted }]}>
-                        :00
-                      </Text>
+
+                      {/* AM / PM */}
                       <Pressable
                         onPress={() => toggleSlotAmPm(i)}
                         style={[
@@ -374,17 +437,32 @@ export default function SettingsScreen() {
 
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-            {/* Default button */}
+            {/* Default / Restore toggle button */}
             <Pressable
-              onPress={applyDefaultSlots}
+              onPress={handleDefaultToggle}
               style={({ pressed }) => [
                 styles.defaultBtn,
-                { backgroundColor: colors.surfaceSecondary, opacity: pressed ? 0.7 : 1 },
+                {
+                  backgroundColor: isShowingDefaults ? "#FFF7ED" : colors.surfaceSecondary,
+                  borderColor: isShowingDefaults ? "#FDE68A" : "transparent",
+                  opacity: pressed ? 0.7 : 1,
+                },
               ]}
             >
-              <Zap size={15} color={colors.tint} />
-              <Text style={[styles.defaultBtnText, { color: colors.tint }]}>
-                Default  (10 PM · 11 PM · 1 AM · 2 AM)
+              {isShowingDefaults ? (
+                <RotateCcw size={15} color="#D97706" />
+              ) : (
+                <Zap size={15} color={colors.tint} />
+              )}
+              <Text
+                style={[
+                  styles.defaultBtnText,
+                  { color: isShowingDefaults ? "#D97706" : colors.tint },
+                ]}
+              >
+                {isShowingDefaults
+                  ? "Restore my schedule"
+                  : "Default  (10 PM · 11 PM · 1 AM · 2 AM)"}
               </Text>
             </Pressable>
 
@@ -578,7 +656,7 @@ const styles = StyleSheet.create({
   },
   unit: { fontSize: 14, fontFamily: "Inter_500Medium" },
   divider: { height: 1, marginHorizontal: 16 },
-  // Overnight slots
+  // Overnight
   infoBanner: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -595,12 +673,28 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 17,
   },
+  slotHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 4,
+    gap: 6,
+  },
+  slotHeaderLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 0.5,
+    width: 44,
+    textAlign: "center",
+  },
   slotRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 10,
     gap: 12,
   },
   slotLabelWrap: {
@@ -616,45 +710,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  slotBadgeText: {
-    fontSize: 13,
-    fontFamily: "Inter_700Bold",
-  },
-  slotLabel: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-  },
+  slotBadgeText: { fontSize: 13, fontFamily: "Inter_700Bold" },
+  slotLabel: { fontSize: 14, fontFamily: "Inter_500Medium" },
   slotPicker: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
   },
-  hourInput: {
-    width: 48,
+  slotInput: {
+    width: 44,
     height: 40,
     borderRadius: 10,
     borderWidth: 1,
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: "Inter_700Bold",
   },
-  colonZero: {
-    fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+  colonSep: {
+    fontSize: 18,
+    fontFamily: "Inter_700Bold",
+    marginHorizontal: 1,
   },
   amPmBtn: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
     paddingVertical: 8,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 46,
+    minWidth: 44,
+    marginLeft: 4,
   },
-  amPmText: {
-    fontSize: 12,
-    fontFamily: "Inter_700Bold",
-    color: "#fff",
-  },
+  amPmText: { fontSize: 12, fontFamily: "Inter_700Bold", color: "#fff" },
   defaultBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -664,11 +750,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginVertical: 12,
     borderRadius: 10,
+    borderWidth: 1,
   },
-  defaultBtnText: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-  },
+  defaultBtnText: { fontSize: 13, fontFamily: "Inter_600SemiBold" },
   // Schedule actions
   unavailableCard: {
     borderWidth: 1,
@@ -677,15 +761,8 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
-  unavailableTitle: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-  },
-  unavailableDesc: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    lineHeight: 19,
-  },
+  unavailableTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
+  unavailableDesc: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 19 },
   statusBanner: {
     borderWidth: 1,
     borderRadius: 10,
