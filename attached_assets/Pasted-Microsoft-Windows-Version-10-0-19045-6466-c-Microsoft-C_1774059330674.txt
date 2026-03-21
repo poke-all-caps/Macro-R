@@ -1,0 +1,99 @@
+Microsoft Windows [Version 10.0.19045.6466]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\Avinash Poudel\projects\Rewards-Automaton>npm install -g pnpm
+
+added 1 package in 12s
+
+1 package is looking for funding
+  run `npm fund` for details
+
+C:\Users\Avinash Poudel\projects\Rewards-Automaton>pnpm install
+Scope: all 9 workspace projects
+ WARN  Moving typescript that was installed by a different package manager to "node_modules/.ignored"
+ WARN  Moving prettier that was installed by a different package manager to "node_modules/.ignored"
+Downloading react-native@0.81.5: 24.77 MB/24.77 MB, done
+artifacts/mobile                         |  WARN  deprecated @react-native-cookies/cookies@6.2.1
+ WARN  6 deprecated subdependencies found: @xmldom/xmldom@0.7.13, glob@10.5.0, glob@7.2.3, inflight@1.0.6, rimraf@3.0.2, uuid@3.4.0
+Packages: +1120
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1101, reused 0, downloaded 1094, added 1120, done
+node_modules/.pnpm/esbuild@0.27.3/node_modules/esbuild: Running postinstall script, done in 18.2s
+. preinstall$ sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm…
+│ 'sh' is not recognized as an internal or external command,
+│ operable program or batch file.
+└─ Failed in 533ms at C:\Users\Avinash Poudel\projects\Rewards-Automaton
+ ELIFECYCLE  Command failed with exit code 1.
+
+C:\Users\Avinash Poudel\projects\Rewards-Automaton>cd artifacts\mobile
+
+C:\Users\Avinash Poudel\projects\Rewards-Automaton\artifacts\mobile>eas build --platform android --profile development
+EAS project not configured.
+√ Would you like to automatically create an EAS project for @shroud.dev/mobile? ... yes
+√ Created @shroud.dev/mobile: https://expo.dev/accounts/shroud.dev/projects/mobile on EAS
+√ Linked local project to EAS project bde8726b-e427-47c3-bfef-bac4d4e46de4
+Resolved "development" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+No environment variables with visibility "Plain text" and "Sensitive" found for the "development" environment on EAS.
+
+
+
+√ Using remote Android credentials (Expo server)
+√ Generate a new Android Keystore? ... yes
+Detected that you do not have keytool installed locally.
+√ Generating keystore in the cloud...
+√ Created keystore
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+√ Compressed project files 10s (2.0 MB)
+√ Uploaded to EAS 2s
+⌛️ Computing the project fingerprint is taking longer than expected...
+⏩ To skip this step, set the environment variable: EAS_SKIP_AUTO_FINGERPRINT=1
+√ Computed project fingerprint
+
+See logs: https://expo.dev/accounts/shroud.dev/projects/mobile/builds/154ad989-8791-4359-adb0-bdbd1203ef12
+
+Waiting for build to complete. You can press Ctrl+C to exit.
+× Build failed
+
+🤖 Android build failed:
+Unknown error. See logs of the Install dependencies build phase for more information.
+
+C:\Users\Avinash Poudel\projects\Rewards-Automaton\artifacts\mobile>eas build --platform android --profile development
+Resolved "development" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+No environment variables with visibility "Plain text" and "Sensitive" found for the "development" environment on EAS.
+
+
+
+√ Using remote Android credentials (Expo server)
+√ Using Keystore from configuration: Build Credentials FsrpFyXWhb (default)
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+√ Compressed project files 6s (2.0 MB)
+√ Uploaded to EAS 2s
+⌛️ Computing the project fingerprint is taking longer than expected...
+⏩ To skip this step, set the environment variable: EAS_SKIP_AUTO_FINGERPRINT=1
+√ Computed project fingerprint
+
+See logs: https://expo.dev/accounts/shroud.dev/projects/mobile/builds/a6d1d97a-7417-4ee4-8898-de8c1aa1ad8b
+
+Waiting for build to complete. You can press Ctrl+C to exit.
+× Build failed
+
+🤖 Android build failed:
+Unknown error. See logs of the Install dependencies build phase for more information.
+
+√ Compressed project files 5s (2.0 MB)
+√ Uploaded to EAS 2s
+⌛️ Computing the project fingerprint is taking longer than expected...
+⏩ To skip this step, set the environment variable: EAS_SKIP_AUTO_FINGERPRINT=1
+√ Computed project fingerprint
+
+See logs: https://expo.dev/accounts/shroud.dev/projects/mobile/builds/84f8b967-0557-41ce-8f8e-98f141d33e89
+√ Using remote Android credentials (Expo server)
+Waiting for build to complete. You can press Ctrl+C to exit.yXWhb (default)
+× Build failed
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+🤖 Android build failed:
+Unknown error. See logs of the Install dependencies build phase for more information.
+
+C:\Users\Avinash Poudel\projects\Rewards-Automaton\artifacts\mobile>
