@@ -727,7 +727,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-  unit: { fontSize: 14, fontFamily: "Inter_500Medium" },
+  unit: { fontSize: 14, fontFamily: "Inter_500Medium", lineHeight: 40, alignSelf: "center" },
   divider: { height: 1, marginHorizontal: 16 },
   // Overnight
   infoBanner: {
