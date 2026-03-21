@@ -9,10 +9,10 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 import { Account, AccountStatus } from "@/context/AccountsContext";
 import Colors from "@/constants/colors";
+import { useAppTheme } from "@/context/ThemeContext";
 
 interface Props {
   account: Account;
@@ -25,7 +25,7 @@ interface Props {
 }
 
 function StatusBadge({ status, searchesCompleted, searchCount }: { status: AccountStatus; searchesCompleted: number; searchCount: number }) {
-  const scheme = useColorScheme() ?? "light";
+  const { scheme } = useAppTheme();
   const colors = Colors[scheme];
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -44,22 +44,20 @@ function StatusBadge({ status, searchesCompleted, searchCount }: { status: Accou
     }
   }, [status]);
 
+  const dark = scheme === "dark";
   const configs = {
-    idle: { Icon: Clock, color: colors.statusIdle, bg: colors.surfaceSecondary, label: "Idle" },
-    running: { Icon: RefreshCw, color: colors.statusRunning, bg: "#EDE9FE", label: `${searchesCompleted}/${searchCount}` },
-    done: { Icon: CheckCircle, color: colors.statusDone, bg: "#DCFCE7", label: "Done" },
-    failed: { Icon: XCircle, color: colors.statusFailed, bg: "#FEE2E2", label: "Failed" },
+    idle: { Icon: Clock, color: colors.statusIdle, bg: dark ? colors.surfaceSecondary : colors.surfaceSecondary, label: "Idle" },
+    running: { Icon: RefreshCw, color: colors.statusRunning, bg: dark ? "#1E1654" : "#EDE9FE", label: `${searchesCompleted}/${searchCount}` },
+    done: { Icon: CheckCircle, color: colors.statusDone, bg: dark ? "#0B2E1A" : "#DCFCE7", label: "Done" },
+    failed: { Icon: XCircle, color: colors.statusFailed, bg: dark ? "#2A0F0F" : "#FEE2E2", label: "Failed" },
   };
 
   const cfg = configs[status];
-  const darkRunning = scheme === "dark" && status === "running";
-  const darkDone = scheme === "dark" && status === "done";
-  const darkFailed = scheme === "dark" && status === "failed";
 
   return (
     <View style={[
       styles.badge,
-      { backgroundColor: darkRunning ? "#4C1D95" : darkDone ? "#14532D" : darkFailed ? "#7F1D1D" : cfg.bg }
+      { backgroundColor: cfg.bg }
     ]}>
       <Animated.View style={{ opacity: status === "running" ? pulseAnim : 1 }}>
         <cfg.Icon size={12} color={cfg.color} />
@@ -78,8 +76,9 @@ function isSessionExpired(account: Account): boolean {
 }
 
 export function AccountCard({ account, onPress, onRun, onDailySet, onRefreshSession, isRunningGlobal, showDailySet = true }: Props) {
-  const scheme = useColorScheme() ?? "light";
+  const { scheme } = useAppTheme();
   const colors = Colors[scheme];
+  const dark = scheme === "dark";
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -154,7 +153,7 @@ export function AccountCard({ account, onPress, onRun, onDailySet, onRefreshSess
               </View>
               {account.todayPoints > 0 && (
                 <>
-                  <View style={styles.statDot} />
+                  <View style={[styles.statDot, { backgroundColor: colors.border }]} />
                   <View style={styles.statItem}>
                     <Star size={11} color={colors.warning} />
                     <Text style={[styles.statText, { color: colors.textSecondary }]}>{account.todayPoints.toLocaleString()} pts today</Text>
@@ -163,7 +162,7 @@ export function AccountCard({ account, onPress, onRun, onDailySet, onRefreshSess
               )}
               {account.lastRun && (
                 <>
-                  <View style={styles.statDot} />
+                  <View style={[styles.statDot, { backgroundColor: colors.border }]} />
                   <Text style={[styles.statText, { color: colors.textMuted }]}>{formatRelativeTime(account.lastRun)}</Text>
                 </>
               )}
@@ -176,10 +175,10 @@ export function AccountCard({ account, onPress, onRun, onDailySet, onRefreshSess
                   styles.sessionBanner,
                   {
                     backgroundColor: noCookies
-                      ? scheme === "dark" ? "#7F1D1D22" : "#FEF2F2"
+                      ? dark ? "#2A0F0F" : "#FEF2F2"
                       : sessionExpired
-                      ? scheme === "dark" ? "#78350F22" : "#FFFBEB"
-                      : scheme === "dark" ? "#14532D22" : "#F0FDF4",
+                      ? dark ? "#2A1A00" : "#FFFBEB"
+                      : dark ? "#0A2518" : "#F0FDF4",
                     borderColor: noCookies ? "#FCA5A5" : sessionExpired ? "#FCD34D" : "#86EFAC",
                     opacity: pressed ? 0.75 : 1,
                   },
@@ -337,7 +336,6 @@ const styles = StyleSheet.create({
     width: 3,
     height: 3,
     borderRadius: 2,
-    backgroundColor: "#D1D5DB",
   },
   badge: {
     flexDirection: "row",
