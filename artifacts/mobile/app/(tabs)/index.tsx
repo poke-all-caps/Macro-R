@@ -191,10 +191,18 @@ export default function HomeScreen() {
           router.push({ pathname: "/account/[id]", params: { id: item.id } })
         }
         onRun={() => handleRunAccount(item.id)}
+        onDailySet={() => handleDailySetAccount(item.id)}
+        onRefreshSession={() =>
+          router.push({
+            pathname: "/login-webview",
+            params: { accountId: item.id },
+          })
+        }
         isRunningGlobal={isRunning}
+        showDailySet={settings.dailySetEnabled}
       />
     ),
-    [isRunning, tileWidth],
+    [isRunning, tileWidth, settings.dailySetEnabled],
   );
 
   const ListHeader = (
