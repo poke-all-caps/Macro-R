@@ -486,12 +486,13 @@ export default function HomeScreen() {
             {
               opacity: pressed ? 0.9 : 1,
               transform: [{ scale: pressed ? 0.96 : 1 }],
+              flex: !isRunning && !settings.dailySetEnabled ? 1 : undefined,
             },
           ]}
         >
           <LinearGradient
             colors={isRunning ? ["#EF4444", "#DC2626"] : ["#3B82F6", "#1D4ED8"]}
-            style={styles.fabBtn}
+            style={[styles.fabBtn, !isRunning && !settings.dailySetEnabled && { justifyContent: "center" }]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
