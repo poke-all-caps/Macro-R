@@ -92,9 +92,11 @@ export default function AccountDetailScreen() {
         text: "Delete",
         style: "destructive",
         onPress: () => {
-          removeAccount(id);
-          router.back();
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          router.dismiss();
+          setTimeout(() => {
+            removeAccount(id);
+          }, 300);
         },
       },
     ]);
