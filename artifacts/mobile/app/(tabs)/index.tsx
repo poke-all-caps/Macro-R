@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
     height: 48,
   },
   headerTitle: { fontSize: 28, fontFamily: "Inter_700Bold" },
-  headerSub: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
+  headerSub: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2, paddingLeft: 4 },
   headerActions: { flexDirection: "row", gap: 8 },
   headerBtn: {
     width: 40,
