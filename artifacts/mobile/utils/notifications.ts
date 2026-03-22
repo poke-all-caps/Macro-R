@@ -97,10 +97,39 @@ export async function scheduleOvernightNotifications(
           type: "daily",
           hour: slot.hour,
           minute: slot.minute,
+          channelId: Platform.OS === "android" ? "default" : undefined,
         } as any,
       });
       count++;
-    } catch {}
+      console.log(`[Notifications] Scheduled daily notification for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
+    } catch (e) {
+      console.log(`[Notifications] Failed to schedule ${slot.hour}:${String(slot.minute).padStart(2, '0')}:`, e);
+      try {
+        const now = new Date();
+        const target = new Date();
+        target.setHours(slot.hour, slot.minute, 0, 0);
+        if (target <= now) target.setDate(target.getDate() + 1);
+        const seconds = Math.max(60, Math.floor((target.getTime() - now.getTime()) / 1000));
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Macro Rewards — Overnight Run",
+            body: "Starting your overnight Bing searches...",
+            data: { action: "start_run" },
+            sound: "default",
+            ...(Platform.OS === "android" && { channelId: "default" }),
+          },
+          trigger: {
+            type: "timeInterval",
+            seconds,
+            repeats: false,
+          } as any,
+        });
+        count++;
+        console.log(`[Notifications] Fallback: scheduled timeInterval ${seconds}s for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
+      } catch (e2) {
+        console.log(`[Notifications] Fallback also failed:`, e2);
+      }
+    }
   }
 
   return { scheduled: count };
