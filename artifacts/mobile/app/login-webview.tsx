@@ -47,7 +47,7 @@ const INJECT_COOKIES_JS = `
       avatarUrl: '',
       localStorageTokens: {},
     };
-    // Detect account name
+    // Detect account name — covers rewards.bing.com me-control AND bing.com header
     var nameSelectors = [
       '#mectrl_currentAccount_name', '.mectrl_accountinfo_name', '.mectrl_name',
       '[data-testid="user-name"]', '.id_accountName',
@@ -55,6 +55,8 @@ const INJECT_COOKIES_JS = `
       '#id_n', '.profile-name', '.display-name',
       '#meControl [aria-label]', '.mectrl_header_text',
       '#id_b', '.b_topbarAccount .id_accountName',
+      '#id_a', '.b_accountName', '.headerUserName',
+      '[data-bi-dhp="account-name"]', '.ms-PersonaBase-text',
     ];
     for (var ns = 0; ns < nameSelectors.length; ns++) {
       var el = document.querySelector(nameSelectors[ns]);
@@ -82,7 +84,7 @@ const INJECT_COOKIES_JS = `
         }
       }
     }
-    // Detect profile picture
+    // Detect profile picture — covers rewards.bing.com me-control AND bing.com header
     var avatarSelectors = [
       '#mectrl_currentAccount_picture img',
       '.mectrl_accountpic img',
@@ -95,10 +97,20 @@ const INJECT_COOKIES_JS = `
       'img[data-testid="user-avatar"]',
       '#mectrl_main_trigger img',
       '.mectrl_trigger img',
+      '#id_a img',
+      '.b_avatar img',
+      '.hplogo img',
+      'img#id_avatar',
+      '[aria-label="Your account"] img',
+      '.headerUserInfoAvatar img',
     ];
     for (var as = 0; as < avatarSelectors.length; as++) {
       var ae = document.querySelector(avatarSelectors[as]);
-      if (ae && ae.src && ae.src.indexOf('data:') !== 0 && ae.src.indexOf('default') === -1) {
+      if (ae && ae.src &&
+          ae.src.indexOf('data:') !== 0 &&
+          ae.src.indexOf('default') === -1 &&
+          ae.src.indexOf('1x1') === -1 &&
+          ae.src.indexOf('pixel') === -1) {
         data.avatarUrl = ae.src;
         break;
       }
@@ -108,9 +120,14 @@ const INJECT_COOKIES_JS = `
       for (var ai = 0; ai < allImgs.length; ai++) {
         var img = allImgs[ai];
         var s = img.src || '';
+        var w = img.naturalWidth || img.width || 0;
+        var h = img.naturalHeight || img.height || 0;
+        if (s.indexOf('data:') === 0 || s.indexOf('1x1') !== -1 || s.indexOf('pixel') !== -1) continue;
         if ((s.indexOf('graph.microsoft.com') !== -1 && s.indexOf('photo') !== -1) ||
+            s.indexOf('profile.live.com') !== -1 ||
             s.indexOf('dsimages-') !== -1 ||
-            (s.indexOf('blob:') === 0 && img.width >= 30 && img.width <= 120 && img.height >= 30 && img.height <= 120)) {
+            s.indexOf('cgi-bin/picture') !== -1 ||
+            (s.indexOf('bing.com') !== -1 && w >= 20 && w <= 150 && h >= 20 && h <= 150 && s.indexOf('http') === 0)) {
           data.avatarUrl = s;
           break;
         }
@@ -169,6 +186,11 @@ export default function LoginWebViewScreen() {
   const [showNameInput, setShowNameInput] = useState(false);
   const [cookiesReady, setCookiesReady] = useState(!!existingAccount);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Refs so handleSave always sees the latest detected values (state is stale in closures)
+  const detectedAvatarRef = useRef("");
+  const detectedEmailRef = useRef("");
+  const accountNameRef = useRef("");
 
   React.useEffect(() => {
     if (!existingAccount) {
@@ -252,15 +274,24 @@ export default function LoginWebViewScreen() {
         Object.entries(lsTokens).forEach(([k, v]) => { lsPrefixed[`_ls_${k}`] = v; });
         // Merge: never discard previously captured cookies — accumulate across all visited domains
         setCapturedCookies((prev) => ({ ...prev, ...parsed, ...lsPrefixed }));
-        // Pick up email
+        // Pick up email — sync ref too
         const email = (msg.data.email || "").trim();
-        if (email && email.includes("@")) setDetectedEmail(email);
-        // Pick up username
+        if (email && email.includes("@")) {
+          setDetectedEmail(email);
+          if (!detectedEmailRef.current) detectedEmailRef.current = email;
+        }
+        // Pick up username — sync ref too
         const username = (msg.data.username || "").trim();
-        if (username) setAccountName((prev) => prev || username.split(" ")[0] || "My Account");
-        // Pick up avatar URL
+        if (username) {
+          setAccountName((prev) => prev || username);
+          if (!accountNameRef.current) accountNameRef.current = username;
+        }
+        // Pick up avatar URL — sync ref too; accept any http URL, prefer non-blob
         const avatar = (msg.data.avatarUrl || "").trim();
-        if (avatar && avatar.startsWith("http")) setDetectedAvatar((prev) => prev || avatar);
+        if (avatar && avatar.startsWith("http")) {
+          setDetectedAvatar((prev) => prev || avatar);
+          if (!detectedAvatarRef.current) detectedAvatarRef.current = avatar;
+        }
       }
     } catch {}
   }, []);
@@ -270,12 +301,16 @@ export default function LoginWebViewScreen() {
     setIsSaving(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-    // Navigate WebView to www.bing.com to trigger auth redirect that sets _U
-    // (_U is often set via Set-Cookie during the redirect chain from login → bing.com,
-    //  which may not happen if user only visited rewards.bing.com)
+    // Navigate WebView to www.bing.com to:
+    // 1. Trigger auth redirect that sets the _U cookie
+    // 2. Let Bing header render so we can capture the profile avatar from it
     try {
       webViewRef.current?.injectJavaScript(`window.location.href = 'https://www.bing.com';true;`);
-      await new Promise<void>((r) => setTimeout(r, 3000));
+      // Wait for bing.com to load, then inject avatar/profile detection
+      await new Promise<void>((r) => setTimeout(r, 2500));
+      webViewRef.current?.injectJavaScript(INJECT_COOKIES_JS);
+      // Give the message handler time to receive and process the injected script result
+      await new Promise<void>((r) => setTimeout(r, 1500));
     } catch {}
 
     // Capture native cookies (including httpOnly) via CookieManager
@@ -322,9 +357,11 @@ export default function LoginWebViewScreen() {
     console.log(`[CookieCapture] _U: ${hasU ? "YES" : "MISSING"} | MUID: ${hasMUID ? "YES" : "MISSING"}`);
     console.log(`[CookieCapture] Native names: ${nativeNames}`);
 
-    let finalAvatar = detectedAvatar;
-    let finalName = accountName.trim();
-    let finalEmail = detectedEmail.trim();
+    // Use refs for avatar/email (may be updated by WebView injection during the bing.com wait above)
+    // Use accountName state directly for name — it reflects what the user typed in the name sheet
+    let finalAvatar = detectedAvatarRef.current;
+    let finalEmail = detectedEmailRef.current.trim();
+    let finalName = accountName.trim() || accountNameRef.current.trim();
 
     // Always try fetching profile info from Bing rewards dashboard API
     try {
@@ -341,20 +378,44 @@ export default function LoginWebViewScreen() {
       });
       if (resp.ok) {
         const info = await resp.json();
+        console.log(`[Profile] getuserinfo raw keys:`, Object.keys(info || {}));
+
+        // Check multiple possible response shapes
         const dashboard = info?.dashboard;
-        if (dashboard) {
-          if (!finalName && dashboard.firstName) finalName = dashboard.firstName;
-          if (!finalName && dashboard.userName) finalName = dashboard.userName;
-          if (!finalEmail && dashboard.email) finalEmail = dashboard.email;
-          if (!finalAvatar && dashboard.userProfileUrl) finalAvatar = dashboard.userProfileUrl;
-          if (!finalAvatar && dashboard.imageUrl) finalAvatar = dashboard.imageUrl;
-          console.log(`[Profile] Fetched from rewards API — name: ${dashboard.firstName || dashboard.userName}, email: ${dashboard.email}, avatar: ${finalAvatar ? "YES" : "NO"}`);
-        }
         const userStatus = info?.userStatus;
-        if (userStatus) {
-          if (!finalName && userStatus.displayName) finalName = userStatus.displayName;
-          if (!finalEmail && userStatus.email) finalEmail = userStatus.email;
+        const userInfo = info?.userInfo;
+
+        // Name — try every known field across all response shapes
+        const nameFields = [
+          dashboard?.firstName, dashboard?.userName, dashboard?.displayName,
+          userStatus?.displayName, userStatus?.firstName, userStatus?.userName,
+          userInfo?.firstName, userInfo?.displayName, userInfo?.userName,
+          info?.firstName, info?.displayName, info?.userName,
+        ];
+        for (const n of nameFields) {
+          if (!finalName && n && typeof n === "string" && n.trim()) { finalName = n.trim(); break; }
         }
+
+        // Email
+        const emailFields = [
+          dashboard?.email, userStatus?.email, userInfo?.email, info?.email,
+        ];
+        for (const e of emailFields) {
+          if (!finalEmail && e && typeof e === "string" && e.includes("@")) { finalEmail = e.trim(); break; }
+        }
+
+        // Avatar — try every known field across all response shapes
+        const avatarFields = [
+          dashboard?.userProfileUrl, dashboard?.imageUrl, dashboard?.profileImageUrl,
+          userStatus?.profileImageUrl, userStatus?.imageUrl,
+          userInfo?.profileImageUrl, userInfo?.imageUrl,
+          info?.profileImageUrl, info?.imageUrl,
+        ];
+        for (const a of avatarFields) {
+          if (!finalAvatar && a && typeof a === "string" && a.startsWith("http")) { finalAvatar = a.trim(); break; }
+        }
+
+        console.log(`[Profile] Resolved — name: "${finalName}", email: "${finalEmail}", avatar: ${finalAvatar ? "YES" : "NO"}`);
       }
     } catch (e) {
       console.log("[Profile] Rewards API fetch failed:", e);
