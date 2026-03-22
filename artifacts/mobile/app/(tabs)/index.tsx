@@ -9,6 +9,7 @@ import {
   Animated,
   Dimensions,
   FlatList,
+  Image,
   Platform,
   Pressable,
   RefreshControl,
@@ -208,13 +209,19 @@ export default function HomeScreen() {
   const ListHeader = (
     <View>
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <View>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            MS Rewards
-          </Text>
-          <Text style={[styles.headerSub, { color: colors.textSecondary }]}>
-            {accounts.length} account{accounts.length !== 1 ? "s" : ""}
-          </Text>
+        <View style={styles.headerLeft}>
+          <Image
+            source={require("@/assets/images/icon.png")}
+            style={styles.headerLogo}
+          />
+          <View>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
+              MS Rewards
+            </Text>
+            <Text style={[styles.headerSub, { color: colors.textSecondary }]}>
+              {accounts.length} account{accounts.length !== 1 ? "s" : ""}
+            </Text>
+          </View>
         </View>
         <View style={styles.headerActions}>
           <Pressable
@@ -515,6 +522,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingBottom: 16,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  headerLogo: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
   },
   headerTitle: { fontSize: 28, fontFamily: "Inter_700Bold" },
   headerSub: { fontSize: 13, fontFamily: "Inter_400Regular", marginTop: 2 },
