@@ -181,7 +181,7 @@ export default function HomeScreen() {
   const { width: screenWidth } = Dimensions.get("window");
   const gridGutter = 8;
   const gridPadding = 12;
-  const tileWidth = Math.floor((screenWidth - gridPadding * 2 - gridGutter * 2) / 3);
+  const tileWidth = Math.floor((screenWidth - gridPadding * 2 - gridGutter) / 2);
 
   const renderGridItem = useCallback(
     ({ item, index }: { item: Account; index: number }) => (
@@ -407,7 +407,7 @@ export default function HomeScreen() {
           data={accounts}
           keyExtractor={(item) => item.id}
           renderItem={renderGridItem}
-          numColumns={3}
+          numColumns={2}
           ListHeaderComponent={ListHeader}
           ListFooterComponent={ListFooter}
           ListEmptyComponent={
