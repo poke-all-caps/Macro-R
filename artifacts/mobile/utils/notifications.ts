@@ -3,16 +3,10 @@ import { Platform } from "react-native";
 
 export const PENDING_RUN_KEY = "@ms_rewards_pending_run";
 
-// expo-notifications was removed from Expo Go in SDK 53.
-// All functions here are safe to call — they no-op gracefully when the module
-// is unavailable, so the rest of the app never crashes.
-// In a dev build or production build, scheduling works fully.
-
 type NotificationsModule = typeof import("expo-notifications");
 
 function getNotifications(): NotificationsModule | null {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require("expo-notifications") as NotificationsModule;
   } catch {
     return null;
@@ -84,9 +78,9 @@ export async function scheduleOvernightNotifications(
       await Notifications.scheduleNotificationAsync({
         content: {
           title: "Macro Rewards — Overnight Run",
-          body: "Tap to start your overnight Bing searches and earn points.",
+          body: "Starting your overnight Bing searches...",
           data: { action: "start_run" },
-          sound: true,
+          sound: "default",
         },
         trigger: {
           type: "daily",
@@ -119,6 +113,62 @@ export function addNotificationResponseListener(
   } catch {
     return { remove: () => {} };
   }
+}
+
+export function addNotificationReceivedListener(
+  callback: (notification: any) => void
+): { remove: () => void } {
+  const Notifications = getNotifications();
+  if (!Notifications) return { remove: () => {} };
+  try {
+    return Notifications.addNotificationReceivedListener(callback);
+  } catch {
+    return { remove: () => {} };
+  }
+}
+
+export async function showRunningNotification(): Promise<string | null> {
+  const Notifications = getNotifications();
+  if (!Notifications) return null;
+  try {
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Macro Rewards — Searching...",
+        body: "Overnight search is running. Tap to open and stop.",
+        data: { action: "open_running" },
+        sound: false,
+        sticky: true,
+      },
+      trigger: null,
+    });
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+export async function dismissRunningNotification(id: string): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+  try {
+    await Notifications.dismissNotificationAsync(id);
+  } catch {}
+}
+
+export async function showCompletedNotification(): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Macro Rewards — Done!",
+        body: "Overnight search completed successfully.",
+        data: { action: "run_complete" },
+        sound: "default",
+      },
+      trigger: null,
+    });
+  } catch {}
 }
 
 export async function setPendingRun(): Promise<void> {

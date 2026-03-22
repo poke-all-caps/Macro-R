@@ -21,6 +21,7 @@ import { QueriesProvider } from "@/context/QueriesContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import {
   addNotificationResponseListener,
+  addNotificationReceivedListener,
   setupNotificationHandler,
   setPendingRun,
 } from "@/utils/notifications";
@@ -33,14 +34,26 @@ function NotificationHandler() {
   useEffect(() => {
     setupNotificationHandler();
 
-    const sub = addNotificationResponseListener(async (response: any) => {
+    const responseSub = addNotificationResponseListener(async (response: any) => {
       const action = response?.notification?.request?.content?.data?.action;
+      if (action === "start_run" || action === "open_running") {
+        await setPendingRun();
+        router.navigate("/(tabs)/");
+      }
+    });
+
+    const receivedSub = addNotificationReceivedListener(async (notification: any) => {
+      const action = notification?.request?.content?.data?.action;
       if (action === "start_run") {
         await setPendingRun();
         router.navigate("/(tabs)/");
       }
     });
-    return () => sub.remove();
+
+    return () => {
+      responseSub.remove();
+      receivedSub.remove();
+    };
   }, []);
 
   return null;

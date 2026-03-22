@@ -18,6 +18,11 @@ import Colors from "@/constants/colors";
 import { Account, useAccounts } from "@/context/AccountsContext";
 import { useQueries } from "@/context/QueriesContext";
 import { useSettings } from "@/context/SettingsContext";
+import {
+  showRunningNotification,
+  dismissRunningNotification,
+  showCompletedNotification,
+} from "@/utils/notifications";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -464,6 +469,8 @@ export default function SearchRunnerScreen() {
     let cancelled = false;
 
     const run = async () => {
+      const runningNotifId = await showRunningNotification();
+
       for (let ai = 0; ai < targetAccounts.length; ai++) {
         if (cancelled || abortRef.current) break;
 
@@ -616,12 +623,17 @@ export default function SearchRunnerScreen() {
         }
       }
 
+      if (runningNotifId) {
+        await dismissRunningNotification(runningNotifId);
+      }
+
       if (!cancelled) {
         setIsFinished(true);
         setPhase("done");
         setStatusLine("All accounts completed!");
         stopRun();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        await showCompletedNotification();
       }
     };
 
