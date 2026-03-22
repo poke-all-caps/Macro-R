@@ -1,18 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  AlertCircle,
-  CheckCircle,
-  CheckSquare,
-  Clock,
-  Loader,
-  Play,
-  RefreshCw,
-  Search,
-  Shield,
-  Star,
-  XCircle,
-} from "lucide-react-native";
+import { AlertCircle, CheckCircle, CheckSquare, Clock, Loader, Play, RefreshCw, Search, Shield, Star, XCircle } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
@@ -36,15 +24,7 @@ interface Props {
   showDailySet?: boolean;
 }
 
-function StatusBadge({
-  status,
-  searchesCompleted,
-  searchCount,
-}: {
-  status: AccountStatus;
-  searchesCompleted: number;
-  searchCount: number;
-}) {
+function StatusBadge({ status, searchesCompleted, searchCount }: { status: AccountStatus; searchesCompleted: number; searchCount: number }) {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -53,17 +33,9 @@ function StatusBadge({
     if (status === "running") {
       const animation = Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 0.4,
-            duration: 700,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 700,
-            useNativeDriver: true,
-          }),
-        ]),
+          Animated.timing(pulseAnim, { toValue: 0.4, duration: 700, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
+        ])
       );
       animation.start();
       return () => animation.stop();
@@ -73,30 +45,10 @@ function StatusBadge({
   }, [status]);
 
   const configs = {
-    idle: {
-      Icon: Clock,
-      color: colors.statusIdle,
-      bg: colors.surfaceSecondary,
-      label: "Idle",
-    },
-    running: {
-      Icon: RefreshCw,
-      color: colors.statusRunning,
-      bg: "#EDE9FE",
-      label: `${searchesCompleted}/${searchCount}`,
-    },
-    done: {
-      Icon: CheckCircle,
-      color: colors.statusDone,
-      bg: "#DCFCE7",
-      label: "Done",
-    },
-    failed: {
-      Icon: XCircle,
-      color: colors.statusFailed,
-      bg: "#FEE2E2",
-      label: "Failed",
-    },
+    idle: { Icon: Clock, color: colors.statusIdle, bg: colors.surfaceSecondary, label: "Idle" },
+    running: { Icon: RefreshCw, color: colors.statusRunning, bg: "#EDE9FE", label: `${searchesCompleted}/${searchCount}` },
+    done: { Icon: CheckCircle, color: colors.statusDone, bg: "#DCFCE7", label: "Done" },
+    failed: { Icon: XCircle, color: colors.statusFailed, bg: "#FEE2E2", label: "Failed" },
   };
 
   const cfg = configs[status];
@@ -105,20 +57,10 @@ function StatusBadge({
   const darkFailed = scheme === "dark" && status === "failed";
 
   return (
-    <View
-      style={[
-        styles.badge,
-        {
-          backgroundColor: darkRunning
-            ? "#4C1D95"
-            : darkDone
-              ? "#14532D"
-              : darkFailed
-                ? "#7F1D1D"
-                : cfg.bg,
-        },
-      ]}
-    >
+    <View style={[
+      styles.badge,
+      { backgroundColor: darkRunning ? "#4C1D95" : darkDone ? "#14532D" : darkFailed ? "#7F1D1D" : cfg.bg }
+    ]}>
       <Animated.View style={{ opacity: status === "running" ? pulseAnim : 1 }}>
         <cfg.Icon size={12} color={cfg.color} />
       </Animated.View>
@@ -131,38 +73,21 @@ function isSessionExpired(account: Account): boolean {
   const hasCookies = Object.keys(account.cookies ?? {}).length > 0;
   if (!hasCookies) return true;
   if (!account.lastRun) return false;
-  const hoursSinceRun =
-    (Date.now() - new Date(account.lastRun).getTime()) / (1000 * 60 * 60);
+  const hoursSinceRun = (Date.now() - new Date(account.lastRun).getTime()) / (1000 * 60 * 60);
   return hoursSinceRun > 24;
 }
 
-export function AccountCard({
-  account,
-  onPress,
-  onRun,
-  onDailySet,
-  onRefreshSession,
-  isRunningGlobal,
-  showDailySet = true,
-}: Props) {
+export function AccountCard({ account, onPress, onRun, onDailySet, onRefreshSession, isRunningGlobal, showDailySet = true }: Props) {
   const scheme = useColorScheme() ?? "light";
   const colors = Colors[scheme];
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 0.97,
-      useNativeDriver: true,
-      speed: 30,
-    }).start();
+    Animated.spring(scaleAnim, { toValue: 0.97, useNativeDriver: true, speed: 30 }).start();
   };
 
   const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 30,
-    }).start();
+    Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, speed: 30 }).start();
   };
 
   const handleRun = () => {
@@ -180,10 +105,9 @@ export function AccountCard({
     onRefreshSession();
   };
 
-  const progressPercent =
-    account.searchCount > 0
-      ? (account.searchesCompleted / account.searchCount) * 100
-      : 0;
+  const progressPercent = account.searchCount > 0
+    ? (account.searchesCompleted / account.searchCount) * 100
+    : 0;
 
   const initial = account.name.charAt(0).toUpperCase();
   const sessionExpired = isSessionExpired(account);
@@ -195,162 +119,140 @@ export function AccountCard({
         onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={[
-          styles.card,
-          { backgroundColor: colors.surface, shadowColor: colors.cardShadow },
-        ]}
+        style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.cardShadow }]}
       >
-        {/* Status badge — top right corner */}
-        <View style={styles.statusCorner}>
-          <StatusBadge
-            status={account.status}
-            searchesCompleted={account.searchesCompleted}
-            searchCount={account.searchCount}
-          />
-        </View>
-
-        {/* Main row: avatar + info */}
-        <View style={styles.centerBlock}>
+        <View style={styles.cardContent}>
           <LinearGradient colors={["#3B82F6", "#1D4ED8"]} style={styles.avatar}>
             <Text style={styles.avatarText}>{initial}</Text>
           </LinearGradient>
 
-          <View style={{ flex: 1, gap: 2 }}>
-            <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-              {account.name}
-            </Text>
+          <View style={styles.info}>
+            <View style={styles.nameRow}>
+              <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+                {account.name}
+              </Text>
+              <StatusBadge
+                status={account.status}
+                searchesCompleted={account.searchesCompleted}
+                searchCount={account.searchCount}
+              />
+            </View>
             <Text style={[styles.email, { color: colors.textSecondary }]} numberOfLines={1}>
               {account.email}
             </Text>
 
             {account.status === "running" && (
               <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    { width: `${progressPercent}%` as any, backgroundColor: colors.running },
-                  ]}
-                />
+                <View style={[styles.progressFill, { width: `${progressPercent}%` as any, backgroundColor: colors.running }]} />
               </View>
             )}
 
             <View style={styles.stats}>
               <View style={styles.statItem}>
-                <Search size={10} color={colors.textMuted} />
-                <Text style={[styles.statText, { color: colors.textSecondary }]}>
-                  {account.searchCount} searches
-                </Text>
+                <Search size={11} color={colors.textMuted} />
+                <Text style={[styles.statText, { color: colors.textSecondary }]}>{account.searchCount} searches</Text>
               </View>
               {account.todayPoints > 0 && (
                 <>
                   <View style={styles.statDot} />
                   <View style={styles.statItem}>
-                    <Star size={10} color={colors.warning} />
-                    <Text style={[styles.statText, { color: colors.textSecondary }]}>
-                      {account.todayPoints.toLocaleString()} pts
-                    </Text>
+                    <Star size={11} color={colors.warning} />
+                    <Text style={[styles.statText, { color: colors.textSecondary }]}>{account.todayPoints.toLocaleString()} pts today</Text>
                   </View>
                 </>
               )}
               {account.lastRun && (
                 <>
                   <View style={styles.statDot} />
-                  <Text style={[styles.statText, { color: colors.textMuted }]}>
-                    {formatRelativeTime(account.lastRun)}
-                  </Text>
+                  <Text style={[styles.statText, { color: colors.textMuted }]}>{formatRelativeTime(account.lastRun)}</Text>
                 </>
               )}
             </View>
+
+            {account.status !== "running" && (
+              <Pressable
+                onPress={handleSessionRefresh}
+                style={({ pressed }) => [
+                  styles.sessionBanner,
+                  {
+                    backgroundColor: noCookies
+                      ? scheme === "dark" ? "#7F1D1D22" : "#FEF2F2"
+                      : sessionExpired
+                      ? scheme === "dark" ? "#78350F22" : "#FFFBEB"
+                      : scheme === "dark" ? "#14532D22" : "#F0FDF4",
+                    borderColor: noCookies ? "#FCA5A5" : sessionExpired ? "#FCD34D" : "#86EFAC",
+                    opacity: pressed ? 0.75 : 1,
+                  },
+                ]}
+              >
+                {noCookies ? (
+                  <AlertCircle size={11} color={colors.error} />
+                ) : sessionExpired ? (
+                  <Clock size={11} color={colors.warning} />
+                ) : (
+                  <Shield size={11} color={colors.success} />
+                )}
+                <Text
+                  style={[
+                    styles.sessionText,
+                    { color: noCookies ? colors.error : sessionExpired ? "#B45309" : colors.success, flex: 1 },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {noCookies
+                    ? "No session — tap to sign in"
+                    : sessionExpired
+                    ? "Session may be expired — tap to refresh"
+                    : "Session active"}
+                </Text>
+                {(noCookies || sessionExpired) && (
+                  <RefreshCw size={11} color={noCookies ? colors.error : "#B45309"} />
+                )}
+              </Pressable>
+            )}
           </View>
-        </View>
 
-        {/* Session banner */}
-        {account.status !== "running" && (
-          <Pressable
-            onPress={handleSessionRefresh}
-            style={({ pressed }) => [
-              styles.sessionBanner,
-              {
-                backgroundColor: noCookies
-                  ? scheme === "dark" ? "#7F1D1D22" : "#FEF2F2"
-                  : sessionExpired
-                    ? scheme === "dark" ? "#78350F22" : "#FFFBEB"
-                    : scheme === "dark" ? "#14532D22" : "#F0FDF4",
-                borderColor: noCookies ? "#FCA5A5" : sessionExpired ? "#FCD34D" : "#86EFAC",
-                opacity: pressed ? 0.75 : 1,
-              },
-            ]}
-          >
-            {noCookies ? (
-              <AlertCircle size={11} color={colors.error} />
-            ) : sessionExpired ? (
-              <Clock size={11} color={colors.warning} />
-            ) : (
-              <Shield size={11} color={colors.success} />
-            )}
-            <Text
-              style={[
-                styles.sessionText,
-                {
-                  color: noCookies ? colors.error : sessionExpired ? "#B45309" : colors.success,
-                  flex: 1,
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {noCookies
-                ? "No session — tap to sign in"
-                : sessionExpired
-                  ? "Session expired — tap to refresh"
-                  : "Session active"}
-            </Text>
-            {(noCookies || sessionExpired) && (
-              <RefreshCw size={11} color={noCookies ? colors.error : "#B45309"} />
-            )}
-          </Pressable>
-        )}
-
-        {/* Action buttons — bottom */}
-        <View style={styles.actionRow}>
-          <Pressable
-            onPress={handleRun}
-            disabled={account.status === "running" || isRunningGlobal}
-            style={({ pressed }) => [
-              styles.runBtn,
-              {
-                backgroundColor:
-                  account.status === "running"
-                    ? colors.border
-                    : pressed ? colors.tintDark : colors.tint,
-                opacity: account.status === "running" || isRunningGlobal ? 0.5 : 1,
-              },
-            ]}
-          >
-            {account.status === "running" ? (
-              <Loader size={13} color="#fff" />
-            ) : (
-              <Play size={13} color="#fff" />
-            )}
-          </Pressable>
-
-          {showDailySet && (
+          <View style={styles.actionCol}>
             <Pressable
-              onPress={handleDailySet}
+              onPress={handleRun}
               disabled={account.status === "running" || isRunningGlobal}
               style={({ pressed }) => [
-                styles.dsBtn,
+                styles.runBtn,
                 {
                   backgroundColor:
-                    account.status === "running" || isRunningGlobal
-                      ? colors.border
-                      : pressed ? "#5B21B6" : "#7C3AED",
-                  opacity: account.status === "running" || isRunningGlobal ? 0.4 : 1,
+                    account.status === "running" ? colors.border : pressed ? colors.tintDark : colors.tint,
+                  opacity: account.status === "running" || isRunningGlobal ? 0.5 : 1,
                 },
               ]}
             >
-              <CheckSquare size={13} color="#fff" />
+              {account.status === "running" ? (
+                <Loader size={14} color="#fff" />
+              ) : (
+                <Play size={14} color="#fff" />
+              )}
             </Pressable>
-          )}
+
+            {showDailySet && (
+              <Pressable
+                onPress={handleDailySet}
+                disabled={account.status === "running" || isRunningGlobal}
+                style={({ pressed }) => [
+                  styles.dsBtn,
+                  {
+                    backgroundColor:
+                      account.status === "running" || isRunningGlobal
+                        ? colors.border
+                        : pressed
+                        ? "#5B21B6"
+                        : "#7C3AED",
+                    opacity: account.status === "running" || isRunningGlobal ? 0.4 : 1,
+                  },
+                ]}
+              >
+                <CheckSquare size={13} color="#fff" />
+              </Pressable>
+            )}
+          </View>
         </View>
       </Pressable>
     </Animated.View>
@@ -371,52 +273,55 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 16,
     marginHorizontal: 16,
-    marginVertical: 4,
+    marginVertical: 6,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 8,
     elevation: 3,
-    overflow: "hidden",
   },
-  statusCorner: {
-    position: "absolute",
-    top: 8,
-    right: 10,
-    zIndex: 1,
-  },
-  centerBlock: {
+  cardContent: {
     flexDirection: "row",
-    alignItems: "center",
-    padding: 10,
-    paddingRight: 80,
-    gap: 10,
+    alignItems: "flex-start",
+    padding: 16,
+    gap: 12,
   },
   avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
+    marginTop: 2,
   },
   avatarText: {
     color: "#fff",
-    fontSize: 15,
+    fontSize: 18,
     fontFamily: "Inter_700Bold",
   },
+  info: {
+    flex: 1,
+    gap: 4,
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   name: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: "Inter_600SemiBold",
+    flex: 1,
   },
   email: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: "Inter_400Regular",
   },
   stats: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    marginTop: 1,
+    gap: 6,
+    marginTop: 2,
     flexWrap: "wrap",
   },
   statItem: {
@@ -447,45 +352,47 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
   progressBar: {
-    height: 2,
-    borderRadius: 1,
+    height: 3,
+    borderRadius: 2,
     overflow: "hidden",
     marginTop: 2,
   },
   progressFill: {
     height: "100%",
-    borderRadius: 1,
+    borderRadius: 2,
   },
   sessionBanner: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    gap: 6,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderBottomWidth: 1,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginTop: 6,
   },
   sessionText: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: "Inter_500Medium",
   },
-  actionRow: {
-    flexDirection: "row",
+  actionCol: {
+    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 6,
+    gap: 6,
+    flexShrink: 0,
+    marginTop: 2,
   },
-  runBtn: {
+  dsBtn: {
     width: 30,
     height: 30,
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
   },
-  dsBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+  runBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
   },
