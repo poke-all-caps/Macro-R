@@ -327,9 +327,9 @@ export function AccountCard({
             ]}
           >
             {account.status === "running" ? (
-              <Loader size={16} color="#fff" />
+              <Loader size={13} color="#fff" />
             ) : (
-              <Play size={16} color="#fff" />
+              <Play size={13} color="#fff" />
             )}
           </Pressable>
 
@@ -348,7 +348,7 @@ export function AccountCard({
                 },
               ]}
             >
-              <CheckSquare size={16} color="#fff" />
+              <CheckSquare size={13} color="#fff" />
             </Pressable>
           )}
         </View>
@@ -472,20 +472,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
-    paddingVertical: 8,
+    gap: 8,
+    paddingVertical: 6,
   },
   runBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
   },
   dsBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
