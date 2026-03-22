@@ -150,12 +150,31 @@ async function fetchRewardsPoints(
     const json = await resp.json();
     const status = json?.dashboard?.userStatus ?? json?.userStatus;
     const available = status?.availablePoints ?? 0;
-    const today = status?.counters?.pcSearch?.[0]?.pointProgress ?? 0;
-    const mobileProgress = status?.counters?.mobileSearch?.[0]?.pointProgress ?? 0;
-    const edgeProgress = status?.counters?.edgeSearch?.[0]?.pointProgress ?? 0;
-    const dailyProgress = status?.counters?.dailyPoint?.pointProgress ?? 0;
-    const totalToday = today + mobileProgress + edgeProgress + dailyProgress;
-    return { available, today: totalToday > 0 ? totalToday : 0 };
+
+    // Each counter has { pointProgress, pointProgressMax }.
+    // pointProgress = points earned today; pointProgressMax = daily cap.
+    // Clamp to pointProgressMax to guard against API returning lifetime values.
+    function dailyProgress(counter: any): number {
+      if (!counter) return 0;
+      const entry = Array.isArray(counter) ? counter[0] : counter;
+      if (!entry) return 0;
+      const progress = Math.max(0, Math.floor(Number(entry.pointProgress) || 0));
+      const max = Math.max(0, Math.floor(Number(entry.pointProgressMax) || 0));
+      // If max is set, clamp progress to it (prevents lifetime values leaking through)
+      if (max > 0 && progress > max) return max;
+      return progress;
+    }
+
+    const counters = status?.counters;
+    const pcToday = dailyProgress(counters?.pcSearch);
+    const mobileToday = dailyProgress(counters?.mobileSearch);
+    const edgeToday = dailyProgress(counters?.edgeSearch);
+    const dailyPt = dailyProgress(counters?.dailyPoint);
+    const totalToday = pcToday + mobileToday + edgeToday + dailyPt;
+
+    console.log(`[Points] available=${available} pcToday=${pcToday} mobile=${mobileToday} edge=${edgeToday} daily=${dailyPt} => today=${totalToday}`);
+
+    return { available, today: totalToday };
   } catch {
     return { available: 0, today: 0 };
   }
@@ -599,7 +618,12 @@ export default function SearchRunnerScreen() {
         setStatusLine(`[${account.name}]  Fetching points…`);
         const { available, today } = await fetchRewardsPoints(acctCookies);
         const prevTotalPoints = account.totalPoints ?? 0;
-        const pointsEarned = available > prevTotalPoints ? available - prevTotalPoints : 0;
+        // If we have a valid baseline (account has been run before), calculate delta.
+        // Otherwise use today's API-reported daily earnings to avoid showing the entire balance.
+        const hasBaseline = !!account.lastRun;
+        const pointsEarned = hasBaseline
+          ? (available > prevTotalPoints ? available - prevTotalPoints : 0)
+          : today;
 
         const finalStatus = networkLost && searchesDone === 0 ? "failed" : "success";
 
