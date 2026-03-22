@@ -49,24 +49,38 @@ const INJECT_COOKIES_JS = `
     };
     // Detect account name
     var nameSelectors = [
+      '#mectrl_currentAccount_name', '.mectrl_accountinfo_name', '.mectrl_name',
       '[data-testid="user-name"]', '.id_accountName',
-      '#mHamburgerFlyout .id_accountName', '.ms-Icon--Contact',
-      '.mectrl_accountinfo_name', '.mectrl_name',
-      '#mectrl_currentAccount_name',
+      '#mHamburgerFlyout .id_accountName',
+      '#id_n', '.profile-name', '.display-name',
+      '#meControl [aria-label]', '.mectrl_header_text',
+      '#id_b', '.b_topbarAccount .id_accountName',
     ];
     for (var ns = 0; ns < nameSelectors.length; ns++) {
       var el = document.querySelector(nameSelectors[ns]);
-      if (el && el.innerText) { data.username = el.innerText.trim(); break; }
+      if (el && el.innerText && el.innerText.trim().length > 1) { data.username = el.innerText.trim(); break; }
     }
     // Detect email
     var emailSelectors = [
+      '#mectrl_currentAccount_subtitle', '.mectrl_accountinfo_email',
       '.id_email', '[data-testid="user-email"]',
-      '.account-header-email', '#mectrl_currentAccount_subtitle',
-      '.mectrl_accountinfo_email',
+      '.account-header-email', '#id_e',
+      '.profile-email', '.b_topbarAccount .id_email',
     ];
     for (var es = 0; es < emailSelectors.length; es++) {
       var ee = document.querySelector(emailSelectors[es]);
-      if (ee && ee.innerText) { data.email = ee.innerText.trim(); break; }
+      if (ee && ee.innerText && ee.innerText.indexOf('@') !== -1) { data.email = ee.innerText.trim(); break; }
+    }
+    // Also try to find email in any visible text on the page
+    if (!data.email) {
+      var allSpans = document.querySelectorAll('span, div, p, a');
+      for (var si = 0; si < allSpans.length; si++) {
+        var txt = (allSpans[si].innerText || '').trim();
+        if (txt.indexOf('@') !== -1 && txt.indexOf('.') !== -1 && txt.length < 60 && !txt.match(/\\s/)) {
+          data.email = txt;
+          break;
+        }
+      }
     }
     // Detect profile picture
     var avatarSelectors = [
@@ -208,11 +222,14 @@ export default function LoginWebViewScreen() {
           webViewRef.current?.injectJavaScript(`
             (function() {
               try {
-                var trigger = document.querySelector('#mectrl_main_trigger') || document.querySelector('.mectrl_trigger');
+                var trigger = document.querySelector('#mectrl_main_trigger') || document.querySelector('.mectrl_trigger') || document.querySelector('#id_l');
                 if (trigger) trigger.click();
                 setTimeout(function() {
                   ${INJECT_COOKIES_JS}
                 }, 1500);
+                setTimeout(function() {
+                  ${INJECT_COOKIES_JS}
+                }, 3000);
               } catch(e) {}
             })();
             true;
@@ -309,33 +326,63 @@ export default function LoginWebViewScreen() {
     let finalName = accountName.trim();
     let finalEmail = detectedEmail.trim();
 
-    // Try fetching profile info from Bing rewards dashboard API
-    if (!finalAvatar || !finalEmail || !finalName) {
+    // Always try fetching profile info from Bing rewards dashboard API
+    try {
+      const cookieStr = Object.entries(allCookies)
+        .filter(([k]) => !k.startsWith("_ls_"))
+        .map(([k, v]) => `${k}=${v}`)
+        .join("; ");
+      const resp = await fetch("https://rewards.bing.com/api/getuserinfo?type=1", {
+        credentials: "omit",
+        headers: {
+          Cookie: cookieStr,
+          "User-Agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36",
+        },
+      });
+      if (resp.ok) {
+        const info = await resp.json();
+        const dashboard = info?.dashboard;
+        if (dashboard) {
+          if (!finalName && dashboard.firstName) finalName = dashboard.firstName;
+          if (!finalName && dashboard.userName) finalName = dashboard.userName;
+          if (!finalEmail && dashboard.email) finalEmail = dashboard.email;
+          if (!finalAvatar && dashboard.userProfileUrl) finalAvatar = dashboard.userProfileUrl;
+          if (!finalAvatar && dashboard.imageUrl) finalAvatar = dashboard.imageUrl;
+          console.log(`[Profile] Fetched from rewards API — name: ${dashboard.firstName || dashboard.userName}, email: ${dashboard.email}, avatar: ${finalAvatar ? "YES" : "NO"}`);
+        }
+        const userStatus = info?.userStatus;
+        if (userStatus) {
+          if (!finalName && userStatus.displayName) finalName = userStatus.displayName;
+          if (!finalEmail && userStatus.email) finalEmail = userStatus.email;
+        }
+      }
+    } catch (e) {
+      console.log("[Profile] Rewards API fetch failed:", e);
+    }
+
+    // Second attempt: try the profile endpoint
+    if (!finalName || !finalEmail) {
       try {
         const cookieStr = Object.entries(allCookies)
           .filter(([k]) => !k.startsWith("_ls_"))
           .map(([k, v]) => `${k}=${v}`)
           .join("; ");
-        const resp = await fetch("https://rewards.bing.com/api/getuserinfo?type=1", {
+        const resp2 = await fetch("https://rewards.bing.com/api/getprofile", {
           credentials: "omit",
           headers: {
             Cookie: cookieStr,
             "User-Agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36",
           },
         });
-        if (resp.ok) {
-          const info = await resp.json();
-          const dashboard = info?.dashboard;
-          if (dashboard) {
-            if (!finalName && dashboard.firstName) finalName = dashboard.firstName;
-            if (!finalEmail && dashboard.email) finalEmail = dashboard.email;
-            if (!finalAvatar && dashboard.userProfileUrl) finalAvatar = dashboard.userProfileUrl;
-            if (!finalAvatar && dashboard.imageUrl) finalAvatar = dashboard.imageUrl;
-            console.log(`[Profile] Fetched from rewards API — name: ${dashboard.firstName}, email: ${dashboard.email}, avatar: ${finalAvatar ? "YES" : "NO"}`);
-          }
+        if (resp2.ok) {
+          const profile = await resp2.json();
+          if (!finalName && profile?.firstName) finalName = profile.firstName;
+          if (!finalName && profile?.displayName) finalName = profile.displayName;
+          if (!finalEmail && profile?.email) finalEmail = profile.email;
+          console.log(`[Profile] Fetched from profile API — name: ${profile?.firstName || profile?.displayName}, email: ${profile?.email}`);
         }
-      } catch (e) {
-        console.log("[Profile] Rewards API fetch failed:", e);
+      } catch (e2) {
+        console.log("[Profile] Profile API fetch failed:", e2);
       }
     }
 
