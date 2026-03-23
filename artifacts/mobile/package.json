@@ -56,7 +56,9 @@
   },
   "dependencies": {
     "@react-native-cookies/cookies": "^6.2.1",
+    "expo-application": "~7.0.8",
     "expo-clipboard": "~8.0.8",
+    "expo-crypto": "~15.0.8",
     "expo-notifications": "^0.32.16",
     "expo-task-manager": "~14.0.9",
     "lucide-react-native": "^0.577.0",

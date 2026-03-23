@@ -1,5 +1,5 @@
 import * as Haptics from "expo-haptics";
-import { Copy, Key, LogOut, Minus, Plus, Power, PowerOff, RefreshCw, Shield, Trash2 } from "lucide-react-native";
+import { Copy, Key, LogOut, Minus, Plus, Power, PowerOff, RefreshCw, Shield, Smartphone, Trash2 } from "lucide-react-native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -27,6 +27,7 @@ interface LicenseKey {
   label: string | null;
   maxAccounts: number;
   isActive: boolean;
+  boundDeviceId: string | null;
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
@@ -142,6 +143,13 @@ export function AdminPanel() {
         })();
   };
 
+  const resetDevice = async (item: LicenseKey) => {
+    if (!item.boundDeviceId) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await apiCall("PUT", `/admin/keys/${item.id}/reset-device`);
+    await loadKeys();
+  };
+
   const toggleKey = async (item: LicenseKey) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await apiCall("PUT", `/admin/keys/${item.id}`, { isActive: !item.isActive });
@@ -197,6 +205,12 @@ export function AdminPanel() {
           <Text style={[styles.metaText, { color: colors.textSecondary }]}>
             Exp: {new Date(item.expiresAt).toLocaleDateString()}
           </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <Smartphone size={11} color={item.boundDeviceId ? "#f59e0b" : "#64748b"} />
+            <Text style={[styles.metaText, { color: item.boundDeviceId ? "#f59e0b" : "#64748b" }]}>
+              {item.boundDeviceId ? "Bound" : "Unbound"}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.actionRow}>
@@ -208,6 +222,13 @@ export function AdminPanel() {
           <Pressable onPress={() => editLimit(item)} style={[styles.actionBtn, { backgroundColor: colors.surfaceSecondary }]}>
             <Text style={[styles.actionText, { color: colors.text }]}>Edit Limit</Text>
           </Pressable>
+
+          {item.boundDeviceId && (
+            <Pressable onPress={() => resetDevice(item)} style={[styles.actionBtn, { backgroundColor: "#f59e0b22" }]}>
+              <Smartphone size={14} color="#f59e0b" />
+              <Text style={[styles.actionText, { color: "#f59e0b" }]}>Reset</Text>
+            </Pressable>
+          )}
 
           <Pressable onPress={() => toggleKey(item)} style={[styles.actionBtn, { backgroundColor: item.isActive ? "#dc262622" : "#16a34a22" }]}>
             {item.isActive ? <PowerOff size={14} color="#f87171" /> : <Power size={14} color="#4ade80" />}

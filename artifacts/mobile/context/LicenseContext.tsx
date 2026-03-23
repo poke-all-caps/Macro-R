@@ -1,10 +1,28 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import * as Application from "expo-application";
+import { Platform } from "react-native";
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
+import * as Crypto from "expo-crypto";
 
 const LICENSE_KEY_STORAGE = "@ms_rewards_license_key";
 const LICENSE_DATA_STORAGE = "@ms_rewards_license_data";
 const ADMIN_SECRET_STORAGE = "@ms_rewards_admin_secret";
+const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "";
+
+async function getDeviceId(): Promise<string> {
+  const stored = await AsyncStorage.getItem(DEVICE_ID_STORAGE);
+  if (stored) return stored;
+
+  let id: string;
+  if (Platform.OS === "android") {
+    id = Application.getAndroidId() || Crypto.randomUUID();
+  } else {
+    id = Crypto.randomUUID();
+  }
+  await AsyncStorage.setItem(DEVICE_ID_STORAGE, id);
+  return id;
+}
 
 interface LicenseData {
   key: string;
@@ -48,10 +66,11 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
 
   const validateKey = useCallback(async (key: string): Promise<{ valid: boolean; error?: string; maxAccounts?: number; expiresAt?: string; label?: string; offline?: boolean }> => {
     try {
+      const deviceId = await getDeviceId();
       const resp = await fetch(`${API_BASE}/validate-key`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key }),
+        body: JSON.stringify({ key, deviceId }),
       });
       return await resp.json();
     } catch {

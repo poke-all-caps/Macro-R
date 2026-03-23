@@ -100,9 +100,25 @@ router.post("/validate-admin", async (req, res) => {
   res.json({ valid: true, isAdmin: true });
 });
 
+router.put("/admin/keys/:id/reset-device", requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await db.update(licenseKeysTable)
+      .set({ boundDeviceId: null, updatedAt: new Date() })
+      .where(eq(licenseKeysTable.id, id))
+      .returning();
+    if (!updated) {
+      return res.status(404).json({ error: "Key not found" });
+    }
+    res.json({ key: updated });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.post("/validate-key", async (req, res) => {
   try {
-    const { key } = req.body;
+    const { key, deviceId } = req.body;
     if (!key) {
       return res.status(400).json({ valid: false, error: "Key is required" });
     }
@@ -120,6 +136,18 @@ router.post("/validate-key", async (req, res) => {
 
     if (new Date(found.expiresAt) < new Date()) {
       return res.json({ valid: false, error: "Key has expired" });
+    }
+
+    if (deviceId) {
+      if (found.boundDeviceId && found.boundDeviceId !== deviceId) {
+        return res.json({ valid: false, error: "Key is already in use on another device" });
+      }
+
+      if (!found.boundDeviceId) {
+        await db.update(licenseKeysTable)
+          .set({ boundDeviceId: deviceId, updatedAt: new Date() })
+          .where(eq(licenseKeysTable.id, found.id));
+      }
     }
 
     res.json({

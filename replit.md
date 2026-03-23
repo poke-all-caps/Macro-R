@@ -111,7 +111,8 @@ SafeAreaProvider
   - Falls back to cached data when offline (if license hasn't expired)
   - Stores: `key`, `maxAccounts`, `expiresAt`, `label`, `validatedAt`
   - AsyncStorage keys: `@ms_rewards_license_key`, `@ms_rewards_license_data`, `@ms_rewards_admin_secret`
-- **AdminPanel** (`components/AdminPanel.tsx`): Full native admin panel shown when admin secret is entered. Allows creating keys, extending expiry, editing account limits, activating/deactivating, deleting, and copying keys to clipboard. Sign out button returns to license entry screen.
+- **AdminPanel** (`components/AdminPanel.tsx`): Full native admin panel shown when admin secret is entered. Allows creating keys, extending expiry, editing account limits, activating/deactivating, deleting, copying keys to clipboard, and resetting device bindings. Sign out button returns to license entry screen.
+- **Device Locking**: Each key is bound to 1 device only. The first device to activate a key gets bound; other devices are rejected with "Key is already in use on another device". Admin can reset device binding from the admin panel. Device ID is Android ID on Android, or a persistent UUID stored in AsyncStorage. Schema column: `bound_device_id` on `license_keys` table.
 - **Account Limit Enforcement**: Enforced in **3 places**:
   1. Home screen "+" button (`app/(tabs)/index.tsx`) — shows alert
   2. Manual add form (`app/add-account.tsx`) — shows validation error
