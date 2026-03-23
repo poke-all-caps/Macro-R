@@ -29,8 +29,8 @@ import {
 import { registerBackgroundSearchTask, isBackgroundRunning } from "@/utils/backgroundSearch";
 
 SplashScreen.preventAutoHideAsync();
-registerBackgroundNotificationTask();
-registerBackgroundSearchTask();
+try { registerBackgroundNotificationTask(); } catch (e) { console.log("[Layout] Failed to register bg notification task:", e); }
+try { registerBackgroundSearchTask(); } catch (e) { console.log("[Layout] Failed to register bg search task:", e); }
 
 const queryClient = new QueryClient();
 
