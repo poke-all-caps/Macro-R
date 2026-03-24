@@ -138,43 +138,60 @@ export function AdminPanel() {
     await loadKeys();
   };
 
-  const editLimit = (item: LicenseKey) => {
-    Alert.prompt
-      ? Alert.prompt("Edit Account Limit", `Current: ${item.maxAccounts}`, async (val) => {
-          const n = parseInt(val);
-          if (isNaN(n) || n < 1) return;
+  const editLimit = async (item: LicenseKey) => {
+    if (Platform.OS === "web") {
+      const val = prompt(`Set account limit (current: ${item.maxAccounts}):`, String(item.maxAccounts));
+      if (val === null) return;
+      const n = parseInt(val);
+      if (isNaN(n) || n < 1) return;
+      await apiCall("PUT", `/admin/keys/${item.id}`, { maxAccounts: n });
+      await loadKeys();
+    } else if (Alert.prompt) {
+      Alert.prompt("Edit Account Limit", `Current: ${item.maxAccounts}`, async (val) => {
+        const n = parseInt(val);
+        if (isNaN(n) || n < 1) return;
+        await apiCall("PUT", `/admin/keys/${item.id}`, { maxAccounts: n });
+        await loadKeys();
+      }, "plain-text", String(item.maxAccounts));
+    } else {
+      const buttons = [1, 2, 3, 5, 10, 20, 50].map((n) => ({
+        text: `${n} account${n > 1 ? "s" : ""}`,
+        onPress: async () => {
           await apiCall("PUT", `/admin/keys/${item.id}`, { maxAccounts: n });
           await loadKeys();
-        }, "plain-text", String(item.maxAccounts))
-      : (() => {
-          const buttons = [1, 2, 3, 5, 10, 20, 50].map((n) => ({
-            text: `${n} account${n > 1 ? "s" : ""}`,
-            onPress: async () => {
-              await apiCall("PUT", `/admin/keys/${item.id}`, { maxAccounts: n });
-              await loadKeys();
-            },
-          }));
-          Alert.alert("Set Account Limit", `Current: ${item.maxAccounts}`, [
-            ...buttons,
-            { text: "Cancel", style: "cancel" },
-          ]);
-        })();
+        },
+      }));
+      Alert.alert("Set Account Limit", `Current: ${item.maxAccounts}`, [
+        ...buttons,
+        { text: "Cancel", style: "cancel" },
+      ]);
+    }
   };
 
-  const changeKeyType = (item: LicenseKey) => {
-    const buttons = KEY_TYPES.map((t) => ({
-      text: t.charAt(0).toUpperCase() + t.slice(1),
-      onPress: async () => {
-        if (t === item.keyType) return;
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        await apiCall("PUT", `/admin/keys/${item.id}`, { keyType: t });
-        await loadKeys();
-      },
-    }));
-    Alert.alert("Change Key Type", `Current: ${item.keyType}`, [
-      ...buttons,
-      { text: "Cancel", style: "cancel" },
-    ]);
+  const changeKeyType = async (item: LicenseKey) => {
+    if (Platform.OS === "web") {
+      const types = KEY_TYPES.map((t, i) => `${i + 1}. ${t.charAt(0).toUpperCase() + t.slice(1)}`).join("\n");
+      const val = prompt(`Change key type (current: ${item.keyType}):\n${types}\nEnter number:`, String(KEY_TYPES.indexOf(item.keyType) + 1));
+      if (val === null) return;
+      const idx = parseInt(val) - 1;
+      if (idx < 0 || idx >= KEY_TYPES.length || KEY_TYPES[idx] === item.keyType) return;
+      await apiCall("PUT", `/admin/keys/${item.id}`, { keyType: KEY_TYPES[idx] });
+      await loadKeys();
+    } else {
+      const buttons = KEY_TYPES.map((t) => ({
+        text: t.charAt(0).toUpperCase() + t.slice(1),
+        onPress: async () => {
+          if (t === item.keyType) return;
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          await apiCall("PUT", `/admin/keys/${item.id}`, { keyType: t });
+          await loadKeys();
+        },
+      }));
+      Alert.alert("Change Key Type", `Current: ${item.keyType}`, [
+        ...buttons,
+        { text: "Cancel", style: "cancel" },
+      ]);
+    }
   };
 
   const resetDevice = async (item: LicenseKey) => {
@@ -190,19 +207,25 @@ export function AdminPanel() {
     await loadKeys();
   };
 
-  const deleteKey = (item: LicenseKey) => {
-    Alert.alert("Delete Key", `Delete ${item.key} permanently?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          await apiCall("DELETE", `/admin/keys/${item.id}`);
-          await loadKeys();
+  const deleteKey = async (item: LicenseKey) => {
+    if (Platform.OS === "web") {
+      if (!confirm(`Delete ${item.key} permanently?`)) return;
+      await apiCall("DELETE", `/admin/keys/${item.id}`);
+      await loadKeys();
+    } else {
+      Alert.alert("Delete Key", `Delete ${item.key} permanently?`, [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            await apiCall("DELETE", `/admin/keys/${item.id}`);
+            await loadKeys();
+          },
         },
-      },
-    ]);
+      ]);
+    }
   };
 
   const copyKey = (key: string) => {
