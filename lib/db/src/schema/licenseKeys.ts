@@ -6,6 +6,7 @@ export const licenseKeysTable = pgTable("license_keys", {
   id: uuid("id").defaultRandom().primaryKey(),
   key: text("key").notNull().unique(),
   label: text("label"),
+  keyType: text("key_type").notNull().default("basic"),
   maxAccounts: integer("max_accounts").notNull().default(3),
   isActive: boolean("is_active").notNull().default(true),
   boundDeviceId: text("bound_device_id"),

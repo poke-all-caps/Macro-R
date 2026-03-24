@@ -41,11 +41,13 @@ router.get("/admin/keys", requireAdmin, async (_req, res) => {
 
 router.post("/admin/keys", requireAdmin, async (req, res) => {
   try {
-    const { label, maxAccounts, expiresAt } = req.body;
+    const { label, maxAccounts, expiresAt, keyType } = req.body;
+    const validTypes = ["basic", "premium", "unlimited", "admin"];
     const key = generateKey();
     const [created] = await db.insert(licenseKeysTable).values({
       key,
       label: label || null,
+      keyType: validTypes.includes(keyType) ? keyType : "basic",
       maxAccounts: maxAccounts ?? 3,
       expiresAt: new Date(expiresAt),
     }).returning();
@@ -58,13 +60,15 @@ router.post("/admin/keys", requireAdmin, async (req, res) => {
 router.put("/admin/keys/:id", requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { label, maxAccounts, expiresAt, isActive } = req.body;
+    const { label, maxAccounts, expiresAt, isActive, keyType } = req.body;
+    const validTypes = ["basic", "premium", "unlimited", "admin"];
 
     const updates: any = { updatedAt: new Date() };
     if (label !== undefined) updates.label = label;
     if (maxAccounts !== undefined) updates.maxAccounts = maxAccounts;
     if (expiresAt !== undefined) updates.expiresAt = new Date(expiresAt);
     if (isActive !== undefined) updates.isActive = isActive;
+    if (keyType !== undefined && validTypes.includes(keyType)) updates.keyType = keyType;
 
     const [updated] = await db.update(licenseKeysTable)
       .set(updates)
@@ -162,6 +166,7 @@ router.post("/validate-key", async (req, res) => {
       maxAccounts: found.maxAccounts,
       expiresAt: found.expiresAt,
       label: found.label,
+      keyType: found.keyType,
     });
   } catch (e: any) {
     res.status(500).json({ valid: false, error: e.message });

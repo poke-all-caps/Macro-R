@@ -23,10 +23,21 @@ import { useLicense } from "@/context/LicenseContext";
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "";
 const OWNER_ADMIN_SECRET = process.env.EXPO_PUBLIC_ADMIN_SECRET || "";
 
+const KEY_TYPES = ["basic", "premium", "unlimited", "admin"] as const;
+type KeyType = typeof KEY_TYPES[number];
+
+const KEY_TYPE_COLORS: Record<KeyType, { color: string; bg: string }> = {
+  basic: { color: "#94a3b8", bg: "#64748b22" },
+  premium: { color: "#a78bfa", bg: "#7c3aed22" },
+  unlimited: { color: "#fbbf24", bg: "#d9770622" },
+  admin: { color: "#f87171", bg: "#dc262622" },
+};
+
 interface LicenseKey {
   id: string;
   key: string;
   label: string | null;
+  keyType: KeyType;
   maxAccounts: number;
   isActive: boolean;
   boundDeviceId: string | null;
@@ -47,6 +58,7 @@ export function AdminPanel() {
   const [newLabel, setNewLabel] = useState("");
   const [newMaxAccounts, setNewMaxAccounts] = useState("3");
   const [newExpDays, setNewExpDays] = useState("30");
+  const [newKeyType, setNewKeyType] = useState<KeyType>("basic");
 
   const effectiveSecret = isOwnerMode ? OWNER_ADMIN_SECRET : (adminSecret || "");
 
@@ -93,11 +105,13 @@ export function AdminPanel() {
         label: newLabel.trim() || null,
         maxAccounts,
         expiresAt,
+        keyType: newKeyType,
       });
       if (result.key) {
         setNewLabel("");
         setNewMaxAccounts("3");
         setNewExpDays("30");
+        setNewKeyType("basic");
         await loadKeys();
         Alert.alert("Key Created", result.key.key, [
           {
@@ -147,6 +161,22 @@ export function AdminPanel() {
         })();
   };
 
+  const changeKeyType = (item: LicenseKey) => {
+    const buttons = KEY_TYPES.map((t) => ({
+      text: t.charAt(0).toUpperCase() + t.slice(1),
+      onPress: async () => {
+        if (t === item.keyType) return;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        await apiCall("PUT", `/admin/keys/${item.id}`, { keyType: t });
+        await loadKeys();
+      },
+    }));
+    Alert.alert("Change Key Type", `Current: ${item.keyType}`, [
+      ...buttons,
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
   const resetDevice = async (item: LicenseKey) => {
     if (!item.boundDeviceId) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -189,6 +219,7 @@ export function AdminPanel() {
 
   const renderKey = ({ item }: { item: LicenseKey }) => {
     const status = getStatus(item);
+    const typeColor = KEY_TYPE_COLORS[item.keyType] || KEY_TYPE_COLORS.basic;
     return (
       <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border, opacity: !item.isActive ? 0.5 : 1 }]}>
         <View style={styles.keyHeader}>
@@ -196,8 +227,13 @@ export function AdminPanel() {
             <Text style={[styles.keyText, { color: "#3b82f6" }]}>{item.key}</Text>
             <Copy size={14} color={colors.textSecondary} />
           </Pressable>
-          <View style={[styles.badge, { backgroundColor: status.bg }]}>
-            <Text style={[styles.badgeText, { color: status.color }]}>{status.label}</Text>
+          <View style={{ flexDirection: "row", gap: 6 }}>
+            <Pressable onPress={() => changeKeyType(item)} style={[styles.badge, { backgroundColor: typeColor.bg }]}>
+              <Text style={[styles.badgeText, { color: typeColor.color }]}>{item.keyType.toUpperCase()}</Text>
+            </Pressable>
+            <View style={[styles.badge, { backgroundColor: status.bg }]}>
+              <Text style={[styles.badgeText, { color: status.color }]}>{status.label}</Text>
+            </View>
           </View>
         </View>
 
@@ -330,6 +366,32 @@ export function AdminPanel() {
             />
           </View>
         </View>
+        <View style={{ marginBottom: 12 }}>
+          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Key Type</Text>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {KEY_TYPES.map((t) => {
+              const tc = KEY_TYPE_COLORS[t];
+              const selected = newKeyType === t;
+              return (
+                <Pressable
+                  key={t}
+                  onPress={() => setNewKeyType(t)}
+                  style={[
+                    styles.typeChip,
+                    {
+                      backgroundColor: selected ? tc.bg : colors.background,
+                      borderColor: selected ? tc.color : colors.border,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.typeChipText, { color: selected ? tc.color : colors.textSecondary }]}>
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
         <Pressable
           onPress={createKey}
           disabled={creating}
@@ -437,4 +499,11 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
   emptyText: { fontSize: 15, fontFamily: "Inter_400Regular" },
+  typeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  typeChipText: { fontSize: 12, fontFamily: "Inter_600SemiBold" },
 });

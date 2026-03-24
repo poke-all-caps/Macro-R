@@ -110,7 +110,7 @@ SafeAreaProvider
   - If regular license key is entered → `isAdmin=false`, shows regular app
   - Caches validated license data in AsyncStorage for **24 hours**
   - Falls back to cached data when offline (if license hasn't expired)
-  - Stores: `key`, `maxAccounts`, `expiresAt`, `label`, `validatedAt`
+  - Stores: `key`, `maxAccounts`, `expiresAt`, `label`, `keyType`, `validatedAt`
   - AsyncStorage keys: `@ms_rewards_license_key`, `@ms_rewards_license_data`, `@ms_rewards_admin_secret`
 - **AdminPanel** (`components/AdminPanel.tsx`): Full native admin panel shown when admin secret is entered. Allows creating keys, extending expiry, editing account limits, activating/deactivating, deleting, copying keys to clipboard, and resetting device bindings. Sign out button returns to license entry screen.
 - **Device Locking**: Each key is bound to 1 device only. The first device to activate a key gets bound; other devices are rejected with "Key is already in use on another device". Admin can reset device binding from the admin panel. Device ID is Android ID on Android, or a persistent UUID stored in AsyncStorage. Schema column: `bound_device_id` on `license_keys` table.
@@ -339,6 +339,7 @@ Returns `{ "valid": true, "isAdmin": true }` or `{ "valid": false }`.
 | `id` | UUID | `defaultRandom()` | Primary key |
 | `key` | TEXT | — | Unique key string (`XXXX-XXXX-XXXX-XXXX`, uppercase hex) |
 | `label` | TEXT | `null` | Optional label for the key |
+| `key_type` | TEXT | `"basic"` | Key tier: `basic`, `premium`, `unlimited`, or `admin` |
 | `max_accounts` | INTEGER | `3` | Maximum accounts allowed |
 | `is_active` | BOOLEAN | `true` | Whether key is currently active |
 | `bound_device_id` | TEXT | `null` | Android device ID bound to this key (1 device per key) |

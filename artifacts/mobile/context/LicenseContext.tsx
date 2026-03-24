@@ -32,6 +32,7 @@ interface LicenseData {
   maxAccounts: number;
   expiresAt: string;
   label: string | null;
+  keyType: string;
   validatedAt: number;
 }
 
@@ -87,7 +88,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(ADMIN_VISIBLE_STORAGE, visible ? "true" : "false");
   }, []);
 
-  const validateKey = useCallback(async (key: string): Promise<{ valid: boolean; error?: string; maxAccounts?: number; expiresAt?: string; label?: string; offline?: boolean }> => {
+  const validateKey = useCallback(async (key: string): Promise<{ valid: boolean; error?: string; maxAccounts?: number; expiresAt?: string; label?: string; keyType?: string; offline?: boolean }> => {
     try {
       const deviceId = await getDeviceId();
       const resp = await fetch(`${API_BASE}/validate-key`, {
@@ -179,6 +180,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
           maxAccounts: result.maxAccounts!,
           expiresAt: result.expiresAt!,
           label: result.label ?? null,
+          keyType: result.keyType ?? "basic",
           validatedAt: Date.now(),
         };
         await AsyncStorage.setItem(LICENSE_DATA_STORAGE, JSON.stringify(data));
@@ -244,6 +246,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       maxAccounts: result.maxAccounts!,
       expiresAt: result.expiresAt!,
       label: result.label ?? null,
+      keyType: result.keyType ?? "basic",
       validatedAt: Date.now(),
     };
 

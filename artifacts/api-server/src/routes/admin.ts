@@ -41,6 +41,11 @@ router.get("/admin", (req, res) => {
     .badge.active { background:#16a34a22; color:#4ade80; border:1px solid #16a34a44; }
     .badge.expired { background:#dc262622; color:#f87171; border:1px solid #dc262644; }
     .badge.inactive { background:#64748b22; color:#94a3b8; border:1px solid #64748b44; }
+    .badge.type-basic { background:#64748b22; color:#94a3b8; border:1px solid #64748b44; }
+    .badge.type-premium { background:#7c3aed22; color:#a78bfa; border:1px solid #7c3aed44; }
+    .badge.type-unlimited { background:#d9770622; color:#fbbf24; border:1px solid #d9770644; }
+    .badge.type-admin { background:#dc262622; color:#f87171; border:1px solid #dc262644; }
+    .type-select { background:#0f172a; color:#fff; border:1px solid #334155; border-radius:8px; padding:4px 8px; font-size:12px; cursor:pointer; }
     button { padding:8px 16px; border:none; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:opacity 0.2s; }
     button:hover { opacity:0.85; }
     .btn-primary { background:#3b82f6; color:#fff; }
@@ -77,6 +82,15 @@ router.get("/admin", (req, res) => {
         <label>Expires In (days)</label>
         <input type="number" id="newExpDays" value="30" min="1">
       </div>
+      <div class="form-group">
+        <label>Key Type</label>
+        <select id="newKeyType">
+          <option value="basic">Basic</option>
+          <option value="premium">Premium</option>
+          <option value="unlimited">Unlimited</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
       <div class="form-group" style="display:flex;align-items:flex-end">
         <button class="btn-primary" style="width:100%;height:38px" onclick="createKey()">Generate Key</button>
       </div>
@@ -110,14 +124,18 @@ router.get("/admin", (req, res) => {
         const daysLeft = Math.ceil((exp - now) / 86400000);
         const status = !k.isActive ? 'inactive' : isExpired ? 'expired' : 'active';
         const statusText = !k.isActive ? 'Inactive' : isExpired ? 'Expired' : daysLeft + 'd left';
+        const kt = k.keyType || 'basic';
         return '<div class="card ' + status + '">' +
-          '<div class="row"><span class="key-text">' + k.key + '</span><span class="badge ' + status + '">' + statusText + '</span></div>' +
+          '<div class="row"><span class="key-text">' + k.key + '</span><span style="display:flex;gap:6px"><span class="badge type-' + kt + '">' + kt.toUpperCase() + '</span><span class="badge ' + status + '">' + statusText + '</span></span></div>' +
           '<div class="stats">' +
             (k.label ? '<span class="stat">' + k.label + '</span>' : '') +
             '<span class="stat">Max: ' + k.maxAccounts + ' accounts</span>' +
             '<span class="stat">Expires: ' + exp.toLocaleDateString() + '</span>' +
           '</div>' +
           '<div class="actions">' +
+            '<select class="type-select" onchange="changeType(\\'' + k.id + '\\', this.value)">' +
+              ['basic','premium','unlimited','admin'].map(t => '<option value="' + t + '"' + (t === kt ? ' selected' : '') + '>' + t.charAt(0).toUpperCase() + t.slice(1) + '</option>').join('') +
+            '</select>' +
             '<button class="btn-secondary" onclick="extendKey(\\'' + k.id + '\\')">+30 Days</button>' +
             '<button class="btn-secondary" onclick="editAccounts(\\'' + k.id + '\\', ' + k.maxAccounts + ')">Edit Limit</button>' +
             '<button class="' + (k.isActive ? 'btn-danger' : 'btn-success') + '" onclick="toggleKey(\\'' + k.id + '\\', ' + !k.isActive + ')">' + (k.isActive ? 'Deactivate' : 'Activate') + '</button>' +
@@ -131,9 +149,16 @@ router.get("/admin", (req, res) => {
       const label = document.getElementById('newLabel').value;
       const maxAccounts = parseInt(document.getElementById('newMaxAccounts').value) || 3;
       const days = parseInt(document.getElementById('newExpDays').value) || 30;
+      const keyType = document.getElementById('newKeyType').value;
       const expiresAt = new Date(Date.now() + days * 86400000).toISOString();
-      await api('POST', '/admin/keys', { label, maxAccounts, expiresAt });
+      await api('POST', '/admin/keys', { label, maxAccounts, expiresAt, keyType });
       document.getElementById('newLabel').value = '';
+      document.getElementById('newKeyType').value = 'basic';
+      loadKeys();
+    }
+
+    async function changeType(id, newType) {
+      await api('PUT', '/admin/keys/' + id, { keyType: newType });
       loadKeys();
     }
 
