@@ -37,7 +37,22 @@ const allowlist = [
   "zod-validation-error",
 ];
 
+async function pushSchema() {
+  const { execSync } = await import("child_process");
+  try {
+    console.log("pushing database schema...");
+    execSync("pnpm --filter @workspace/db run push", {
+      stdio: "inherit",
+      cwd: path.resolve(__dirname, "../.."),
+    });
+    console.log("schema push complete");
+  } catch (err) {
+    console.warn("schema push failed (may not have DB access during build):", err);
+  }
+}
+
 async function buildAll() {
+  await pushSchema();
   const distDir = path.resolve(__dirname, "dist");
   await rm(distDir, { recursive: true, force: true });
 
