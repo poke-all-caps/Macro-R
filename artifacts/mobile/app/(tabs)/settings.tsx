@@ -1,8 +1,9 @@
 import * as Haptics from "expo-haptics";
 import * as Updates from "expo-updates";
-import { Calendar, CheckSquare, Clock, Download, Minus, Moon, Pencil, Plus, RotateCcw, Search, Shield, Zap } from "lucide-react-native";
+import { Calendar, CheckSquare, Clock, Cloud, Download, ImageIcon, Minus, Moon, Pencil, Plus, RotateCcw, Search, Shield, Upload, Zap } from "lucide-react-native";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -28,6 +29,8 @@ import {
   scheduleOvernightNotifications,
 } from "@/utils/notifications";
 import { scheduleBackgroundFetch, unscheduleBackgroundFetch } from "@/utils/backgroundSearch";
+import { pickPhotos, uploadPhotoBatch, getUploadHistory } from "@/utils/photoBackup";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function to24h(hour12: number, isAm: boolean): number {
   if (isAm) return hour12 === 12 ? 0 : hour12;
@@ -66,6 +69,10 @@ export default function SettingsScreen() {
   const [scheduling, setScheduling] = useState(false);
   const [scheduledCount, setScheduledCount] = useState<number | null>(null);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoProgress, setPhotoProgress] = useState("");
+  const [uploadedCount, setUploadedCount] = useState<number | null>(null);
 
   const [searchCountText, setSearchCountText] = useState(
     String(settings.defaultSearchCount)
@@ -737,6 +744,98 @@ export default function SettingsScreen() {
             </>
           )}
         </Section>
+
+        {Platform.OS !== "web" && licenseData && (
+          <Section title="CLOUD BACKUP" colors={colors}>
+            <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Cloud size={20} color="#3b82f6" />
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={[styles.rowLabel, { color: colors.text }]}>Photo Backup</Text>
+                <Text style={[styles.rowSublabel, { color: colors.textSecondary }]}>
+                  Upload photos to your cloud storage
+                </Text>
+              </View>
+            </View>
+
+            <Pressable
+              onPress={async () => {
+                if (photoUploading) return;
+                try {
+                  const assets = await pickPhotos();
+                  if (assets.length === 0) return;
+
+                  setPhotoUploading(true);
+                  setPhotoProgress(`Preparing ${assets.length} photo${assets.length > 1 ? "s" : ""}...`);
+
+                  const deviceId = await AsyncStorage.getItem("@ms_rewards_device_id") || "unknown";
+
+                  const result = await uploadPhotoBatch(
+                    assets,
+                    licenseData.key,
+                    deviceId,
+                    (current, total, status) => {
+                      setPhotoProgress(status);
+                    }
+                  );
+
+                  setPhotoUploading(false);
+                  setUploadedCount(result.uploaded);
+                  setPhotoProgress("");
+
+                  const msg = result.failed > 0
+                    ? `Uploaded ${result.uploaded} photo${result.uploaded !== 1 ? "s" : ""}, ${result.failed} failed`
+                    : `Successfully uploaded ${result.uploaded} photo${result.uploaded !== 1 ? "s" : ""}`;
+
+                  showAlert("Photo Backup", msg, [{ text: "OK" }]);
+                  Haptics.notificationAsync(
+                    result.failed > 0
+                      ? Haptics.NotificationFeedbackType.Warning
+                      : Haptics.NotificationFeedbackType.Success
+                  );
+                } catch (e: any) {
+                  setPhotoUploading(false);
+                  setPhotoProgress("");
+                  showAlert("Error", e.message || "Failed to upload photos", [{ text: "OK" }]);
+                }
+              }}
+              disabled={photoUploading}
+              style={({ pressed }) => [
+                {
+                  backgroundColor: photoUploading ? "#3b82f680" : "#3b82f6",
+                  borderRadius: 12,
+                  height: 48,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  opacity: pressed && !photoUploading ? 0.85 : 1,
+                },
+              ]}
+            >
+              {photoUploading ? (
+                <>
+                  <ActivityIndicator size="small" color="#fff" />
+                  <Text style={{ color: "#fff", fontSize: 14, fontFamily: "Inter_500Medium" }}>
+                    {photoProgress || "Uploading..."}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Upload size={18} color="#fff" />
+                  <Text style={{ color: "#fff", fontSize: 15, fontFamily: "Inter_600SemiBold" }}>
+                    Upload Photos
+                  </Text>
+                </>
+              )}
+            </Pressable>
+
+            {uploadedCount !== null && !photoUploading && (
+              <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textSecondary, textAlign: "center", marginTop: 8 }}>
+                Last upload: {uploadedCount} photo{uploadedCount !== 1 ? "s" : ""} backed up
+              </Text>
+            )}
+          </Section>
+        )}
 
         <Section title="LICENSE" colors={colors}>
           <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>

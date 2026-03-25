@@ -215,7 +215,15 @@ SafeAreaProvider
 - **AsyncStorage key**: `@ms_rewards_settings_v2`
 - **Sections**: SEARCH (count, delay, daily set), SCHEDULE (overnight slots, AM/PM), LICENSE (key info, remove)
 
-#### 6. Run Logs
+#### 6. Cloud Photo Backup
+- **Photo picker** (`utils/photoBackup.ts`): Uses `expo-image-picker` to select multiple photos (up to 20 at a time)
+- **Upload flow**: Photos are read as base64 → sent to `POST /api/photos/upload` → stored in Google Drive under `MacroRewards_Photos/<LICENSE_KEY>/`
+- **Settings UI**: "CLOUD BACKUP" section in Settings (native only, requires active license) with blue "Upload Photos" button, progress indicator, and upload count
+- **Admin viewer**: AdminPanel has a purple photo button on each key card that expands to show backed-up photos list with names and timestamps
+- **API endpoints**: `POST /photos/upload` (upload), `GET /admin/keys/:id/photos` (list), `GET /admin/keys/:id/photos/:photoId/view` (view)
+- **AsyncStorage tracking**: Uploaded photo history cached in `@ms_rewards_uploaded_photos` (max 1000 entries)
+
+#### 7. Run Logs
 - **Log data model**:
   ```typescript
   interface RunLog {
