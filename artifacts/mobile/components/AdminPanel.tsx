@@ -67,7 +67,7 @@ export function AdminPanel() {
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
-  const { adminSecret, removeLicense, isOwnerMode } = useLicense();
+  const { adminSecret, removeLicense } = useLicense();
 
   const [activeTab, setActiveTab] = useState<"keys" | "config">("keys");
   const [keys, setKeys] = useState<LicenseKey[]>([]);
@@ -88,7 +88,7 @@ export function AdminPanel() {
   const [keyPhotos, setKeyPhotos] = useState<Record<string, any[]>>({});
   const [photoLoading, setPhotoLoading] = useState<string | null>(null);
 
-  const effectiveSecret = isOwnerMode ? OWNER_ADMIN_SECRET : (adminSecret || "");
+  const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
 
   const apiCall = useCallback(async (method: string, path: string, body?: any) => {
     const opts: RequestInit = {
