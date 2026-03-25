@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { licenseKeysTable, featureConfigTable, deviceCookiesTable } from "@workspace/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
 import crypto from "crypto";
+import { requireAdmin } from "../adminSession";
 
 const DEFAULT_CONFIGS = [
   { keyType: "basic", maxAccounts: 2, maxSearches: 20, minDelaySeconds: 5, backgroundEnabled: false, customQueriesEnabled: false, dailySetEnabled: true },
@@ -22,22 +23,6 @@ async function seedFeatureConfigs() {
 seedFeatureConfigs().catch(console.error);
 
 const router: IRouter = Router();
-
-const ADMIN_SECRET = process.env["ADMIN_SECRET"];
-if (!ADMIN_SECRET) {
-  console.warn("WARNING: ADMIN_SECRET env var not set — admin endpoints will reject all requests");
-}
-
-function requireAdmin(req: any, res: any, next: any) {
-  if (!ADMIN_SECRET) {
-    return res.status(401).json({ error: "Unauthorized — ADMIN_SECRET not configured" });
-  }
-  const auth = req.headers["x-admin-secret"] || req.query.secret;
-  if (!auth || auth !== ADMIN_SECRET) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  next();
-}
 
 function generateKey(): string {
   const segments = [];
@@ -172,6 +157,7 @@ router.put("/admin/feature-config/:keyType", requireAdmin, async (req, res) => {
 });
 
 router.post("/validate-admin", async (req, res) => {
+  const ADMIN_SECRET = process.env["ADMIN_SECRET"];
   const { secret } = req.body;
   if (!secret || !ADMIN_SECRET || secret !== ADMIN_SECRET) {
     return res.json({ valid: false });
@@ -223,11 +209,15 @@ router.post("/validate-key", async (req, res) => {
       }
 
       if (!found.boundDeviceId) {
-        const result = await db.update(licenseKeysTable)
+        await db.update(licenseKeysTable)
           .set({ boundDeviceId: deviceId, updatedAt: new Date() })
           .where(and(eq(licenseKeysTable.id, found.id), isNull(licenseKeysTable.boundDeviceId)));
-        const rowCount = (result as any).rowCount ?? (result as any).changes ?? 0;
-        if (rowCount === 0) {
+        // Re-query to confirm bind — avoids relying on adapter-specific rowCount metadata
+        const [recheckBound] = await db
+          .select({ boundDeviceId: licenseKeysTable.boundDeviceId })
+          .from(licenseKeysTable)
+          .where(eq(licenseKeysTable.id, found.id));
+        if (recheckBound?.boundDeviceId !== deviceId) {
           return res.json({ valid: false, error: "Key is already in use on another device" });
         }
       }

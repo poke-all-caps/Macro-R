@@ -1,6 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState, Platform } from "react-native";
 
+import {
+  sleep,
+  randomHex,
+  buildCookieHeader,
+  performBingSearch,
+  fetchRewardsPoints,
+} from "./bingSearch";
+
 const ACCOUNTS_KEY = "@ms_rewards_accounts";
 const QUERIES_KEY = "@ms_rewards_queries_v2";
 const SETTINGS_KEY = "@ms_rewards_settings_v2";
@@ -10,102 +18,37 @@ const BG_LAST_RUN_KEY = "@ms_rewards_bg_last_run";
 const BG_FETCH_ENABLED_KEY = "@ms_rewards_bg_fetch_enabled";
 const BG_LOCK_TTL_MS = 10 * 60 * 1000;
 
-const BING_UA =
-  "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
-
-function sleep(ms: number) {
-  return new Promise<void>((r) => setTimeout(r, ms));
+interface BgAccount {
+  id: string;
+  name: string;
+  email: string;
+  cookies: Record<string, string> | null;
+  lastRun: string | null;
+  totalPoints?: number;
+  todayPoints?: number;
+  status?: string;
+  searchesCompleted?: number;
 }
 
-function randomHex(len: number): string {
-  return Array.from({ length: len }, () =>
-    Math.floor(Math.random() * 16).toString(16)
-  ).join("");
+interface BgSettings {
+  searchCount?: number;
+  defaultSearchCount?: number;
 }
 
-function buildCookieHeader(cookies: Record<string, string>): string {
-  return Object.entries(cookies)
-    .filter(([k]) => !k.startsWith("_ls_"))
-    .map(([k, v]) => `${k}=${v}`)
-    .join("; ");
+interface BgLogEntry {
+  id: string;
+  accountId: string;
+  accountName: string;
+  timestamp: string;
+  searchesDone: number;
+  dailySetDone: boolean;
+  pointsEarned: number;
+  status: "success" | "failed";
+  errorMessage?: string;
+  backgroundRun?: boolean;
 }
 
-async function performBingSearch(
-  query: string,
-  cookies: Record<string, string>
-): Promise<{ ok: boolean; status?: number; networkError?: boolean }> {
-  const cookieStr = buildCookieHeader(cookies);
-  const cvid = randomHex(32).toUpperCase();
-  const url = `https://www.bing.com/search?q=${encodeURIComponent(query)}&form=QBLH&cvid=${cvid}`;
-  try {
-    const resp = await fetch(url, {
-      method: "GET",
-      credentials: "omit",
-      headers: {
-        Cookie: cookieStr,
-        "User-Agent": BING_UA,
-        Accept: "text/html,application/xhtml+xml,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        Referer: "https://www.bing.com/",
-        "Cache-Control": "no-cache",
-      },
-    });
-    return { ok: resp.ok || resp.status === 302, status: resp.status };
-  } catch (e: any) {
-    if (e?.message?.includes("Network request failed")) {
-      return { ok: false, status: 0, networkError: true };
-    }
-    return { ok: false, status: 0 };
-  }
-}
-
-async function fetchRewardsPoints(
-  cookies: Record<string, string>
-): Promise<{ available: number; today: number }> {
-  const cookieStr = buildCookieHeader(cookies);
-  try {
-    const resp = await fetch(
-      "https://rewards.bing.com/api/getuserinfo?type=1&X-Requested-With=XMLHttpRequest",
-      {
-        credentials: "omit",
-        headers: {
-          Cookie: cookieStr,
-          "User-Agent": BING_UA,
-          Accept: "application/json, text/javascript, */*",
-          Referer: "https://rewards.bing.com/",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      }
-    );
-    if (!resp.ok) return { available: 0, today: 0 };
-    const json = await resp.json();
-    const status = json?.dashboard?.userStatus ?? json?.userStatus;
-    const available = status?.availablePoints ?? 0;
-
-    function dailyProgress(counter: any): number {
-      if (!counter) return 0;
-      const entry = Array.isArray(counter) ? counter[0] : counter;
-      if (!entry) return 0;
-      const progress = Math.max(0, Math.floor(Number(entry.pointProgress) || 0));
-      const max = Math.max(0, Math.floor(Number(entry.pointProgressMax) || 0));
-      if (max > 0 && progress > max) return max;
-      return progress;
-    }
-
-    const counters = status?.counters;
-    const pcToday = dailyProgress(counters?.pcSearch);
-    const mobileToday = dailyProgress(counters?.mobileSearch);
-    const edgeToday = dailyProgress(counters?.edgeSearch);
-    const dailyPt = dailyProgress(counters?.dailyPoint);
-    const totalToday = pcToday + mobileToday + edgeToday + dailyPt;
-
-    return { available, today: totalToday };
-  } catch {
-    return { available: 0, today: 0 };
-  }
-}
-
-async function getAccounts(): Promise<any[]> {
+async function getAccounts(): Promise<BgAccount[]> {
   const raw = await AsyncStorage.getItem(ACCOUNTS_KEY);
   if (!raw) return [];
   try {
@@ -144,7 +87,7 @@ async function getQueriesAndRotate(needed: number): Promise<string[]> {
   }
 }
 
-async function getSettings(): Promise<any> {
+async function getSettings(): Promise<BgSettings> {
   const raw = await AsyncStorage.getItem(SETTINGS_KEY);
   if (!raw) return {};
   try {
@@ -154,12 +97,15 @@ async function getSettings(): Promise<any> {
   }
 }
 
-async function updateAccountInStorage(accountId: string, updates: Record<string, any>): Promise<void> {
+async function updateAccountInStorage(
+  accountId: string,
+  updates: Partial<BgAccount>
+): Promise<void> {
   const raw = await AsyncStorage.getItem(ACCOUNTS_KEY);
   if (!raw) return;
   try {
-    const accounts = JSON.parse(raw);
-    const idx = accounts.findIndex((a: any) => a.id === accountId);
+    const accounts: BgAccount[] = JSON.parse(raw);
+    const idx = accounts.findIndex((a) => a.id === accountId);
     if (idx >= 0) {
       accounts[idx] = { ...accounts[idx], ...updates };
       await AsyncStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
@@ -167,7 +113,7 @@ async function updateAccountInStorage(accountId: string, updates: Record<string,
   } catch {}
 }
 
-async function appendLog(entry: any): Promise<void> {
+async function appendLog(entry: BgLogEntry): Promise<void> {
   try {
     const raw = await AsyncStorage.getItem("@ms_rewards_logs");
     const logs = raw ? JSON.parse(raw) : [];
@@ -309,12 +255,14 @@ export async function runBackgroundSearches(): Promise<void> {
         timestamp: new Date().toISOString(),
         searchesDone,
         dailySetDone: false,
-        pointsEarned: account.lastRun ? earned : 0,
+        pointsEarned: earned,
         status: "success",
         backgroundRun: true,
       });
 
-      console.log(`[BackgroundSearch] ${account.name}: ${searchesDone}/${searchCount} searches, +${earned} points`);
+      console.log(
+        `[BackgroundSearch] ${account.name}: ${searchesDone}/${searchCount} searches, +${earned} points`
+      );
     }
 
     await showNotification(
@@ -417,5 +365,7 @@ export async function getBackgroundFetchStatus(): Promise<string> {
     return "unavailable";
   }
 }
+
+export { sleep, randomHex, buildCookieHeader };
 
 export const BACKGROUND_SEARCH_TASK_NAME = BACKGROUND_SEARCH_TASK;

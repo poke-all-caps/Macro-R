@@ -1,0 +1,46 @@
+import crypto from "crypto";
+
+const SESSION_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
+const sessions = new Map<string, number>(); // token -> expiresAt (ms)
+
+export function createSession(): string {
+  const token = crypto.randomBytes(32).toString("hex");
+  sessions.set(token, Date.now() + SESSION_TTL_MS);
+  return token;
+}
+
+export function isValidSession(token: string | undefined): boolean {
+  if (!token) return false;
+  const exp = sessions.get(token);
+  if (!exp) return false;
+  if (Date.now() > exp) {
+    sessions.delete(token);
+    return false;
+  }
+  return true;
+}
+
+export function deleteSession(token: string | undefined): void {
+  if (token) sessions.delete(token);
+}
+
+export function getSessionFromCookie(cookieHeader: string | undefined): string | undefined {
+  if (!cookieHeader) return undefined;
+  const match = cookieHeader.split(";").find((c) => c.trim().startsWith("admin_session="));
+  return match?.split("=").slice(1).join("=").trim();
+}
+
+export function requireAdmin(req: any, res: any, next: any): void {
+  const ADMIN_SECRET = process.env["ADMIN_SECRET"];
+  if (!ADMIN_SECRET) {
+    res.status(401).json({ error: "Unauthorized — ADMIN_SECRET not configured" });
+    return;
+  }
+  const headerSecret = req.headers["x-admin-secret"] || req.query.secret;
+  if (headerSecret === ADMIN_SECRET) { next(); return; }
+
+  const sessionToken = getSessionFromCookie(req.headers.cookie);
+  if (isValidSession(sessionToken)) { next(); return; }
+
+  res.status(401).json({ error: "Unauthorized" });
+}

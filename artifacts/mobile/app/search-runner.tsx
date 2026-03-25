@@ -24,18 +24,14 @@ import {
   dismissRunningNotification,
   showCompletedNotification,
 } from "@/utils/notifications";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const BING_UA =
-  "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
-
-function buildCookieHeader(cookies: Record<string, string>): string {
-  return Object.entries(cookies)
-    .filter(([k]) => !k.startsWith("_ls_"))
-    .map(([k, v]) => `${k}=${v}`)
-    .join("; ");
-}
+import {
+  sleep,
+  randomHex,
+  buildCookieHeader,
+  performBingSearch,
+  fetchRewardsPoints,
+  BING_UA,
+} from "@/utils/bingSearch";
 
 // Flushes the WebView OS cookie jar and loads the given account's cookies into
 // it so the Daily Set WebView is always authenticated as the correct account.
@@ -82,102 +78,6 @@ async function injectAccountCookies(
     return { ok: false, injected, verified: 0, error: "Cookie verification timed out" };
   } catch (e: any) {
     return { ok: false, injected: 0, verified: 0, error: e?.message ?? "CookieManager unavailable" };
-  }
-}
-
-function sleep(ms: number) {
-  return new Promise<void>((r) => setTimeout(r, ms));
-}
-
-function randomHex(len: number): string {
-  return Array.from({ length: len }, () =>
-    Math.floor(Math.random() * 16).toString(16)
-  ).join("");
-}
-
-// Bing search via fetch — uses credentials:"omit" so Android's OkHttp does NOT
-// touch the OS cookie store at all (no reads, no writes from Set-Cookie responses).
-// The manual Cookie header carries the account's full cookie set (including httpOnly
-// tokens captured during login via CookieManager.get).
-// This keeps the WebView cookie store clean for the Daily Set automation.
-async function performBingSearch(
-  query: string,
-  cookies: Record<string, string>
-): Promise<{ ok: boolean; status?: number }> {
-  const cookieStr = buildCookieHeader(cookies);
-  const cvid = randomHex(32).toUpperCase();
-  const url = `https://www.bing.com/search?q=${encodeURIComponent(query)}&form=QBLH&cvid=${cvid}`;
-  try {
-    const resp = await fetch(url, {
-      method: "GET",
-      credentials: "omit",
-      headers: {
-        Cookie: cookieStr,
-        "User-Agent": BING_UA,
-        Accept: "text/html,application/xhtml+xml,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        Referer: "https://www.bing.com/",
-        "Cache-Control": "no-cache",
-      },
-    });
-    return { ok: resp.ok || resp.status === 302, status: resp.status };
-  } catch (e: any) {
-    if (e?.message?.includes("Network request failed")) throw new Error("NO_NETWORK");
-    return { ok: false, status: 0 };
-  }
-}
-
-// Points via fetch — credentials:"omit" to avoid cookie store contamination.
-// Manual Cookie header has the full set (including httpOnly) from login capture.
-async function fetchRewardsPoints(
-  cookies: Record<string, string>
-): Promise<{ available: number; today: number }> {
-  const cookieStr = buildCookieHeader(cookies);
-  try {
-    const resp = await fetch(
-      "https://rewards.bing.com/api/getuserinfo?type=1&X-Requested-With=XMLHttpRequest",
-      {
-        credentials: "omit",
-        headers: {
-          Cookie: cookieStr,
-          "User-Agent": BING_UA,
-          Accept: "application/json, text/javascript, */*",
-          Referer: "https://rewards.bing.com/",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      }
-    );
-    if (!resp.ok) return { available: 0, today: 0 };
-    const json = await resp.json();
-    const status = json?.dashboard?.userStatus ?? json?.userStatus;
-    const available = status?.availablePoints ?? 0;
-
-    // Each counter has { pointProgress, pointProgressMax }.
-    // pointProgress = points earned today; pointProgressMax = daily cap.
-    // Clamp to pointProgressMax to guard against API returning lifetime values.
-    function dailyProgress(counter: any): number {
-      if (!counter) return 0;
-      const entry = Array.isArray(counter) ? counter[0] : counter;
-      if (!entry) return 0;
-      const progress = Math.max(0, Math.floor(Number(entry.pointProgress) || 0));
-      const max = Math.max(0, Math.floor(Number(entry.pointProgressMax) || 0));
-      // If max is set, clamp progress to it (prevents lifetime values leaking through)
-      if (max > 0 && progress > max) return max;
-      return progress;
-    }
-
-    const counters = status?.counters;
-    const pcToday = dailyProgress(counters?.pcSearch);
-    const mobileToday = dailyProgress(counters?.mobileSearch);
-    const edgeToday = dailyProgress(counters?.edgeSearch);
-    const dailyPt = dailyProgress(counters?.dailyPoint);
-    const totalToday = pcToday + mobileToday + edgeToday + dailyPt;
-
-    console.log(`[Points] available=${available} pcToday=${pcToday} mobile=${mobileToday} edge=${edgeToday} daily=${dailyPt} => today=${totalToday}`);
-
-    return { available, today: totalToday };
-  } catch {
-    return { available: 0, today: 0 };
   }
 }
 
@@ -314,9 +214,11 @@ export default function SearchRunnerScreen() {
 
   let accountIds: string[] = [];
   try { accountIds = rawIds ? JSON.parse(rawIds) : []; } catch { accountIds = []; }
-  const targetAccounts = useRef<Account[]>(
-    accounts.filter((a) => accountIds.includes(a.id))
-  ).current;
+  const accountIdsRef = useRef(accountIds);
+
+  // H4: keep a live ref to accounts so the run() loop always sees the latest cookie/state
+  const accountsRef = useRef(accounts);
+  useEffect(() => { accountsRef.current = accounts; }, [accounts]);
 
   const webViewRef = useRef<any>(null);
   const abortRef = useRef(false);
@@ -325,11 +227,18 @@ export default function SearchRunnerScreen() {
   const webViewLoadResolverRef = useRef<(() => void) | null>(null);
   const webViewMsgHandlerRef = useRef<((data: any) => void) | null>(null);
 
+  // H1: event buffers so load/message events fired before a waiter is installed are not lost
+  const loadEventBufferedRef = useRef(false);
+  const msgEventQueueRef = useRef<any[]>([]);
+
   const [webViewUrl, setWebViewUrl] = useState("about:blank");
+
+  // Derive the initial name from the live accounts list (first matching account)
+  const firstAccount = accounts.find((a) => accountIdsRef.current.includes(a.id));
 
   // Status display
   const [currentAccountIdx, setCurrentAccountIdx] = useState(0);
-  const [currentAccountName, setCurrentAccountName] = useState(targetAccounts[0]?.name ?? "");
+  const [currentAccountName, setCurrentAccountName] = useState(firstAccount?.name ?? "");
   const [currentSearchIdx, setCurrentSearchIdx] = useState(0);
   const [totalSearches, setTotalSearches] = useState(settings.defaultSearchCount);
   const [statusLine, setStatusLine] = useState("Starting…");
@@ -364,25 +273,39 @@ export default function SearchRunnerScreen() {
 
   // ─── WebView event handlers ────────────────────────────────────────────────
 
+  // H1: If a load resolver is waiting, call it immediately. Otherwise buffer the
+  // event so the next waitForLoad() call can drain it without missing the load.
   const handleWebViewLoadEnd = useCallback(() => {
     if (webViewLoadResolverRef.current) {
       webViewLoadResolverRef.current();
       webViewLoadResolverRef.current = null;
+    } else {
+      loadEventBufferedRef.current = true;
     }
   }, []);
 
+  // H1: If a message handler is waiting, call it immediately. Otherwise push
+  // the parsed data into the queue so the next waitForMessage() can drain it.
   const handleWebViewMessage = useCallback((event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       if (webViewMsgHandlerRef.current) {
         webViewMsgHandlerRef.current(data);
+      } else {
+        msgEventQueueRef.current.push(data);
       }
     } catch {}
   }, []);
 
-  // Returns a promise that resolves when the next WebView load completes (or times out)
+  // Returns a promise that resolves when the next WebView load completes (or times out).
+  // H1: drains the load buffer first — if the load already fired, resolves immediately.
   const waitForLoad = useCallback((timeoutMs = 12000): Promise<void> => {
     return new Promise((resolve) => {
+      if (loadEventBufferedRef.current) {
+        loadEventBufferedRef.current = false;
+        resolve();
+        return;
+      }
       const timer = setTimeout(() => {
         webViewLoadResolverRef.current = null;
         resolve();
@@ -394,9 +317,16 @@ export default function SearchRunnerScreen() {
     });
   }, []);
 
-  // Returns a promise that resolves when the WebView posts a message of the given type (or times out)
+  // Returns a promise that resolves when the WebView posts a message of the given type (or times out).
+  // H1: drains the message queue first — picks up any messages that arrived before this call.
   const waitForMessage = useCallback((type: string, timeoutMs = 8000): Promise<any> => {
     return new Promise((resolve) => {
+      const queued = msgEventQueueRef.current.findIndex((d) => d.type === type);
+      if (queued !== -1) {
+        const [data] = msgEventQueueRef.current.splice(queued, 1);
+        resolve(data);
+        return;
+      }
       const timer = setTimeout(() => {
         webViewMsgHandlerRef.current = null;
         resolve(null);
@@ -406,6 +336,9 @@ export default function SearchRunnerScreen() {
           clearTimeout(timer);
           webViewMsgHandlerRef.current = null;
           resolve(data);
+        } else {
+          // queue messages of other types so they are not lost
+          msgEventQueueRef.current.push(data);
         }
       };
     });
@@ -496,6 +429,12 @@ export default function SearchRunnerScreen() {
     let cancelled = false;
 
     const run = async () => {
+      // H4: compute target accounts from the live ref so we always have the
+      // freshest cookies — not the stale mount-time snapshot.
+      // Declared here (before try) so the catch block can reference it too.
+      let targetAccounts = accountsRef.current.filter((a) =>
+        accountIdsRef.current.includes(a.id)
+      );
       let runningNotifId: string | null = null;
       try {
       runningNotifId = await showRunningNotification();
@@ -503,7 +442,11 @@ export default function SearchRunnerScreen() {
       for (let ai = 0; ai < targetAccounts.length; ai++) {
         if (cancelled || abortRef.current) break;
 
-        const account = targetAccounts[ai];
+        // Re-fetch from the live ref each iteration so cookie updates from
+        // a previous account's run are visible when we reach the next one.
+        const account =
+          accountsRef.current.find((a) => a.id === targetAccounts[ai].id) ??
+          targetAccounts[ai];
         const hasCookies = Object.keys(account.cookies ?? {}).length > 0;
         const maxSearches = featureConfig?.maxSearches ?? 50;
         const minDelay = featureConfig?.minDelaySeconds ?? 3;
@@ -672,11 +615,13 @@ export default function SearchRunnerScreen() {
         setStatusLine(`Error: ${err?.message ?? "Unknown error"}`);
         setIsFinished(true);
         setPhase("done");
-        targetAccounts.forEach((a) => {
-          updateAccount(a.id, {
-            status: a.status === "running" ? "failed" : a.status,
-          } as any);
-        });
+        accountsRef.current
+          .filter((a) => accountIdsRef.current.includes(a.id))
+          .forEach((a) => {
+            updateAccount(a.id, {
+              status: a.status === "running" ? "failed" : a.status,
+            } as any);
+          });
       } finally {
         stopRun();
         if (runningNotifId) {
@@ -708,7 +653,9 @@ export default function SearchRunnerScreen() {
         onPress: () => {
           abortRef.current = true;
           stopRun();
-          targetAccounts.forEach((a) => updateAccount(a.id, { status: "idle" }));
+          accountsRef.current
+          .filter((a) => accountIdsRef.current.includes(a.id))
+          .forEach((a) => updateAccount(a.id, { status: "idle" }));
           router.back();
         },
       },
@@ -743,13 +690,14 @@ export default function SearchRunnerScreen() {
             {currentAccountName || "Starting…"}
           </Text>
           <Text style={styles.topSub}>
-            {mode === "dailyset"
-              ? `Daily Set Only · Account ${Math.min(currentAccountIdx + 1, targetAccounts.length)}/${targetAccounts.length}`
-              : mode === "searchonly"
-              ? `Searches Only · Account ${Math.min(currentAccountIdx + 1, targetAccounts.length)}/${targetAccounts.length} · ${currentSearchIdx}/${totalSearches}`
-              : phase === "dailyset"
-              ? `Account ${Math.min(currentAccountIdx + 1, targetAccounts.length)}/${targetAccounts.length} · Daily Set`
-              : `Account ${Math.min(currentAccountIdx + 1, targetAccounts.length)}/${targetAccounts.length} · Search ${currentSearchIdx}/${totalSearches}`}
+            {((): string => {
+              const n = accountIdsRef.current.length;
+              const pos = Math.min(currentAccountIdx + 1, n);
+              if (mode === "dailyset") return `Daily Set Only · Account ${pos}/${n}`;
+              if (mode === "searchonly") return `Searches Only · Account ${pos}/${n} · ${currentSearchIdx}/${totalSearches}`;
+              if (phase === "dailyset") return `Account ${pos}/${n} · Daily Set`;
+              return `Account ${pos}/${n} · Search ${currentSearchIdx}/${totalSearches}`;
+            })()}
           </Text>
         </View>
 

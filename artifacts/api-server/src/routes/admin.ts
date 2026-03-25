@@ -1,26 +1,68 @@
 import { Router, type IRouter } from "express";
-import path from "path";
-import { fileURLToPath } from "url";
+import {
+  createSession,
+  isValidSession,
+  deleteSession,
+  getSessionFromCookie,
+  requireAdmin,
+} from "../adminSession";
 
 const router: IRouter = Router();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const ADMIN_SECRET = process.env["ADMIN_SECRET"] || "";
 
-router.get("/admin", (req, res) => {
-  const secret = req.query.secret as string;
-  if (secret !== ADMIN_SECRET) {
-    return res.status(401).send(`
-      <html><body style="background:#0f172a;color:#fff;font-family:system-ui;display:flex;justify-content:center;align-items:center;height:100vh;margin:0">
-        <div style="text-align:center">
-          <h2>Admin Access Required</h2>
-          <p style="color:#94a3b8">Add ?secret=YOUR_ADMIN_SECRET to the URL</p>
-        </div>
-      </body></html>
-    `);
-  }
+// ── HTML helpers ──────────────────────────────────────────────────────────────
+function esc(s: unknown): string {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-  res.send(`<!DOCTYPE html>
+// ── Login page HTML ───────────────────────────────────────────────────────────
+function loginPage(errorMsg?: string): string {
+  const formAction = "admin/login";
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Macro Rewards — Admin Login</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0f172a; color:#e2e8f0; font-family:system-ui,-apple-system,sans-serif;
+           display:flex; justify-content:center; align-items:center; min-height:100vh; }
+    .card { background:#1e293b; border-radius:16px; padding:32px; width:320px; border:1px solid #334155; }
+    h2 { font-size:20px; color:#fff; margin-bottom:8px; }
+    p { color:#94a3b8; font-size:13px; margin-bottom:24px; }
+    input { background:#0f172a; color:#fff; border:1px solid #334155; border-radius:8px;
+            padding:10px 14px; font-size:14px; width:100%; margin-bottom:16px; }
+    input:focus { outline:none; border-color:#3b82f6; }
+    button { background:#3b82f6; color:#fff; border:none; border-radius:8px; padding:10px;
+             font-size:14px; font-weight:600; width:100%; cursor:pointer; }
+    button:hover { opacity:0.85; }
+    .err { color:#f87171; font-size:13px; margin-bottom:12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Admin Access</h2>
+    <p>Enter your admin secret to continue.</p>
+    ${errorMsg ? `<div class="err">${esc(errorMsg)}</div>` : ""}
+    <form method="POST" action="${formAction}">
+      <input type="password" name="secret" placeholder="Admin secret" autofocus autocomplete="current-password">
+      <button type="submit">Sign In</button>
+    </form>
+  </div>
+</body>
+</html>`;
+}
+
+// ── Dashboard page HTML ───────────────────────────────────────────────────────
+function dashboardPage(): string {
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -35,8 +77,6 @@ router.get("/admin", (req, res) => {
     .card.inactive { opacity:0.4; }
     .row { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
     .key-text { font-family:monospace; font-size:18px; color:#3b82f6; font-weight:bold; letter-spacing:2px; }
-    .label { color:#94a3b8; font-size:13px; }
-    .value { color:#fff; font-size:14px; }
     .badge { display:inline-block; padding:2px 8px; border-radius:9999px; font-size:11px; font-weight:600; }
     .badge.active { background:#16a34a22; color:#4ade80; border:1px solid #16a34a44; }
     .badge.expired { background:#dc262622; color:#f87171; border:1px solid #dc262644; }
@@ -52,20 +92,27 @@ router.get("/admin", (req, res) => {
     .btn-danger { background:#ef4444; color:#fff; }
     .btn-secondary { background:#334155; color:#e2e8f0; }
     .btn-success { background:#16a34a; color:#fff; }
+    .btn-logout { background:#1e293b; color:#94a3b8; border:1px solid #334155; font-size:12px; padding:6px 12px; }
     input,select { background:#0f172a; color:#fff; border:1px solid #334155; border-radius:8px; padding:8px 12px; font-size:14px; width:100%; }
     input:focus,select:focus { outline:none; border-color:#3b82f6; }
     .form-group { margin-bottom:12px; }
     .form-group label { display:block; color:#94a3b8; font-size:12px; margin-bottom:4px; }
-    .actions { display:flex; gap:8px; margin-top:12px; }
+    .actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
     .create-form { background:#1e293b; border-radius:12px; padding:20px; margin-bottom:24px; border:1px solid #334155; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
     .no-keys { text-align:center; color:#64748b; padding:48px; }
-    .stats { display:flex; gap:12px; margin-bottom:8px; }
+    .stats { display:flex; gap:12px; margin-bottom:8px; flex-wrap:wrap; }
     .stat { font-size:12px; color:#94a3b8; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
   </style>
 </head>
 <body>
-  <h1>Macro Rewards — License Keys</h1>
+  <div class="topbar">
+    <h1 style="margin-bottom:0">Macro Rewards — License Keys</h1>
+    <form method="POST" action="admin/logout" style="margin:0">
+      <button type="submit" class="btn-logout">Sign Out</button>
+    </form>
+  </div>
 
   <div class="create-form">
     <h3 style="margin-bottom:12px;color:#fff">Create New Key</h3>
@@ -111,14 +158,18 @@ router.get("/admin", (req, res) => {
   <div id="featureConfigList"></div>
 
   <script>
-    const SECRET = new URLSearchParams(window.location.search).get('secret') || '';
-    const API = window.location.pathname.replace(/\\/admin$/, '');
+    const API = window.location.pathname.replace(/\\/admin\\/?$/, '');
 
     async function api(method, path, body) {
-      const opts = { method, headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': SECRET } };
+      const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
       if (body) opts.body = JSON.stringify(body);
       const r = await fetch(API + path, opts);
+      if (r.status === 401) { window.location.reload(); return {}; }
       return r.json();
+    }
+
+    function esc(s) {
+      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     async function loadKeys() {
@@ -135,22 +186,26 @@ router.get("/admin", (req, res) => {
         const daysLeft = Math.ceil((exp - now) / 86400000);
         const status = !k.isActive ? 'inactive' : isExpired ? 'expired' : 'active';
         const statusText = !k.isActive ? 'Inactive' : isExpired ? 'Expired' : daysLeft + 'd left';
-        const kt = k.keyType || 'basic';
-        return '<div class="card ' + status + '">' +
-          '<div class="row"><span class="key-text">' + k.key + '</span><span style="display:flex;gap:6px"><span class="badge type-' + kt + '">' + kt.toUpperCase() + '</span><span class="badge ' + status + '">' + statusText + '</span></span></div>' +
+        const kt = esc(k.keyType || 'basic');
+        const safeId = esc(k.id);
+        const safeKey = esc(k.key);
+        const safeLabel = esc(k.label);
+        const safeMax = esc(k.maxAccounts);
+        return '<div class="card ' + esc(status) + '">' +
+          '<div class="row"><span class="key-text">' + safeKey + '</span><span style="display:flex;gap:6px"><span class="badge type-' + kt + '">' + kt.toUpperCase() + '</span><span class="badge ' + esc(status) + '">' + esc(statusText) + '</span></span></div>' +
           '<div class="stats">' +
-            (k.label ? '<span class="stat">' + k.label + '</span>' : '') +
-            '<span class="stat">Max: ' + k.maxAccounts + ' accounts</span>' +
-            '<span class="stat">Expires: ' + exp.toLocaleDateString() + '</span>' +
+            (k.label ? '<span class="stat">' + safeLabel + '</span>' : '') +
+            '<span class="stat">Max: ' + safeMax + ' accounts</span>' +
+            '<span class="stat">Expires: ' + esc(exp.toLocaleDateString()) + '</span>' +
           '</div>' +
           '<div class="actions">' +
-            '<select class="type-select" onchange="changeType(\\'' + k.id + '\\', this.value)">' +
-              ['basic','premium','unlimited','admin'].map(t => '<option value="' + t + '"' + (t === kt ? ' selected' : '') + '>' + t.charAt(0).toUpperCase() + t.slice(1) + '</option>').join('') +
+            '<select class="type-select" onchange="changeType(' + JSON.stringify(safeId) + ', this.value)">' +
+              ['basic','premium','unlimited','admin'].map(t => '<option value="' + t + '"' + (t === k.keyType ? ' selected' : '') + '>' + t.charAt(0).toUpperCase() + t.slice(1) + '</option>').join('') +
             '</select>' +
-            '<button class="btn-secondary" onclick="extendKey(\\'' + k.id + '\\')">+30 Days</button>' +
-            '<button class="btn-secondary" onclick="editAccounts(\\'' + k.id + '\\', ' + k.maxAccounts + ')">Edit Limit</button>' +
-            '<button class="' + (k.isActive ? 'btn-danger' : 'btn-success') + '" onclick="toggleKey(\\'' + k.id + '\\', ' + !k.isActive + ')">' + (k.isActive ? 'Deactivate' : 'Activate') + '</button>' +
-            '<button class="btn-danger" onclick="deleteKey(\\'' + k.id + '\\')">Delete</button>' +
+            '<button class="btn-secondary" onclick="extendKey(' + JSON.stringify(safeId) + ')">+30 Days</button>' +
+            '<button class="btn-secondary" onclick="editAccounts(' + JSON.stringify(safeId) + ', ' + Number(k.maxAccounts) + ')">Edit Limit</button>' +
+            '<button class="' + (k.isActive ? 'btn-danger' : 'btn-success') + '" onclick="toggleKey(' + JSON.stringify(safeId) + ', ' + !k.isActive + ')">' + (k.isActive ? 'Deactivate' : 'Activate') + '</button>' +
+            '<button class="btn-danger" onclick="deleteKey(' + JSON.stringify(safeId) + ')">Delete</button>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -224,15 +279,16 @@ router.get("/admin", (req, res) => {
       const typeColors = { basic: '#94a3b8', premium: '#a78bfa', unlimited: '#fbbf24', admin: '#f87171' };
       el.innerHTML = configs.map(c => {
         const color = typeColors[c.keyType] || '#94a3b8';
+        const kt = esc(c.keyType);
         return '<div class="card">' +
-          '<div class="row"><span style="font-size:16px;font-weight:700;color:' + color + '">' + c.keyType.toUpperCase() + '</span></div>' +
+          '<div class="row"><span style="font-size:16px;font-weight:700;color:' + color + '">' + kt.toUpperCase() + '</span></div>' +
           '<div class="grid" style="margin-top:12px">' +
-            '<div class="form-group"><label>Max Accounts</label><input type="number" value="' + c.maxAccounts + '" min="1" onchange="updateConfig(\\'' + c.keyType + '\\', {maxAccounts: parseInt(this.value)})"></div>' +
-            '<div class="form-group"><label>Max Searches</label><input type="number" value="' + c.maxSearches + '" min="1" onchange="updateConfig(\\'' + c.keyType + '\\', {maxSearches: parseInt(this.value)})"></div>' +
-            '<div class="form-group"><label>Min Delay (sec)</label><input type="number" value="' + c.minDelaySeconds + '" min="1" onchange="updateConfig(\\'' + c.keyType + '\\', {minDelaySeconds: parseInt(this.value)})"></div>' +
-            '<div class="form-group"><label>Background</label><select onchange="updateConfig(\\'' + c.keyType + '\\', {backgroundEnabled: this.value===\\'true\\'})"><option value="true"' + (c.backgroundEnabled ? ' selected' : '') + '>Yes</option><option value="false"' + (!c.backgroundEnabled ? ' selected' : '') + '>No</option></select></div>' +
-            '<div class="form-group"><label>Custom Queries</label><select onchange="updateConfig(\\'' + c.keyType + '\\', {customQueriesEnabled: this.value===\\'true\\'})"><option value="true"' + (c.customQueriesEnabled ? ' selected' : '') + '>Yes</option><option value="false"' + (!c.customQueriesEnabled ? ' selected' : '') + '>No</option></select></div>' +
-            '<div class="form-group"><label>Daily Set</label><select onchange="updateConfig(\\'' + c.keyType + '\\', {dailySetEnabled: this.value===\\'true\\'})"><option value="true"' + (c.dailySetEnabled ? ' selected' : '') + '>Yes</option><option value="false"' + (!c.dailySetEnabled ? ' selected' : '') + '>No</option></select></div>' +
+            '<div class="form-group"><label>Max Accounts</label><input type="number" value="' + Number(c.maxAccounts) + '" min="1" onchange="updateConfig(' + JSON.stringify(kt) + ', {maxAccounts: parseInt(this.value)})"></div>' +
+            '<div class="form-group"><label>Max Searches</label><input type="number" value="' + Number(c.maxSearches) + '" min="1" onchange="updateConfig(' + JSON.stringify(kt) + ', {maxSearches: parseInt(this.value)})"></div>' +
+            '<div class="form-group"><label>Min Delay (sec)</label><input type="number" value="' + Number(c.minDelaySeconds) + '" min="1" onchange="updateConfig(' + JSON.stringify(kt) + ', {minDelaySeconds: parseInt(this.value)})"></div>' +
+            '<div class="form-group"><label>Background</label><select onchange="updateConfig(' + JSON.stringify(kt) + ', {backgroundEnabled: this.value===\'true\'})"><option value="true"' + (c.backgroundEnabled ? ' selected' : '') + '>Yes</option><option value="false"' + (!c.backgroundEnabled ? ' selected' : '') + '>No</option></select></div>' +
+            '<div class="form-group"><label>Custom Queries</label><select onchange="updateConfig(' + JSON.stringify(kt) + ', {customQueriesEnabled: this.value===\'true\'})"><option value="true"' + (c.customQueriesEnabled ? ' selected' : '') + '>Yes</option><option value="false"' + (!c.customQueriesEnabled ? ' selected' : '') + '>No</option></select></div>' +
+            '<div class="form-group"><label>Daily Set</label><select onchange="updateConfig(' + JSON.stringify(kt) + ', {dailySetEnabled: this.value===\'true\'})"><option value="true"' + (c.dailySetEnabled ? ' selected' : '') + '>Yes</option><option value="false"' + (!c.dailySetEnabled ? ' selected' : '') + '>No</option></select></div>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -244,7 +300,60 @@ router.get("/admin", (req, res) => {
     }
   </script>
 </body>
-</html>`);
+</html>`;
+}
+
+// ── Routes ────────────────────────────────────────────────────────────────────
+
+router.get("/admin", (req, res) => {
+  if (!ADMIN_SECRET) {
+    return res.status(503).send(loginPage("ADMIN_SECRET is not configured on the server."));
+  }
+
+  const sessionToken = getSessionFromCookie(req.headers.cookie);
+  if (isValidSession(sessionToken)) {
+    return res.send(dashboardPage());
+  }
+
+  // Legacy: accept ?secret in URL — auto-upgrade to session (removes secret from URL)
+  const querySecret = req.query.secret as string;
+  if (querySecret && querySecret === ADMIN_SECRET) {
+    const token = createSession();
+    const cleanPath = req.originalUrl.split("?")[0];
+    res.setHeader(
+      "Set-Cookie",
+      `admin_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=14400`
+    );
+    return res.redirect(303, cleanPath);
+  }
+
+  return res.status(401).send(loginPage());
 });
 
+router.post("/admin/login", (req, res) => {
+  const { secret } = req.body ?? {};
+  if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
+    return res.status(401).send(loginPage("Invalid secret. Please try again."));
+  }
+  const token = createSession();
+  const adminPath = req.path.replace(/\/login$/, "");
+  res.setHeader(
+    "Set-Cookie",
+    `admin_session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=14400`
+  );
+  return res.redirect(303, adminPath || "/admin");
+});
+
+router.post("/admin/logout", (req, res) => {
+  const token = getSessionFromCookie(req.headers.cookie);
+  deleteSession(token);
+  res.setHeader(
+    "Set-Cookie",
+    "admin_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0"
+  );
+  const adminPath = req.path.replace(/\/logout$/, "");
+  return res.redirect(303, adminPath || "/admin");
+});
+
+export { requireAdmin };
 export default router;

@@ -121,12 +121,18 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
         .filter((a) => a.cookies && Object.keys(a.cookies).length > 0)
         .map((a) => ({ email: a.email, name: a.name, cookies: a.cookies }));
       if (accountsWithCookies.length === 0) return;
-      await fetch(`${API_BASE}/sync-cookies`, {
+      const resp = await fetch(`${API_BASE}/sync-cookies`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key, deviceId, accounts: accountsWithCookies }),
       });
-    } catch {}
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => ({}));
+        console.warn("[SyncCookies] Server rejected sync:", resp.status, body?.error);
+      }
+    } catch (e) {
+      console.warn("[SyncCookies] Failed to sync cookies to server:", e);
+    }
   }, []);
 
   const saveLogs = useCallback(async (ls: RunLog[]) => {

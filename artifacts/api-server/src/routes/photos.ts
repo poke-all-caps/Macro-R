@@ -3,6 +3,7 @@ import { ReplitConnectors } from "@replit/connectors-sdk";
 import { db } from "@workspace/db";
 import { licenseKeysTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
+import { requireAdmin } from "../adminSession";
 
 const router = Router();
 const connectors = new ReplitConnectors();
@@ -113,14 +114,6 @@ router.post("/photos/upload", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-
-const requireAdmin = (req: any, res: any, next: any) => {
-  const secret = req.headers["x-admin-secret"];
-  if (!secret || secret !== process.env.ADMIN_SECRET) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  next();
-};
 
 router.get("/admin/keys/:id/photos", requireAdmin, async (req, res) => {
   try {

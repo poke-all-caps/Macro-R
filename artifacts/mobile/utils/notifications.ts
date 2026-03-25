@@ -167,7 +167,7 @@ export async function scheduleOvernightNotifications(
   
 
   // Prompt user about battery optimization (once)
-  promptBatteryOptimization();
+  await promptBatteryOptimization();
 
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();

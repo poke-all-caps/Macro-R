@@ -8,6 +8,7 @@ import * as Crypto from "expo-crypto";
 const LICENSE_KEY_STORAGE = "@ms_rewards_license_key";
 const LICENSE_DATA_STORAGE = "@ms_rewards_license_data";
 const ADMIN_SECRET_STORAGE = "@ms_rewards_admin_secret";
+const ADMIN_VALIDATED_AT_STORAGE = "@ms_rewards_admin_validated_at";
 const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 const ADMIN_VISIBLE_STORAGE = "@ms_rewards_admin_visible";
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "";
@@ -15,6 +16,8 @@ export const OWNER_MODE =
   Constants.expoConfig?.extra?.ownerMode === true ||
   process.env.EXPO_PUBLIC_OWNER_MODE === "true" ||
   Platform.OS === "web";
+
+const ADMIN_OFFLINE_GRACE_DAYS = 7;
 
 async function getDeviceId(): Promise<string> {
   const stored = await AsyncStorage.getItem(DEVICE_ID_STORAGE);
@@ -183,6 +186,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       if (storedAdminSecret) {
         const result = await validateAdmin(storedAdminSecret);
         if (result.valid) {
+          await AsyncStorage.setItem(ADMIN_VALIDATED_AT_STORAGE, Date.now().toString());
           setAdminSecret(storedAdminSecret);
           setIsAdmin(true);
           setIsLicensed(true);
@@ -190,14 +194,22 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
           setIsLoading(false);
           return;
         } else if (result.offline) {
-          setAdminSecret(storedAdminSecret);
-          setIsAdmin(true);
-          setIsLicensed(true);
-          setFeatureConfig(OWNER_FEATURE_CONFIG);
-          setIsLoading(false);
-          return;
+          const validatedAtStr = await AsyncStorage.getItem(ADMIN_VALIDATED_AT_STORAGE);
+          const validatedAt = validatedAtStr ? parseInt(validatedAtStr, 10) : 0;
+          const daysSince = (Date.now() - validatedAt) / (1000 * 60 * 60 * 24);
+          if (daysSince <= ADMIN_OFFLINE_GRACE_DAYS) {
+            setAdminSecret(storedAdminSecret);
+            setIsAdmin(true);
+            setIsLicensed(true);
+            setFeatureConfig(OWNER_FEATURE_CONFIG);
+            setIsLoading(false);
+            return;
+          }
+          await AsyncStorage.removeItem(ADMIN_SECRET_STORAGE);
+          await AsyncStorage.removeItem(ADMIN_VALIDATED_AT_STORAGE);
         } else {
           await AsyncStorage.removeItem(ADMIN_SECRET_STORAGE);
+          await AsyncStorage.removeItem(ADMIN_VALIDATED_AT_STORAGE);
         }
       }
 
@@ -238,10 +250,16 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
 
       const result = await validateKey(storedKey);
       if (result.valid) {
+        if (!result.maxAccounts || !result.expiresAt) {
+          setError("Server returned incomplete license data");
+          setIsLicensed(false);
+          setIsLoading(false);
+          return;
+        }
         const data: LicenseData = {
           key: storedKey,
-          maxAccounts: result.maxAccounts!,
-          expiresAt: result.expiresAt!,
+          maxAccounts: result.maxAccounts,
+          expiresAt: result.expiresAt,
           label: result.label ?? null,
           keyType: result.keyType ?? "basic",
           validatedAt: Date.now(),
@@ -293,6 +311,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     const adminResult = await validateAdmin(trimmed);
     if (adminResult.valid) {
       await AsyncStorage.setItem(ADMIN_SECRET_STORAGE, trimmed);
+      await AsyncStorage.setItem(ADMIN_VALIDATED_AT_STORAGE, Date.now().toString());
       await AsyncStorage.removeItem(LICENSE_KEY_STORAGE);
       await AsyncStorage.removeItem(LICENSE_DATA_STORAGE);
       setAdminSecret(trimmed);
@@ -311,10 +330,15 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
+    if (!result.maxAccounts || !result.expiresAt) {
+      setError("Server returned incomplete license data");
+      return false;
+    }
+
     const data: LicenseData = {
       key: upperKey,
-      maxAccounts: result.maxAccounts!,
-      expiresAt: result.expiresAt!,
+      maxAccounts: result.maxAccounts,
+      expiresAt: result.expiresAt,
       label: result.label ?? null,
       keyType: result.keyType ?? "basic",
       validatedAt: Date.now(),
@@ -324,6 +348,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(LICENSE_KEY_STORAGE, upperKey);
     await AsyncStorage.setItem(LICENSE_DATA_STORAGE, JSON.stringify(data));
     await AsyncStorage.removeItem(ADMIN_SECRET_STORAGE);
+    await AsyncStorage.removeItem(ADMIN_VALIDATED_AT_STORAGE);
     if (result.featureConfig) {
       await saveFeatureConfig(result.featureConfig);
     }
@@ -338,6 +363,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.removeItem(LICENSE_KEY_STORAGE);
     await AsyncStorage.removeItem(LICENSE_DATA_STORAGE);
     await AsyncStorage.removeItem(ADMIN_SECRET_STORAGE);
+    await AsyncStorage.removeItem(ADMIN_VALIDATED_AT_STORAGE);
     await AsyncStorage.removeItem(FEATURE_CONFIG_STORAGE);
     setLicenseData(null);
     setFeatureConfig(DEFAULT_FEATURE_CONFIG);
