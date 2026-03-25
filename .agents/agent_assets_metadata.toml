@@ -18,3 +18,9 @@ id = "HqbrlhgpDqT4jocd33RMU"
 uri = "file://senior report.md"
 type = "text"
 title = "Macro Rewards — Senior Audit Report"
+
+[[outputs]]
+id = "Vf799pIJnvMive1bjUzKi"
+uri = "file://DOCUMENTATION.md"
+type = "text"
+title = "Macro Rewards — Full Documentation"
