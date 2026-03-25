@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Lock, KeyRound, ScanLine, Image as ImageIcon, X } from "lucide-react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { CameraView, Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useLicense } from "@/context/LicenseContext";
 import { AdminPanel } from "@/components/AdminPanel";
@@ -30,7 +30,6 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   const [submitting, setSubmitting] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [scanned, setScanned] = useState(false);
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
   if (isLoading) {
     return (
@@ -71,9 +70,9 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   };
 
   const openScanner = async () => {
-    if (!cameraPermission?.granted) {
-      const result = await requestCameraPermission();
-      if (!result.granted) {
+    if (Platform.OS !== "web") {
+      const { granted } = await Camera.requestCameraPermissionsAsync();
+      if (!granted) {
         Alert.alert(
           "Camera Permission Required",
           "Please allow camera access in your device settings to scan QR codes.",
