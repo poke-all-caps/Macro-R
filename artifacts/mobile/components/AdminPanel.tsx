@@ -23,7 +23,11 @@ import * as Clipboard from "expo-clipboard";
 import Colors from "@/constants/colors";
 import { useLicense } from "@/context/LicenseContext";
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || "";
+const API_BASE =
+  process.env.EXPO_PUBLIC_API_URL ||
+  (process.env.EXPO_PUBLIC_DOMAIN
+    ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+    : "");
 const OWNER_ADMIN_SECRET = process.env.EXPO_PUBLIC_ADMIN_SECRET || "";
 
 const KEY_TYPES = ["basic", "premium", "unlimited", "admin"] as const;

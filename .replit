@@ -30,7 +30,6 @@ timeoutMs = 20000
 
 [userenv.shared]
 ADMIN_SECRET = "5a3c08fc5bb635040ec2db32d5634203f50fc8c2ed599551"
-EXPO_PUBLIC_API_URL = "https://dc504ee6-c8b1-4c66-a83d-f4d7f12a4664-00-rk5lj667wqx7.picard.replit.dev/api"
 EXPO_PUBLIC_ADMIN_SECRET = "5a3c08fc5bb635040ec2db32d5634203f50fc8c2ed599551"
 EXPO_PUBLIC_OWNER_MODE = "true"
 

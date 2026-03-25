@@ -11,7 +11,11 @@ const ADMIN_SECRET_STORAGE = "@ms_rewards_admin_secret";
 const ADMIN_VALIDATED_AT_STORAGE = "@ms_rewards_admin_validated_at";
 const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 const ADMIN_VISIBLE_STORAGE = "@ms_rewards_admin_visible";
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || "";
+const API_BASE =
+  process.env.EXPO_PUBLIC_API_URL ||
+  (process.env.EXPO_PUBLIC_DOMAIN
+    ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+    : "");
 export const OWNER_MODE =
   Constants.expoConfig?.extra?.ownerMode === true ||
   process.env.EXPO_PUBLIC_OWNER_MODE === "true" ||

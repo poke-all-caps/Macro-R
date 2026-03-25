@@ -9,7 +9,11 @@ import React, {
 } from "react";
 import { AppState, Platform, type AppStateStatus } from "react-native";
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || "";
+const API_BASE =
+  process.env.EXPO_PUBLIC_API_URL ||
+  (process.env.EXPO_PUBLIC_DOMAIN
+    ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
+    : "");
 const LICENSE_KEY_STORAGE = "@ms_rewards_license_key";
 const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 
