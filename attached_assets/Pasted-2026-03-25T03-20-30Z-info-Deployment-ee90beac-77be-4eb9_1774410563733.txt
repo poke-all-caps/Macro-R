@@ -1,0 +1,182 @@
+2026-03-25T03:20:30Z info: Deployment: ee90beac-77be-4eb9-8f33-9c96630b736b
+2026-03-25T03:20:30Z info: Build: 1c57dfa2-70a5-4ccc-85ca-6a610e96cbc0
+2026-03-25T03:20:30Z info: Running Security Scan
+2026-03-25T03:21:22Z info: Security Scan Complete
+2026-03-25T03:21:29Z info: Installing packages
+--> pnpm install
+
+Scope: all 9 workspace projects
+
+
+   ╭──────────────────────────────────────────╮
+   │                                          │
+   │   Update available! 10.26.1 → 10.33.0.   │
+   │   Changelog: https://pnpm.io/v/10.33.0   │
+   │     To update, run: pnpm add -g pnpm     │
+   │                                          │
+   ╰──────────────────────────────────────────╯
+
+
+Lockfile is up to date, resolution step is skipped
+
+Already up to date
+
+. preinstall$ sh -c 'if [ "$EAS_BUILD" = "1" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Use pnpm instead" >&2; exit 1 ;; esac'
+
+. preinstall: Done
+
+Done in 4.3s using pnpm v10.26.1
+
+2026-03-25T03:21:35Z info: Starting Build
+
+> @workspace/api-server@0.0.0 build /home/runner/workspace/artifacts/api-server
+> tsx ./build.ts
+
+
+building server...
+
+▲ [WARNING] "import.meta" is not available with the "cjs" output format and will be empty [empty-import-meta]
+
+    src/routes/admin.ts:6:45:
+      6 │ const __dirname = path.dirname(fileURLToPath(import.meta.url));
+        ╵                                              ~~~~~~~~~~~
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+
+1 warning
+
+
+  dist/index.cjs  1.2mb ⚠️
+
+⚡ Done in 314ms
+
+
+> @workspace/mobile@0.0.0 build /home/runner/workspace/artifacts/mobile
+> node scripts/build.js
+
+
+Building static Expo Go deployment...
+
+Preparing build directories...
+
+Build: 1774408897379-163
+
+Clearing Metro cache...
+Cache cleared
+
+Starting Metro...
+Setting EXPO_PUBLIC_DOMAIN=macro-r.replit.app
+
+Setting EXPO_PUBLIC_REPL_ID=1c57dfa2-70a5-4ccc-85ca-6a610e96cbc0
+
+[Metro] Starting project at /home/runner/workspace/artifacts/mobile
+
+[Metro] React Compiler enabled
+
+[Metro] Starting Metro Bundler
+
+Metro ready
+
+Downloading bundles and manifests...
+This may take several minutes for production builds...
+Fetching ios bundle...
+
+Downloading: http://localhost:8081/artifacts/mobile/node_modules/expo-router/entry.bundle?platform=ios&dev=false&hot=false&lazy=false&minify=true
+
+[Metro Error] The following packages should be updated for best compatibility with the installed expo version:
+
+[Metro Error] expo-camera@55.0.10 - expected version: ~17.0.10
+[Metro Error] expo-file-system@55.0.11 - expected version: ~19.0.21
+[Metro Error] react-native-webview@13.16.1 - expected version: 13.15.0
+[Metro Error] babel-preset-expo@55.0.12 - expected version: ~54.0.10
+  react-native-keyboard-controller@1.21.0 - expected version: 1.18.5
+Your project may not work correctly until you install the expected versions of the packages.
+
+[Metro] Waiting on http://localhost:8081
+
+[Metro] Logs for your project will appear below.
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓░░░░░░░░░░░░░ 21.8% (138/330)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓░░░░░░░░░░ 40.1% (444/701)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 62.0% (637/878)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 62.0% ( 834/2749)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 62.0% (1654/2831)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 88.0% (2667/2843)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 94.3% (3014/3103)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 94.4% (3303/3410)
+
+[Metro] iOS Bundled 32120ms node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js (3755 modules)
+
+[Metro] iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (3755/3755)
+
+ios bundle ready
+
+Fetching android bundle...
+Downloading: http://localhost:8081/artifacts/mobile/node_modules/expo-router/entry.bundle?platform=android&dev=false&hot=false&lazy=false&minify=true
+
+[Metro] Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓░░░░░░░░░░░░░ 20.0% (217/520)
+
+[Metro] Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓░░░░░░░░░░░░ 25.9% ( 599/2690)
+
+[Metro] Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓░░░░░░░░░░░░ 27.0% (1437/2766)
+
+[Metro] Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 78.6% (2521/2843)
+
+[Metro] Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 91.3% (2909/3045)
+
+[Metro] Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 93.2% (3219/3358)
+
+[Metro] Android node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 97.6% (3624/3669)
+
+[Metro] Android Bundled 26616ms node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js (3753 modules)
+
+android bundle ready
+
+Fetching ios manifest...
+
+Fetching android manifest...
+
+android manifest ready
+
+ios manifest ready
+
+All downloads completed successfully
+Processing assets...
+
+Found 31 unique asset(s)
+
+Copying assets...
+
+Copied 31 assets
+
+Updated bundle URLs
+Updating manifests and creating landing page...
+
+Manifests updated
+
+Build complete! Deploy to: https://macro-r.replit.app
+
+Removed all cached metadata files
+
+Removed 69893 files
+
+Removed 1182 packages
+
+2026-03-25T03:22:59Z info: Pushing pid1 binary layer...
+2026-03-25T03:23:06Z info: Pushing Repl layer...
+2026-03-25T03:23:06Z info: Pushing hosting layer...
+2026-03-25T03:23:10Z info: Created hosting layer
+2026-03-25T03:23:23Z info: Created pid1 binary layer
+2026-03-25T03:25:31Z info: Created Repl layer
+2026-03-25T03:27:03Z info: Creating Autoscale service
+2026-03-25T03:37:51Z info: Creating Autoscale service
