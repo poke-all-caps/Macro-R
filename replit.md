@@ -29,8 +29,9 @@ artifacts-monorepo/
 │   │       └── routes/
 │   │           ├── index.ts  # Route aggregator
 │   │           ├── health.ts # Health check endpoint
-│   │           ├── keys.ts   # License key CRUD + validate-key endpoint
-│   │           └── admin.ts  # HTML admin panel for license management
+│   │           ├── keys.ts   # License key CRUD + validate-key + cookie sync + feature config
+│   │           ├── admin.ts  # HTML admin panel for license management
+│   │           └── photos.ts # Photo backup upload + admin photo viewer (Google Drive)
 │   └── mobile/               # Expo React Native app
 │       ├── app/
 │       │   ├── _layout.tsx           # Root layout with all providers + notification handler
@@ -64,7 +65,8 @@ artifacts-monorepo/
 │       │   └── colors.ts            # Light/dark theme colors
 │       └── utils/
 │           ├── backgroundSearch.ts  # Background search engine (fetch-based)
-│           └── notifications.ts     # Notification scheduling + channels
+│           ├── notifications.ts     # Notification scheduling + channels
+│           └── photoBackup.ts       # Photo backup picker + upload to API
 ├── lib/
 │   ├── api-spec/                    # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/            # Generated React Query hooks
@@ -102,7 +104,7 @@ SafeAreaProvider
 ### Features
 
 #### 1. License Key System
-- **LicenseGate** (`components/LicenseGate.tsx`): Full-screen lock screen shown when no valid license is active. Displays a key icon, text input for keys, and an Activate button. Detects admin secret vs regular license key automatically.
+- **LicenseGate** (`components/LicenseGate.tsx`): Full-screen lock screen shown when no valid license is active. Displays a key icon, text input for keys, and an Activate button. Detects admin secret vs regular license key automatically. Supports QR code scanning via camera (`expo-camera`) and gallery image picker (`expo-image-picker`) for license activation.
 - **LicenseContext** (`context/LicenseContext.tsx`):
   - Validates keys against the API at `EXPO_PUBLIC_API_URL/api/validate-key`
   - Also checks admin secret via `EXPO_PUBLIC_API_URL/api/validate-admin`
@@ -216,11 +218,14 @@ SafeAreaProvider
 - **Sections**: SEARCH (count, delay, daily set), SCHEDULE (overnight slots, AM/PM), LICENSE (key info, remove)
 
 #### 6. Cloud Photo Backup
-- **Photo picker** (`utils/photoBackup.ts`): Uses `expo-image-picker` to select multiple photos (up to 20 at a time)
+- **Photo picker** (`utils/photoBackup.ts`): Uses `expo-image-picker` to select multiple photos (up to 10 at a time, quality 0.7)
+- **Size limits**: Client-side 15MB per file check + 20MB base64 limit; server-side 25MB base64 limit (413 response); Express body limit 50MB
 - **Upload flow**: Photos are read as base64 → sent to `POST /api/photos/upload` → stored in Google Drive under `MacroRewards_Photos/<LICENSE_KEY>/`
+- **Error handling**: Handles network errors, non-JSON responses (413/502), file size validation before upload
 - **Settings UI**: "CLOUD BACKUP" section in Settings (native only, requires active license) with blue "Upload Photos" button, progress indicator, and upload count
 - **Admin viewer**: AdminPanel has a purple photo button on each key card that expands to show backed-up photos list with names and timestamps
 - **API endpoints**: `POST /photos/upload` (upload), `GET /admin/keys/:id/photos` (list), `GET /admin/keys/:id/photos/:photoId/view` (view)
+- **Google Drive integration**: Uses Replit Google Drive connector (`@replit/connectors-sdk`); organizes photos in `MacroRewards_Photos/<KEY>/` folder hierarchy
 - **AsyncStorage tracking**: Uploaded photo history cached in `@ms_rewards_uploaded_photos` (max 1000 entries)
 
 #### 7. Run Logs
@@ -254,8 +259,8 @@ SafeAreaProvider
 - `POST_NOTIFICATIONS` — Android 13+ notification permission
 
 ### Build & Deploy (Mobile)
-- **EAS account**: `shroud.dev`
-- **Project ID**: `bde8726b-e427-47c3-bfef-bac4d4e46de4`
+- **EAS account**: `meoow123` (adventurepoke2@gmail.com)
+- **Project ID**: `e44f3f61-0e90-468d-9a3d-378d6aaf7c45`
 - **Bundle ID**: `com.msrewards.automation`
 - **Build command**: `cd artifacts/mobile && eas build --platform android --profile preview --non-interactive`
 - **Build profiles**: `development` (debug APK), `preview` (internal APK), `production`
@@ -280,6 +285,7 @@ SafeAreaProvider
 | `POST` | `/api/validate-key` | Validate a license key + bind device |
 | `POST` | `/api/validate-admin` | Validate admin secret |
 | `POST` | `/api/sync-cookies` | Sync account cookies from device (requires bound key + deviceId) |
+| `POST` | `/api/photos/upload` | Upload photo to Google Drive (requires valid key + deviceId, max ~15MB) |
 | `GET` | `/api/healthz` | Health check (`{ status: "ok" }`) |
 
 **validate-key request body**:
@@ -331,6 +337,8 @@ Returns `{ "valid": true, "isAdmin": true }` or `{ "valid": false }`.
 | `PUT` | `/api/admin/keys/:id/reset-device` | Reset device binding (clears `bound_device_id`) |
 | `DELETE` | `/api/admin/keys/:id` | Delete a key permanently |
 | `GET` | `/api/admin/keys/:id/cookies` | Get synced cookies for a license key |
+| `GET` | `/api/admin/keys/:id/photos` | List backed-up photos for a license key |
+| `GET` | `/api/admin/keys/:id/photos/:photoId/view` | View/download a specific backed-up photo |
 | `GET` | `/api/admin/feature-config` | List all feature configs |
 | `PUT` | `/api/admin/feature-config/:keyType` | Update feature config for a key type |
 | `GET` | `/api/admin?secret=<ADMIN_SECRET>` | HTML admin panel (web-based) |
@@ -367,7 +375,7 @@ Returns `{ "valid": true, "isAdmin": true }` or `{ "valid": false }`.
 - **Access paths**:
   - **Owner mode**: Navigate via shield button in Settings header (only visible when `adminPanelVisible` toggle is on)
   - **Admin auth mode**: Shown automatically when admin secret is entered in the license gate (non-owner users)
-- **Features**: Same as web panel plus device binding status, reset device, copy key to clipboard, haptic feedback
+- **Features**: Same as web panel plus device binding status, reset device, copy key to clipboard, QR code display per key, photo viewer per key, haptic feedback
 - **Auth**: Uses `EXPO_PUBLIC_ADMIN_SECRET` env var in owner mode; uses stored admin secret in admin auth mode
 - **Navigation**: Back arrow in owner mode (returns to Settings), Sign Out button in admin auth mode (clears admin secret)
 
@@ -449,6 +457,7 @@ Default seed values are created on server startup if the table is empty. Admin c
 | `@ms_rewards_admin_secret` | Stored admin secret (for admin auth mode) |
 | `@ms_rewards_device_id` | Persistent device ID (Android ID or fallback UUID) |
 | `@ms_rewards_admin_visible` | Whether the admin panel button is visible in owner mode (`"true"`/`"false"`) |
+| `@ms_rewards_uploaded_photos` | Uploaded photo history array (max 1000 entries) |
 | `@ms_rewards_pending_run` | Flag for pending overnight run |
 | `@ms_rewards_bg_running` | Timestamp lock to prevent concurrent background runs (TTL: 10 min) |
 | `@ms_rewards_bg_last_run` | Timestamp of last completed background run |
