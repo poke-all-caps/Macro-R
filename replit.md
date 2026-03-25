@@ -116,7 +116,7 @@ SafeAreaProvider
   - AsyncStorage keys: `@ms_rewards_license_key`, `@ms_rewards_license_data`, `@ms_rewards_admin_secret`
 - **AdminPanel** (`components/AdminPanel.tsx`): Full native admin panel shown when admin secret is entered. Allows creating keys, extending expiry, editing account limits, activating/deactivating, deleting, copying keys to clipboard, and resetting device bindings. Sign out button returns to license entry screen.
 - **Device Locking**: Each key is bound to 1 device only. The first device to activate a key gets bound; other devices are rejected with "Key is already in use on another device". Admin can reset device binding from the admin panel. Device ID is Android ID on Android, or a persistent UUID stored in AsyncStorage. Schema column: `bound_device_id` on `license_keys` table.
-- **Owner Mode** (`app.json` → `expo.extra.ownerMode`): Build-time flag. When `true`, the license screen is bypassed entirely — no key needed. The admin panel is accessible from Settings via a purple "Admin Panel" button, but this button is hidden by default. To show/hide it, go to account #2's edit screen and toggle the "Panel" switch. When `ownerMode` is `false`, everything works normally (license key required). The admin panel uses `EXPO_PUBLIC_ADMIN_SECRET` env var for API auth in owner mode.
+- **Owner Mode** (`EXPO_PUBLIC_OWNER_MODE` env var): Build-time flag. When `"true"`, the license screen is bypassed entirely — no key needed. Controlled solely by `process.env.EXPO_PUBLIC_OWNER_MODE === "true"` (the old `Constants.expoConfig?.extra?.ownerMode` check was removed because it cached stale values on web). The admin panel is accessible from Settings via a purple "Admin Panel" button, but this button is hidden by default. To show/hide it, go to account #2's edit screen and toggle the "Panel" switch. When `"false"`, everything works normally (license key required). The admin panel uses `EXPO_PUBLIC_ADMIN_SECRET` env var for API auth.
 - **Background Work** (`utils/backgroundSearch.ts`): Three-layer approach:
   1. **Background Fetch** (`expo-background-fetch`): Registered on app launch, runs periodically (~1 hour) via Android's JobScheduler. Calls `runBackgroundSearches()`.
   2. **Notification-triggered** (`utils/notifications.ts`): When overnight notification fires in background, `BACKGROUND-NOTIFICATION-TASK` runs `runBackgroundSearches()`. If that fails, it sets a pending-run flag and opens the app.
@@ -422,6 +422,7 @@ Unique constraint on `(license_key_id, account_email)`.
 | `min_delay_seconds` | INTEGER | `5` | Minimum delay between searches |
 | `background_enabled` | BOOLEAN | `false` | Whether background/overnight automation is allowed |
 | `custom_queries_enabled` | BOOLEAN | `false` | Whether custom query editing is allowed |
+| `daily_set_enabled` | BOOLEAN | `true` | Whether Daily Set automation is allowed |
 
 Default seed values are created on server startup if the table is empty. Admin can update per key type via the admin panel or API.
 
@@ -439,8 +440,10 @@ Default seed values are created on server startup if the table is empty. Admin c
 
 ### Current Values
 - **ADMIN_SECRET**: Set via Replit Secrets (do not store in code or docs)
-- **Admin Panel URL**: `https://<REPLIT_DEV_DOMAIN>/api/admin?secret=<ADMIN_SECRET>`
-- **Test License Key**: `1EDA-E7C2-CF06-5B0E` (5 accounts, expires Jan 2027)
+- **Production URL**: `https://macro-r.replit.app`
+- **Admin Panel (prod)**: `https://macro-r.replit.app/api/admin` (log in with ADMIN_SECRET)
+- **Admin Panel (dev)**: `https://<REPLIT_DEV_DOMAIN>/api/admin` (log in with ADMIN_SECRET)
+- **Admin Keys**: `8D34-1426-CA57-B69A` (unbound), `AE26-901F-27B2-671A` (device-bound)
 
 ---
 
@@ -485,13 +488,29 @@ Default seed values are created on server startup if the table is empty. Admin c
 - **Background search delay**: 1.5–2.5 seconds between searches (shorter than foreground)
 
 ### Owner Mode Flow
-1. Set `ownerMode: true` in `app.json` > `expo.extra`
-2. On build, `LicenseContext` reads `Constants.expoConfig.extra.ownerMode` → `OWNER_MODE = true`
+1. Set `EXPO_PUBLIC_OWNER_MODE=true` in Replit Secrets (or `.env` for EAS builds)
+2. On build, Metro inlines `process.env.EXPO_PUBLIC_OWNER_MODE` → `OWNER_MODE = true`
 3. License screen is bypassed entirely — app loads directly
 4. Admin panel button (purple shield) appears in Settings header only when `isOwnerMode && adminPanelVisible`
 5. The `adminPanelVisible` toggle is hidden in account #2's edit section (index 1): visible only when `isOwnerMode && accountIndex === 1 && isEditing`
 6. `admin-panel.tsx` route guard: redirects to `/` if `!OWNER_MODE`
 7. In admin auth mode (non-owner enters admin secret), `LicenseGate` renders `AdminPanel` directly instead of the app
+8. **Important:** `Constants.expoConfig?.extra?.ownerMode` was removed from the check because it caches stale values on web. Only `process.env.EXPO_PUBLIC_OWNER_MODE === "true"` is used now.
+
+### Admin Panel Auth
+The admin panel (`AdminPanel.tsx`) determines the API secret with:
+```typescript
+const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
+```
+- `adminSecret`: Set in context when user enters the admin secret on the license screen
+- `OWNER_ADMIN_SECRET`: Falls back to `EXPO_PUBLIC_ADMIN_SECRET` env var (baked into the build)
+- This ensures the admin panel works whether the user entered the admin secret directly OR used an admin-type license key
+
+### Production Deployment
+- **Production URL**: `https://macro-r.replit.app`
+- **Build script** (`build.ts`): Automatically runs `drizzle-kit push` to sync the production DB schema before bundling
+- **Health check**: `GET /api/healthz`
+- **Mobile APK**: Must set `EXPO_PUBLIC_API_URL=https://macro-r.replit.app/api` in EAS env before building
 
 ### Device Compatibility Notes
 - **Infinix/HiOS**: Requires Autostart enabled for background tasks
