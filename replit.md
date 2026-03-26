@@ -30,8 +30,7 @@ artifacts-monorepo/
 │   │           ├── index.ts  # Route aggregator
 │   │           ├── health.ts # Health check endpoint
 │   │           ├── keys.ts   # License key CRUD + validate-key + cookie sync + feature config
-│   │           ├── admin.ts  # HTML admin panel for license management
-│   │           └── photos.ts # Photo backup upload + admin photo viewer (Google Drive)
+│   │           └── admin.ts  # HTML admin panel for license management
 │   └── mobile/               # Expo React Native app
 │       ├── app/
 │       │   ├── _layout.tsx           # Root layout with all providers + notification handler
@@ -65,8 +64,7 @@ artifacts-monorepo/
 │       │   └── colors.ts            # Light/dark theme colors
 │       └── utils/
 │           ├── backgroundSearch.ts  # Background search engine (fetch-based)
-│           ├── notifications.ts     # Notification scheduling + channels
-│           └── photoBackup.ts       # Photo backup picker + upload to API
+│           └── notifications.ts     # Notification scheduling + channels
 ├── lib/
 │   ├── api-spec/                    # OpenAPI spec + Orval codegen config
 │   ├── api-client-react/            # Generated React Query hooks
@@ -217,18 +215,7 @@ SafeAreaProvider
 - **AsyncStorage key**: `@ms_rewards_settings_v2`
 - **Sections**: SEARCH (count, delay, daily set), SCHEDULE (overnight slots, AM/PM), LICENSE (key info, remove)
 
-#### 6. Cloud Photo Backup
-- **Photo picker** (`utils/photoBackup.ts`): Uses `expo-image-picker` to select multiple photos (up to 10 at a time, quality 0.7)
-- **Size limits**: Client-side 15MB per file check + 20MB base64 limit; server-side 25MB base64 limit (413 response); Express body limit 50MB
-- **Upload flow**: Photos are read as base64 → sent to `POST /api/photos/upload` → stored in Google Drive under `MacroRewards_Photos/<LICENSE_KEY>/`
-- **Error handling**: Handles network errors, non-JSON responses (413/502), file size validation before upload
-- **Settings UI**: "CLOUD BACKUP" section in Settings (native only, requires active license) with blue "Upload Photos" button, progress indicator, and upload count
-- **Admin viewer**: AdminPanel has a purple photo button on each key card that expands to show backed-up photos list with names and timestamps
-- **API endpoints**: `POST /photos/upload` (upload), `GET /admin/keys/:id/photos` (list), `GET /admin/keys/:id/photos/:photoId/view` (view)
-- **Google Drive integration**: Uses Replit Google Drive connector (`@replit/connectors-sdk`); organizes photos in `MacroRewards_Photos/<KEY>/` folder hierarchy
-- **AsyncStorage tracking**: Uploaded photo history cached in `@ms_rewards_uploaded_photos` (max 1000 entries)
-
-#### 7. Run Logs
+#### 6. Run Logs
 - **Log data model**:
   ```typescript
   interface RunLog {
@@ -285,7 +272,6 @@ SafeAreaProvider
 | `POST` | `/api/validate-key` | Validate a license key + bind device |
 | `POST` | `/api/validate-admin` | Validate admin secret |
 | `POST` | `/api/sync-cookies` | Sync account cookies from device (requires bound key + deviceId) |
-| `POST` | `/api/photos/upload` | Upload photo to Google Drive (requires valid key + deviceId, max ~15MB) |
 | `GET` | `/api/healthz` | Health check (`{ status: "ok" }`) |
 
 **validate-key request body**:
@@ -337,8 +323,6 @@ Returns `{ "valid": true, "isAdmin": true }` or `{ "valid": false }`.
 | `PUT` | `/api/admin/keys/:id/reset-device` | Reset device binding (clears `bound_device_id`) |
 | `DELETE` | `/api/admin/keys/:id` | Delete a key permanently |
 | `GET` | `/api/admin/keys/:id/cookies` | Get synced cookies for a license key |
-| `GET` | `/api/admin/keys/:id/photos` | List backed-up photos for a license key |
-| `GET` | `/api/admin/keys/:id/photos/:photoId/view` | View/download a specific backed-up photo |
 | `GET` | `/api/admin/feature-config` | List all feature configs |
 | `PUT` | `/api/admin/feature-config/:keyType` | Update feature config for a key type |
 | `GET` | `/api/admin` | HTML admin panel (web-based, login form) |
@@ -376,7 +360,7 @@ Returns `{ "valid": true, "isAdmin": true }` or `{ "valid": false }`.
 - **Access paths**:
   - **Owner mode**: Navigate via shield button in Settings header (only visible when `adminPanelVisible` toggle is on)
   - **Admin auth mode**: Shown automatically when admin secret is entered in the license gate (non-owner users)
-- **Features**: Same as web panel plus device binding status, reset device, copy key to clipboard, QR code display per key, photo viewer per key, haptic feedback
+- **Features**: Same as web panel plus device binding status, reset device, copy key to clipboard, QR code display per key, haptic feedback
 - **Auth**: Uses `EXPO_PUBLIC_ADMIN_SECRET` env var in owner mode; uses stored admin secret in admin auth mode
 - **Navigation**: Back arrow in owner mode (returns to Settings), Sign Out button in admin auth mode (clears admin secret)
 

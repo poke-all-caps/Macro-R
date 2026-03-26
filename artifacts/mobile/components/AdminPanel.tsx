@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { ArrowLeft, Cookie, Copy, Image as ImageIcon, Key, LogOut, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, Settings, Shield, Smartphone, Trash2 } from "lucide-react-native";
+import { ArrowLeft, Cookie, Copy, Key, LogOut, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, Settings, Shield, Smartphone, Trash2 } from "lucide-react-native";
 import QRCode from "react-native-qrcode-svg";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -84,9 +84,7 @@ export function AdminPanel() {
   const [keyCookies, setKeyCookies] = useState<Record<string, any[]>>({});
   const [cookieLoading, setCookieLoading] = useState<string | null>(null);
   const [showQrKeyId, setShowQrKeyId] = useState<string | null>(null);
-  const [expandedPhotoKeyId, setExpandedPhotoKeyId] = useState<string | null>(null);
-  const [keyPhotos, setKeyPhotos] = useState<Record<string, any[]>>({});
-  const [photoLoading, setPhotoLoading] = useState<string | null>(null);
+
 
   const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
   const adminLicenseKey = licenseData?.keyType === "admin" ? licenseData.key : null;
@@ -154,21 +152,6 @@ export function AdminPanel() {
     setCookieLoading(null);
   }, [apiCall, expandedCookieKeyId]);
 
-  const fetchPhotosForKey = useCallback(async (keyId: string) => {
-    if (expandedPhotoKeyId === keyId) {
-      setExpandedPhotoKeyId(null);
-      return;
-    }
-    setPhotoLoading(keyId);
-    try {
-      const data = await apiCall("GET", `/admin/keys/${keyId}/photos`);
-      setKeyPhotos((prev) => ({ ...prev, [keyId]: data.photos || [] }));
-      setExpandedPhotoKeyId(keyId);
-    } catch {
-      Alert.alert("Error", "Failed to load photos");
-    }
-    setPhotoLoading(null);
-  }, [apiCall, expandedPhotoKeyId]);
 
   useEffect(() => {
     loadKeys();
@@ -412,14 +395,6 @@ export function AdminPanel() {
             )}
           </Pressable>
 
-          <Pressable onPress={() => fetchPhotosForKey(item.id)} style={[styles.actionBtn, styles.actionBtnFlex, { backgroundColor: expandedPhotoKeyId === item.id ? "#8b5cf622" : "#8b5cf622" }]}>
-            {photoLoading === item.id ? (
-              <ActivityIndicator size={14} color="#8b5cf6" />
-            ) : (
-              <ImageIcon size={14} color="#8b5cf6" />
-            )}
-          </Pressable>
-
           <Pressable onPress={() => setShowQrKeyId(showQrKeyId === item.id ? null : item.id)} style={[styles.actionBtn, styles.actionBtnFlex, { backgroundColor: showQrKeyId === item.id ? "#3b82f622" : colors.surfaceSecondary }]}>
             <QrCode size={14} color={showQrKeyId === item.id ? "#3b82f6" : colors.text} />
           </Pressable>
@@ -491,38 +466,6 @@ export function AdminPanel() {
           </View>
         )}
 
-        {expandedPhotoKeyId === item.id && (
-          <View style={{ marginTop: 12, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 10 }}>
-              <ImageIcon size={16} color="#8b5cf6" />
-              <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: colors.text }}>Backed Up Photos</Text>
-              <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textSecondary }}>
-                ({(keyPhotos[item.id] || []).length})
-              </Text>
-            </View>
-            {(keyPhotos[item.id] || []).length === 0 ? (
-              <Text style={{ fontSize: 13, fontFamily: "Inter_400Regular", color: colors.textSecondary, textAlign: "center", paddingVertical: 8 }}>
-                No photos backed up for this key
-              </Text>
-            ) : (
-              (keyPhotos[item.id] || []).map((photo: any, idx: number) => (
-                <View key={photo.id || idx} style={{ backgroundColor: colors.background, borderRadius: 10, padding: 10, marginBottom: 8, borderWidth: 1, borderColor: colors.border, flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <View style={{ width: 40, height: 40, borderRadius: 8, backgroundColor: "#8b5cf622", alignItems: "center", justifyContent: "center" }}>
-                    <ImageIcon size={20} color="#8b5cf6" />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 13, fontFamily: "Inter_500Medium", color: colors.text }} numberOfLines={1}>
-                      {photo.name}
-                    </Text>
-                    <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textSecondary }}>
-                      {photo.createdTime ? new Date(photo.createdTime).toLocaleString() : ""}
-                    </Text>
-                  </View>
-                </View>
-              ))
-            )}
-          </View>
-        )}
       </View>
     );
   };

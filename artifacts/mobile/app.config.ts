@@ -68,7 +68,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-image-picker",
       {
-        photosPermission: "Allow Macro R to access your photos to scan QR codes from images and back up your photos.",
+        photosPermission: "Allow Macro R to access your photos to scan QR codes from images.",
         cameraPermission: "Allow Macro R to access your camera to scan QR codes.",
       },
     ],
