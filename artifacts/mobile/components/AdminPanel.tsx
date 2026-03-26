@@ -67,7 +67,7 @@ export function AdminPanel() {
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
-  const { adminSecret, removeLicense } = useLicense();
+  const { adminSecret, licenseData, removeLicense } = useLicense();
 
   const [activeTab, setActiveTab] = useState<"keys" | "config">("keys");
   const [keys, setKeys] = useState<LicenseKey[]>([]);
@@ -89,15 +89,18 @@ export function AdminPanel() {
   const [photoLoading, setPhotoLoading] = useState<string | null>(null);
 
   const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
+  const adminLicenseKey = licenseData?.keyType === "admin" ? licenseData.key : null;
 
   const apiCall = useCallback(async (method: string, path: string, body?: any) => {
-    const opts: RequestInit = {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        "X-Admin-Secret": effectiveSecret,
-      },
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
     };
+    if (effectiveSecret) {
+      headers["X-Admin-Secret"] = effectiveSecret;
+    } else if (adminLicenseKey) {
+      headers["X-Admin-Key"] = adminLicenseKey;
+    }
+    const opts: RequestInit = { method, headers };
     if (body) opts.body = JSON.stringify(body);
     const resp = await fetch(`${API_BASE}${path}`, opts);
     if (!resp.ok) {
@@ -105,7 +108,7 @@ export function AdminPanel() {
       throw new Error(text);
     }
     return resp.json();
-  }, [effectiveSecret]);
+  }, [effectiveSecret, adminLicenseKey]);
 
   const loadKeys = useCallback(async () => {
     try {

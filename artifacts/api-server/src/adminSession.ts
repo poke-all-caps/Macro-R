@@ -1,4 +1,7 @@
 import crypto from "crypto";
+import { db } from "@workspace/db";
+import { licenseKeysTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
 
 const SESSION_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
 const sessions = new Map<string, number>(); // token -> expiresAt (ms)
@@ -30,6 +33,17 @@ export function getSessionFromCookie(cookieHeader: string | undefined): string |
   return match?.split("=").slice(1).join("=").trim();
 }
 
+async function isAdminLicenseKey(key: string | undefined): Promise<boolean> {
+  if (!key) return false;
+  try {
+    const [found] = await db.select().from(licenseKeysTable)
+      .where(eq(licenseKeysTable.key, key.trim().toUpperCase()));
+    return !!(found && found.isActive && found.keyType === "admin" && new Date(found.expiresAt) > new Date());
+  } catch {
+    return false;
+  }
+}
+
 export function requireAdmin(req: any, res: any, next: any): void {
   const ADMIN_SECRET = process.env["ADMIN_SECRET"];
   if (!ADMIN_SECRET) {
@@ -41,6 +55,17 @@ export function requireAdmin(req: any, res: any, next: any): void {
 
   const sessionToken = getSessionFromCookie(req.headers.cookie);
   if (isValidSession(sessionToken)) { next(); return; }
+
+  const adminKey = req.headers["x-admin-key"];
+  if (adminKey) {
+    isAdminLicenseKey(adminKey).then((valid) => {
+      if (valid) { next(); return; }
+      res.status(401).json({ error: "Unauthorized" });
+    }).catch(() => {
+      res.status(401).json({ error: "Unauthorized" });
+    });
+    return;
+  }
 
   res.status(401).json({ error: "Unauthorized" });
 }
