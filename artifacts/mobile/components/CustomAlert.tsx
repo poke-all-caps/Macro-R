@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { X } from "lucide-react-native";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
@@ -24,6 +25,8 @@ interface CustomAlertProps {
   buttons?: AlertButton[];
   onDismiss?: () => void;
   children?: React.ReactNode;
+  showCloseButton?: boolean;
+  icon?: React.ReactNode;
 }
 
 export function CustomAlert({
@@ -33,8 +36,10 @@ export function CustomAlert({
   buttons,
   onDismiss,
   children,
+  showCloseButton = true,
+  icon,
 }: CustomAlertProps) {
-  const scheme = useColorScheme() ?? "light";
+  const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
   const scaleAnim = useRef(new Animated.Value(0.85)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -93,7 +98,20 @@ export function CustomAlert({
             },
           ]}
         >
+          {showCloseButton && (
+            <Pressable
+              onPress={onDismiss}
+              style={[styles.closeButton, { backgroundColor: colors.surfaceSecondary }]}
+              hitSlop={8}
+              accessibilityLabel="Close"
+              accessibilityRole="button"
+            >
+              <X size={16} color={colors.textSecondary} />
+            </Pressable>
+          )}
+
           <View style={styles.content}>
+            {icon && <View style={styles.iconContainer}>{icon}</View>}
             <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
             {message ? (
               <Text style={[styles.message, { color: colors.textSecondary }]}>
@@ -103,52 +121,54 @@ export function CustomAlert({
             {children}
           </View>
 
-          <View style={styles.buttonRow}>
-            {resolvedButtons.map((btn, i) => {
-              const gradientColors = getButtonColors(btn.style);
-              const textColor = getButtonTextColor(btn.style);
-              const isGradient = btn.style !== "cancel";
+          {resolvedButtons.length > 0 && (
+            <View style={styles.buttonRow}>
+              {resolvedButtons.map((btn, i) => {
+                const gradientColors = getButtonColors(btn.style);
+                const textColor = getButtonTextColor(btn.style);
+                const isGradient = btn.style !== "cancel";
 
-              return (
-                <Pressable
-                  key={i}
-                  onPress={() => {
-                    btn.onPress?.();
-                    onDismiss?.();
-                  }}
-                  style={({ pressed }) => [
-                    styles.button,
-                    resolvedButtons.length === 1 && { flex: 1 },
-                    { opacity: pressed ? 0.8 : 1 },
-                  ]}
-                >
-                  {isGradient ? (
-                    <LinearGradient
-                      colors={gradientColors}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.buttonGradient}
-                    >
-                      <Text style={[styles.buttonText, { color: textColor }]}>
-                        {btn.text}
-                      </Text>
-                    </LinearGradient>
-                  ) : (
-                    <View
-                      style={[
-                        styles.buttonGradient,
-                        { backgroundColor: gradientColors[0] },
-                      ]}
-                    >
-                      <Text style={[styles.buttonText, { color: textColor }]}>
-                        {btn.text}
-                      </Text>
-                    </View>
-                  )}
-                </Pressable>
-              );
-            })}
-          </View>
+                return (
+                  <Pressable
+                    key={i}
+                    onPress={() => {
+                      btn.onPress?.();
+                      onDismiss?.();
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      resolvedButtons.length === 1 && { flex: 1 },
+                      { opacity: pressed ? 0.8 : 1 },
+                    ]}
+                  >
+                    {isGradient ? (
+                      <LinearGradient
+                        colors={gradientColors}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.buttonGradient}
+                      >
+                        <Text style={[styles.buttonText, { color: textColor }]}>
+                          {btn.text}
+                        </Text>
+                      </LinearGradient>
+                    ) : (
+                      <View
+                        style={[
+                          styles.buttonGradient,
+                          { backgroundColor: gradientColors[0] },
+                        ]}
+                      >
+                        <Text style={[styles.buttonText, { color: textColor }]}>
+                          {btn.text}
+                        </Text>
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
         </Animated.View>
       </Animated.View>
     </Modal>
@@ -162,15 +182,17 @@ export function useCustomAlert() {
     message?: string;
     buttons?: AlertButton[];
     children?: React.ReactNode;
+    icon?: React.ReactNode;
   }>({ visible: false, title: "" });
 
   const showAlert = (
     title: string,
     message?: string,
     buttons?: AlertButton[],
-    children?: React.ReactNode
+    children?: React.ReactNode,
+    icon?: React.ReactNode
   ) => {
-    setAlertState({ visible: true, title, message, buttons, children });
+    setAlertState({ visible: true, title, message, buttons, children, icon });
   };
 
   const hideAlert = () => {
@@ -184,6 +206,7 @@ export function useCustomAlert() {
       message={alertState.message}
       buttons={alertState.buttons}
       onDismiss={hideAlert}
+      icon={alertState.icon}
     >
       {alertState.children}
     </CustomAlert>
@@ -213,9 +236,25 @@ const styles = StyleSheet.create({
     elevation: 12,
     overflow: "hidden",
   },
+  closeButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
   content: {
     padding: 24,
+    paddingTop: 28,
     gap: 10,
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginBottom: 4,
   },
   title: {
     fontSize: 20,

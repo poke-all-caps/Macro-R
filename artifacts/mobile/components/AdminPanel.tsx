@@ -1,11 +1,10 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { ArrowLeft, Calendar, ChevronRight, Cookie, Copy, Key, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, X } from "lucide-react-native";
+import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, Key, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, Users, X } from "lucide-react-native";
 import QRCode from "react-native-qrcode-svg";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   Platform,
@@ -23,6 +22,7 @@ import * as Clipboard from "expo-clipboard";
 
 import Colors from "@/constants/colors";
 import { useLicense } from "@/context/LicenseContext";
+import { CustomAlert } from "@/components/CustomAlert";
 
 const API_BASE =
   process.env.EXPO_PUBLIC_API_URL ||
@@ -86,6 +86,17 @@ export function AdminPanel() {
   const [cookieLoading, setCookieLoading] = useState(false);
   const [showQr, setShowQr] = useState(false);
 
+  const [deletePopup, setDeletePopup] = useState(false);
+  const [errorPopup, setErrorPopup] = useState<{ visible: boolean; title: string; message: string }>({ visible: false, title: "", message: "" });
+  const [successPopup, setSuccessPopup] = useState<{ visible: boolean; title: string; message: string; copyText?: string }>({ visible: false, title: "", message: "" });
+  const [typePopup, setTypePopup] = useState(false);
+  const [limitPopup, setLimitPopup] = useState(false);
+  const [limitInput, setLimitInput] = useState("");
+  const [expiryPopup, setExpiryPopup] = useState(false);
+  const [expiryYear, setExpiryYear] = useState("");
+  const [expiryMonth, setExpiryMonth] = useState("");
+  const [expiryDay, setExpiryDay] = useState("");
+
   const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
   const adminLicenseKey = licenseData?.keyType === "admin" ? licenseData.key : null;
 
@@ -108,12 +119,20 @@ export function AdminPanel() {
     return resp.json();
   }, [effectiveSecret, adminLicenseKey]);
 
+  const showError = (title: string, message: string) => {
+    setErrorPopup({ visible: true, title, message });
+  };
+
+  const showSuccess = (title: string, message: string, copyText?: string) => {
+    setSuccessPopup({ visible: true, title, message, copyText });
+  };
+
   const loadKeys = useCallback(async () => {
     try {
       const data = await apiCall("GET", "/admin/keys");
       setKeys(data.keys || []);
     } catch {
-      Alert.alert("Error", "Failed to load keys");
+      showError("Failed to Load Keys", "Could not connect to the server. Check your connection and try again.");
     }
     setLoading(false);
   }, [apiCall]);
@@ -132,7 +151,7 @@ export function AdminPanel() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       loadFeatureConfigs();
     } catch {
-      Alert.alert("Error", "Failed to update config");
+      showError("Update Failed", "Could not update feature config. Try again.");
     }
   }, [apiCall, loadFeatureConfigs]);
 
@@ -170,18 +189,10 @@ export function AdminPanel() {
         setNewExpUnit("days");
         setNewKeyType("basic");
         await loadKeys();
-        Alert.alert("Key Created", result.key.key, [
-          {
-            text: "Copy",
-            onPress: () => {
-              Clipboard.setStringAsync(result.key.key);
-            },
-          },
-          { text: "OK" },
-        ]);
+        showSuccess("Key Created", result.key.key, result.key.key);
       }
     } catch {
-      Alert.alert("Error", "Failed to create key");
+      showError("Creation Failed", "Could not create the key. Try again.");
     }
     setCreating(false);
   };
@@ -217,6 +228,10 @@ export function AdminPanel() {
     setSelectedKey(null);
     setProfileCookies([]);
     setShowQr(false);
+    setDeletePopup(false);
+    setTypePopup(false);
+    setLimitPopup(false);
+    setExpiryPopup(false);
   };
 
   const profileExtendKey = async () => {
@@ -225,80 +240,116 @@ export function AdminPanel() {
     const current = new Date(selectedKey.expiresAt);
     const base = current > new Date() ? current : new Date();
     const newExp = new Date(base.getTime() + 30 * 86400000).toISOString();
-    await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { expiresAt: newExp });
-    await loadKeys();
-    setSelectedKey((prev) => prev ? { ...prev, expiresAt: newExp } : null);
-  };
-
-  const profileEditLimit = async () => {
-    if (!selectedKey) return;
-    if (Platform.OS === "web") {
-      const val = prompt(`Set account limit (current: ${selectedKey.maxAccounts}):`, String(selectedKey.maxAccounts));
-      if (val === null) return;
-      const n = parseInt(val);
-      if (isNaN(n) || n < 1) return;
-      await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { maxAccounts: n });
+    try {
+      await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { expiresAt: newExp });
       await loadKeys();
-      setSelectedKey((prev) => prev ? { ...prev, maxAccounts: n } : null);
-    } else {
-      const buttons = [1, 2, 3, 5, 10, 20, 50].map((n) => ({
-        text: `${n} account${n > 1 ? "s" : ""}`,
-        onPress: async () => {
-          await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { maxAccounts: n });
-          await loadKeys();
-          setSelectedKey((prev) => prev ? { ...prev, maxAccounts: n } : null);
-        },
-      }));
-      Alert.alert("Set Account Limit", `Current: ${selectedKey.maxAccounts}`, [
-        ...buttons,
-        { text: "Cancel", style: "cancel" },
-      ]);
+      setSelectedKey((prev) => prev ? { ...prev, expiresAt: newExp } : null);
+    } catch {
+      showError("Error", "Failed to extend expiry.");
     }
   };
 
-  const profileChangeType = async () => {
+  const openLimitPopup = () => {
     if (!selectedKey) return;
-    if (Platform.OS === "web") {
-      const types = KEY_TYPES.map((t, i) => `${i + 1}. ${t.charAt(0).toUpperCase() + t.slice(1)}`).join("\n");
-      const val = prompt(`Change key type (current: ${selectedKey.keyType}):\n${types}\nEnter number:`, String(KEY_TYPES.indexOf(selectedKey.keyType) + 1));
-      if (val === null) return;
-      const idx = parseInt(val) - 1;
-      if (idx < 0 || idx >= KEY_TYPES.length || KEY_TYPES[idx] === selectedKey.keyType) return;
-      await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { keyType: KEY_TYPES[idx] });
+    setLimitInput(String(selectedKey.maxAccounts));
+    setLimitPopup(true);
+  };
+
+  const submitLimit = async (n: number) => {
+    if (!selectedKey) return;
+    if (isNaN(n) || n < 1) {
+      showError("Invalid Limit", "Please enter a number greater than 0.");
+      return;
+    }
+    setLimitPopup(false);
+    try {
+      await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { maxAccounts: n });
       await loadKeys();
-      setSelectedKey((prev) => prev ? { ...prev, keyType: KEY_TYPES[idx] } : null);
-    } else {
-      const buttons = KEY_TYPES.map((t) => ({
-        text: t.charAt(0).toUpperCase() + t.slice(1),
-        onPress: async () => {
-          if (t === selectedKey.keyType) return;
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { keyType: t });
-          await loadKeys();
-          setSelectedKey((prev) => prev ? { ...prev, keyType: t } : null);
-        },
-      }));
-      Alert.alert("Change Key Type", `Current: ${selectedKey.keyType}`, [
-        ...buttons,
-        { text: "Cancel", style: "cancel" },
-      ]);
+      setSelectedKey((prev) => prev ? { ...prev, maxAccounts: n } : null);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      showError("Error", "Failed to update account limit.");
+    }
+  };
+
+  const openExpiryPopup = () => {
+    if (!selectedKey) return;
+    const d = new Date(selectedKey.expiresAt);
+    setExpiryYear(String(d.getFullYear()));
+    setExpiryMonth(String(d.getMonth() + 1).padStart(2, "0"));
+    setExpiryDay(String(d.getDate()).padStart(2, "0"));
+    setExpiryPopup(true);
+  };
+
+  const submitExpiry = async () => {
+    if (!selectedKey) return;
+    const y = parseInt(expiryYear);
+    const m = parseInt(expiryMonth);
+    const d = parseInt(expiryDay);
+    if (isNaN(y) || isNaN(m) || isNaN(d) || m < 1 || m > 12 || d < 1 || d > 31 || y < 2024) {
+      showError("Invalid Date", "Please enter a valid date.");
+      return;
+    }
+    const constructed = new Date(y, m - 1, d, 23, 59, 59);
+    if (constructed.getFullYear() !== y || constructed.getMonth() !== m - 1 || constructed.getDate() !== d) {
+      showError("Invalid Date", "That date doesn't exist. Please check the values.");
+      return;
+    }
+    const newExp = constructed.toISOString();
+    setExpiryPopup(false);
+    try {
+      await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { expiresAt: newExp });
+      await loadKeys();
+      setSelectedKey((prev) => prev ? { ...prev, expiresAt: newExp } : null);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {
+      showError("Error", "Failed to update expiry date.");
+    }
+  };
+
+  const openTypePopup = () => {
+    if (!selectedKey) return;
+    setTypePopup(true);
+  };
+
+  const submitType = async (t: KeyType) => {
+    if (!selectedKey || t === selectedKey.keyType) {
+      setTypePopup(false);
+      return;
+    }
+    setTypePopup(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { keyType: t });
+      await loadKeys();
+      setSelectedKey((prev) => prev ? { ...prev, keyType: t } : null);
+    } catch {
+      showError("Error", "Failed to change key type.");
     }
   };
 
   const profileResetDevice = async () => {
     if (!selectedKey?.boundDeviceId) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await apiCall("PUT", `/admin/keys/${selectedKey.id}/reset-device`);
-    await loadKeys();
-    setSelectedKey((prev) => prev ? { ...prev, boundDeviceId: null } : null);
+    try {
+      await apiCall("PUT", `/admin/keys/${selectedKey.id}/reset-device`);
+      await loadKeys();
+      setSelectedKey((prev) => prev ? { ...prev, boundDeviceId: null } : null);
+    } catch {
+      showError("Error", "Failed to reset device binding.");
+    }
   };
 
   const profileToggleActive = async () => {
     if (!selectedKey) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { isActive: !selectedKey.isActive });
-    await loadKeys();
-    setSelectedKey((prev) => prev ? { ...prev, isActive: !prev.isActive } : null);
+    try {
+      await apiCall("PUT", `/admin/keys/${selectedKey.id}`, { isActive: !selectedKey.isActive });
+      await loadKeys();
+      setSelectedKey((prev) => prev ? { ...prev, isActive: !prev.isActive } : null);
+    } catch {
+      showError("Error", "Failed to toggle key status.");
+    }
   };
 
   const profileLoadCookies = async () => {
@@ -308,32 +359,21 @@ export function AdminPanel() {
       const data = await apiCall("GET", `/admin/keys/${selectedKey.id}/cookies`);
       setProfileCookies(data.cookies || []);
     } catch {
-      Alert.alert("Error", "Failed to load cookies");
+      showError("Error", "Failed to load synced cookies.");
     }
     setCookieLoading(false);
   };
 
-  const profileDeleteKey = async () => {
+  const confirmDeleteKey = async () => {
     if (!selectedKey) return;
-    if (Platform.OS === "web") {
-      if (!confirm(`Delete ${selectedKey.key} permanently?`)) return;
+    setDeletePopup(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    try {
       await apiCall("DELETE", `/admin/keys/${selectedKey.id}`);
       await loadKeys();
       closeProfile();
-    } else {
-      Alert.alert("Delete Key", `Delete ${selectedKey.key} permanently?`, [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-            await apiCall("DELETE", `/admin/keys/${selectedKey.id}`);
-            await loadKeys();
-            closeProfile();
-          },
-        },
-      ]);
+    } catch {
+      showError("Error", "Failed to delete key.");
     }
   };
 
@@ -472,18 +512,25 @@ export function AdminPanel() {
                 onPress={profileExtendKey}
               />
               <ProfileAction
-                icon={<Minus size={18} color="#8b5cf6" />}
+                icon={<Calendar size={18} color="#10b981" />}
+                label="Set Custom Expiry"
+                sublabel={new Date(selectedKey.expiresAt).toLocaleDateString()}
+                colors={colors}
+                onPress={openExpiryPopup}
+              />
+              <ProfileAction
+                icon={<Users size={18} color="#8b5cf6" />}
                 label="Change Account Limit"
                 sublabel={`Current: ${selectedKey.maxAccounts}`}
                 colors={colors}
-                onPress={profileEditLimit}
+                onPress={openLimitPopup}
               />
               <ProfileAction
                 icon={<Key size={18} color={typeColor.color} />}
                 label="Change Key Type"
                 sublabel={selectedKey.keyType.charAt(0).toUpperCase() + selectedKey.keyType.slice(1)}
                 colors={colors}
-                onPress={profileChangeType}
+                onPress={openTypePopup}
               />
               {selectedKey.boundDeviceId && (
                 <ProfileAction
@@ -575,7 +622,7 @@ export function AdminPanel() {
 
             <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
               <Pressable
-                onPress={profileDeleteKey}
+                onPress={() => setDeletePopup(true)}
                 style={({ pressed }) => [
                   styles.deleteBtn,
                   { opacity: pressed ? 0.85 : 1 },
@@ -812,6 +859,203 @@ export function AdminPanel() {
       )}
 
       {renderKeyProfile()}
+
+      <CustomAlert
+        visible={deletePopup}
+        title="Delete Key"
+        message={`Are you sure you want to permanently delete this key?\n\n${selectedKey?.key ?? ""}`}
+        icon={<View style={popupStyles.iconCircleRed}><Trash2 size={24} color="#fff" /></View>}
+        onDismiss={() => setDeletePopup(false)}
+        buttons={[
+          { text: "Cancel", style: "cancel" },
+          { text: "Delete", style: "destructive", onPress: confirmDeleteKey },
+        ]}
+      />
+
+      <CustomAlert
+        visible={errorPopup.visible}
+        title={errorPopup.title}
+        message={errorPopup.message}
+        icon={<View style={popupStyles.iconCircleOrange}><AlertTriangle size={24} color="#fff" /></View>}
+        onDismiss={() => setErrorPopup({ visible: false, title: "", message: "" })}
+        buttons={[{ text: "OK", style: "default" }]}
+      />
+
+      <CustomAlert
+        visible={successPopup.visible}
+        title={successPopup.title}
+        icon={<View style={popupStyles.iconCircleGreen}><Check size={24} color="#fff" /></View>}
+        onDismiss={() => setSuccessPopup({ visible: false, title: "", message: "" })}
+        buttons={
+          successPopup.copyText
+            ? [
+                { text: "Copy Key", style: "default", onPress: () => { if (successPopup.copyText) Clipboard.setStringAsync(successPopup.copyText); } },
+                { text: "Done", style: "cancel" },
+              ]
+            : [{ text: "OK", style: "default" }]
+        }
+      >
+        <View style={popupStyles.keyDisplay}>
+          <Text style={popupStyles.keyDisplayText}>{successPopup.message}</Text>
+        </View>
+      </CustomAlert>
+
+      <CustomAlert
+        visible={typePopup}
+        title="Change Key Type"
+        message={`Current: ${selectedKey?.keyType?.toUpperCase() ?? ""}`}
+        icon={<View style={popupStyles.iconCircleBlue}><Key size={24} color="#fff" /></View>}
+        onDismiss={() => setTypePopup(false)}
+        buttons={[]}
+      >
+        <View style={popupStyles.optionGrid}>
+          {KEY_TYPES.map((t) => {
+            const tc = KEY_TYPE_COLORS[t];
+            const isSelected = selectedKey?.keyType === t;
+            return (
+              <Pressable
+                key={t}
+                onPress={() => submitType(t)}
+                style={[
+                  popupStyles.optionChip,
+                  {
+                    backgroundColor: isSelected ? tc.bg : "rgba(255,255,255,0.05)",
+                    borderColor: isSelected ? tc.color : "rgba(255,255,255,0.1)",
+                  },
+                ]}
+              >
+                {isSelected && <Check size={14} color={tc.color} />}
+                <Text style={[popupStyles.optionChipText, { color: isSelected ? tc.color : "#94a3b8" }]}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </CustomAlert>
+
+      <CustomAlert
+        visible={limitPopup}
+        title="Set Account Limit"
+        message={`Current: ${selectedKey?.maxAccounts ?? 0} accounts`}
+        icon={<View style={popupStyles.iconCirclePurple}><Users size={24} color="#fff" /></View>}
+        onDismiss={() => setLimitPopup(false)}
+        buttons={[
+          { text: "Cancel", style: "cancel" },
+          { text: "Save", style: "default", onPress: () => submitLimit(parseInt(limitInput)) },
+        ]}
+      >
+        <View style={popupStyles.inputSection}>
+          <View style={popupStyles.presetRow}>
+            {[1, 2, 3, 5, 10, 20, 50].map((n) => (
+              <Pressable
+                key={n}
+                onPress={() => setLimitInput(String(n))}
+                style={[
+                  popupStyles.presetChip,
+                  limitInput === String(n) && popupStyles.presetChipActive,
+                ]}
+              >
+                <Text style={[popupStyles.presetChipText, limitInput === String(n) && popupStyles.presetChipTextActive]}>
+                  {n}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <View style={popupStyles.customInputRow}>
+            <Text style={popupStyles.customInputLabel}>Custom:</Text>
+            <TextInput
+              style={popupStyles.customInput}
+              keyboardType="number-pad"
+              value={limitInput}
+              onChangeText={setLimitInput}
+              placeholder="Enter number"
+              placeholderTextColor="#64748b"
+              selectTextOnFocus
+            />
+          </View>
+        </View>
+      </CustomAlert>
+
+      <CustomAlert
+        visible={expiryPopup}
+        title="Set Expiry Date"
+        message={selectedKey ? `Current: ${new Date(selectedKey.expiresAt).toLocaleDateString()}` : ""}
+        icon={<View style={popupStyles.iconCircleTeal}><Calendar size={24} color="#fff" /></View>}
+        onDismiss={() => setExpiryPopup(false)}
+        buttons={[
+          { text: "Cancel", style: "cancel" },
+          { text: "Save", style: "default", onPress: submitExpiry },
+        ]}
+      >
+        <View style={popupStyles.inputSection}>
+          <View style={popupStyles.dateRow}>
+            <View style={popupStyles.dateField}>
+              <Text style={popupStyles.dateLabel}>Year</Text>
+              <TextInput
+                style={popupStyles.dateInput}
+                keyboardType="number-pad"
+                value={expiryYear}
+                onChangeText={setExpiryYear}
+                maxLength={4}
+                placeholder="2025"
+                placeholderTextColor="#64748b"
+                selectTextOnFocus
+              />
+            </View>
+            <View style={popupStyles.dateField}>
+              <Text style={popupStyles.dateLabel}>Month</Text>
+              <TextInput
+                style={popupStyles.dateInput}
+                keyboardType="number-pad"
+                value={expiryMonth}
+                onChangeText={setExpiryMonth}
+                maxLength={2}
+                placeholder="01"
+                placeholderTextColor="#64748b"
+                selectTextOnFocus
+              />
+            </View>
+            <View style={popupStyles.dateField}>
+              <Text style={popupStyles.dateLabel}>Day</Text>
+              <TextInput
+                style={popupStyles.dateInput}
+                keyboardType="number-pad"
+                value={expiryDay}
+                onChangeText={setExpiryDay}
+                maxLength={2}
+                placeholder="01"
+                placeholderTextColor="#64748b"
+                selectTextOnFocus
+              />
+            </View>
+          </View>
+          <View style={popupStyles.quickDateRow}>
+            {[
+              { label: "+30d", days: 30 },
+              { label: "+90d", days: 90 },
+              { label: "+6m", days: 180 },
+              { label: "+1y", days: 365 },
+              { label: "+2y", days: 730 },
+            ].map((opt) => (
+              <Pressable
+                key={opt.label}
+                onPress={() => {
+                  const base = selectedKey ? new Date(selectedKey.expiresAt) : new Date();
+                  const target = base > new Date() ? base : new Date();
+                  target.setDate(target.getDate() + opt.days);
+                  setExpiryYear(String(target.getFullYear()));
+                  setExpiryMonth(String(target.getMonth() + 1).padStart(2, "0"));
+                  setExpiryDay(String(target.getDate()).padStart(2, "0"));
+                }}
+                style={popupStyles.quickDateChip}
+              >
+                <Text style={popupStyles.quickDateText}>{opt.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </CustomAlert>
     </View>
   );
 }
@@ -887,6 +1131,189 @@ function ConfigToggle({ label, value, colors, onToggle }: { label: string; value
     </View>
   );
 }
+
+const popupStyles = StyleSheet.create({
+  iconCircleRed: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#dc2626",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircleOrange: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#f59e0b",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircleGreen: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#16a34a",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircleBlue: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#3b82f6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCirclePurple: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#8b5cf6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircleTeal: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#10b981",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  keyDisplay: {
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(59, 130, 246, 0.2)",
+  },
+  keyDisplayText: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+    color: "#3b82f6",
+    letterSpacing: 2,
+  },
+  optionGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
+    justifyContent: "center",
+  },
+  optionChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  optionChipText: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+  },
+  inputSection: {
+    marginTop: 8,
+    gap: 12,
+  },
+  presetRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    justifyContent: "center",
+  },
+  presetChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  presetChipActive: {
+    backgroundColor: "rgba(139, 92, 246, 0.15)",
+    borderColor: "#8b5cf6",
+  },
+  presetChipText: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    color: "#94a3b8",
+  },
+  presetChipTextActive: {
+    color: "#8b5cf6",
+  },
+  customInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  customInputLabel: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    color: "#94a3b8",
+  },
+  customInput: {
+    flex: 1,
+    height: 42,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    paddingHorizontal: 14,
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+    color: "#fff",
+    textAlign: "center",
+  },
+  dateRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  dateField: {
+    flex: 1,
+  },
+  dateLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_500Medium",
+    color: "#94a3b8",
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  dateInput: {
+    height: 42,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    paddingHorizontal: 8,
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+    color: "#fff",
+    textAlign: "center",
+  },
+  quickDateRow: {
+    flexDirection: "row",
+    gap: 6,
+    justifyContent: "center",
+  },
+  quickDateChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: "rgba(16, 185, 129, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.25)",
+  },
+  quickDateText: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    color: "#10b981",
+  },
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
