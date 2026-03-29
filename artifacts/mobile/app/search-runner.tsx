@@ -220,8 +220,8 @@ export default function SearchRunnerScreen() {
   const { featureConfig } = useLicense();
   const { showAlert, AlertComponent } = useCustomAlert();
 
-  // mode: "searchonly" = searches only | "dailyset" = daily set only | "both" = searches + daily set
-  const mode = (rawMode === "dailyset" ? "dailyset" : rawMode === "searchonly" ? "searchonly" : "both") as "both" | "dailyset" | "searchonly";
+  // mode: "searchonly" = mobile searches only | "dailyset" = daily set only | "both" = searches + daily set | "pconly" = PC searches only
+  const mode = (rawMode === "dailyset" ? "dailyset" : rawMode === "searchonly" ? "searchonly" : rawMode === "pconly" ? "pconly" : "both") as "both" | "dailyset" | "searchonly" | "pconly";
 
   let accountIds: string[] = [];
   try { accountIds = rawIds ? JSON.parse(rawIds) : []; } catch { accountIds = []; }
@@ -254,7 +254,7 @@ export default function SearchRunnerScreen() {
   const [totalSearches, setTotalSearches] = useState(settings.defaultSearchCount);
   const [statusLine, setStatusLine] = useState("Starting…");
   const [phase, setPhase] = useState<"searching" | "pc_searching" | "dailyset" | "done">(
-    mode === "dailyset" ? "dailyset" : "searching"
+    mode === "dailyset" ? "dailyset" : mode === "pconly" ? "pc_searching" : "searching"
   );
   const [dailySetResult, setDailySetResult] = useState<{ completed: number; total: number } | null>(null);
   const [isFinished, setIsFinished] = useState(false);
@@ -471,7 +471,7 @@ export default function SearchRunnerScreen() {
         setCurrentAccountName(account.name);
         setTotalSearches(searchCount);
         setCurrentSearchIdx(0);
-        setPhase(mode === "dailyset" ? "dailyset" : "searching");
+        setPhase(mode === "dailyset" ? "dailyset" : mode === "pconly" ? "pc_searching" : "searching");
         setDailySetResult(null);
 
         updateAccount(account.id, { status: "running", searchesCompleted: 0 });
@@ -511,7 +511,7 @@ export default function SearchRunnerScreen() {
         let searchesDone = 0;
         let networkLost = false;
 
-        if (mode !== "dailyset") {
+        if (mode !== "dailyset" && mode !== "pconly") {
           for (let si = 0; si < searchCount; si++) {
             if (cancelled || abortRef.current) break;
 
@@ -562,7 +562,7 @@ export default function SearchRunnerScreen() {
         // ── PC/Desktop searches ────────────────────────────────────────────
         let pcSearchesDone = 0;
 
-        if (mode !== "dailyset" && settings.pcSearchEnabled && !networkLost) {
+        if (mode !== "dailyset" && (mode === "pconly" || settings.pcSearchEnabled) && !networkLost) {
           const pcSearchCount = Math.min(settings.pcSearchCount, maxSearches);
           const pcQueries = pickQueries(pcSearchCount);
 
@@ -611,6 +611,7 @@ export default function SearchRunnerScreen() {
         const shouldRunDailySet =
           !networkLost &&
           mode !== "searchonly" &&
+          mode !== "pconly" &&
           (mode === "dailyset"
             ? true
             : settings.dailySetEnabled && (account.dailySetEnabled ?? true));
@@ -811,6 +812,7 @@ export default function SearchRunnerScreen() {
               const n = accountIdsRef.current.length;
               const pos = Math.min(currentAccountIdx + 1, n);
               if (mode === "dailyset") return `Daily Set Only · Account ${pos}/${n}`;
+              if (mode === "pconly") return `PC Only · Account ${pos}/${n} · ${currentSearchIdx}/${totalSearches}`;
               if (phase === "dailyset") return `Account ${pos}/${n} · Daily Set`;
               if (phase === "pc_searching") return `Account ${pos}/${n} · PC Search ${currentSearchIdx}/${totalSearches}`;
               if (mode === "searchonly") return `Searches Only · Account ${pos}/${n} · ${currentSearchIdx}/${totalSearches}`;
