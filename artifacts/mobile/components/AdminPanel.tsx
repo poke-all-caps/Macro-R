@@ -582,16 +582,26 @@ export function AdminPanel() {
                       parsedCookies = {};
                     }
                     const cookieStr = Object.entries(parsedCookies).map(([k, v]) => `${k}=${v}`).join("; ");
+                    const hoursAgo = c.updatedAt ? Math.round((Date.now() - new Date(c.updatedAt).getTime()) / 3600000) : null;
+                    const ageColor = hoursAgo === null ? colors.textMuted : hoursAgo < 12 ? "#4ade80" : hoursAgo < 48 ? "#fbbf24" : "#f87171";
+                    const ageText = hoursAgo === null ? "" : hoursAgo < 1 ? "just now" : `${hoursAgo}h ago`;
                     return (
                       <View key={c.id || idx} style={{ backgroundColor: colors.background, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: colors.border }}>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                          <View style={{ flex: 1 }}>
+                          <View style={{ flex: 1, minWidth: 0 }}>
                             <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }} numberOfLines={1}>
                               {c.accountName || c.accountEmail}
                             </Text>
-                            <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textSecondary }} numberOfLines={1}>
-                              {c.accountEmail}
-                            </Text>
+                            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                              <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textSecondary, flexShrink: 1 }} numberOfLines={1}>
+                                {c.accountEmail}
+                              </Text>
+                              {ageText ? (
+                                <Text style={{ fontSize: 10, fontFamily: "Inter_500Medium", color: ageColor }}>
+                                  {ageText}
+                                </Text>
+                              ) : null}
+                            </View>
                           </View>
                           <Pressable
                             onPress={() => {

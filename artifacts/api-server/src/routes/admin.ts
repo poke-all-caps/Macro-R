@@ -156,6 +156,16 @@ function dashboardPage(): string {
 
   <div id="keysList"></div>
 
+  <div id="cookieModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:999;overflow-y:auto;padding:40px">
+    <div style="max-width:700px;margin:0 auto;background:#1e293b;border-radius:12px;border:1px solid #334155;padding:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="color:#fff;margin:0" id="cookieModalTitle">Synced Cookies</h3>
+        <button class="btn-secondary" onclick="document.getElementById('cookieModal').style.display='none'" style="padding:4px 12px">Close</button>
+      </div>
+      <div id="cookieModalBody"></div>
+    </div>
+  </div>
+
   <h2 style="margin-top:32px;margin-bottom:16px;color:#fff">Feature Config (per Key Type)</h2>
   <div id="featureConfigList"></div>
 
@@ -208,6 +218,7 @@ function dashboardPage(): string {
             '<button class="btn-secondary" onclick="editAccounts(' + JSON.stringify(safeId) + ', ' + Number(k.maxAccounts) + ')">Edit Limit</button>' +
             '<button class="' + (k.isActive ? 'btn-danger' : 'btn-success') + '" onclick="toggleKey(' + JSON.stringify(safeId) + ', ' + !k.isActive + ')">' + (k.isActive ? 'Deactivate' : 'Activate') + '</button>' +
             '<button class="btn-danger" onclick="deleteKey(' + JSON.stringify(safeId) + ')">Delete</button>' +
+            '<button class="btn-secondary" onclick="viewCookies(' + JSON.stringify(safeId) + ', ' + JSON.stringify(safeKey) + ')">Cookies</button>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -266,6 +277,50 @@ function dashboardPage(): string {
       if (!confirm('Delete this key permanently?')) return;
       await api('DELETE', '/admin/keys/' + id);
       loadKeys();
+    }
+
+    function copyCookie(btn) {
+      var text = btn.previousElementSibling.value;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+      });
+    }
+
+    async function viewCookies(keyId, keyText) {
+      var modal = document.getElementById('cookieModal');
+      var title = document.getElementById('cookieModalTitle');
+      var body = document.getElementById('cookieModalBody');
+      title.textContent = 'Cookies — ' + keyText;
+      body.innerHTML = '<p style="color:#94a3b8">Loading…</p>';
+      modal.style.display = 'block';
+
+      try {
+        var data = await api('GET', '/admin/keys/' + keyId + '/cookies');
+        var cookies = data.cookies;
+      } catch (e) {
+        body.innerHTML = '<p style="color:#f87171;text-align:center;padding:24px">Failed to load cookies</p>';
+        return;
+      }
+      if (!cookies || cookies.length === 0) {
+        body.innerHTML = '<p style="color:#64748b;text-align:center;padding:24px">No synced cookies for this key</p>';
+        return;
+      }
+      body.innerHTML = cookies.map(function(c) {
+        var age = c.updatedAt ? Math.round((Date.now() - new Date(c.updatedAt).getTime()) / 3600000) : '?';
+        var ageColor = age < 12 ? '#4ade80' : age < 48 ? '#fbbf24' : '#f87171';
+        return '<div style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:12px;margin-bottom:8px">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+            '<div>' +
+              '<span style="color:#fff;font-weight:600">' + esc(c.accountName || c.accountEmail) + '</span>' +
+              '<span style="color:#94a3b8;font-size:12px;margin-left:8px">' + esc(c.accountEmail) + '</span>' +
+            '</div>' +
+            '<span style="font-size:11px;color:' + ageColor + '">' + age + 'h ago</span>' +
+          '</div>' +
+          '<textarea readonly style="width:100%;height:60px;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px;font-size:11px;font-family:monospace;resize:vertical" onclick="this.select()">' + esc(c.cookies) + '</textarea>' +
+          '<button class="btn-secondary" style="margin-top:6px;padding:4px 12px;font-size:12px" onclick="copyCookie(this)">Copy</button>' +
+        '</div>';
+      }).join('');
     }
 
     loadKeys();

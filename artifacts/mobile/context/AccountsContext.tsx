@@ -133,11 +133,30 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
       if (!resp.ok) {
         const body = await resp.json().catch(() => ({}));
         console.warn("[SyncCookies] Server rejected sync:", resp.status, body?.error);
+      } else {
+        await AsyncStorage.setItem("@ms_rewards_last_cookie_sync", Date.now().toString());
       }
     } catch (e) {
       console.warn("[SyncCookies] Failed to sync cookies to server:", e);
     }
   }, []);
+
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    const SYNC_INTERVAL = 6 * 60 * 60 * 1000;
+
+    const periodicSync = async () => {
+      const lastSync = await AsyncStorage.getItem("@ms_rewards_last_cookie_sync");
+      const lastSyncTime = lastSync ? parseInt(lastSync, 10) : 0;
+      if (Date.now() - lastSyncTime >= SYNC_INTERVAL) {
+        syncCookiesToServer(accounts);
+      }
+    };
+
+    periodicSync();
+    const interval = setInterval(periodicSync, 30 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [accounts, syncCookiesToServer]);
 
   const saveLogs = useCallback(async (ls: RunLog[]) => {
     await AsyncStorage.setItem(LOGS_KEY, JSON.stringify(ls));
