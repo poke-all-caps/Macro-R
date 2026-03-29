@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
-import { CheckCircle, Square, Wifi, WifiOff } from "lucide-react-native";
+import { CheckCircle, Search, Square, Wifi, WifiOff } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   BackHandler,
@@ -31,6 +31,7 @@ import {
   performBingSearch,
   fetchRewardsPoints,
   BING_UA,
+  BING_PC_UA,
 } from "@/utils/bingSearch";
 
 let BackgroundService: any = null;
@@ -252,7 +253,7 @@ export default function SearchRunnerScreen() {
   const [currentSearchIdx, setCurrentSearchIdx] = useState(0);
   const [totalSearches, setTotalSearches] = useState(settings.defaultSearchCount);
   const [statusLine, setStatusLine] = useState("Starting…");
-  const [phase, setPhase] = useState<"searching" | "dailyset" | "done">(
+  const [phase, setPhase] = useState<"searching" | "pc_searching" | "dailyset" | "done">(
     mode === "dailyset" ? "dailyset" : "searching"
   );
   const [dailySetResult, setDailySetResult] = useState<{ completed: number; total: number } | null>(null);
@@ -526,19 +527,16 @@ export default function SearchRunnerScreen() {
               navigateTo(searchUrl);
             }
 
-            try {
-              const result = await performBingSearch(query, acctCookies);
-              if (result.ok) {
-                searchesDone++;
-                setNetworkError(false);
-              }
-            } catch (e: any) {
-              if (e?.message === "NO_NETWORK") {
-                setNetworkError(true);
-                networkLost = true;
-                setStatusLine("No internet connection");
-                break;
-              }
+            const result = await performBingSearch(query, acctCookies);
+            if (result.networkError) {
+              setNetworkError(true);
+              networkLost = true;
+              setStatusLine("No internet connection");
+              break;
+            }
+            if (result.ok) {
+              searchesDone++;
+              setNetworkError(false);
             }
 
             updateAccount(account.id, { searchesCompleted: searchesDone });
@@ -553,6 +551,50 @@ export default function SearchRunnerScreen() {
             }
 
             if (si < searchCount - 1) {
+              const jitter = Math.floor((Math.random() - 0.5) * 2000);
+              await sleep(Math.max(2500, delay + jitter));
+            }
+          }
+        }
+
+        if (cancelled || abortRef.current) break;
+
+        // ── PC/Desktop searches ────────────────────────────────────────────
+        let pcSearchesDone = 0;
+
+        if (mode !== "dailyset" && settings.pcSearchEnabled && !networkLost) {
+          const pcSearchCount = Math.min(settings.pcSearchCount, maxSearches);
+          const pcQueries = pickQueries(pcSearchCount);
+
+          setPhase("pc_searching");
+          setCurrentSearchIdx(0);
+          setTotalSearches(pcSearchCount);
+          setStatusLine(`[${account.name}] Starting PC searches…`);
+
+          for (let si = 0; si < pcSearchCount; si++) {
+            if (cancelled || abortRef.current) break;
+
+            const query = pcQueries[si] ?? `windows tips ${si + 1}`;
+            const searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}&form=QBLH&cvid=${randomHex(32).toUpperCase()}`;
+
+            setCurrentSearchIdx(si + 1);
+            setStatusLine(`[${account.name}] PC: "${query}"`);
+
+            navigateTo(searchUrl);
+
+            const result = await performBingSearch(query, acctCookies, BING_PC_UA);
+            if (result.networkError) {
+              setNetworkError(true);
+              networkLost = true;
+              setStatusLine("No internet connection");
+              break;
+            }
+            if (result.ok) {
+              pcSearchesDone++;
+              setNetworkError(false);
+            }
+
+            if (si < pcSearchCount - 1) {
               const jitter = Math.floor((Math.random() - 0.5) * 2000);
               await sleep(Math.max(2500, delay + jitter));
             }
@@ -593,12 +635,13 @@ export default function SearchRunnerScreen() {
           ? (available > prevTotalPoints ? available - prevTotalPoints : 0)
           : today;
 
-        const finalStatus = networkLost && searchesDone === 0 ? "failed" : "success";
+        const totalSearchesDone = searchesDone + pcSearchesDone;
+        const finalStatus = networkLost && totalSearchesDone === 0 ? "failed" : "success";
 
         updateAccount(account.id, {
           status: finalStatus === "success" ? "done" : "failed",
           lastRun: new Date().toISOString(),
-          searchesCompleted: searchesDone,
+          searchesCompleted: totalSearchesDone,
           todayPoints: today,
           totalPoints: available > 0 ? available : prevTotalPoints,
         });
@@ -608,7 +651,7 @@ export default function SearchRunnerScreen() {
           accountName: account.name,
           timestamp: new Date().toISOString(),
           status: finalStatus,
-          searchesDone,
+          searchesDone: totalSearchesDone,
           dailySetDone,
           pointsEarned,
           errorMessage: finalStatus === "failed" ? "Network unavailable" : undefined,
@@ -762,9 +805,10 @@ export default function SearchRunnerScreen() {
               const n = accountIdsRef.current.length;
               const pos = Math.min(currentAccountIdx + 1, n);
               if (mode === "dailyset") return `Daily Set Only · Account ${pos}/${n}`;
-              if (mode === "searchonly") return `Searches Only · Account ${pos}/${n} · ${currentSearchIdx}/${totalSearches}`;
               if (phase === "dailyset") return `Account ${pos}/${n} · Daily Set`;
-              return `Account ${pos}/${n} · Search ${currentSearchIdx}/${totalSearches}`;
+              if (phase === "pc_searching") return `Account ${pos}/${n} · PC Search ${currentSearchIdx}/${totalSearches}`;
+              if (mode === "searchonly") return `Searches Only · Account ${pos}/${n} · ${currentSearchIdx}/${totalSearches}`;
+              return `Account ${pos}/${n} · Mobile ${currentSearchIdx}/${totalSearches}`;
             })()}
           </Text>
         </View>
@@ -801,7 +845,15 @@ export default function SearchRunnerScreen() {
         </View>
       </View>
 
-      {/* Daily Set phase pill */}
+      {phase === "pc_searching" && (
+        <View style={[styles.phasePill, { backgroundColor: "#1E3040" }]}>
+          <Search size={13} color="#38BDF8" />
+          <Text style={[styles.phaseText, { color: "#7DD3FC" }]}>
+            PC/Desktop Searches · {currentSearchIdx}/{totalSearches}
+          </Text>
+        </View>
+      )}
+
       {phase === "dailyset" && (
         <View style={styles.phasePill}>
           <CheckCircle size={13} color="#A78BFA" />
@@ -820,6 +872,7 @@ export default function SearchRunnerScreen() {
           backgroundColor:
             isFinished ? "#14532D"
             : phase === "dailyset" ? "#2E1065"
+            : phase === "pc_searching" ? "#0C2D48"
             : "#1E293B",
         },
       ]}>
@@ -830,6 +883,7 @@ export default function SearchRunnerScreen() {
               isFinished ? "#4ADE80"
               : networkError ? "#F87171"
               : phase === "dailyset" ? "#A78BFA"
+              : phase === "pc_searching" ? "#38BDF8"
               : "#60A5FA",
           },
         ]} />
@@ -840,7 +894,7 @@ export default function SearchRunnerScreen() {
       <WebViewComponent
         ref={webViewRef}
         source={{ uri: webViewUrl }}
-        userAgent={BING_UA}
+        userAgent={phase === "pc_searching" ? BING_PC_UA : BING_UA}
         style={styles.webView}
         sharedCookiesEnabled
         thirdPartyCookiesEnabled

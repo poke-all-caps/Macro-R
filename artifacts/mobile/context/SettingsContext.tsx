@@ -10,6 +10,8 @@ interface Settings {
   defaultSearchCount: number;
   searchDelay: number;
   dailySetEnabled: boolean;
+  pcSearchEnabled: boolean;
+  pcSearchCount: number;
   overnightSlots: OvernightSlot[];
   overnightDailySet: boolean;
 }
@@ -25,6 +27,8 @@ const DEFAULT_SETTINGS: Settings = {
   defaultSearchCount: 30,
   searchDelay: 5,
   dailySetEnabled: true,
+  pcSearchEnabled: true,
+  pcSearchCount: 30,
   overnightSlots: DEFAULT_OVERNIGHT_SLOTS,
   overnightDailySet: false,
 };

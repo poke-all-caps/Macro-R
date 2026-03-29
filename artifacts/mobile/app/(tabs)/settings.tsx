@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import * as Updates from "expo-updates";
-import { Calendar, CheckSquare, Clock, Download, Minus, Moon, Pencil, Plus, RotateCcw, Search, Shield, Zap } from "lucide-react-native";
+import { Calendar, CheckSquare, Clock, Download, Minus, Monitor, Moon, Pencil, Plus, RotateCcw, Search, Shield, Zap } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -73,6 +73,9 @@ export default function SettingsScreen() {
   const [searchCountText, setSearchCountText] = useState(
     String(settings.defaultSearchCount)
   );
+  const [pcSearchCountText, setPcSearchCountText] = useState(
+    String(settings.pcSearchCount ?? 30)
+  );
   const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
 
   const [slotHourTexts, setSlotHourTexts] = useState<string[]>(() =>
@@ -96,6 +99,18 @@ export default function SettingsScreen() {
     if (clamped !== settings.defaultSearchCount) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       updateSettings({ defaultSearchCount: clamped });
+    }
+  };
+
+  const commitPcSearchCount = () => {
+    const parsed = parseInt(pcSearchCountText, 10);
+    const clamped = isNaN(parsed)
+      ? settings.pcSearchCount ?? 30
+      : Math.max(1, Math.min(featureConfig.maxSearches, parsed));
+    setPcSearchCountText(String(clamped));
+    if (clamped !== (settings.pcSearchCount ?? 30)) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      updateSettings({ pcSearchCount: clamped });
     }
   };
 
@@ -348,6 +363,66 @@ export default function SettingsScreen() {
                 />
               </View>
             </View>
+
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+            <View style={styles.settingRow}>
+              <View style={styles.settingLabel}>
+                <View style={[styles.iconBg, { backgroundColor: "#EDE9FE" }]}>
+                  <Monitor size={16} color="#7C3AED" />
+                </View>
+                <View style={styles.labelText}>
+                  <Text style={[styles.settingTitle, { color: colors.text }]}>
+                    PC/Desktop searches
+                  </Text>
+                  <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                    Run desktop UA searches for extra points
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={settings.pcSearchEnabled}
+                onValueChange={(v) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  updateSettings({ pcSearchEnabled: v });
+                }}
+                trackColor={{ false: "#3e3e3e", true: colors.tint }}
+              />
+            </View>
+
+            {settings.pcSearchEnabled && (
+              <>
+                <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                <View style={styles.settingRow}>
+                  <View style={styles.settingLabel}>
+                    <View style={[styles.iconBg, { backgroundColor: "#F3E8FF" }]}>
+                      <Monitor size={16} color="#9333EA" />
+                    </View>
+                    <View style={styles.labelText}>
+                      <Text style={[styles.settingTitle, { color: colors.text }]}>
+                        PC searches per account
+                      </Text>
+                      <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                        Desktop searches (1–{featureConfig.maxSearches})
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={styles.inputWithUnit}>
+                    <TextInput
+                      style={inputStyle}
+                      value={pcSearchCountText}
+                      onChangeText={setPcSearchCountText}
+                      onBlur={commitPcSearchCount}
+                      onSubmitEditing={commitPcSearchCount}
+                      keyboardType="number-pad"
+                      returnKeyType="done"
+                      maxLength={2}
+                      selectTextOnFocus
+                    />
+                  </View>
+                </View>
+              </>
+            )}
 
             <View style={[styles.divider, { backgroundColor: colors.border }]} />
 

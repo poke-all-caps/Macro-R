@@ -175,7 +175,9 @@ SafeAreaProvider
 #### 3. Search Automation
 - **Foreground searches** (`app/search-runner.tsx`):
   - Executes Bing searches via `fetch()` (no WebView needed for searches)
-  - Uses mobile User-Agent: `Pixel 7 / Chrome 112`
+  - Uses mobile User-Agent: `Pixel 7 / Chrome 112` for mobile searches
+  - Uses desktop User-Agent: `Windows 10 / Edge 120` for PC searches (earns separate points)
+  - PC searches run after mobile searches when enabled in settings
   - Sends `credentials: "omit"` with manual `Cookie` header
   - Each search generates a unique `cvid` (random hex)
   - Delay between searches: configurable in settings (default 5s in UI)
@@ -209,6 +211,8 @@ SafeAreaProvider
     defaultSearchCount: number;  // Default: 30
     searchDelay: number;         // Default: 5 (seconds, UI display)
     dailySetEnabled: boolean;    // Default: true
+    pcSearchEnabled: boolean;    // Default: true — run desktop UA searches
+    pcSearchCount: number;       // Default: 30 — PC searches per account
     overnightSlots: OvernightSlot[];  // Default: 22:00, 23:00, 01:00, 02:00
     overnightDailySet: boolean;  // Default: false
   }

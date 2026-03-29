@@ -1,6 +1,9 @@
 export const BING_UA =
   "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
 
+export const BING_PC_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0";
+
 export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
@@ -20,7 +23,8 @@ export function buildCookieHeader(cookies: Record<string, string>): string {
 
 export async function performBingSearch(
   query: string,
-  cookies: Record<string, string>
+  cookies: Record<string, string>,
+  userAgent?: string
 ): Promise<{ ok: boolean; status?: number; networkError?: boolean }> {
   const cookieStr = buildCookieHeader(cookies);
   const cvid = randomHex(32).toUpperCase();
@@ -31,7 +35,7 @@ export async function performBingSearch(
       credentials: "omit",
       headers: {
         Cookie: cookieStr,
-        "User-Agent": BING_UA,
+        "User-Agent": userAgent || BING_UA,
         Accept: "text/html,application/xhtml+xml,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
         Referer: "https://www.bing.com/",

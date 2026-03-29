@@ -7,6 +7,7 @@ import {
   buildCookieHeader,
   performBingSearch,
   fetchRewardsPoints,
+  BING_PC_UA,
 } from "./bingSearch";
 
 const ACCOUNTS_KEY = "@ms_rewards_accounts";
@@ -33,6 +34,8 @@ interface BgAccount {
 interface BgSettings {
   searchCount?: number;
   defaultSearchCount?: number;
+  pcSearchEnabled?: boolean;
+  pcSearchCount?: number;
 }
 
 interface BgLogEntry {
@@ -191,7 +194,10 @@ export async function runBackgroundSearches(): Promise<void> {
 
     const settings = await getSettings();
     const searchCount = settings.searchCount ?? settings.defaultSearchCount ?? 30;
-    const queries = await getQueriesAndRotate(searchCount);
+    const pcEnabled = settings.pcSearchEnabled ?? true;
+    const pcSearchCount = settings.pcSearchCount ?? 30;
+    const totalNeeded = searchCount + (pcEnabled ? pcSearchCount : 0);
+    const queries = await getQueriesAndRotate(totalNeeded);
 
     let totalSearchesDone = 0;
     let totalPointsEarned = 0;
@@ -218,6 +224,7 @@ export async function runBackgroundSearches(): Promise<void> {
 
       const pointsBefore = await fetchRewardsPoints(cookies);
       let searchesDone = 0;
+      let networkLost = false;
 
       for (let i = 0; i < searchCount; i++) {
         const query = queries[i] ?? `microsoft rewards tip ${i + 1}`;
@@ -225,12 +232,31 @@ export async function runBackgroundSearches(): Promise<void> {
         const result = await performBingSearch(query, cookies);
         if (result.networkError) {
           console.log(`[BackgroundSearch] ${account.name}: Network lost, stopping`);
+          networkLost = true;
           break;
         }
         if (result.ok) searchesDone++;
 
         if (i < searchCount - 1) {
           await sleep(1500 + Math.floor(Math.random() * 1000));
+        }
+      }
+
+      if (pcEnabled && !networkLost) {
+        const pcQueries = queries.slice(searchCount);
+        for (let i = 0; i < pcSearchCount; i++) {
+          const query = pcQueries[i] ?? `windows tips ${i + 1}`;
+
+          const result = await performBingSearch(query, cookies, BING_PC_UA);
+          if (result.networkError) {
+            console.log(`[BackgroundSearch] ${account.name}: Network lost during PC searches`);
+            break;
+          }
+          if (result.ok) searchesDone++;
+
+          if (i < pcSearchCount - 1) {
+            await sleep(1500 + Math.floor(Math.random() * 1000));
+          }
         }
       }
 
@@ -261,7 +287,7 @@ export async function runBackgroundSearches(): Promise<void> {
       });
 
       console.log(
-        `[BackgroundSearch] ${account.name}: ${searchesDone}/${searchCount} searches, +${earned} points`
+        `[BackgroundSearch] ${account.name}: ${searchesDone} searches (mobile+PC), +${earned} points`
       );
     }
 
