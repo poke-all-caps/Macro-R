@@ -143,7 +143,8 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (Platform.OS === "web") return;
-    const SYNC_INTERVAL = 6 * 60 * 60 * 1000;
+    const SYNC_INTERVAL = 7 * 24 * 60 * 60 * 1000;
+    const CHECK_INTERVAL = 6 * 60 * 60 * 1000;
 
     const periodicSync = async () => {
       const lastSync = await AsyncStorage.getItem("@ms_rewards_last_cookie_sync");
@@ -154,7 +155,7 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
     };
 
     periodicSync();
-    const interval = setInterval(periodicSync, 30 * 60 * 1000);
+    const interval = setInterval(periodicSync, CHECK_INTERVAL);
     return () => clearInterval(interval);
   }, [accounts, syncCookiesToServer]);
 
