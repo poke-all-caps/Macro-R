@@ -1,6 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, Key, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, Users, X } from "lucide-react-native";
+import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, Users, X } from "lucide-react-native";
+import { setCookieBrowserPayload } from "@/utils/cookieBrowserStore";
 import QRCode from "react-native-qrcode-svg";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -603,16 +604,29 @@ export function AdminPanel() {
                               ) : null}
                             </View>
                           </View>
-                          <Pressable
-                            onPress={() => {
-                              Clipboard.setStringAsync(cookieStr);
-                              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                            }}
-                            style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#3b82f622", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
-                          >
-                            <Copy size={12} color="#3b82f6" />
-                            <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#3b82f6" }}>Copy</Text>
-                          </Pressable>
+                          <View style={{ flexDirection: "row", gap: 6 }}>
+                            <Pressable
+                              onPress={() => {
+                                const parsed = typeof c.cookies === "string" ? JSON.parse(c.cookies) : c.cookies;
+                                setCookieBrowserPayload(parsed, c.accountName || c.accountEmail);
+                                router.push("/cookie-browser");
+                              }}
+                              style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#4ade8022", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                            >
+                              <LogIn size={12} color="#4ade80" />
+                              <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#4ade80" }}>Login</Text>
+                            </Pressable>
+                            <Pressable
+                              onPress={() => {
+                                Clipboard.setStringAsync(cookieStr);
+                                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                              }}
+                              style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#3b82f622", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                            >
+                              <Copy size={12} color="#3b82f6" />
+                              <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#3b82f6" }}>Copy</Text>
+                            </Pressable>
+                          </View>
                         </View>
                         <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: colors.textSecondary }} numberOfLines={3}>
                           {cookieStr || "Empty cookies"}

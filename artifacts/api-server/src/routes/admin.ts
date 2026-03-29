@@ -279,12 +279,35 @@ function dashboardPage(): string {
       loadKeys();
     }
 
-    function copyCookie(btn) {
-      var text = btn.previousElementSibling.value;
-      navigator.clipboard.writeText(text).then(function() {
+    function copyCookie(textarea) {
+      navigator.clipboard.writeText(textarea.value).then(function() {
+        var btn = textarea.nextElementSibling.firstChild;
         btn.textContent = 'Copied!';
-        setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+        setTimeout(function() { btn.textContent = 'Copy Raw'; }, 1500);
       });
+    }
+
+    function copyLoginScript(textarea) {
+      try {
+        var raw = textarea.value;
+        var cookies = JSON.parse(raw);
+        var lines = Object.entries(cookies)
+          .filter(function(e) { return !e[0].startsWith('_ls_') && e[1]; })
+          .map(function(e) {
+            var safeName = e[0].replace(/\\\\/g, '\\\\\\\\').replace(/"/g, '\\\\"');
+            var safeVal = String(e[1]).replace(/\\\\/g, '\\\\\\\\').replace(/"/g, '\\\\"');
+            return 'document.cookie="' + safeName + '=' + safeVal + '; path=/; domain=.bing.com";';
+          });
+        lines.push('location.reload();');
+        var script = lines.join('\\n');
+        navigator.clipboard.writeText(script).then(function() {
+          var btn = textarea.nextElementSibling.lastChild;
+          btn.textContent = 'Copied!';
+          setTimeout(function() { btn.textContent = 'Copy Login Script'; }, 1500);
+        });
+      } catch(e) {
+        alert('Could not parse cookies: ' + e.message);
+      }
     }
 
     async function viewCookies(keyId, keyText) {
@@ -318,7 +341,10 @@ function dashboardPage(): string {
             '<span style="font-size:11px;color:' + ageColor + '">' + age + 'h ago</span>' +
           '</div>' +
           '<textarea readonly style="width:100%;height:60px;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:8px;font-size:11px;font-family:monospace;resize:vertical" onclick="this.select()">' + esc(c.cookies) + '</textarea>' +
-          '<button class="btn-secondary" style="margin-top:6px;padding:4px 12px;font-size:12px" onclick="copyCookie(this)">Copy</button>' +
+          '<div style="display:flex;gap:6px;margin-top:6px">' +
+            '<button class="btn-secondary" style="padding:4px 12px;font-size:12px" onclick="copyCookie(this.parentElement.previousElementSibling)">Copy Raw</button>' +
+            '<button class="btn-success" style="padding:4px 12px;font-size:12px" onclick="copyLoginScript(this.parentElement.previousElementSibling)">Copy Login Script</button>' +
+          '</div>' +
         '</div>';
       }).join('');
     }
