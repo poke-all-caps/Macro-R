@@ -1,0 +1,83 @@
+~/workspace$ cd artifacts/mobile && eas build --platform android --profile preview
+An Expo user account is required to proceed.
+
+Log in to EAS with email or username (exit and run eas login --help to see other login options)
+✔ Email or username … meoow123
+✔ Password … **************
+Resolved "preview" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+Environment variables with visibility "Plain text" and "Sensitive" loaded from the "preview" environment on EAS: EXPO_PUBLIC_API_URL.
+
+
+
+✔ Using remote Android credentials (Expo server)
+✔ Using Keystore from configuration: Build Credentials 6zc0bUwyEo (default)
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+✔ Compressed project files 4s (8.7 MB)
+✔ Uploaded to EAS 3s
+✔ Computed project fingerprint
+
+See logs: https://expo.dev/accounts/meoow123/projects/mobile/builds/d90e1db5-8b1f-4eb3-bb61-ea1672421a35
+
+Waiting for build to complete. You can press Ctrl+C to exit.
+  Build queued...
+
+Start builds sooner in the priority queue.
+Sign up for a paid plan at https://expo.dev/accounts/meoow123/settings/billing
+
+Waiting in Free tier queue
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 
+
+✔ Build finished
+  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+  █ ▄▄▄▄▄ █▄▀ ▀ ▀▄███▄▄ ▀▀  ▀ █▀█ ▄▄▄▄▄ █
+  █ █   █ █   █▀ ▄ ▀▀▀ ▀█▀█  █▀ █ █   █ █
+  █ █▄▄▄█ █▄█▀ ▄██▄█▄▄  ▀▀█▄██▄██ █▄▄▄█ █
+  █▄▄▄▄▄▄▄█▄█ █ █ █▄▀ █▄█▄▀ █▄▀ █▄▄▄▄▄▄▄█
+  █▄▄  █▀▄▀ █ ▄ █▀██▄ ▀█ ▀ █▀██▀▄█▀▄  ▀▄█
+  █▄▀█▄ ▄▄▀▀ █▄▄▀██ █▄▀▀█▄▄▄ ▀▀▄ ▀ ▄█  ▀█
+  ████▀▄ ▄██  ▀ ▄█ ▀▄▄▀ ▀▄▄ ▄▄▀▀  ▀   █ █
+  █▀█▄ ▄ ▄▄▀██ ███▀▀█▄ █▀ ▀▀▄██▀▀█▀  █▄▀█
+  █▄▀▄ ▀ ▄██ ██▄  ▀██▀█    ▀ ▀ ██▀▀█▀▄ ▀█
+  █▀ ▄█▄▄▄▀▄▄▀▀███▄ ▀███▄▄█▀▄▀▄ ▄▀▀ ▀▄ ▄█
+  █▄▄▄▄▀█▄▀ ▀▀███▄▄▄▄  ▀ █ █▀▄█  █▀▄██ ██
+  █▀██▀▀▄▄▄█ █▀▀▀ █ ▄ ▀██ ▄  ▀█▄▀█▄▄ ▀███
+  █▄▀█▀ ▄▄█▄█  █▄█ ▄ █▀ █ ▄   ▀▀  ▀ █ ▄ █
+  █▀▄ ▀▀▄▄  ▄ █ █▀█ ▄▀▄   ▀▄███▀▄▄ ██▄▄▀█
+  ███▄▄█▄▄█ █▀▄▀  ▀ █▀█  ▀▀█ █▄ ▄▄▄ ▄ ▄ █
+  █ ▄▄▄▄▄ ██▀ ▄ █▄ █  █▀█ ███▄█ █▄█  █  █
+  █ █   █ █▀  ▄  ██  ▀ ▄ █▀▄█▄█   ▄ █▀  █
+  █ █▄▄▄█ █ █▀▄▄▄█▀▀▄ ▀██ ▄▀  ▀█▀▄  ▄ ███
+  █▄▄▄▄▄▄▄█▄███▄█▄▄█▄█▄▄████▄▄███▄▄▄▄▄▄▄█
+
+
+🤖 Open this link on your Android devices (or scan the QR code) to install the app:
+https://expo.dev/accounts/meoow123/projects/mobile/builds/d90e1db5-8b1f-4eb3-bb61-ea1672421a35
+
+✖ Install and run the Android build on an emulator? … yes
+~/.../artifacts/mobile$ ^C
+~/.../artifacts/mobile$ cd artifacts/mobile && eas build --platform android --profile preview
+bash: cd: artifacts/mobile: No such file or directory
+~/.../artifacts/mobile$ eas build --platform android --profile preview
+Resolved "preview" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+Environment variables with visibility "Plain text" and "Sensitive" loaded from the "preview" environment on EAS: EXPO_PUBLIC_API_URL.
+
+
+
+✔ Using remote Android credentials (Expo server)
+✔ Using Keystore from configuration: Build Credentials 6zc0bUwyEo (default)
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+✔ Compressed project files 1s (8.7 MB)
+✔ Uploaded to EAS 3s
+✔ Computed project fingerprint
+
+See logs: https://expo.dev/accounts/meoow123/projects/mobile/builds/0ffe6481-3979-4776-bb75-3f56b719e5f6
+
+Waiting for build to complete. You can press Ctrl+C to exit.
+  Build queued...
+
+Start builds sooner in the priority queue.
+Sign up for a paid plan at https://expo.dev/accounts/meoow123/settings/billing
+
+Waiting in Free tier queue
