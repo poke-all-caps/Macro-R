@@ -269,6 +269,9 @@ function dashboardPage(): string {
     }
 
     async function toggleKey(id, active) {
+      if (!active) {
+        if (!confirm('Are you sure you want to DEACTIVATE this key? The user will lose access immediately.')) return;
+      }
       await api('PUT', '/admin/keys/' + id, { isActive: active });
       loadKeys();
     }
