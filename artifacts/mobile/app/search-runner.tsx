@@ -32,6 +32,7 @@ import {
   fetchRewardsPoints,
   BING_UA,
   BING_PC_UA,
+  DESKTOP_MODE_JS,
 } from "@/utils/bingSearch";
 
 let BackgroundService: any = null;
@@ -921,6 +922,10 @@ export default function SearchRunnerScreen() {
         startInLoadingState
         onLoadEnd={handleWebViewLoadEnd}
         onMessage={handleWebViewMessage}
+        {...(webViewUA === BING_PC_UA ? {
+          injectedJavaScriptBeforeContentLoaded: DESKTOP_MODE_JS,
+          forceDarkOn: false,
+        } : {})}
       />
       {AlertComponent}
     </View>

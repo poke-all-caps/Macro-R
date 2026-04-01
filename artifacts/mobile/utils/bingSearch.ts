@@ -4,6 +4,83 @@ export const BING_UA =
 export const BING_PC_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0";
 
+export const DESKTOP_MODE_JS = `(function() {
+  try {
+    Object.defineProperty(navigator, 'userAgent', {
+      get: function() { return '${BING_PC_UA}'; },
+      configurable: true
+    });
+    Object.defineProperty(navigator, 'appVersion', {
+      get: function() { return '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0'; },
+      configurable: true
+    });
+    Object.defineProperty(navigator, 'platform', {
+      get: function() { return 'Win32'; },
+      configurable: true
+    });
+    Object.defineProperty(navigator, 'vendor', {
+      get: function() { return 'Google Inc.'; },
+      configurable: true
+    });
+    Object.defineProperty(navigator, 'maxTouchPoints', {
+      get: function() { return 0; },
+      configurable: true
+    });
+    Object.defineProperty(navigator, 'hardwareConcurrency', {
+      get: function() { return 8; },
+      configurable: true
+    });
+    Object.defineProperty(screen, 'width', {
+      get: function() { return 1920; },
+      configurable: true
+    });
+    Object.defineProperty(screen, 'height', {
+      get: function() { return 1080; },
+      configurable: true
+    });
+    Object.defineProperty(screen, 'availWidth', {
+      get: function() { return 1920; },
+      configurable: true
+    });
+    Object.defineProperty(screen, 'availHeight', {
+      get: function() { return 1040; },
+      configurable: true
+    });
+    Object.defineProperty(screen, 'colorDepth', {
+      get: function() { return 24; },
+      configurable: true
+    });
+    Object.defineProperty(window, 'innerWidth', {
+      get: function() { return 1920; },
+      configurable: true
+    });
+    Object.defineProperty(window, 'innerHeight', {
+      get: function() { return 969; },
+      configurable: true
+    });
+    Object.defineProperty(window, 'outerWidth', {
+      get: function() { return 1920; },
+      configurable: true
+    });
+    Object.defineProperty(window, 'outerHeight', {
+      get: function() { return 1040; },
+      configurable: true
+    });
+    Object.defineProperty(window, 'devicePixelRatio', {
+      get: function() { return 1; },
+      configurable: true
+    });
+    var meta = document.querySelector('meta[name="viewport"]');
+    if (meta) { meta.setAttribute('content', 'width=1920'); }
+    else {
+      meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=1920';
+      if (document.head) document.head.appendChild(meta);
+    }
+  } catch(e) {}
+})(); true;`;
+
 export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
