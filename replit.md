@@ -535,9 +535,9 @@ If you are forking this project and setting it up from scratch, follow these ste
 
 ### 2. Deploy the API Server
 1. Click **Publish** in Replit to deploy the API server
-2. Note your production URL (e.g. `https://your-app.replit.app`)
-3. Verify the server is running: visit `https://your-app.replit.app/api/healthz`
-4. Create your first admin key via the web admin panel: `https://your-app.replit.app/api/admin`
+2. After publishing, Replit gives you a production URL — find it in the **Deployments** tab. It will look like `https://<your-replit-name>.replit.app`. Copy this URL and save it — you'll need it for the mobile app setup below.
+3. Verify the server is running: visit `https://<your-replit-name>.replit.app/api/healthz` — you should see `{"status":"ok"}`
+4. Create your first admin key via the web admin panel: `https://<your-replit-name>.replit.app/api/admin` (log in with the `ADMIN_SECRET` you set in Step 1)
 
 ### 3. EAS / Mobile Build Setup
 1. Install EAS CLI globally if not installed:
@@ -551,13 +551,13 @@ If you are forking this project and setting it up from scratch, follow these ste
 3. Update the EAS project config in `artifacts/mobile/app.json`:
    - Change `expo.extra.eas.projectId` to your own EAS project ID
    - Change `expo.owner` to your Expo username
-4. Set the API URL environment variable in EAS (**must match your production URL**):
+4. Set the API URL environment variable in EAS — **replace `<your-replit-name>` with the actual name from Step 2**:
    ```
-   cd artifacts/mobile && npx eas env:create --name EXPO_PUBLIC_API_URL --value "https://your-app.replit.app/api" --environment preview --visibility plaintext --non-interactive
+   cd artifacts/mobile && npx eas env:create --name EXPO_PUBLIC_API_URL --value "https://<your-replit-name>.replit.app/api" --environment preview --visibility plaintext --non-interactive
    ```
    If updating an existing variable:
    ```
-   cd artifacts/mobile && npx eas env:update --variable-name EXPO_PUBLIC_API_URL --value "https://your-app.replit.app/api" --environment preview --non-interactive
+   cd artifacts/mobile && npx eas env:update --variable-name EXPO_PUBLIC_API_URL --value "https://<your-replit-name>.replit.app/api" --environment preview --non-interactive
    ```
 5. Build the APK:
    ```
@@ -571,6 +571,6 @@ pnpm --filter @workspace/mobile run update "description of changes"
 ```
 
 ### Common Mistakes
-- **Wrong API URL**: The `EXPO_PUBLIC_API_URL` in EAS must exactly match your deployed Replit URL (check for typos, extra hyphens, etc.). If wrong, the app will show "Couldn't connect to server"
-- **Forgot to deploy**: The production database is only created on first deploy. Dev and production databases are separate — keys created in dev won't exist in production
-- **Stale build**: After changing `EXPO_PUBLIC_API_URL` in EAS, you must either push an OTA update or do a new build for the change to take effect
+- **"Couldn't connect to server"**: The `EXPO_PUBLIC_API_URL` in EAS must exactly match the production URL from the Deployments tab (check for typos, extra hyphens, missing letters, etc.)
+- **Keys not working on phone**: Dev and production databases are completely separate. Keys you create in development won't exist in production. Always create keys via the production admin panel (`https://<your-replit-name>.replit.app/api/admin`)
+- **Stale build**: After changing `EXPO_PUBLIC_API_URL` in EAS, you must either push an OTA update or do a full rebuild for the change to take effect
