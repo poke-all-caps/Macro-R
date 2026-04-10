@@ -441,10 +441,9 @@ Default seed values are created on server startup if the table is empty. Admin c
 
 ### Current Values
 - **ADMIN_SECRET**: Set via Replit Secrets (do not store in code or docs)
-- **Production URL**: `https://macro-rr.replit.app`
-- **Admin Panel (prod)**: `https://macro-rr.replit.app/api/admin` (log in with ADMIN_SECRET)
+- **Production URL**: `https://macrorr.replit.app`
+- **Admin Panel (prod)**: `https://macrorr.replit.app/api/admin` (log in with ADMIN_SECRET)
 - **Admin Panel (dev)**: `https://<REPLIT_DEV_DOMAIN>/api/admin` (log in with ADMIN_SECRET)
-- **Admin Keys**: `8D34-1426-CA57-B69A` (unbound), `AE26-901F-27B2-671A` (device-bound)
 
 ---
 
@@ -508,12 +507,70 @@ const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
 - This ensures the admin panel works whether the user entered the admin secret directly OR used an admin-type license key
 
 ### Production Deployment
-- **Production URL**: `https://macro-rr.replit.app`
+- **Production URL**: `https://macrorr.replit.app`
 - **Build script** (`build.ts`): Automatically runs `drizzle-kit push` to sync the production DB schema before bundling
+- **Auto-migration**: On startup, `ensureTables()` (in `lib/db/src/migrate.ts`) creates all tables with `CREATE TABLE IF NOT EXISTS` + retry logic (5 attempts). This ensures the production DB is ready even on first deploy.
 - **Health check**: `GET /api/healthz`
-- **Mobile APK**: Must set `EXPO_PUBLIC_API_URL=https://macro-rr.replit.app/api` in EAS env before building
+- **Mobile APK**: Must set `EXPO_PUBLIC_API_URL` in EAS env to match your production URL (e.g. `https://macrorr.replit.app/api`)
 
 ### Device Compatibility Notes
 - **Infinix/HiOS**: Requires Autostart enabled for background tasks
 - **Samsung**: May need "Sleeping apps" exception
 - **All Android**: Battery optimization should be set to "Unrestricted" for reliable notifications
+
+---
+
+## Fork / First-Time Setup Guide
+
+If you are forking this project and setting it up from scratch, follow these steps:
+
+### 1. Replit Environment Setup
+1. Fork the Replit project
+2. Set the following **Secrets** in Replit (Tools > Secrets):
+   - `ADMIN_SECRET` — any long random string (this is your admin password)
+   - `EXPO_PUBLIC_ADMIN_SECRET` — same value as `ADMIN_SECRET`
+   - `EXPO_PUBLIC_OWNER_MODE` — set to `"true"` if you want to bypass the license screen
+3. The PostgreSQL database is auto-provisioned by Replit — no manual setup needed
+4. Click **Run** to start the API server — it will auto-create all database tables on first boot
+
+### 2. Deploy the API Server
+1. Click **Publish** in Replit to deploy the API server
+2. Note your production URL (e.g. `https://your-app.replit.app`)
+3. Verify the server is running: visit `https://your-app.replit.app/api/healthz`
+4. Create your first admin key via the web admin panel: `https://your-app.replit.app/api/admin`
+
+### 3. EAS / Mobile Build Setup
+1. Install EAS CLI globally if not installed:
+   ```
+   npm install -g eas-cli
+   ```
+2. Log in to your Expo account:
+   ```
+   cd artifacts/mobile && npx eas login
+   ```
+3. Update the EAS project config in `artifacts/mobile/app.json`:
+   - Change `expo.extra.eas.projectId` to your own EAS project ID
+   - Change `expo.owner` to your Expo username
+4. Set the API URL environment variable in EAS (**must match your production URL**):
+   ```
+   cd artifacts/mobile && npx eas env:create --name EXPO_PUBLIC_API_URL --value "https://your-app.replit.app/api" --environment preview --visibility plaintext --non-interactive
+   ```
+   If updating an existing variable:
+   ```
+   cd artifacts/mobile && npx eas env:update --variable-name EXPO_PUBLIC_API_URL --value "https://your-app.replit.app/api" --environment preview --non-interactive
+   ```
+5. Build the APK:
+   ```
+   cd artifacts/mobile && eas build --platform android --profile preview --non-interactive
+   ```
+
+### 4. OTA Updates (no rebuild needed)
+After code changes that don't involve native modules:
+```
+pnpm --filter @workspace/mobile run update "description of changes"
+```
+
+### Common Mistakes
+- **Wrong API URL**: The `EXPO_PUBLIC_API_URL` in EAS must exactly match your deployed Replit URL (check for typos, extra hyphens, etc.). If wrong, the app will show "Couldn't connect to server"
+- **Forgot to deploy**: The production database is only created on first deploy. Dev and production databases are separate — keys created in dev won't exist in production
+- **Stale build**: After changing `EXPO_PUBLIC_API_URL` in EAS, you must either push an OTA update or do a new build for the change to take effect
