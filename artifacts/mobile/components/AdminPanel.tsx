@@ -88,6 +88,7 @@ export function AdminPanel() {
   const [profileCookies, setProfileCookies] = useState<any[]>([]);
   const [cookieLoading, setCookieLoading] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const [deletePopup, setDeletePopup] = useState(false);
   const [errorPopup, setErrorPopup] = useState<{ visible: boolean; title: string; message: string }>({ visible: false, title: "", message: "" });
@@ -725,99 +726,123 @@ export function AdminPanel() {
       {activeTab === "keys" ? (
       <>
       <View style={[styles.createSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
-        <Text style={[styles.createTitle, { color: colors.text }]}>Create New Key</Text>
-        <View style={styles.createRow}>
-          <View style={styles.createField}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Label</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
-              placeholder="e.g. User name"
-              placeholderTextColor={colors.textSecondary}
-              value={newLabel}
-              onChangeText={setNewLabel}
-            />
-          </View>
-          <View style={styles.createFieldSmall}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Accounts</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
-              keyboardType="number-pad"
-              value={newMaxAccounts}
-              onChangeText={setNewMaxAccounts}
-            />
-          </View>
-          <View style={styles.createFieldSmall}>
-            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Duration</Text>
-            <TextInput
-              style={[styles.fieldInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
-              keyboardType="number-pad"
-              value={newExpAmount}
-              onChangeText={setNewExpAmount}
-            />
-          </View>
-        </View>
-        <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
-          {(["days", "months", "years"] as const).map((u) => {
-            const selected = newExpUnit === u;
-            return (
-              <Pressable
-                key={u}
-                onPress={() => setNewExpUnit(u)}
-                style={[
-                  styles.typeChip,
-                  {
-                    backgroundColor: selected ? "#3b82f622" : colors.background,
-                    borderColor: selected ? "#3b82f6" : colors.border,
-                  },
-                ]}
-              >
-                <Text style={[styles.typeChipText, { color: selected ? "#3b82f6" : colors.textSecondary }]}>
-                  {u.charAt(0).toUpperCase() + u.slice(1)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        <View style={{ marginBottom: 12 }}>
-          <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Key Type</Text>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            {KEY_TYPES.map((t) => {
-              const tc = KEY_TYPE_COLORS[t];
-              const selected = newKeyType === t;
-              return (
-                <Pressable
-                  key={t}
-                  onPress={() => setNewKeyType(t)}
-                  style={[
-                    styles.typeChip,
-                    {
-                      backgroundColor: selected ? tc.bg : colors.background,
-                      borderColor: selected ? tc.color : colors.border,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.typeChipText, { color: selected ? tc.color : colors.textSecondary }]}>
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
         <Pressable
-          onPress={createKey}
-          disabled={creating}
-          style={({ pressed }) => [styles.createBtn, { opacity: creating ? 0.5 : pressed ? 0.85 : 1 }]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowCreateForm((p) => !p);
+          }}
+          style={styles.createToggle}
         >
-          {creating ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <>
-              <Key size={16} color="#fff" />
-              <Text style={styles.createBtnText}>Generate Key</Text>
-            </>
-          )}
+          <View style={styles.createToggleLeft}>
+            <Plus size={16} color={showCreateForm ? "#3b82f6" : colors.textSecondary} />
+            <Text style={[styles.createTitle, { color: colors.text }]}>Create New Key</Text>
+          </View>
+          <ChevronRight
+            size={16}
+            color={colors.textSecondary}
+            style={{ transform: [{ rotate: showCreateForm ? "90deg" : "0deg" }] }}
+          />
         </Pressable>
+
+        {showCreateForm && (
+          <>
+            <View style={[styles.createDivider, { backgroundColor: colors.border }]} />
+            <View style={styles.createFormBody}>
+              <View style={styles.createRow}>
+                <View style={styles.createField}>
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Label</Text>
+                  <TextInput
+                    style={[styles.fieldInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                    placeholder="e.g. User name"
+                    placeholderTextColor={colors.textSecondary}
+                    value={newLabel}
+                    onChangeText={setNewLabel}
+                  />
+                </View>
+                <View style={styles.createFieldSmall}>
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Accounts</Text>
+                  <TextInput
+                    style={[styles.fieldInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                    keyboardType="number-pad"
+                    value={newMaxAccounts}
+                    onChangeText={setNewMaxAccounts}
+                  />
+                </View>
+                <View style={styles.createFieldSmall}>
+                  <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Duration</Text>
+                  <TextInput
+                    style={[styles.fieldInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
+                    keyboardType="number-pad"
+                    value={newExpAmount}
+                    onChangeText={setNewExpAmount}
+                  />
+                </View>
+              </View>
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+                {(["days", "months", "years"] as const).map((u) => {
+                  const selected = newExpUnit === u;
+                  return (
+                    <Pressable
+                      key={u}
+                      onPress={() => setNewExpUnit(u)}
+                      style={[
+                        styles.typeChip,
+                        {
+                          backgroundColor: selected ? "#3b82f622" : colors.background,
+                          borderColor: selected ? "#3b82f6" : colors.border,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.typeChipText, { color: selected ? "#3b82f6" : colors.textSecondary }]}>
+                        {u.charAt(0).toUpperCase() + u.slice(1)}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <View style={{ marginBottom: 12 }}>
+                <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Key Type</Text>
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  {KEY_TYPES.map((t) => {
+                    const tc = KEY_TYPE_COLORS[t];
+                    const selected = newKeyType === t;
+                    return (
+                      <Pressable
+                        key={t}
+                        onPress={() => setNewKeyType(t)}
+                        style={[
+                          styles.typeChip,
+                          {
+                            backgroundColor: selected ? tc.bg : colors.background,
+                            borderColor: selected ? tc.color : colors.border,
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.typeChipText, { color: selected ? tc.color : colors.textSecondary }]}>
+                          {t.charAt(0).toUpperCase() + t.slice(1)}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+              <Pressable
+                onPress={createKey}
+                disabled={creating}
+                style={({ pressed }) => [styles.createBtn, { opacity: creating ? 0.5 : pressed ? 0.85 : 1 }]}
+              >
+                {creating ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Key size={16} color="#fff" />
+                    <Text style={styles.createBtnText}>Generate Key</Text>
+                  </>
+                )}
+              </Pressable>
+            </View>
+          </>
+        )}
       </View>
 
       {loading ? (
@@ -1394,11 +1419,24 @@ const styles = StyleSheet.create({
   createSection: {
     marginHorizontal: 16,
     marginBottom: 16,
-    padding: 16,
     borderRadius: 16,
     borderWidth: 1,
+    overflow: "hidden",
   },
-  createTitle: { fontSize: 16, fontFamily: "Inter_600SemiBold", marginBottom: 12 },
+  createToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+  },
+  createToggleLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  createDivider: { height: 1 },
+  createFormBody: { padding: 16 },
+  createTitle: { fontSize: 16, fontFamily: "Inter_600SemiBold" },
   createRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
   createField: { flex: 2 },
   createFieldSmall: { flex: 1 },
