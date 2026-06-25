@@ -309,6 +309,75 @@ export async function showCompletedNotification(): Promise<void> {
   } catch {}
 }
 
+const EXPIRY_NOTIF_IDS_KEY = "@ms_rewards_expiry_notif_ids";
+
+export async function scheduleExpiryNotifications(expiresAt: string): Promise<void> {
+  if (Platform.OS === "web") return;
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+
+  await cancelExpiryNotifications();
+
+  const expiry = new Date(expiresAt).getTime();
+  const now = Date.now();
+  const channelId = Platform.OS === "android" ? "macro-rewards" : undefined;
+  const ids: string[] = [];
+
+  const candidates = [
+    {
+      offsetDays: 7,
+      title: "License Expiring Soon",
+      body: "Your Macro R license expires in 7 days. Open the app to renew.",
+    },
+    {
+      offsetDays: 1,
+      title: "License Expires Tomorrow",
+      body: "Your Macro R license expires tomorrow. Open the app to renew.",
+    },
+  ];
+
+  for (const { offsetDays, title, body } of candidates) {
+    const fireAt = expiry - offsetDays * 24 * 60 * 60 * 1000;
+    if (fireAt <= now) continue;
+    const seconds = Math.floor((fireAt - now) / 1000);
+    try {
+      const id = await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: { action: "license_expiry" },
+          sound: "default",
+          ...(Platform.OS === "android" && { channelId }),
+        },
+        trigger: { type: "timeInterval", seconds, repeats: false } as any,
+      });
+      ids.push(id);
+    } catch (e) {
+      console.log(`[Notifications] Failed to schedule expiry notif (${offsetDays}d):`, e);
+    }
+  }
+
+  if (ids.length > 0) {
+    await AsyncStorage.setItem(EXPIRY_NOTIF_IDS_KEY, JSON.stringify(ids));
+    console.log(`[Notifications] Scheduled ${ids.length} expiry notification(s)`);
+  }
+}
+
+export async function cancelExpiryNotifications(): Promise<void> {
+  if (Platform.OS === "web") return;
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+  try {
+    const stored = await AsyncStorage.getItem(EXPIRY_NOTIF_IDS_KEY);
+    if (!stored) return;
+    const ids: string[] = JSON.parse(stored);
+    for (const id of ids) {
+      try { await Notifications.cancelScheduledNotificationAsync(id); } catch {}
+    }
+    await AsyncStorage.removeItem(EXPIRY_NOTIF_IDS_KEY);
+  } catch {}
+}
+
 export async function setPendingRun(): Promise<void> {
   await AsyncStorage.setItem(PENDING_RUN_KEY, "true");
 }

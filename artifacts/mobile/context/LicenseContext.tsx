@@ -3,6 +3,7 @@ import * as Application from "expo-application";
 import { Platform } from "react-native";
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import * as Crypto from "expo-crypto";
+import { scheduleExpiryNotifications, cancelExpiryNotifications } from "@/utils/notifications";
 
 // ─── Licensing toggle ────────────────────────────────────────────────────────
 // Set to `false` to bypass all license checks and unlock every feature.
@@ -335,6 +336,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
         } else if (result.featureConfig) {
           await saveFeatureConfig(result.featureConfig);
         }
+        scheduleExpiryNotifications(result.expiresAt).catch(() => {});
       } else if (result.offline && storedData) {
         const data: LicenseData = JSON.parse(storedData);
         if (new Date(data.expiresAt).getTime() > Date.now()) {
@@ -382,6 +384,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem(ADMIN_VALIDATED_AT_STORAGE, Date.now().toString());
       await AsyncStorage.removeItem(LICENSE_KEY_STORAGE);
       await AsyncStorage.removeItem(LICENSE_DATA_STORAGE);
+      cancelExpiryNotifications().catch(() => {});
       setAdminSecret(trimmed);
       setIsAdmin(true);
       setIsLicensed(true);
@@ -423,6 +426,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     if (effectiveConfig) {
       await saveFeatureConfig(effectiveConfig);
     }
+    scheduleExpiryNotifications(result.expiresAt).catch(() => {});
     setLicenseData(data);
     setIsLicensed(true);
     setIsAdmin(isOwnerKey);
@@ -432,6 +436,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
   }, [validateKey, validateAdmin, saveFeatureConfig]);
 
   const removeLicense = useCallback(async () => {
+    cancelExpiryNotifications().catch(() => {});
     await AsyncStorage.removeItem(LICENSE_KEY_STORAGE);
     await AsyncStorage.removeItem(LICENSE_DATA_STORAGE);
     await AsyncStorage.removeItem(ADMIN_SECRET_STORAGE);
