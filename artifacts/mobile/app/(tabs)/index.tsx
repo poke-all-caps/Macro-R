@@ -2,7 +2,7 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useFocusEffect } from "expo-router";
-import { CheckSquare, Grid3X3, List, Play, PlayCircle, Plus, Square, Users } from "lucide-react-native";
+import { AlertTriangle, CheckSquare, Grid3X3, List, Play, PlayCircle, Plus, Square, Users } from "lucide-react-native";
 import React, { useCallback, useState } from "react";
 import {
   Animated,
@@ -44,6 +44,11 @@ export default function HomeScreen() {
   const maxSearches = featureConfig.maxSearches;
   const minDelay = featureConfig.minDelaySeconds;
   const dailySetAllowed = featureConfig.dailySetEnabled && settings.dailySetEnabled;
+
+  const daysUntilExpiry = licenseData
+    ? Math.ceil((new Date(licenseData.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+  const showExpiryWarning = daysUntilExpiry !== null && daysUntilExpiry <= 7 && daysUntilExpiry >= 0;
   const lastPointsRefresh = React.useRef(0);
 
   const onRefresh = useCallback(async () => {
@@ -394,6 +399,23 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {showExpiryWarning && (
+        <Pressable
+          onPress={() => router.push("/(tabs)/settings")}
+          style={[
+            styles.expiryBanner,
+            { backgroundColor: daysUntilExpiry === 0 ? "#7f1d1d" : "#78350f" },
+          ]}
+        >
+          <AlertTriangle size={16} color="#fbbf24" />
+          <Text style={styles.expiryBannerText}>
+            {daysUntilExpiry === 0
+              ? "Your license expires today — tap to renew"
+              : `License expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"} — tap to renew`}
+          </Text>
+        </Pressable>
+      )}
+
       {accounts.length > 0 && <StatsBar accounts={accounts} />}
     </View>
   );
@@ -540,6 +562,22 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  expiryBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  expiryBannerText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    color: "#fef3c7",
+    flex: 1,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
