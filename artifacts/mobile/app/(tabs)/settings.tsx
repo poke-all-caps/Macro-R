@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import * as Updates from "expo-updates";
-import { CheckSquare, ChevronRight, Clock, Download, Moon, Search, Shield } from "lucide-react-native";
+import { CheckSquare, ChevronRight, Clock, Download, Moon, RefreshCw, Search, Shield } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -43,9 +43,10 @@ export default function SettingsScreen() {
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
-  const { licenseData, featureConfig, removeLicense, isOwnerMode, adminPanelVisible } = useLicense();
+  const { licenseData, featureConfig, removeLicense, isOwnerMode, adminPanelVisible, revalidate, error: licenseError } = useLicense();
   const { showAlert, AlertComponent } = useCustomAlert();
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [checkingLicense, setCheckingLicense] = useState(false);
 
   const [searchCountText, setSearchCountText] = useState(
     String(settings.defaultSearchCount)
@@ -295,6 +296,43 @@ export default function SettingsScreen() {
               </View>
             )}
           </View>
+          {licenseData && (
+            <Pressable
+              onPress={async () => {
+                if (checkingLicense) return;
+                setCheckingLicense(true);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                await revalidate();
+                setCheckingLicense(false);
+                showAlert(
+                  licenseError ? "License Error" : "License Updated",
+                  licenseError ?? "Your license details have been refreshed from the server.",
+                  [{ text: "OK" }]
+                );
+              }}
+              style={({ pressed }) => [
+                styles.clearBtn,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.surface,
+                  opacity: pressed || checkingLicense ? 0.7 : 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                },
+              ]}
+            >
+              {checkingLicense ? (
+                <ActivityIndicator size="small" color="#3b82f6" />
+              ) : (
+                <RefreshCw size={15} color="#3b82f6" />
+              )}
+              <Text style={[styles.clearText, { color: "#3b82f6" }]}>
+                {checkingLicense ? "Checking…" : "Check for Update"}
+              </Text>
+            </Pressable>
+          )}
           {licenseData && (
             <Pressable
               onPress={() => {
