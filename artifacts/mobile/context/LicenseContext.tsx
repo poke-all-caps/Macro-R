@@ -17,11 +17,14 @@ const ADMIN_SECRET_STORAGE = "@ms_rewards_admin_secret";
 const ADMIN_VALIDATED_AT_STORAGE = "@ms_rewards_admin_validated_at";
 const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 const ADMIN_VISIBLE_STORAGE = "@ms_rewards_admin_visible";
+// On web (Expo web preview), EXPO_PUBLIC_DOMAIN is injected by the dev workflow
+// and points to the same-origin Replit API server — no CORS issues.
+// On native EAS builds, EXPO_PUBLIC_DOMAIN is NOT set, so we fall back to
+// EXPO_PUBLIC_API_URL which is baked in via eas.json per build profile.
 const API_BASE =
-  process.env.EXPO_PUBLIC_API_URL ||
-  (process.env.EXPO_PUBLIC_DOMAIN
+  process.env.EXPO_PUBLIC_DOMAIN
     ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
-    : "");
+    : process.env.EXPO_PUBLIC_API_URL || "";
 export const OWNER_MODE =
   process.env.EXPO_PUBLIC_OWNER_MODE === "true";
 
