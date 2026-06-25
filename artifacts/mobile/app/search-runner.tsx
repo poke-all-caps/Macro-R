@@ -164,38 +164,26 @@ function makeClickScript(alreadyClicked: string[]): string {
       );
     }
 
-    // ── Selector list: old UI + new 2024-2025 redesign ────────────────────────
+    // ── Selector list: Daily Set ONLY ─────────────────────────────────────────
+    // Only selectors that specifically target Daily Set items.
+    // Removed: punchcard, c-card, lockup, offer-card, data-activity-id,
+    // and bare href matchers — they all match non-daily-set activities.
     var selectors = [
-      // New 2024-2025 Microsoft Rewards UI
+      // New 2024-2025 Microsoft Rewards UI — Daily Set specific
       'mee-rewards-daily-set-item a[href]',
-      'mee-rewards-punchcard-item a[href]',
       '[class*="dailySet"] a[href]',
       '[class*="daily-set"] a[href]',
       '[class*="DailySet"] a[href]',
       '[data-bi-an*="DailySet"] a[href]',
       '[data-bi-an*="dailyset"] a[href]',
       '[data-m*="DailySet"] a[href]',
-      '[class*="c-card"] a[href]',
-      '[class*="reward-card"] a[href]',
-      '[class*="rewardCard"] a[href]',
-      '[class*="offer-cta"] a[href]',
-      '[class*="offerCta"] a[href]',
-      '[class*="lockup"] a[href]',
-      'section[class*="daily"] a[href]',
-      'div[class*="daily"] a[href]',
-      // Old UI selectors (kept for compatibility)
-      '[data-activity-id] a[href]',
+      'section[class*="daily-set"] a[href]',
+      'div[class*="daily-set"] a[href]',
+      // Old UI selectors — Daily Set specific
       '[data-bi-id*="dailyset"] a[href]',
       '[data-bi-id*="DailySet"] a[href]',
       '.ds-card-sec a[href]',
       '[class*="ds-card"] a[href]',
-      '.punchcard-row a[href]',
-      '[class*="punchcard"] a[href]',
-      '[class*="offer-card"] a[href]',
-      '[class*="offercard"] a[href]',
-      'a[href*="rewardschallenges"]',
-      'a[href*="rewards.bing.com/go/"]',
-      'a[href*="rewards.microsoft.com/go/"]',
     ];
 
     // ── Pass 1: try each selector ─────────────────────────────────────────────
@@ -227,18 +215,19 @@ function makeClickScript(alreadyClicked: string[]): string {
       }
     }
 
-    // ── Pass 2: find "Daily Set" heading, then grab links nearby ─────────────
-    // Handles any renamed/obfuscated class structure in the new UI.
+    // ── Pass 2: find a heading that says exactly "Daily Set", grab links nearby ─
+    // Requires both words together ("daily set") to avoid matching "daily streak",
+    // "daily login bonus", etc. Limits walk-up depth to 4 to stay inside the section.
     var allHeadings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,span,div,p'));
     for (var hi = 0; hi < allHeadings.length; hi++) {
       var hEl = allHeadings[hi];
       var hText = (hEl.textContent || '').trim().toLowerCase();
-      if (hText.indexOf('daily set') === -1 && hText.indexOf('daily') === -1) continue;
-      if (hText.length > 60) continue; // skip large containers that happen to contain the word
+      if (hText.indexOf('daily set') === -1) continue; // must contain both words
+      if (hText.length > 60) continue; // skip large containers
 
-      // Walk up to a section/div that wraps the whole daily set block
+      // Walk up to find the section wrapping the Daily Set block (max 4 levels)
       var section = hEl.parentElement;
-      for (var depth = 0; depth < 6 && section; depth++) {
+      for (var depth = 0; depth < 4 && section; depth++) {
         var links = Array.from(section.querySelectorAll('a[href]'));
         for (var li2 = 0; li2 < links.length; li2++) {
           var lEl = links[li2];
@@ -263,27 +252,10 @@ function makeClickScript(alreadyClicked: string[]): string {
       }
     }
 
-    // ── Pass 3: last resort — any unclicked rewards activity link on the page ─
-    var allLinks = Array.from(document.querySelectorAll('a[href]'));
-    for (var ali = 0; ali < allLinks.length; ali++) {
-      var aEl = allLinks[ali];
-      var aHref = (aEl.href || aEl.getAttribute('href') || '').toLowerCase().trim();
-      if (!isActivityHref(aHref)) continue;
-      if (isCompleted(aEl)) continue;
-
-      var aCardId = getCardId(aEl);
-      if (alreadyClicked.indexOf(aCardId) !== -1) continue;
-      if (aHref && alreadyClicked.indexOf(aHref) !== -1) continue;
-
-      var aText = (aEl.textContent || aEl.getAttribute('aria-label') || '').trim().replace(/\\s+/g, ' ').slice(0, 60);
-      aEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-
-      window.ReactNativeWebView.postMessage(JSON.stringify({
-        type: 'card_clicked', found: true,
-        text: aText || 'Activity', href: aHref, cardId: aCardId,
-      }));
-      return;
-    }
+    // ── Pass 3 removed ────────────────────────────────────────────────────────
+    // Previously clicked any rewards link on the page as a last resort.
+    // Removed because it clicked punch cards, streak bonuses, and other
+    // non-Daily-Set activities. If passes 1 & 2 found nothing, we stop.
 
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'card_clicked', found: false }));
   } catch(e) {
