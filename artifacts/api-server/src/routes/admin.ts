@@ -24,8 +24,8 @@ function esc(s: unknown): string {
 }
 
 // ── Login page HTML ───────────────────────────────────────────────────────────
-function loginPage(errorMsg?: string): string {
-  const formAction = "admin/login";
+function loginPage(errorMsg?: string, baseAdminPath = "/api/admin"): string {
+  const formAction = `${baseAdminPath}/login`;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -118,7 +118,7 @@ function dashboardPage(): string {
 <body>
   <div class="topbar">
     <h1 style="margin-bottom:0">Macro Rewards — License Keys</h1>
-    <form method="POST" action="admin/logout" style="margin:0">
+    <form method="POST" action="/api/admin/logout" style="margin:0">
       <button type="submit" class="btn-logout">Sign Out</button>
     </form>
   </div>
@@ -422,8 +422,9 @@ function dashboardPage(): string {
 // ── Routes ────────────────────────────────────────────────────────────────────
 
 router.get("/admin", (req, res) => {
+  const baseAdminPath = `${req.baseUrl}/admin`;
   if (!ADMIN_SECRET) {
-    return res.status(503).send(loginPage("ADMIN_SECRET is not configured on the server."));
+    return res.status(503).send(loginPage("ADMIN_SECRET is not configured on the server.", baseAdminPath));
   }
 
   const sessionToken = getSessionFromCookie(req.headers.cookie);
@@ -431,32 +432,32 @@ router.get("/admin", (req, res) => {
     return res.send(dashboardPage());
   }
 
-  return res.status(401).send(loginPage());
+  return res.status(401).send(loginPage(undefined, baseAdminPath));
 });
 
 router.post("/admin/login", (req, res) => {
+  const baseAdminPath = `${req.baseUrl}/admin`;
   const { secret } = req.body ?? {};
   if (!ADMIN_SECRET || secret !== ADMIN_SECRET) {
-    return res.status(401).send(loginPage("Invalid secret. Please try again."));
+    return res.status(401).send(loginPage("Invalid secret. Please try again.", baseAdminPath));
   }
   const token = createSession();
-  const adminPath = req.path.replace(/\/login$/, "");
   res.setHeader(
     "Set-Cookie",
     `admin_session=${token}; ${COOKIE_FLAGS}; Max-Age=14400`
   );
-  return res.redirect(303, adminPath || "/admin");
+  return res.redirect(303, baseAdminPath);
 });
 
 router.post("/admin/logout", (req, res) => {
+  const baseAdminPath = `${req.baseUrl}/admin`;
   const token = getSessionFromCookie(req.headers.cookie);
   deleteSession(token);
   res.setHeader(
     "Set-Cookie",
     `admin_session=; ${COOKIE_FLAGS}; Max-Age=0`
   );
-  const adminPath = req.path.replace(/\/logout$/, "");
-  return res.redirect(303, adminPath || "/admin");
+  return res.redirect(303, baseAdminPath);
 });
 
 export { requireAdmin };
