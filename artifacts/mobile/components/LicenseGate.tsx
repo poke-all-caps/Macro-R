@@ -13,9 +13,10 @@ import {
   Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Lock, KeyRound, ScanLine, Image as ImageIcon, X } from "lucide-react-native";
+import { Lock, KeyRound, ScanLine, Image as ImageIcon, X, Download } from "lucide-react-native";
 import { CameraView, Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
+import * as Updates from "expo-updates";
 import { useLicense } from "@/context/LicenseContext";
 import Colors from "@/constants/colors";
 
@@ -29,6 +30,36 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   const [submitting, setSubmitting] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+
+  const handleCheckUpdate = async () => {
+    if (checkingUpdate || Platform.OS === "web") return;
+    setCheckingUpdate(true);
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        Alert.alert("Update Available", "A new version is ready. Download and install now?", [
+          { text: "Later", style: "cancel" },
+          {
+            text: "Update Now",
+            onPress: async () => {
+              try {
+                await Updates.fetchUpdateAsync();
+                await Updates.reloadAsync();
+              } catch {
+                Alert.alert("Error", "Failed to download update. Try again later.");
+              }
+            },
+          },
+        ]);
+      } else {
+        Alert.alert("Up to Date", "You're already running the latest version.");
+      }
+    } catch {
+      Alert.alert("Error", "Could not check for updates. Try again later.");
+    }
+    setCheckingUpdate(false);
+  };
 
   if (isLoading) {
     return (
@@ -181,6 +212,26 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
               </Pressable>
             </View>
           )}
+
+          {Platform.OS !== "web" && (
+            <Pressable
+              onPress={handleCheckUpdate}
+              disabled={checkingUpdate}
+              style={({ pressed }) => [
+                styles.updateButton,
+                { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed || checkingUpdate ? 0.7 : 1 },
+              ]}
+            >
+              {checkingUpdate ? (
+                <ActivityIndicator size="small" color="#059669" />
+              ) : (
+                <Download size={16} color="#059669" />
+              )}
+              <Text style={[styles.updateButtonText, { color: colors.textSecondary }]}>
+                {checkingUpdate ? "Checking…" : "Update App"}
+              </Text>
+            </Pressable>
+          )}
         </View>
       </View>
 
@@ -291,6 +342,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   scanButtonText: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+  },
+  updateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderRadius: 12,
+    height: 44,
+    borderWidth: 1,
+    marginTop: 10,
+  },
+  updateButtonText: {
     fontSize: 14,
     fontFamily: "Inter_500Medium",
   },

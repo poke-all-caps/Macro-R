@@ -333,6 +333,60 @@ export default function SettingsScreen() {
               </Text>
             </Pressable>
           )}
+          {Platform.OS !== "web" && licenseData && (
+            <Pressable
+              onPress={async () => {
+                if (checkingUpdate) return;
+                setCheckingUpdate(true);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                try {
+                  const update = await Updates.checkForUpdateAsync();
+                  if (update.isAvailable) {
+                    showAlert("Update Available", "A new version is ready. Download and restart?", [
+                      { text: "Later", style: "cancel" },
+                      {
+                        text: "Update Now",
+                        onPress: async () => {
+                          try {
+                            await Updates.fetchUpdateAsync();
+                            await Updates.reloadAsync();
+                          } catch {
+                            showAlert("Error", "Failed to download update. Try again later.");
+                          }
+                        },
+                      },
+                    ]);
+                  } else {
+                    showAlert("Up to Date", "You're running the latest version.");
+                  }
+                } catch {
+                  showAlert("Error", "Could not check for updates. Try again later.");
+                }
+                setCheckingUpdate(false);
+              }}
+              style={({ pressed }) => [
+                styles.clearBtn,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.surface,
+                  opacity: pressed || checkingUpdate ? 0.7 : 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                },
+              ]}
+            >
+              {checkingUpdate ? (
+                <ActivityIndicator size="small" color="#059669" />
+              ) : (
+                <Download size={15} color="#059669" />
+              )}
+              <Text style={[styles.clearText, { color: "#059669" }]}>
+                {checkingUpdate ? "Checking…" : "Update App"}
+              </Text>
+            </Pressable>
+          )}
           {licenseData && (
             <Pressable
               onPress={() => {
