@@ -17,8 +17,8 @@ if (Number.isNaN(port) || port <= 0) {
 
 initSchema()
   .then(() => {
-    app.listen(port, () => {
-      console.log(`Server listening on port ${port}`);
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`Server listening on 0.0.0.0:${port}`);
     });
   })
   .catch((err) => {
