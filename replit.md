@@ -430,8 +430,8 @@ Default seed values are created on server startup if the table is empty. Admin c
 
 ### Current Values
 - **ADMIN_SECRET**: Set via Replit Secrets (do not store in code or docs)
-- **Production URL**: `https://macro-r.onrender.com`
-- **Admin Panel (prod)**: `https://macro-r.onrender.com/api/admin` (log in with ADMIN_SECRET)
+- **Production URL**: `https://macro-r-631x.onrender.com`
+- **Admin Panel (prod)**: `https://macro-r-631x.onrender.com/api/admin` (log in with ADMIN_SECRET)
 - **Admin Panel (dev)**: `https://<REPLIT_DEV_DOMAIN>/api/admin` (log in with ADMIN_SECRET)
 
 ---
@@ -496,10 +496,10 @@ const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
 - This ensures the admin panel works whether the user entered the admin secret directly OR used an admin-type license key
 
 ### Production Deployment
-- **Production URL**: `https://macro-r.onrender.com`
+- **Production URL**: `https://macro-r-631x.onrender.com`
 - **Build script** (`build.ts`): Automatically runs `drizzle-kit push` to sync the production DB schema before bundling
 - **Health check**: `GET /api/healthz`
-- **Mobile APK**: Must set `EXPO_PUBLIC_API_URL=https://macro-r.onrender.com/api` in EAS env before building
+- **Mobile APK**: Must set `EXPO_PUBLIC_API_URL=https://macro-r-631x.onrender.com/api` in EAS env before building
 
 ### Device Compatibility Notes
 - **Infinix/HiOS**: Requires Autostart enabled for background tasks
