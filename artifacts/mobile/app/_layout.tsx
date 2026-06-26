@@ -54,9 +54,14 @@ function NotificationHandler() {
 
   useEffect(() => {
     setupNotificationHandler();
+    // Re-register background fetch on startup ONLY if the user previously
+    // applied a schedule (BG_FETCH_ENABLED_KEY === "true").  This survives
+    // app restarts and reinstalls without overriding a cleared schedule.
     isBackgroundFetchEnabled().then((enabled) => {
       if (enabled) {
-        scheduleBackgroundFetch().catch((e) => console.log("[Layout] Background fetch schedule failed:", e));
+        scheduleBackgroundFetch().catch((e) =>
+          console.log("[Layout] Background fetch re-register failed:", e)
+        );
       }
     });
 
@@ -67,18 +72,25 @@ function NotificationHandler() {
         return;
       }
 
-      if (accountsRef.current.length > 0 && !isRunningRef.current) {
+      // If a foreground run is already in progress, don't interrupt or redirect
+      if (isRunningRef.current) {
+        console.log("[NotificationHandler] Foreground run already in progress, skipping");
+        return;
+      }
+
+      if (accountsRef.current.length > 0) {
         startRunRef.current();
         router.navigate({
           pathname: "/search-runner",
           params: {
-            accountIds: JSON.stringify(accountsRef.current.map((a) => a.id)),
+            accountIds: JSON.stringify(
+              accountsRef.current.filter((a) => (a as any).enabled ?? true).map((a) => a.id)
+            ),
             mode: overnightDailySetRef.current ? "both" : "searchonly",
           },
         });
       } else {
         await setPendingRun();
-        router.navigate("/(tabs)/");
       }
     };
 

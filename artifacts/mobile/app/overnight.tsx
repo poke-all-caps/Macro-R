@@ -193,7 +193,11 @@ export default function OvernightScreen() {
     setScheduledCount(scheduled);
     setScheduling(false);
     const slotList = settings.overnightSlots.map((s, i) => `  Run ${i + 1}: ${formatSlot(s)}`).join("\n");
-    showAlert("Overnight Schedule Active", `${scheduled} daily notification${scheduled !== 1 ? "s" : ""} scheduled.\n\n${slotList}\n\nTap the notification when it fires — the app will start automatically.`, [{ text: "Got it" }]);
+    showAlert(
+      "Overnight Schedule Active",
+      `${scheduled} daily alarm${scheduled !== 1 ? "s" : ""} set.\n\n${slotList}\n\nSearches will run automatically at these times — even if the app is closed — as long as battery optimization is disabled for the app.\n\nTip: Go to Settings → Apps → Macro R → Battery → Unrestricted to ensure reliable overnight runs.`,
+      [{ text: "Got it" }]
+    );
   };
 
   const handleClearSchedule = async () => {

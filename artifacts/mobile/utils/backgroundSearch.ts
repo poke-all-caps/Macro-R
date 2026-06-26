@@ -165,6 +165,47 @@ export async function getLastBackgroundRun(): Promise<number> {
   return val ? parseInt(val, 10) : 0;
 }
 
+/**
+ * Checks whether the current time is within SLOT_WINDOW_MINUTES of any configured
+ * overnight slot AND we haven't already run within MIN_INTERVAL_MS.
+ * Used by the periodic background fetch so searches fire at the right times even
+ * if the notification-triggered task was killed by the OS.
+ */
+const SLOT_WINDOW_MINUTES = 20; // fire if within ±20 min of a scheduled slot
+const MIN_INTERVAL_MS = 50 * 60 * 1000; // don't re-run within 50 minutes
+
+export async function isScheduledRunDue(): Promise<boolean> {
+  try {
+    const raw = await AsyncStorage.getItem(SETTINGS_KEY);
+    if (!raw) return false;
+    const settings = JSON.parse(raw);
+    const slots: Array<{ hour: number; minute: number }> = settings.overnightSlots ?? [];
+    if (slots.length === 0) return false;
+
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const isNearSlot = slots.some((slot) => {
+      const slotMinutes = slot.hour * 60 + slot.minute;
+      // Handle midnight wrap-around (e.g., slot at 0:00 and now at 23:50)
+      const diff = Math.min(
+        Math.abs(nowMinutes - slotMinutes),
+        1440 - Math.abs(nowMinutes - slotMinutes)
+      );
+      return diff <= SLOT_WINDOW_MINUTES;
+    });
+
+    if (!isNearSlot) return false;
+
+    const lastRun = await getLastBackgroundRun();
+    if (Date.now() - lastRun < MIN_INTERVAL_MS) return false;
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function runBackgroundSearches(): Promise<void> {
   const alreadyRunning = await isBackgroundRunning();
   if (alreadyRunning) {
@@ -310,10 +351,28 @@ export function registerBackgroundSearchTask(): void {
     const TaskManager = require("expo-task-manager");
     TaskManager.defineTask(BACKGROUND_SEARCH_TASK, async () => {
       try {
-        console.log("[BackgroundSearch] Background fetch triggered");
-        await runBackgroundSearches();
+        console.log("[BackgroundSearch] Background fetch triggered — checking schedule");
         const BackgroundFetch = require("expo-background-fetch");
-        return BackgroundFetch.BackgroundFetchResult.NewData;
+
+        // Check if we're near an overnight slot
+        const due = await isScheduledRunDue();
+        if (due) {
+          console.log("[BackgroundSearch] Overnight slot matched — running searches");
+          await runBackgroundSearches();
+          return BackgroundFetch.BackgroundFetchResult.NewData;
+        }
+
+        // Also pick up any pending run flag set by the notification task fallback
+        const pending = await AsyncStorage.getItem("@ms_rewards_pending_run");
+        if (pending === "true") {
+          console.log("[BackgroundSearch] Pending run flag found — running searches");
+          await AsyncStorage.removeItem("@ms_rewards_pending_run");
+          await runBackgroundSearches();
+          return BackgroundFetch.BackgroundFetchResult.NewData;
+        }
+
+        console.log("[BackgroundSearch] No scheduled run due, skipping");
+        return BackgroundFetch.BackgroundFetchResult.NoData;
       } catch (e) {
         console.log("[BackgroundSearch] Task error:", e);
         await AsyncStorage.removeItem(BG_RUNNING_KEY);
@@ -346,7 +405,7 @@ export async function scheduleBackgroundFetch(): Promise<boolean> {
     }
 
     await BackgroundFetch.registerTaskAsync(BACKGROUND_SEARCH_TASK, {
-      minimumInterval: 60 * 60,
+      minimumInterval: 15 * 60, // 15 minutes — Android minimum; OS schedules as close as it can
       stopOnTerminate: false,
       startOnBoot: true,
     });
