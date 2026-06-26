@@ -24,6 +24,7 @@ import { SettingsProvider, useSettings } from "@/context/SettingsContext";
 import {
   addNotificationResponseListener,
   addNotificationReceivedListener,
+  getInitialNotificationResponse,
   setupNotificationHandler,
   setPendingRun,
   registerBackgroundNotificationTask,
@@ -93,6 +94,20 @@ function NotificationHandler() {
         await setPendingRun();
       }
     };
+
+    // ── Cold-start: app was killed, user tapped notification ────────────────
+    // addNotificationResponseListener only fires for taps that happen AFTER
+    // this component mounts. When the app is dead and the notification wakes
+    // it, the response is already "used up" before the listener registers.
+    // getLastNotificationResponseAsync() retrieves that cold-start response.
+    getInitialNotificationResponse().then(async (response) => {
+      if (!response) return;
+      const action = response?.notification?.request?.content?.data?.action;
+      if (action === "start_run" || action === "open_running") {
+        console.log("[NotificationHandler] Cold-start notification response — starting run");
+        await handleStartRun();
+      }
+    });
 
     const responseSub = addNotificationResponseListener(async (response: any) => {
       const action = response?.notification?.request?.content?.data?.action;

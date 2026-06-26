@@ -378,6 +378,16 @@ export async function cancelExpiryNotifications(): Promise<void> {
   } catch {}
 }
 
+export async function getInitialNotificationResponse(): Promise<any | null> {
+  const Notifications = getNotifications();
+  if (!Notifications) return null;
+  try {
+    return await Notifications.getLastNotificationResponseAsync();
+  } catch {
+    return null;
+  }
+}
+
 export async function setPendingRun(): Promise<void> {
   await AsyncStorage.setItem(PENDING_RUN_KEY, "true");
 }
