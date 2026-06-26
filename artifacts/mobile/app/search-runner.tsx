@@ -154,8 +154,50 @@ function makeClickScript(alreadyClicked: string[]): string {
       );
     }
 
-    // ── Tier 1: precise Daily Set container selectors ──────────────────────
-    // These target only the Daily Set section, not the full activity feed.
+    // ── Tier 1: new Tailwind-based card selectors (rewards.microsoft.com 2024 redesign) ──
+    // The redesigned page uses design-token utility classes. The Daily Set card
+    // elements have a distinctive class combination: bg-bgCardOnPrimaryDefaultRest +
+    // cursor-pointer + flex-row. We find all of them (capped at 3), skip completed
+    // ones, and click the first unvisited one.
+    // These card elements ARE the anchor tags (or contain them), so we handle both cases.
+    var tailwindCardCandidates = Array.from(
+      document.querySelectorAll(
+        'a.cursor-pointer[class*="bgCardOnPrimaryDefault"],' +
+        'a[class*="bgCardOnPrimaryDefault"],' +
+        // Also try the container div if the anchor is the card itself
+        'div.cursor-pointer[class*="bgCardOnPrimaryDefault"] a[href],' +
+        '[class*="bgCardOnPrimaryDefault"] a[href]'
+      )
+    );
+
+    for (var ti = 0; ti < tailwindCardCandidates.length; ti++) {
+      var tEl = tailwindCardCandidates[ti];
+      // Resolve to the anchor element
+      var aEl = (tEl.tagName === 'A') ? tEl : tEl.closest('a') || tEl.querySelector('a');
+      if (!aEl) continue;
+      var tHref = (aEl.href || aEl.getAttribute('href') || '').toLowerCase().trim();
+      if (!isDailySetActivityHref(tHref)) continue;
+      if (isCompleted(aEl)) continue;
+
+      var tCardId = getCardId(aEl);
+      if (alreadyClicked.indexOf(tCardId) !== -1) continue;
+      if (tHref && alreadyClicked.indexOf(tHref) !== -1) continue;
+
+      var tText = (
+        aEl.textContent ||
+        aEl.getAttribute('aria-label') ||
+        aEl.getAttribute('title') || ''
+      ).trim().replace(/\\s+/g, ' ').slice(0, 60);
+
+      aEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        type: 'card_clicked', found: true,
+        text: tText || 'Activity', href: tHref, cardId: tCardId,
+      }));
+      return;
+    }
+
+    // ── Tier 2: older Angular/class-attribute selectors (pre-2024 layout) ──────
     var selectors = [
       'mee-rewards-daily-set-item a[href]',
       '[class*="dailySet"] a[href]',
