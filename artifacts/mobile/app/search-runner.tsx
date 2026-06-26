@@ -94,6 +94,8 @@ function makeClickScript(alreadyClicked: string[]): string {
   try {
     var alreadyClicked = ${JSON.stringify(alreadyClicked)};
 
+    // Build a stable ID from the card's data attributes + href so we can
+    // deduplicate across page reloads without relying on DOM positions.
     function getCardId(el) {
       var href = (el.href || el.getAttribute('href') || '').toLowerCase().trim();
       var container = el.closest('[data-activity-id], [data-bi-id], [data-m], [id]');
@@ -106,6 +108,8 @@ function makeClickScript(alreadyClicked: string[]): string {
       return (attrId + '||' + href);
     }
 
+    // Signals that a card has already been completed — check the element itself
+    // and its closest card container.
     var completedSignals = [
       '[class*="complete"]', '[class*="completed"]',
       '[class*="done"]', '[aria-checked="true"]',
@@ -128,28 +132,30 @@ function makeClickScript(alreadyClicked: string[]): string {
         for (var s of completedSignals) {
           if (card.querySelector(s)) return true;
         }
-          if (card.querySelector('svg[class*="check"], svg[class*="complete"], [class*="check-icon"]')) return true;
+        if (card.querySelector('svg[class*="check"], svg[class*="complete"], [class*="check-icon"]')) return true;
       }
       return false;
     }
 
-    function isActivityHref(href) {
+    // Only follow links that are genuine Daily Set activity links.
+    // Deliberately narrow: rewards /go/ redirects and bing quiz/search URLs.
+    // Does NOT include generic microsoft.com/rewards or bing.com/rewards home
+    // pages — those are the dashboard itself, not activities.
+    function isDailySetActivityHref(href) {
       if (!href) return false;
       var h = href.toLowerCase();
       return (
-        h.indexOf('bing.com/search') !== -1 ||
-        h.indexOf('bing.com/rewards') !== -1 ||
-        h.indexOf('rewards.bing.com/go') !== -1 ||
-        h.indexOf('rewards.microsoft.com/go') !== -1 ||
-        h.indexOf('rewards.microsoft.com/redeem') !== -1 ||
-        h.indexOf('rewardschallenges') !== -1 ||
-        h.indexOf('microsoft.com/rewards') !== -1 ||
+        h.indexOf('rewards.microsoft.com/go/') !== -1 ||
+        h.indexOf('rewards.bing.com/go/') !== -1 ||
+        h.indexOf('bing.com/search?') !== -1 ||
         h.indexOf('bing.com/quiz') !== -1 ||
         h.indexOf('bing.com/know') !== -1 ||
-        h.indexOf('go.microsoft.com') !== -1
+        h.indexOf('rewardschallenges') !== -1
       );
     }
 
+    // ── Tier 1: precise Daily Set container selectors ──────────────────────
+    // These target only the Daily Set section, not the full activity feed.
     var selectors = [
       'mee-rewards-daily-set-item a[href]',
       '[class*="dailySet"] a[href]',
@@ -170,11 +176,15 @@ function makeClickScript(alreadyClicked: string[]): string {
       var matches = Array.from(document.querySelectorAll(sel));
       for (var i = 0; i < matches.length; i++) {
         var el = matches[i];
+        var href = (el.href || el.getAttribute('href') || '').toLowerCase().trim();
+
+        // Skip links that don't look like actual activity destinations.
+        // This is the key guard — it prevents clicking nav links, banners,
+        // and other non-activity anchors that live inside the same containers.
+        if (!isDailySetActivityHref(href)) continue;
         if (isCompleted(el)) continue;
 
         var cardId = getCardId(el);
-        var href = (el.href || el.getAttribute('href') || '').toLowerCase().trim();
-
         if (alreadyClicked.indexOf(cardId) !== -1) continue;
         if (href && alreadyClicked.indexOf(href) !== -1) continue;
 
@@ -194,39 +204,10 @@ function makeClickScript(alreadyClicked: string[]): string {
       }
     }
 
-    var allHeadings = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,span,div,p'));
-    for (var hi = 0; hi < allHeadings.length; hi++) {
-      var hEl = allHeadings[hi];
-      var hText = (hEl.textContent || '').trim().toLowerCase();
-      if (hText.indexOf('daily set') === -1) continue;
-      if (hText.length > 60) continue;
-
-      var section = hEl.parentElement;
-      for (var depth = 0; depth < 4 && section; depth++) {
-        var links = Array.from(section.querySelectorAll('a[href]'));
-        for (var li2 = 0; li2 < links.length; li2++) {
-          var lEl = links[li2];
-          var lHref = (lEl.href || lEl.getAttribute('href') || '').toLowerCase().trim();
-          if (!isActivityHref(lHref)) continue;
-          if (isCompleted(lEl)) continue;
-
-          var lCardId = getCardId(lEl);
-          if (alreadyClicked.indexOf(lCardId) !== -1) continue;
-          if (lHref && alreadyClicked.indexOf(lHref) !== -1) continue;
-
-          var lText = (lEl.textContent || lEl.getAttribute('aria-label') || '').trim().replace(/\\s+/g, ' ').slice(0, 60);
-          lEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-
-          window.ReactNativeWebView.postMessage(JSON.stringify({
-            type: 'card_clicked', found: true,
-            text: lText || 'Activity', href: lHref, cardId: lCardId,
-          }));
-          return;
-        }
-        section = section.parentElement;
-      }
-    }
-
+    // ── No card found — report done ────────────────────────────────────────
+    // The old fallback that searched arbitrary headings for "daily set" text
+    // and walked up the DOM has been intentionally removed. It was too broad
+    // and clicked promotions, streaks, and other non-Daily-Set activities.
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'card_clicked', found: false }));
   } catch(e) {
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'card_clicked', found: false, error: String(e) }));
@@ -390,7 +371,7 @@ export default function SearchRunnerScreen() {
   const runDailySetViaWebView = useCallback(async (
     onStatus: (msg: string) => void
   ): Promise<{ completed: number; total: number; alreadyDone: boolean }> => {
-    const MAX_CARDS = 10; // safety cap per account
+    const MAX_CARDS = 3; // Daily Set always has exactly 3 cards
     let completed = 0;
 
     // Tracks every card we clicked this session so we never repeat one.
