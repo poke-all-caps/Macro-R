@@ -13,7 +13,14 @@ import {
   Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Lock, KeyRound, ScanLine, Image as ImageIcon, X, Download } from "lucide-react-native";
+import {
+  Lock,
+  KeyRound,
+  ScanLine,
+  Image as ImageIcon,
+  X,
+  Download,
+} from "lucide-react-native";
 import { CameraView, Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as Updates from "expo-updates";
@@ -38,20 +45,27 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
     try {
       const update = await Updates.checkForUpdateAsync();
       if (update.isAvailable) {
-        Alert.alert("Update Available", "A new version is ready. Download and install now?", [
-          { text: "Later", style: "cancel" },
-          {
-            text: "Update Now",
-            onPress: async () => {
-              try {
-                await Updates.fetchUpdateAsync();
-                await Updates.reloadAsync();
-              } catch {
-                Alert.alert("Error", "Failed to download update. Try again later.");
-              }
+        Alert.alert(
+          "Update Available",
+          "A new version is ready. Download and install now?",
+          [
+            { text: "Later", style: "cancel" },
+            {
+              text: "Update Now123",
+              onPress: async () => {
+                try {
+                  await Updates.fetchUpdateAsync();
+                  await Updates.reloadAsync();
+                } catch {
+                  Alert.alert(
+                    "Error",
+                    "Failed to download update. Try again later.",
+                  );
+                }
+              },
             },
-          },
-        ]);
+          ],
+        );
       } else {
         Alert.alert("Up to Date", "You're already running the latest version.");
       }
@@ -102,7 +116,7 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
         Alert.alert(
           "Camera Permission Required",
           "Please allow camera access in your device settings to scan QR codes.",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
         return;
       }
@@ -123,7 +137,7 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
       Alert.alert(
         "QR Code from Image",
         "Please enter the license key shown in the QR code image manually, or use the camera scanner for automatic detection.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
     } catch (e) {
       Alert.alert("Error", "Failed to open gallery");
@@ -132,7 +146,10 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}
+      style={[
+        styles.container,
+        { backgroundColor: colors.background, paddingTop: insets.top },
+      ]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.content}>
@@ -140,17 +157,31 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
           <Lock size={48} color="#3b82f6" />
         </View>
 
-        <Text style={[styles.title, { color: colors.text }]}>License Required</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          License Required
+        </Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Enter your license key or scan a QR code
         </Text>
 
         <View style={styles.inputContainer}>
-          <View style={[styles.inputWrapper, { backgroundColor: colors.card, borderColor: error ? "#ef4444" : colors.border }]}>
-            <KeyRound size={18} color={colors.textSecondary} style={{ marginRight: 10 }} />
+          <View
+            style={[
+              styles.inputWrapper,
+              {
+                backgroundColor: colors.card,
+                borderColor: error ? "#ef4444" : colors.border,
+              },
+            ]}
+          >
+            <KeyRound
+              size={18}
+              color={colors.textSecondary}
+              style={{ marginRight: 10 }}
+            />
             <TextInput
               style={[styles.input, { color: colors.text }]}
-              placeholder="XXXX-XXXX-XXXX-XXXX"
+              placeholder="XsXXX-XXXX-XXXX-XXXX1s"
               placeholderTextColor={colors.textSecondary}
               value={keyInput}
               onChangeText={setKeyInput}
@@ -166,9 +197,7 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
             )}
           </View>
 
-          {error && (
-            <Text style={styles.errorText}>{error}</Text>
-          )}
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
           <Pressable
             onPress={handleActivate}
@@ -176,7 +205,8 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
             style={({ pressed }) => [
               styles.button,
               {
-                opacity: submitting || !keyInput.trim() ? 0.5 : pressed ? 0.85 : 1,
+                opacity:
+                  submitting || !keyInput.trim() ? 0.5 : pressed ? 0.85 : 1,
               },
             ]}
           >
@@ -193,22 +223,36 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
                 onPress={openScanner}
                 style={({ pressed }) => [
                   styles.scanButton,
-                  { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1, flex: 1 },
+                  {
+                    backgroundColor: colors.card,
+                    borderColor: colors.border,
+                    opacity: pressed ? 0.85 : 1,
+                    flex: 1,
+                  },
                 ]}
               >
                 <ScanLine size={18} color="#3b82f6" />
-                <Text style={[styles.scanButtonText, { color: colors.text }]}>Scan QR</Text>
+                <Text style={[styles.scanButtonText, { color: colors.text }]}>
+                  Scan QR
+                </Text>
               </Pressable>
 
               <Pressable
                 onPress={pickFromGallery}
                 style={({ pressed }) => [
                   styles.scanButton,
-                  { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.85 : 1, flex: 1 },
+                  {
+                    backgroundColor: colors.card,
+                    borderColor: colors.border,
+                    opacity: pressed ? 0.85 : 1,
+                    flex: 1,
+                  },
                 ]}
               >
                 <ImageIcon size={18} color="#3b82f6" />
-                <Text style={[styles.scanButtonText, { color: colors.text }]}>Gallery</Text>
+                <Text style={[styles.scanButtonText, { color: colors.text }]}>
+                  Gallery
+                </Text>
               </Pressable>
             </View>
           )}
@@ -219,7 +263,11 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
               disabled={checkingUpdate}
               style={({ pressed }) => [
                 styles.updateButton,
-                { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed || checkingUpdate ? 0.7 : 1 },
+                {
+                  backgroundColor: colors.card,
+                  borderColor: colors.border,
+                  opacity: pressed || checkingUpdate ? 0.7 : 1,
+                },
               ]}
             >
               {checkingUpdate ? (
@@ -227,7 +275,12 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
               ) : (
                 <Download size={16} color="#059669" />
               )}
-              <Text style={[styles.updateButtonText, { color: colors.textSecondary }]}>
+              <Text
+                style={[
+                  styles.updateButtonText,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 {checkingUpdate ? "Checking…" : "Update App"}
               </Text>
             </Pressable>
@@ -235,11 +288,18 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
         </View>
       </View>
 
-      <Modal visible={showScanner} animationType="slide" presentationStyle="fullScreen">
+      <Modal
+        visible={showScanner}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
         <View style={[styles.scannerContainer, { backgroundColor: "#000" }]}>
           <View style={[styles.scannerHeader, { paddingTop: insets.top + 12 }]}>
             <Text style={styles.scannerTitle}>Scan License QR Code</Text>
-            <Pressable onPress={() => setShowScanner(false)} style={styles.closeBtn}>
+            <Pressable
+              onPress={() => setShowScanner(false)}
+              style={styles.closeBtn}
+            >
               <X size={24} color="#fff" />
             </Pressable>
           </View>
