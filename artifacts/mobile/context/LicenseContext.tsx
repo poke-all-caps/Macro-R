@@ -20,13 +20,14 @@ const ADMIN_VISIBLE_STORAGE = "@ms_rewards_admin_visible";
 // On web, use a relative URL so the browser always resolves it to the same
 // origin — no CORS issues, no env var dependency.
 // On native EAS builds, use EXPO_PUBLIC_API_URL baked in via eas.json.
+const PRODUCTION_API_URL = "https://macro-r-631x.onrender.com/api";
 const API_BASE: string =
   Platform.OS === "web"
     ? "/api"
     : process.env.EXPO_PUBLIC_API_URL ||
       (process.env.EXPO_PUBLIC_DOMAIN
         ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
-        : "");
+        : PRODUCTION_API_URL);
 export const OWNER_MODE =
   process.env.EXPO_PUBLIC_OWNER_MODE === "true";
 
