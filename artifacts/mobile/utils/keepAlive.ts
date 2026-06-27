@@ -1,9 +1,9 @@
 import { AppState, type AppStateStatus, type NativeEventSubscription } from "react-native";
 import { API_BASE } from "@/context/LicenseContext";
 
-// Ping interval — 4 minutes is comfortably under Render's 15-min sleep
-// threshold and Neon's 5-min auto-suspend.
-const PING_INTERVAL_MS = 4 * 60 * 1000;
+// Ping interval — 2 minutes keeps Render (15-min sleep) and Neon (5-min
+// auto-suspend) well within their activity windows.
+const PING_INTERVAL_MS = 2 * 60 * 1000;
 
 async function ping() {
   try {
