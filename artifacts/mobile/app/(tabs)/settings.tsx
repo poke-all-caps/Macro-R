@@ -1,9 +1,10 @@
 import * as Haptics from "expo-haptics";
-import { CheckSquare, ChevronRight, Clock, Moon, Search, Shield } from "lucide-react-native";
+import { CheckSquare, ChevronRight, Clock, Key, Moon, Search, Shield, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -19,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useCustomAlert } from "@/components/CustomAlert";
 import Colors from "@/constants/colors";
+import { useAccounts } from "@/context/AccountsContext";
 import { useLicense } from "@/context/LicenseContext";
 import { OvernightSlot, useSettings } from "@/context/SettingsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -43,12 +45,14 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
   const { licenseData, featureConfig, removeLicense, isOwnerMode, adminPanelVisible, revalidate, error: licenseError } = useLicense();
+  const { accounts } = useAccounts();
   const { showAlert, AlertComponent } = useCustomAlert();
 
   const [searchCountText, setSearchCountText] = useState(
     String(settings.defaultSearchCount)
   );
   const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
+  const [licenseModalVisible, setLicenseModalVisible] = useState(false);
 
 
   const commitSearchCount = () => {
@@ -315,16 +319,29 @@ export default function SettingsScreen() {
 
 
         <Section title="LICENSE" colors={colors}>
-          <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Pressable
+            onPress={() => {
+              if (licenseData) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setLicenseModalVisible(true);
+              }
+            }}
+            style={({ pressed }) => [
+              styles.row,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                opacity: pressed && licenseData ? 0.7 : 1,
+              },
+            ]}
+          >
             <View style={{ flex: 1 }}>
-              <Text style={[styles.rowLabel, { color: colors.text }]}>
-                License Key
-              </Text>
+              <Text style={[styles.rowLabel, { color: colors.text }]}>License Key</Text>
               <Text style={[styles.rowSublabel, { color: colors.textSecondary }]}>
                 {licenseData ? `${licenseData.key.slice(0, 9)}...` : "Not activated"}
               </Text>
             </View>
-            {licenseData && (
+            {licenseData ? (
               <View style={{ alignItems: "flex-end" }}>
                 <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.accent }}>
                   {licenseData.maxAccounts} account{licenseData.maxAccounts > 1 ? "s" : ""}
@@ -333,40 +350,142 @@ export default function SettingsScreen() {
                   Expires {new Date(licenseData.expiresAt).toLocaleDateString()}
                 </Text>
               </View>
-            )}
-          </View>
-          {licenseData && (
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                showAlert(
-                  "Remove License",
-                  "Are you sure? You'll need to re-enter your key to use the app.",
-                  [
-                    { text: "Cancel", style: "cancel" },
-                    { text: "Remove", style: "destructive", onPress: removeLicense },
-                  ]
-                );
-              }}
-              style={({ pressed }) => [
-                styles.clearBtn,
-                {
-                  borderColor: colors.border,
-                  backgroundColor: colors.surface,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}
-            >
-              <Text style={[styles.clearText, { color: "#ef4444" }]}>
-                Remove License
-              </Text>
-            </Pressable>
-          )}
+            ) : null}
+            {licenseData && <ChevronRight size={16} color={colors.textMuted} style={{ marginLeft: 6 }} />}
+          </Pressable>
         </Section>
 
 
         <View style={{ height: insets.bottom + 40 }} />
       </ScrollView>
+
+      {/* ── LICENSE DETAIL MODAL ─────────────────────────── */}
+      <Modal
+        visible={licenseModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLicenseModalVisible(false)}
+      >
+        <Pressable
+          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "flex-end" }}
+          onPress={() => setLicenseModalVisible(false)}
+        >
+          <Pressable
+            onPress={() => {}}
+            style={{
+              backgroundColor: colors.surface,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingHorizontal: 24,
+              paddingTop: 20,
+              paddingBottom: insets.bottom + 28,
+            }}
+          >
+            {/* Handle bar */}
+            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: "center", marginBottom: 20 }} />
+
+            {/* Title row */}
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#F5F3FF", alignItems: "center", justifyContent: "center" }}>
+                  <Key size={16} color="#7C3AED" />
+                </View>
+                <Text style={{ fontSize: 17, fontFamily: "Inter_700Bold", color: colors.text }}>License Details</Text>
+              </View>
+              <Pressable
+                onPress={() => setLicenseModalVisible(false)}
+                style={({ pressed }) => ({
+                  width: 30, height: 30, borderRadius: 15,
+                  backgroundColor: colors.surfaceSecondary,
+                  alignItems: "center", justifyContent: "center",
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <X size={15} color={colors.textMuted} />
+              </Pressable>
+            </View>
+
+            {licenseData && (
+              <>
+                {/* Key */}
+                <View style={{ backgroundColor: colors.background, borderRadius: 12, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: colors.border }}>
+                  <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: colors.textMuted, letterSpacing: 0.6, marginBottom: 4 }}>LICENSE KEY</Text>
+                  <Text style={{ fontSize: 13, fontFamily: "Inter_500Medium", color: colors.text, letterSpacing: 0.3 }} selectable>
+                    {licenseData.key}
+                  </Text>
+                </View>
+
+                {/* Stats grid */}
+                <View style={{ flexDirection: "row", gap: 10, marginBottom: 10 }}>
+                  <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: colors.border }}>
+                    <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: colors.textMuted, letterSpacing: 0.6, marginBottom: 6 }}>ACCOUNTS USED</Text>
+                    <Text style={{ fontSize: 22, fontFamily: "Inter_700Bold", color: colors.text }}>
+                      {accounts.length}
+                      <Text style={{ fontSize: 14, fontFamily: "Inter_400Regular", color: colors.textMuted }}>
+                        /{licenseData.maxAccounts}
+                      </Text>
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: colors.border }}>
+                    <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: colors.textMuted, letterSpacing: 0.6, marginBottom: 6 }}>PLAN</Text>
+                    <Text style={{ fontSize: 16, fontFamily: "Inter_700Bold", color: "#7C3AED", textTransform: "capitalize" }}>
+                      {licenseData.keyType ?? "Standard"}
+                    </Text>
+                    {licenseData.label ? (
+                      <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textMuted, marginTop: 2 }}>{licenseData.label}</Text>
+                    ) : null}
+                  </View>
+                </View>
+
+                {/* Dates */}
+                <View style={{ flexDirection: "row", gap: 10, marginBottom: 20 }}>
+                  <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: colors.border }}>
+                    <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: colors.textMuted, letterSpacing: 0.6, marginBottom: 4 }}>EXPIRES</Text>
+                    <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }}>
+                      {new Date(licenseData.expiresAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                    </Text>
+                  </View>
+                  <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: colors.border }}>
+                    <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: colors.textMuted, letterSpacing: 0.6, marginBottom: 4 }}>LAST VERIFIED</Text>
+                    <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }}>
+                      {new Date(licenseData.validatedAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Remove button */}
+                <Pressable
+                  onPress={() => {
+                    setLicenseModalVisible(false);
+                    setTimeout(() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                      showAlert(
+                        "Remove License",
+                        "Are you sure? You'll need to re-enter your key to use the app.",
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          { text: "Remove", style: "destructive", onPress: removeLicense },
+                        ]
+                      );
+                    }, 350);
+                  }}
+                  style={({ pressed }) => ({
+                    borderRadius: 12,
+                    paddingVertical: 14,
+                    alignItems: "center",
+                    backgroundColor: pressed ? "#fef2f2" : "#fff5f5",
+                    borderWidth: 1,
+                    borderColor: "#fecaca",
+                  })}
+                >
+                  <Text style={{ fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#ef4444" }}>Remove License</Text>
+                </Pressable>
+              </>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       {AlertComponent}
     </KeyboardAvoidingView>
   );
