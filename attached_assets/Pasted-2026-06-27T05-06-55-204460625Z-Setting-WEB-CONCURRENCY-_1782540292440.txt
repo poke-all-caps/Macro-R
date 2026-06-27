@@ -1,0 +1,70 @@
+2026-06-27T05:06:55.204460625Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-06-27T05:07:31.285614151Z [db] Schema ready.
+2026-06-27T05:07:31.288132542Z Server listening on 0.0.0.0:10000
+2026-06-27T05:07:36.124057786Z ==> Your service is live 🎉
+2026-06-27T05:07:36.330751851Z ==> 
+2026-06-27T05:07:36.333033529Z ==> ///////////////////////////////////////////////////////////
+2026-06-27T05:07:36.335501142Z ==> 
+2026-06-27T05:07:36.337268556Z ==> Available at your primary URL https://macro-r-631x.onrender.com
+2026-06-27T05:07:36.339627926Z ==> 
+2026-06-27T05:07:36.341452842Z ==> ///////////////////////////////////////////////////////////
+2026-06-27T05:12:35.426735506Z ==> Detected service running on port 10000
+2026-06-27T05:12:35.59174163Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-06-27T05:53:04.33831476Z ==> Running 'node artifacts/api-server/dist/index.cjs'
+2026-06-27T05:53:05.235779438Z [proxy] Forwarding /validate-key, /validate-admin, /sync-cookies → https://macro-r-631x.onrender.com/api
+2026-06-27T05:53:05.246619803Z (node:52) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+2026-06-27T05:53:05.246642744Z In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+2026-06-27T05:53:05.246646034Z 
+2026-06-27T05:53:05.246649474Z To prepare for this change:
+2026-06-27T05:53:05.246653364Z - If you want the current behavior, explicitly use 'sslmode=verify-full'
+2026-06-27T05:53:05.246655914Z - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+2026-06-27T05:53:05.246658164Z 
+2026-06-27T05:53:05.246661334Z See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+2026-06-27T05:53:05.246663754Z (Use `node --trace-warnings ...` to show where the warning was created)
+2026-06-27T05:53:06.911003631Z [db] Schema ready.
+2026-06-27T05:53:06.913660091Z Server listening on 0.0.0.0:10000
+2026-06-27T05:57:48.99580827Z Deploy cancelled
+2026-06-27T05:58:58.959845019Z ==> Deploying...
+2026-06-27T05:58:59.070725435Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-06-27T05:59:32.775504986Z ==> Running 'node artifacts/api-server/dist/index.cjs'
+2026-06-27T05:59:33.58119527Z [proxy] Forwarding /validate-key, /validate-admin, /sync-cookies → https://macro-r-631x.onrender.com/api
+2026-06-27T05:59:33.680835894Z (node:71) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+2026-06-27T05:59:33.680854814Z In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+2026-06-27T05:59:33.680857924Z 
+2026-06-27T05:59:33.680861034Z To prepare for this change:
+2026-06-27T05:59:33.680863984Z - If you want the current behavior, explicitly use 'sslmode=verify-full'
+2026-06-27T05:59:33.680866635Z - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+2026-06-27T05:59:33.680869055Z 
+2026-06-27T05:59:33.680871875Z See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+2026-06-27T05:59:33.680874385Z (Use `node --trace-warnings ...` to show where the warning was created)
+2026-06-27T05:59:35.258955615Z [db] Schema ready.
+2026-06-27T05:59:35.261602791Z Server listening on 0.0.0.0:10000
+2026-06-27T05:59:39.897174397Z ==> Your service is live 🎉
+2026-06-27T05:59:39.995787276Z ==> 
+2026-06-27T05:59:39.99927169Z ==> ///////////////////////////////////////////////////////////
+2026-06-27T05:59:40.002423863Z ==> 
+2026-06-27T05:59:40.005852243Z ==> Available at your primary URL https://macro-r-631x.onrender.com
+2026-06-27T05:59:40.008903259Z ==> 
+2026-06-27T05:59:40.011327755Z ==> ///////////////////////////////////////////////////////////
+2026-06-27T06:03:25.901342894Z ==> Deploying...
+2026-06-27T06:03:25.998708656Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-06-27T06:04:00.380369209Z ==> Running 'node artifacts/api-server/dist/index.cjs'
+2026-06-27T06:04:01.372517905Z [proxy] Forwarding /validate-key, /validate-admin, /sync-cookies → https://macro-r-631x.onrender.com/api
+2026-06-27T06:04:01.473023649Z (node:71) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+2026-06-27T06:04:01.473046899Z In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+2026-06-27T06:04:01.473049759Z 
+2026-06-27T06:04:01.4730539Z To prepare for this change:
+2026-06-27T06:04:01.47305904Z - If you want the current behavior, explicitly use 'sslmode=verify-full'
+2026-06-27T06:04:01.47306235Z - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+2026-06-27T06:04:01.47306502Z 
+2026-06-27T06:04:01.47306927Z See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+2026-06-27T06:04:01.47307256Z (Use `node --trace-warnings ...` to show where the warning was created)
+2026-06-27T06:04:03.03710332Z [db] Schema ready.
+2026-06-27T06:04:03.039436556Z Server listening on 0.0.0.0:10000
+2026-06-27T06:04:06.780484964Z ==> Your service is live 🎉
+2026-06-27T06:04:06.946528188Z ==> 
+2026-06-27T06:04:06.948713263Z ==> ///////////////////////////////////////////////////////////
+2026-06-27T06:04:06.950469617Z ==> 
+2026-06-27T06:04:06.952486608Z ==> Available at your primary URL https://macro-r-631x.onrender.com
+2026-06-27T06:04:06.954076098Z ==> 
+2026-06-27T06:04:06.955981135Z ==> ///////////////////////////////////////////////////////////
