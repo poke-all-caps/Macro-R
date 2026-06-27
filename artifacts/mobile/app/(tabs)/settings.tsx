@@ -252,22 +252,61 @@ export default function SettingsScreen() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               router.push("/overnight");
             }}
-            style={({ pressed }) => [styles.settingRow, { opacity: pressed ? 0.7 : 1 }]}
+            style={({ pressed }) => [
+              styles.settingRow,
+              { opacity: pressed ? 0.7 : 1, alignItems: "flex-start", paddingVertical: 14 },
+            ]}
           >
-            <View style={styles.settingLabel}>
-              <View style={[styles.iconBg, { backgroundColor: "#EFF6FF" }]}>
+            <View style={[styles.settingLabel, { alignItems: "flex-start" }]}>
+              <View style={[styles.iconBg, { backgroundColor: "#F5F3FF", marginTop: 2 }]}>
                 <Moon size={16} color="#7C3AED" />
               </View>
               <View style={styles.labelText}>
-                <Text style={[styles.settingTitle, { color: colors.text }]}>
-                  Overnight Schedule
-                </Text>
-                <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                  {settings.overnightSlots.map((s) => formatSlot(s)).join(" · ")}
-                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Text style={[styles.settingTitle, { color: colors.text }]}>
+                    Overnight Schedule
+                  </Text>
+                  {settings.overnightSlots.length > 0 && (
+                    <View style={{
+                      backgroundColor: "#7C3AED18",
+                      borderRadius: 6,
+                      paddingHorizontal: 6,
+                      paddingVertical: 2,
+                    }}>
+                      <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#7C3AED" }}>
+                        {settings.overnightSlots.length} active
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                {settings.overnightSlots.length > 0 ? (
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                    {settings.overnightSlots.map((s, i) => (
+                      <View
+                        key={i}
+                        style={{
+                          backgroundColor: "#7C3AED15",
+                          borderRadius: 6,
+                          paddingHorizontal: 7,
+                          paddingVertical: 3,
+                          borderWidth: 1,
+                          borderColor: "#7C3AED30",
+                        }}
+                      >
+                        <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#7C3AED" }}>
+                          {formatSlot(s)}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <Text style={[styles.settingDesc, { color: colors.textMuted, marginTop: 2 }]}>
+                    No schedule set
+                  </Text>
+                )}
               </View>
             </View>
-            <ChevronRight size={18} color={colors.textMuted} />
+            <ChevronRight size={18} color={colors.textMuted} style={{ marginTop: 2 }} />
           </Pressable>
         </Section>
 
