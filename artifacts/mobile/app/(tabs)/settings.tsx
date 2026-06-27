@@ -1,5 +1,6 @@
 import * as Haptics from "expo-haptics";
-import { CheckSquare, ChevronRight, Clock, Key, Moon, Search, Shield, X } from "lucide-react-native";
+import * as Updates from "expo-updates";
+import { CheckSquare, ChevronRight, Clock, Download, Key, Moon, Search, Shield, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -53,6 +54,7 @@ export default function SettingsScreen() {
   );
   const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
   const [licenseModalVisible, setLicenseModalVisible] = useState(false);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
 
 
   const commitSearchCount = () => {
@@ -314,6 +316,62 @@ export default function SettingsScreen() {
                 </Text>
               </View>
             )}
+          </Pressable>
+        </Section>
+
+
+        {/* ── UPDATES ───────────────────────────────────────── */}
+        <Section title="UPDATES" colors={colors}>
+          <Pressable
+            onPress={async () => {
+              if (checkingUpdate) return;
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setCheckingUpdate(true);
+              try {
+                const result = await Updates.checkForUpdateAsync();
+                if (result.isAvailable) {
+                  showAlert(
+                    "Update Available",
+                    "A new version is ready. Restart to apply it.",
+                    [
+                      { text: "Later", style: "cancel" },
+                      {
+                        text: "Restart Now",
+                        onPress: async () => {
+                          await Updates.fetchUpdateAsync();
+                          await Updates.reloadAsync();
+                        },
+                      },
+                    ]
+                  );
+                } else {
+                  showAlert("Up to Date", "You're running the latest version.", [{ text: "OK" }]);
+                }
+              } catch {
+                showAlert("Check Failed", "Could not check for updates. Try again later.", [{ text: "OK" }]);
+              } finally {
+                setCheckingUpdate(false);
+              }
+            }}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? "#16a34a" : "#22c55e",
+              borderRadius: 14,
+              paddingVertical: 15,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              opacity: checkingUpdate ? 0.7 : 1,
+            })}
+          >
+            {checkingUpdate ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Download size={18} color="#fff" />
+            )}
+            <Text style={{ fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" }}>
+              {checkingUpdate ? "Checking…" : "Check for Updates"}
+            </Text>
           </Pressable>
         </Section>
 
