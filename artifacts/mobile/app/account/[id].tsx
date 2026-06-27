@@ -1,7 +1,7 @@
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import { AlertCircle, AlertTriangle, ArrowLeft, Award, Calendar, Clock, Edit2, Eye, EyeOff, RefreshCw, Search, Shield, ShieldOff, Smartphone, Star, Trash2, X } from "lucide-react-native";
+import { AlertCircle, AlertTriangle, ArrowLeft, Award, Calendar, ChevronDown, ChevronRight, Clock, Cookie, Edit2, Eye, EyeOff, RefreshCw, Search, Shield, ShieldOff, Smartphone, Star, Trash2, X } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -37,6 +37,7 @@ export default function AccountDetailScreen() {
   const { showAlert, AlertComponent } = useCustomAlert();
   const [avatarError, setAvatarError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [cookiesExpanded, setCookiesExpanded] = useState(false);
   const [editName, setEditName] = useState(account?.name ?? "");
   const [editEmail, setEditEmail] = useState(account?.email ?? "");
 
@@ -257,6 +258,48 @@ export default function AccountDetailScreen() {
                 {isSessionValid ? "Refresh Session" : "Sign In with Microsoft"}
               </Text>
             </Pressable>
+
+            {cookieCount > 0 && (
+              <>
+                <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                <Pressable
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    setCookiesExpanded((v) => !v);
+                  }}
+                  style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", justifyContent: "space-between", opacity: pressed ? 0.7 : 1 })}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <Cookie size={15} color={colors.textSecondary} />
+                    <Text style={{ fontSize: 14, fontFamily: "Inter_500Medium", color: colors.textSecondary }}>
+                      Synced Cookies
+                    </Text>
+                    <View style={{ backgroundColor: colors.tint + "18", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
+                      <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: colors.tint }}>{cookieCount}</Text>
+                    </View>
+                  </View>
+                  {cookiesExpanded
+                    ? <ChevronDown size={16} color={colors.textMuted} />
+                    : <ChevronRight size={16} color={colors.textMuted} />
+                  }
+                </Pressable>
+
+                {cookiesExpanded && (
+                  <View style={{ gap: 6, marginTop: 4 }}>
+                    {Object.entries(account.cookies ?? {}).map(([key, value]) => (
+                      <View key={key} style={{ backgroundColor: colors.background, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                        <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.textSecondary, flex: 1 }} numberOfLines={1}>
+                          {key}
+                        </Text>
+                        <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textMuted, maxWidth: "55%" }} numberOfLines={1}>
+                          {String(value).slice(0, 40)}{String(value).length > 40 ? "…" : ""}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </>
+            )}
           </Card>
 
           {account.lastRun && (
