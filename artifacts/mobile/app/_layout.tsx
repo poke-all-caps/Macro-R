@@ -30,6 +30,7 @@ import {
   registerBackgroundNotificationTask,
 } from "@/utils/notifications";
 import { registerBackgroundSearchTask, isBackgroundRunning, scheduleBackgroundFetch, isBackgroundFetchEnabled } from "@/utils/backgroundSearch";
+import { startKeepAlive } from "@/utils/keepAlive";
 
 SplashScreen.preventAutoHideAsync();
 try { registerBackgroundNotificationTask(); } catch (e) { console.log("[Layout] Failed to register bg notification task:", e); }
@@ -169,6 +170,11 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
+
+  useEffect(() => {
+    const stopKeepAlive = startKeepAlive();
+    return stopKeepAlive;
+  }, []);
 
   if (!fontsLoaded && !fontError) return null;
 

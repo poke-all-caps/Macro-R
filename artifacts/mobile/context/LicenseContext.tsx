@@ -21,7 +21,7 @@ const ADMIN_VISIBLE_STORAGE = "@ms_rewards_admin_visible";
 // origin — no CORS issues, no env var dependency.
 // On native EAS builds, use EXPO_PUBLIC_API_URL baked in via eas.json.
 const PRODUCTION_API_URL = "https://macro-r-631x.onrender.com/api";
-const API_BASE: string =
+export const API_BASE: string =
   Platform.OS === "web"
     ? "/api"
     : process.env.EXPO_PUBLIC_API_URL ||
