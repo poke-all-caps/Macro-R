@@ -1,6 +1,5 @@
 import * as Haptics from "expo-haptics";
-import * as Updates from "expo-updates";
-import { CheckSquare, ChevronRight, Clock, Download, Moon, RefreshCw, Search, Shield } from "lucide-react-native";
+import { CheckSquare, ChevronRight, Clock, Moon, Search, Shield } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -45,8 +44,6 @@ export default function SettingsScreen() {
   const { settings, updateSettings } = useSettings();
   const { licenseData, featureConfig, removeLicense, isOwnerMode, adminPanelVisible, revalidate, error: licenseError } = useLicense();
   const { showAlert, AlertComponent } = useCustomAlert();
-  const [checkingUpdate, setCheckingUpdate] = useState(false);
-  const [checkingLicense, setCheckingLicense] = useState(false);
 
   const [searchCountText, setSearchCountText] = useState(
     String(settings.defaultSearchCount)
@@ -298,97 +295,6 @@ export default function SettingsScreen() {
           </View>
           {licenseData && (
             <Pressable
-              onPress={async () => {
-                if (checkingLicense) return;
-                setCheckingLicense(true);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                await revalidate();
-                setCheckingLicense(false);
-                showAlert(
-                  licenseError ? "License Error" : "License Updated",
-                  licenseError ?? "Your license details have been refreshed from the server.",
-                  [{ text: "OK" }]
-                );
-              }}
-              style={({ pressed }) => [
-                styles.clearBtn,
-                {
-                  borderColor: colors.border,
-                  backgroundColor: colors.surface,
-                  opacity: pressed || checkingLicense ? 0.7 : 1,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                },
-              ]}
-            >
-              {checkingLicense ? (
-                <ActivityIndicator size="small" color="#3b82f6" />
-              ) : (
-                <RefreshCw size={15} color="#3b82f6" />
-              )}
-              <Text style={[styles.clearText, { color: "#3b82f6" }]}>
-                {checkingLicense ? "Checking…" : "Check for Update"}
-              </Text>
-            </Pressable>
-          )}
-          {Platform.OS !== "web" && licenseData && (
-            <Pressable
-              onPress={async () => {
-                if (checkingUpdate) return;
-                setCheckingUpdate(true);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                try {
-                  const update = await Updates.checkForUpdateAsync();
-                  if (update.isAvailable) {
-                    showAlert("Update Available", "A new version is ready. Download and restart?", [
-                      { text: "Later", style: "cancel" },
-                      {
-                        text: "Update Now",
-                        onPress: async () => {
-                          try {
-                            await Updates.fetchUpdateAsync();
-                            await Updates.reloadAsync();
-                          } catch {
-                            showAlert("Error", "Failed to download update. Try again later.");
-                          }
-                        },
-                      },
-                    ]);
-                  } else {
-                    showAlert("Up to Date", "You're running the latest version.");
-                  }
-                } catch {
-                  showAlert("Error", "Could not check for updates. Try again later.");
-                }
-                setCheckingUpdate(false);
-              }}
-              style={({ pressed }) => [
-                styles.clearBtn,
-                {
-                  borderColor: colors.border,
-                  backgroundColor: colors.surface,
-                  opacity: pressed || checkingUpdate ? 0.7 : 1,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                },
-              ]}
-            >
-              {checkingUpdate ? (
-                <ActivityIndicator size="small" color="#059669" />
-              ) : (
-                <Download size={15} color="#059669" />
-              )}
-              <Text style={[styles.clearText, { color: "#059669" }]}>
-                {checkingUpdate ? "Checking…" : "Update App"}
-              </Text>
-            </Pressable>
-          )}
-          {licenseData && (
-            <Pressable
               onPress={() => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 showAlert(
@@ -416,53 +322,6 @@ export default function SettingsScreen() {
           )}
         </Section>
 
-        {Platform.OS !== "web" && (
-          <Section title="UPDATES" colors={colors}>
-            <Pressable
-              onPress={async () => {
-                if (checkingUpdate) return;
-                setCheckingUpdate(true);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                try {
-                  const update = await Updates.checkForUpdateAsync();
-                  if (update.isAvailable) {
-                    showAlert("Update Available", "A new version is ready. Download and restart?", [
-                      { text: "Later", style: "cancel" },
-                      {
-                        text: "Update Now",
-                        onPress: async () => {
-                          try {
-                            await Updates.fetchUpdateAsync();
-                            await Updates.reloadAsync();
-                          } catch {
-                            showAlert("Error", "Failed to download update. Try again later.");
-                          }
-                        },
-                      },
-                    ]);
-                  } else {
-                    showAlert("Up to Date", "You're running the latest version.");
-                  }
-                } catch {
-                  showAlert("Error", "Could not check for updates. Try again later.");
-                }
-                setCheckingUpdate(false);
-              }}
-              style={({ pressed }) => [
-                styles.applyBtn,
-                {
-                  backgroundColor: "#059669",
-                  opacity: pressed || checkingUpdate ? 0.75 : 1,
-                },
-              ]}
-            >
-              <Download size={18} color="#fff" />
-              <Text style={styles.applyText}>
-                {checkingUpdate ? "Checking…" : "Check for Updates"}
-              </Text>
-            </Pressable>
-          </Section>
-        )}
 
         <View style={{ height: insets.bottom + 40 }} />
       </ScrollView>
