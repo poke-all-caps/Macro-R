@@ -672,7 +672,27 @@ export default function SearchRunnerScreen() {
         if (ai < targetAccounts.length - 1 && !abortRef.current) {
           setStatusLine("Pausing before next account…");
           setPhase("searching");
+
+          // Reset the WebView to a blank page between accounts so the Android
+          // WebView process releases the page memory before loading the next
+          // account's session. Clear stale event refs first so the about:blank
+          // onLoadEnd doesn't accidentally resolve a waiting promise.
+          webViewLoadResolverRef.current = null;
+          webViewMsgHandlerRef.current = null;
+          loadEventBufferedRef.current = false;
+          msgEventQueueRef.current = [];
+          setWebViewUrl("about:blank");
+
           await sleep(3000);
+
+          // about:blank's onLoadEnd fires during the sleep and may set
+          // loadEventBufferedRef=true. Any late postMessage from the previous
+          // page can also repopulate msgEventQueueRef during the sleep.
+          // Clear both now so the next account starts with a fully clean
+          // event bridge — no stale load or message events carried over.
+          webViewLoadResolverRef.current = null;
+          loadEventBufferedRef.current = false;
+          msgEventQueueRef.current = [];
         }
       }
 

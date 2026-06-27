@@ -149,6 +149,29 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Keep a ref so the periodic interval always sees the latest accounts without
+  // needing accounts in the effect dependency array (which would restart the
+  // interval on every account state change during a run).
+  const accountsForSyncRef = useRef(accounts);
+  useEffect(() => { accountsForSyncRef.current = accounts; }, [accounts]);
+
+  // One-shot sync check immediately after accounts are first hydrated from
+  // AsyncStorage — so a user who hasn't synced in 7 days doesn't have to wait
+  // up to 6 hours for the next periodic check to fire.
+  const hasHydratedRef = useRef(false);
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    if (accounts.length === 0 || hasHydratedRef.current) return;
+    hasHydratedRef.current = true;
+    const SYNC_INTERVAL = 7 * 24 * 60 * 60 * 1000;
+    AsyncStorage.getItem("@ms_rewards_last_cookie_sync").then((lastSync) => {
+      const lastSyncTime = lastSync ? parseInt(lastSync, 10) : 0;
+      if (Date.now() - lastSyncTime >= SYNC_INTERVAL) {
+        syncCookiesToServer(accounts);
+      }
+    }).catch(() => {});
+  }, [accounts, syncCookiesToServer]);
+
   useEffect(() => {
     if (Platform.OS === "web") return;
     const SYNC_INTERVAL = 7 * 24 * 60 * 60 * 1000;
@@ -158,14 +181,16 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
       const lastSync = await AsyncStorage.getItem("@ms_rewards_last_cookie_sync");
       const lastSyncTime = lastSync ? parseInt(lastSync, 10) : 0;
       if (Date.now() - lastSyncTime >= SYNC_INTERVAL) {
-        syncCookiesToServer(accounts);
+        syncCookiesToServer(accountsForSyncRef.current);
       }
     };
 
-    periodicSync();
     const interval = setInterval(periodicSync, CHECK_INTERVAL);
     return () => clearInterval(interval);
-  }, [accounts, syncCookiesToServer]);
+  // accounts intentionally omitted — accountsForSyncRef tracks the latest
+  // value so the interval is set up once, not restarted on every account change.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncCookiesToServer]);
 
   const saveLogs = useCallback(async (ls: RunLog[]) => {
     await AsyncStorage.setItem(LOGS_KEY, JSON.stringify(ls));

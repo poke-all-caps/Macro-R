@@ -32,6 +32,23 @@ import {
 import { registerBackgroundSearchTask, isBackgroundRunning, scheduleBackgroundFetch, isBackgroundFetchEnabled } from "@/utils/backgroundSearch";
 import { startKeepAlive } from "@/utils/keepAlive";
 
+// Log all uncaught JS errors before forwarding to the default RN handler.
+// Non-fatal errors are logged and swallowed so a single bad async throw
+// doesn't crash the whole app. Fatal errors always go to the default handler
+// so RN's normal crash/reload path still works.
+// Access via globalThis so this doesn't throw on web / non-RN runtimes where
+// ErrorUtils is not defined.
+const EU = (globalThis as any).ErrorUtils;
+if (EU) {
+  const defaultHandler = EU.getGlobalHandler?.();
+  EU.setGlobalHandler?.((error: any, isFatal: boolean) => {
+    console.error("[GlobalError] isFatal:", isFatal, error);
+    if (isFatal && defaultHandler) {
+      defaultHandler(error, isFatal);
+    }
+  });
+}
+
 SplashScreen.preventAutoHideAsync();
 try { registerBackgroundNotificationTask(); } catch (e) { console.log("[Layout] Failed to register bg notification task:", e); }
 try { registerBackgroundSearchTask(); } catch (e) { console.log("[Layout] Failed to register bg search task:", e); }
