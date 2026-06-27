@@ -1,6 +1,7 @@
 import * as Haptics from "expo-haptics";
 import * as Updates from "expo-updates";
-import { CheckSquare, ChevronRight, Clock, Download, Key, Moon, Search, Shield, X } from "lucide-react-native";
+import Constants from "expo-constants";
+import { CheckSquare, ChevronRight, Clock, Download, Key, Moon, RotateCcw, Search, Shield, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -55,6 +56,10 @@ export default function SettingsScreen() {
   const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
   const [licenseModalVisible, setLicenseModalVisible] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [downgradeModalVisible, setDowngradeModalVisible] = useState(false);
+  const [downgradeChannel, setDowngradeChannel] = useState("");
+  const [applyingDowngrade, setApplyingDowngrade] = useState(false);
+  const appVersion = Constants.expoConfig?.version ?? "—";
 
 
   const commitSearchCount = () => {
@@ -411,6 +416,37 @@ export default function SettingsScreen() {
               {checkingUpdate ? "Checking…" : "Check for Updates"}
             </Text>
           </Pressable>
+
+          <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textMuted, textAlign: "center", marginTop: 6 }}>
+            Current version: <Text style={{ fontFamily: "Inter_600SemiBold" }}>v{appVersion}</Text>
+          </Text>
+
+          {(isOwnerMode || isAdmin) && (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setDowngradeChannel("");
+                setDowngradeModalVisible(true);
+              }}
+              style={({ pressed }) => ({
+                marginTop: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                paddingVertical: 13,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: "#ef444440",
+                backgroundColor: pressed ? "#ef444410" : "#ef444408",
+              })}
+            >
+              <RotateCcw size={16} color="#ef4444" />
+              <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#ef4444" }}>
+                Downgrade Version
+              </Text>
+            </Pressable>
+          )}
         </Section>
 
 
@@ -540,6 +576,142 @@ export default function SettingsScreen() {
                 </Pressable>
               </>
             )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* ── DOWNGRADE MODAL ──────────────────────────────── */}
+      <Modal
+        visible={downgradeModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDowngradeModalVisible(false)}
+      >
+        <Pressable
+          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}
+          onPress={() => !applyingDowngrade && setDowngradeModalVisible(false)}
+        >
+          <Pressable
+            onPress={() => {}}
+            style={{
+              backgroundColor: colors.surface,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingHorizontal: 24,
+              paddingTop: 14,
+              paddingBottom: insets.bottom + 28,
+            }}
+          >
+            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: "center", marginBottom: 20 }} />
+
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#fef2f2", alignItems: "center", justifyContent: "center" }}>
+                  <RotateCcw size={16} color="#ef4444" />
+                </View>
+                <Text style={{ fontSize: 17, fontFamily: "Inter_700Bold", color: colors.text }}>Downgrade Version</Text>
+              </View>
+              <Pressable
+                onPress={() => !applyingDowngrade && setDowngradeModalVisible(false)}
+                style={({ pressed }) => ({
+                  width: 30, height: 30, borderRadius: 15,
+                  backgroundColor: colors.surfaceSecondary,
+                  alignItems: "center", justifyContent: "center",
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <X size={15} color={colors.textMuted} />
+              </Pressable>
+            </View>
+
+            <Text style={{ fontSize: 13, fontFamily: "Inter_400Regular", color: colors.textSecondary, lineHeight: 19, marginBottom: 20 }}>
+              Enter the EAS update channel name to roll back to (e.g. <Text style={{ fontFamily: "Inter_600SemiBold", color: colors.text }}>production-v1.3</Text>). The app will switch to that channel and restart.
+            </Text>
+
+            <View style={{ backgroundColor: "#fef2f2", borderRadius: 12, padding: 12, marginBottom: 20, flexDirection: "row", gap: 8 }}>
+              <Text style={{ fontSize: 12, fontFamily: "Inter_500Medium", color: "#b91c1c", flex: 1, lineHeight: 17 }}>
+                ⚠ Downgrading may remove features or cause instability. Only proceed if you know the target version.
+              </Text>
+            </View>
+
+            <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.textSecondary, marginBottom: 8, letterSpacing: 0.4 }}>CHANNEL NAME</Text>
+            <TextInput
+              style={{
+                backgroundColor: colors.surfaceSecondary,
+                borderRadius: 12,
+                paddingHorizontal: 14,
+                paddingVertical: 13,
+                fontSize: 15,
+                fontFamily: "Inter_400Regular",
+                color: colors.text,
+                borderWidth: 1,
+                borderColor: colors.border,
+                marginBottom: 20,
+              }}
+              value={downgradeChannel}
+              onChangeText={setDowngradeChannel}
+              placeholder="e.g. production-v1.3"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!applyingDowngrade}
+            />
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Pressable
+                onPress={() => setDowngradeModalVisible(false)}
+                disabled={applyingDowngrade}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  alignItems: "center",
+                  backgroundColor: colors.surfaceSecondary,
+                  opacity: pressed || applyingDowngrade ? 0.6 : 1,
+                })}
+              >
+                <Text style={{ fontSize: 15, fontFamily: "Inter_600SemiBold", color: colors.textSecondary }}>Cancel</Text>
+              </Pressable>
+
+              <Pressable
+                onPress={async () => {
+                  const ch = downgradeChannel.trim();
+                  if (!ch) return;
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+                  setApplyingDowngrade(true);
+                  try {
+                    await Updates.setExtraParamAsync("channel-name", ch);
+                    const result = await Updates.checkForUpdateAsync();
+                    if (result.isAvailable) {
+                      await Updates.fetchUpdateAsync();
+                      await Updates.reloadAsync();
+                    } else {
+                      showAlert("No Update Found", `No update was found on channel "${ch}". Verify the channel name and try again.`, [{ text: "OK" }]);
+                      await Updates.setExtraParamAsync("channel-name", "");
+                    }
+                  } catch (e: any) {
+                    showAlert("Downgrade Failed", e?.message ?? "Could not apply downgrade. Check the channel name.", [{ text: "OK" }]);
+                    try { await Updates.setExtraParamAsync("channel-name", ""); } catch {}
+                  } finally {
+                    setApplyingDowngrade(false);
+                    setDowngradeModalVisible(false);
+                  }
+                }}
+                disabled={!downgradeChannel.trim() || applyingDowngrade}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  alignItems: "center",
+                  backgroundColor: !downgradeChannel.trim() || applyingDowngrade ? "#ef444460" : pressed ? "#dc2626" : "#ef4444",
+                })}
+              >
+                {applyingDowngrade
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={{ fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" }}>Apply</Text>
+                }
+              </Pressable>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>
