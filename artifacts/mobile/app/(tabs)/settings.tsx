@@ -1,8 +1,8 @@
 import * as Haptics from "expo-haptics";
 import * as Updates from "expo-updates";
 import Constants from "expo-constants";
-import { CheckSquare, ChevronRight, Clock, Download, Key, Moon, RotateCcw, Search, Shield, X } from "lucide-react-native";
-import React, { useState } from "react";
+import { CheckSquare, ChevronRight, Clock, Download, History, Key, Moon, RotateCcw, Search, Shield, Trash2, X } from "lucide-react-native";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -61,6 +61,28 @@ export default function SettingsScreen() {
   const [applyingDowngrade, setApplyingDowngrade] = useState(false);
   const appVersion = Constants.expoConfig?.version ?? "—";
 
+  type HistoryEntry = { date: string; version: string; channel: string; type: "upgraded" | "downgraded" };
+  const HISTORY_KEY = "@update_history_v1";
+  const [updateHistory, setUpdateHistory] = useState<HistoryEntry[]>([]);
+
+  useEffect(() => {
+    AsyncStorage.getItem(HISTORY_KEY).then((raw) => {
+      if (raw) { try { setUpdateHistory(JSON.parse(raw)); } catch {} }
+    });
+  }, []);
+
+  const addHistoryEntry = async (entry: HistoryEntry) => {
+    setUpdateHistory((prev) => {
+      const next = [entry, ...prev].slice(0, 20);
+      AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const clearHistory = () => {
+    setUpdateHistory([]);
+    AsyncStorage.removeItem(HISTORY_KEY);
+  };
 
   const commitSearchCount = () => {
     const parsed = parseInt(searchCountText, 10);
@@ -382,6 +404,7 @@ export default function SettingsScreen() {
                         text: "Restart Now",
                         onPress: async () => {
                           await Updates.fetchUpdateAsync();
+                          await addHistoryEntry({ date: new Date().toISOString(), version: appVersion, channel: "production", type: "upgraded" });
                           await Updates.reloadAsync();
                         },
                       },
@@ -422,30 +445,101 @@ export default function SettingsScreen() {
           </Text>
 
           {(isOwnerMode || isAdmin) && (
-            <Pressable
-              onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                setDowngradeChannel("");
-                setDowngradeModalVisible(true);
-              }}
-              style={({ pressed }) => ({
-                marginTop: 10,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-                paddingVertical: 13,
-                borderRadius: 14,
-                borderWidth: 1,
-                borderColor: "#ef444440",
-                backgroundColor: pressed ? "#ef444410" : "#ef444408",
-              })}
-            >
-              <RotateCcw size={16} color="#ef4444" />
-              <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#ef4444" }}>
-                Downgrade Version
-              </Text>
-            </Pressable>
+            <>
+              <Pressable
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  setDowngradeChannel("");
+                  setDowngradeModalVisible(true);
+                }}
+                style={({ pressed }) => ({
+                  marginTop: 10,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  paddingVertical: 13,
+                  borderRadius: 14,
+                  borderWidth: 1,
+                  borderColor: "#ef444440",
+                  backgroundColor: pressed ? "#ef444410" : "#ef444408",
+                })}
+              >
+                <RotateCcw size={16} color="#ef4444" />
+                <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#ef4444" }}>
+                  Downgrade Version
+                </Text>
+              </Pressable>
+
+              {/* ── VERSION HISTORY ─────────────────────────── */}
+              <View style={{ marginTop: 16 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <History size={14} color={colors.textSecondary} />
+                    <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.textSecondary, letterSpacing: 0.5 }}>
+                      UPDATE HISTORY
+                    </Text>
+                  </View>
+                  {updateHistory.length > 0 && (
+                    <Pressable
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        showAlert("Clear History", "Remove all update history entries?", [
+                          { text: "Cancel", style: "cancel" },
+                          { text: "Clear", style: "destructive", onPress: clearHistory },
+                        ]);
+                      }}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, flexDirection: "row", alignItems: "center", gap: 4 })}
+                    >
+                      <Trash2 size={12} color={colors.textMuted} />
+                      <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.textMuted }}>Clear</Text>
+                    </Pressable>
+                  )}
+                </View>
+
+                {updateHistory.length === 0 ? (
+                  <View style={{ backgroundColor: colors.surfaceSecondary, borderRadius: 12, padding: 16, alignItems: "center" }}>
+                    <Text style={{ fontSize: 13, fontFamily: "Inter_400Regular", color: colors.textMuted }}>No update history yet</Text>
+                  </View>
+                ) : (
+                  <View style={{ backgroundColor: colors.surfaceSecondary, borderRadius: 12, overflow: "hidden" }}>
+                    {updateHistory.map((entry, i) => {
+                      const d = new Date(entry.date);
+                      const dateStr = d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+                      const timeStr = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+                      const isDowngrade = entry.type === "downgraded";
+                      return (
+                        <View key={i} style={[{ paddingHorizontal: 14, paddingVertical: 12 }, i > 0 && { borderTopWidth: 1, borderTopColor: colors.border }]}>
+                          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                              <View style={{
+                                width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center",
+                                backgroundColor: isDowngrade ? "#fef2f2" : "#f0fdf4",
+                              }}>
+                                {isDowngrade
+                                  ? <RotateCcw size={13} color="#ef4444" />
+                                  : <Download size={13} color="#22c55e" />
+                                }
+                              </View>
+                              <View>
+                                <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }}>
+                                  {isDowngrade ? "Downgraded" : "Upgraded"}
+                                  {" "}
+                                  <Text style={{ color: isDowngrade ? "#ef4444" : "#22c55e" }}>v{entry.version}</Text>
+                                </Text>
+                                <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textMuted, marginTop: 1 }}>
+                                  {entry.channel} · {dateStr} at {timeStr}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            </>
           )}
         </Section>
 
@@ -684,6 +778,7 @@ export default function SettingsScreen() {
                     const result = await Updates.checkForUpdateAsync();
                     if (result.isAvailable) {
                       await Updates.fetchUpdateAsync();
+                      await addHistoryEntry({ date: new Date().toISOString(), version: appVersion, channel: ch, type: "downgraded" });
                       await Updates.reloadAsync();
                     } else {
                       showAlert("No Update Found", `No update was found on channel "${ch}". Verify the channel name and try again.`, [{ text: "OK" }]);
