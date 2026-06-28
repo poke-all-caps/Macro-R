@@ -46,16 +46,18 @@ async function isAdminLicenseKey(key: string | undefined): Promise<boolean> {
 
 export function requireAdmin(req: any, res: any, next: any): void {
   const ADMIN_SECRET = process.env["ADMIN_SECRET"];
-  if (!ADMIN_SECRET) {
-    res.status(401).json({ error: "Unauthorized — ADMIN_SECRET not configured" });
-    return;
-  }
-  const headerSecret = req.headers["x-admin-secret"];
-  if (headerSecret === ADMIN_SECRET) { next(); return; }
 
+  // 1. Secret-header auth (only possible when ADMIN_SECRET is configured)
+  if (ADMIN_SECRET) {
+    const headerSecret = req.headers["x-admin-secret"];
+    if (headerSecret === ADMIN_SECRET) { next(); return; }
+  }
+
+  // 2. Browser session cookie
   const sessionToken = getSessionFromCookie(req.headers.cookie);
   if (isValidSession(sessionToken)) { next(); return; }
 
+  // 3. Admin-type license key (always checked, no dependency on ADMIN_SECRET)
   const adminKey = req.headers["x-admin-key"];
   if (adminKey) {
     isAdminLicenseKey(adminKey).then((valid) => {
