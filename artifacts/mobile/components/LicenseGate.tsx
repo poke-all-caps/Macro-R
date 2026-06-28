@@ -3,9 +3,12 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
   View,
   useColorScheme,
   KeyboardAvoidingView,
@@ -146,12 +149,16 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
 
   return (
     <KeyboardAvoidingView
-      style={[
-        styles.container,
-        { backgroundColor: colors.background, paddingTop: insets.top },
-      ]}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: insets.bottom + 24 }]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+      >
       <View style={styles.content}>
         <View style={[styles.iconContainer, { backgroundColor: colors.card }]}>
           <Lock size={48} color="#3b82f6" />
@@ -287,6 +294,8 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
           )}
         </View>
       </View>
+      </ScrollView>
+      </TouchableWithoutFeedback>
 
       <Modal
         visible={showScanner}
@@ -322,6 +331,9 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
   },
