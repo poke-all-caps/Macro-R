@@ -97,6 +97,8 @@ export function AdminPanel() {
   const [expiryYear, setExpiryYear] = useState("");
   const [expiryMonth, setExpiryMonth] = useState("");
   const [expiryDay, setExpiryDay] = useState("");
+  const [expiryHour, setExpiryHour] = useState("23");
+  const [expiryMinute, setExpiryMinute] = useState("59");
 
   const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
   const adminLicenseKey = licenseData?.keyType === "admin" ? licenseData.key : null;
@@ -289,6 +291,8 @@ export function AdminPanel() {
     setExpiryYear(String(d.getFullYear()));
     setExpiryMonth(String(d.getMonth() + 1).padStart(2, "0"));
     setExpiryDay(String(d.getDate()).padStart(2, "0"));
+    setExpiryHour(String(d.getHours()).padStart(2, "0"));
+    setExpiryMinute(String(d.getMinutes()).padStart(2, "0"));
     setExpiryPopup(true);
   };
 
@@ -297,11 +301,17 @@ export function AdminPanel() {
     const y = parseInt(expiryYear);
     const m = parseInt(expiryMonth);
     const d = parseInt(expiryDay);
+    const h = parseInt(expiryHour);
+    const min = parseInt(expiryMinute);
     if (isNaN(y) || isNaN(m) || isNaN(d) || m < 1 || m > 12 || d < 1 || d > 31 || y < 2024) {
       showError("Invalid Date", "Please enter a valid date.");
       return;
     }
-    const constructed = new Date(y, m - 1, d, 23, 59, 59);
+    if (isNaN(h) || h < 0 || h > 23 || isNaN(min) || min < 0 || min > 59) {
+      showError("Invalid Time", "Hour must be 0–23 and minute must be 0–59.");
+      return;
+    }
+    const constructed = new Date(y, m - 1, d, h, min, 0);
     if (constructed.getFullYear() !== y || constructed.getMonth() !== m - 1 || constructed.getDate() !== d) {
       showError("Invalid Date", "That date doesn't exist. Please check the values.");
       return;
@@ -1109,6 +1119,40 @@ export function AdminPanel() {
               />
             </View>
           </View>
+          <View style={[popupStyles.dateRow, { marginTop: 8 }]}>
+            <View style={popupStyles.dateField}>
+              <Text style={popupStyles.dateLabel}>Hour (0–23)</Text>
+              <TextInput
+                style={popupStyles.dateInput}
+                keyboardType="number-pad"
+                value={expiryHour}
+                onChangeText={(v) => setExpiryHour(v.replace(/\D/g, "").slice(0, 2))}
+                maxLength={2}
+                placeholder="23"
+                placeholderTextColor="#64748b"
+                selectTextOnFocus
+              />
+            </View>
+            <View style={popupStyles.dateField}>
+              <Text style={popupStyles.dateLabel}>Minute (0–59)</Text>
+              <TextInput
+                style={popupStyles.dateInput}
+                keyboardType="number-pad"
+                value={expiryMinute}
+                onChangeText={(v) => setExpiryMinute(v.replace(/\D/g, "").slice(0, 2))}
+                maxLength={2}
+                placeholder="59"
+                placeholderTextColor="#64748b"
+                selectTextOnFocus
+              />
+            </View>
+            <View style={[popupStyles.dateField, { justifyContent: "flex-end" }]}>
+              <Text style={popupStyles.dateLabel}> </Text>
+              <View style={[popupStyles.dateInput, { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4 }]}>
+                <Text style={{ color: "#64748b", fontSize: 11 }}>24h</Text>
+              </View>
+            </View>
+          </View>
           <View style={popupStyles.quickDateRow}>
             {[
               { label: "+30d", days: 30 },
@@ -1126,6 +1170,7 @@ export function AdminPanel() {
                   setExpiryYear(String(target.getFullYear()));
                   setExpiryMonth(String(target.getMonth() + 1).padStart(2, "0"));
                   setExpiryDay(String(target.getDate()).padStart(2, "0"));
+                  // preserve the hour/minute the admin already typed
                 }}
                 style={popupStyles.quickDateChip}
               >
