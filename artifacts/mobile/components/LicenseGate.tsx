@@ -2,18 +2,17 @@ import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Keyboard,
+  Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableWithoutFeedback,
-  Keyboard,
   View,
   useColorScheme,
-  KeyboardAvoidingView,
-  Platform,
-  Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -148,14 +147,14 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.background }]}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <ScrollView
+        style={[styles.container, { backgroundColor: colors.background }]}
         contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: insets.bottom + 24 }]}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        automaticallyAdjustKeyboardInsets={true}
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
@@ -295,7 +294,7 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
         </View>
       </View>
       </ScrollView>
-      </TouchableWithoutFeedback>
+    </TouchableWithoutFeedback>
 
       <Modal
         visible={showScanner}
@@ -324,7 +323,7 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
           <Text style={styles.scanHint}>Point your camera at the QR code</Text>
         </View>
       </Modal>
-    </KeyboardAvoidingView>
+    </>
   );
 }
 
