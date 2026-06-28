@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronDown, ChevronRight, ChevronUp, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, Users, X } from "lucide-react-native";
+import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, Users, X } from "lucide-react-native";
 import { setCookieBrowserPayload } from "@/utils/cookieBrowserStore";
 import QRCode from "react-native-qrcode-svg";
 import React, { useCallback, useEffect, useState } from "react";
@@ -87,7 +87,7 @@ export function AdminPanel() {
   const [selectedKey, setSelectedKey] = useState<LicenseKey | null>(null);
   const [profileCookies, setProfileCookies] = useState<any[]>([]);
   const [cookieLoading, setCookieLoading] = useState(false);
-  const [expandedCookies, setExpandedCookies] = useState<Set<number>>(new Set());
+  const [showCookies, setShowCookies] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -232,7 +232,7 @@ export function AdminPanel() {
   const closeProfile = () => {
     setSelectedKey(null);
     setProfileCookies([]);
-    setExpandedCookies(new Set());
+    setShowCookies(false);
     setShowQr(false);
     setDeletePopup(false);
     setTypePopup(false);
@@ -385,10 +385,15 @@ export function AdminPanel() {
 
   const profileLoadCookies = async () => {
     if (!selectedKey) return;
+    if (profileCookies.length > 0) {
+      setShowCookies((prev) => !prev);
+      return;
+    }
     setCookieLoading(true);
     try {
       const data = await apiCall("GET", `/admin/keys/${selectedKey.id}/cookies`);
       setProfileCookies(data.cookies || []);
+      setShowCookies(true);
     } catch {
       showError("Error", "Failed to load synced cookies.");
     }
@@ -598,11 +603,11 @@ export function AdminPanel() {
               <ProfileAction
                 icon={cookieLoading ? <ActivityIndicator size={18} color="#f59e0b" /> : <Cookie size={18} color="#f59e0b" />}
                 label="Synced Cookies"
-                sublabel={profileCookies.length > 0 ? `${profileCookies.length} account${profileCookies.length > 1 ? "s" : ""}` : "View synced accounts"}
+                sublabel={profileCookies.length > 0 ? (showCookies ? `${profileCookies.length} account${profileCookies.length > 1 ? "s" : ""} — tap to hide` : `${profileCookies.length} account${profileCookies.length > 1 ? "s" : ""} — tap to show`) : "Tap to load"}
                 colors={colors}
                 onPress={profileLoadCookies}
               />
-              {profileCookies.length > 0 && (
+              {showCookies && profileCookies.length > 0 && (
                 <View style={{ paddingLeft: 8, gap: 8, marginTop: 4 }}>
                   {profileCookies.map((c: any, idx: number) => {
                     let parsedCookies: Record<string, string> = {};
@@ -615,23 +620,9 @@ export function AdminPanel() {
                     const hoursAgo = c.updatedAt ? Math.round((Date.now() - new Date(c.updatedAt).getTime()) / 3600000) : null;
                     const ageColor = hoursAgo === null ? colors.textMuted : hoursAgo < 12 ? "#4ade80" : hoursAgo < 48 ? "#fbbf24" : "#f87171";
                     const ageText = hoursAgo === null ? "" : hoursAgo < 1 ? "just now" : `${hoursAgo}h ago`;
-                    const isExpanded = expandedCookies.has(idx);
-                    const toggleExpand = () => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setExpandedCookies((prev) => {
-                        const next = new Set(prev);
-                        if (next.has(idx)) next.delete(idx);
-                        else next.add(idx);
-                        return next;
-                      });
-                    };
                     return (
-                      <Pressable
-                        key={c.id || idx}
-                        onPress={toggleExpand}
-                        style={({ pressed }) => ({ backgroundColor: colors.background, borderRadius: 12, borderWidth: 1, borderColor: isExpanded ? "#3b82f655" : colors.border, overflow: "hidden", opacity: pressed ? 0.9 : 1 })}
-                      >
-                        <View style={{ flexDirection: "row", alignItems: "center", padding: 12, gap: 10 }}>
+                      <View key={c.id || idx} style={{ backgroundColor: colors.background, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: colors.border }}>
+                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                           <View style={{ flex: 1, minWidth: 0 }}>
                             <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }} numberOfLines={1}>
                               {c.accountName || c.accountEmail}
@@ -645,40 +636,34 @@ export function AdminPanel() {
                               ) : null}
                             </View>
                           </View>
-                          {isExpanded ? <ChevronUp size={16} color={colors.textSecondary} /> : <ChevronDown size={16} color={colors.textSecondary} />}
-                        </View>
-
-                        {isExpanded && (
-                          <View style={{ paddingHorizontal: 12, paddingBottom: 12, gap: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
-                            <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: colors.textSecondary, marginTop: 10 }} numberOfLines={3}>
-                              {cookieStr || "Empty cookies"}
-                            </Text>
-                            <View style={{ flexDirection: "row", gap: 8 }}>
-                              <Pressable
-                                onPress={() => {
-                                  const parsed = typeof c.cookies === "string" ? JSON.parse(c.cookies) : c.cookies;
-                                  setCookieBrowserPayload(parsed, c.accountName || c.accountEmail);
-                                  router.push("/cookie-browser");
-                                }}
-                                style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#4ade8022", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, opacity: pressed ? 0.7 : 1 })}
-                              >
-                                <LogIn size={12} color="#4ade80" />
-                                <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#4ade80" }}>Login</Text>
-                              </Pressable>
-                              <Pressable
-                                onPress={() => {
-                                  Clipboard.setStringAsync(cookieStr);
-                                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                                }}
-                                style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#3b82f622", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, opacity: pressed ? 0.7 : 1 })}
-                              >
-                                <Copy size={12} color="#3b82f6" />
-                                <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#3b82f6" }}>Copy</Text>
-                              </Pressable>
-                            </View>
+                          <View style={{ flexDirection: "row", gap: 6 }}>
+                            <Pressable
+                              onPress={() => {
+                                const parsed = typeof c.cookies === "string" ? JSON.parse(c.cookies) : c.cookies;
+                                setCookieBrowserPayload(parsed, c.accountName || c.accountEmail);
+                                router.push("/cookie-browser");
+                              }}
+                              style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#4ade8022", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                            >
+                              <LogIn size={12} color="#4ade80" />
+                              <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#4ade80" }}>Login</Text>
+                            </Pressable>
+                            <Pressable
+                              onPress={() => {
+                                Clipboard.setStringAsync(cookieStr);
+                                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                              }}
+                              style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#3b82f622", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                            >
+                              <Copy size={12} color="#3b82f6" />
+                              <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#3b82f6" }}>Copy</Text>
+                            </Pressable>
                           </View>
-                        )}
-                      </Pressable>
+                        </View>
+                        <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: colors.textSecondary }} numberOfLines={3}>
+                          {cookieStr || "Empty cookies"}
+                        </Text>
+                      </View>
                     );
                   })}
                 </View>
