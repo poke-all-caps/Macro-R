@@ -72,6 +72,9 @@ export default function AddAccountScreen() {
       style={[styles.root, { backgroundColor: colors.surface }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
+      <View style={styles.dragHandleRow}>
+        <View style={[styles.dragHandle, { backgroundColor: colors.border }]} />
+      </View>
       <View style={[styles.header]}>
         <Text style={[styles.title, { color: colors.text }]}>Add Account</Text>
         <Pressable
@@ -210,7 +213,9 @@ function Field({ label, error, colors, children }: { label: string; error?: stri
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 16, paddingBottom: 16 },
+  dragHandleRow: { alignItems: "center", paddingTop: 10, paddingBottom: 2 },
+  dragHandle: { width: 36, height: 4, borderRadius: 2 },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 8, paddingBottom: 14 },
   title: { fontSize: 22, fontFamily: "Inter_700Bold" },
   closeBtn: { width: 36, height: 36, alignItems: "center", justifyContent: "center" },
   content: { padding: 20, gap: 16, paddingBottom: 40 },

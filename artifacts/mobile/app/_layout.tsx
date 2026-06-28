@@ -159,7 +159,7 @@ function RootLayoutNav() {
         <Stack.Screen name="account/[id]" options={{ presentation: "modal", headerShown: false }} />
         <Stack.Screen
           name="add-account"
-          options={{ presentation: "formSheet", sheetAllowedDetents: [0.6, 1], sheetGrabberVisible: true, headerShown: false }}
+          options={{ presentation: "formSheet", sheetAllowedDetents: [0.6, 1], sheetGrabberVisible: false, headerShown: false }}
         />
         <Stack.Screen name="login-webview" options={{ presentation: "fullScreenModal", headerShown: false, gestureEnabled: false }} />
         <Stack.Screen name="cookie-browser" options={{ presentation: "fullScreenModal", headerShown: false }} />

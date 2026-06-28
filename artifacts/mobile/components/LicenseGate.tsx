@@ -187,7 +187,7 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
             />
             <TextInput
               style={[styles.input, { color: colors.text }]}
-              placeholder="XsXXX-XXXX-XXXX-XXXX1s"
+              placeholder="XXXX-XXXX-XXXX-XXXX"
               placeholderTextColor={colors.textSecondary}
               value={keyInput}
               onChangeText={setKeyInput}
