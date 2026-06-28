@@ -27,6 +27,7 @@ import { StatsBar } from "@/components/StatsBar";
 import Colors from "@/constants/colors";
 import { Account, useAccounts } from "@/context/AccountsContext";
 import { useLicense } from "@/context/LicenseContext";
+import { formatTimeRemaining } from "@/utils/time";
 import { useSettings } from "@/context/SettingsContext";
 import { consumePendingRun } from "@/utils/notifications";
 
@@ -45,10 +46,10 @@ export default function HomeScreen() {
   const minDelay = featureConfig.minDelaySeconds;
   const dailySetAllowed = featureConfig.dailySetEnabled && settings.dailySetEnabled;
 
-  const daysUntilExpiry = licenseData
-    ? Math.ceil((new Date(licenseData.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  const msUntilExpiry = licenseData
+    ? new Date(licenseData.expiresAt).getTime() - Date.now()
     : null;
-  const showExpiryWarning = daysUntilExpiry !== null && daysUntilExpiry <= 7 && daysUntilExpiry >= 0;
+  const showExpiryWarning = msUntilExpiry !== null && msUntilExpiry > 0 && msUntilExpiry <= 7 * 24 * 60 * 60 * 1000;
   const lastPointsRefresh = React.useRef(0);
 
   const onRefresh = useCallback(async () => {
@@ -409,9 +410,7 @@ export default function HomeScreen() {
         >
           <AlertTriangle size={16} color="#fbbf24" />
           <Text style={styles.expiryBannerText}>
-            {daysUntilExpiry === 0
-              ? "Your license expires today — tap to renew"
-              : `License expires in ${daysUntilExpiry} day${daysUntilExpiry === 1 ? "" : "s"} — tap to renew`}
+            {`License expires in ${formatTimeRemaining(licenseData!.expiresAt)} — tap to renew`}
           </Text>
         </Pressable>
       )}

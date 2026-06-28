@@ -2,6 +2,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, Users, X } from "lucide-react-native";
 import { setCookieBrowserPayload } from "@/utils/cookieBrowserStore";
+import { formatTimeRemaining } from "@/utils/time";
 import QRCode from "react-native-qrcode-svg";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -212,19 +213,7 @@ export function AdminPanel() {
   const getStatus = (item: LicenseKey) => {
     if (!item.isActive) return { label: "Inactive", color: "#64748b", bg: "#64748b22" };
     if (new Date(item.expiresAt) < new Date()) return { label: "Expired", color: "#f87171", bg: "#dc262622" };
-    const days = Math.ceil((new Date(item.expiresAt).getTime() - Date.now()) / 86400000);
-    let label: string;
-    if (days >= 365) {
-      const years = Math.floor(days / 365);
-      const rem = Math.floor((days % 365) / 30);
-      label = rem > 0 ? `${years}y ${rem}m` : `${years}y`;
-    } else if (days >= 30) {
-      const months = Math.floor(days / 30);
-      const rem = days % 30;
-      label = rem > 0 ? `${months}m ${rem}d` : `${months}m`;
-    } else {
-      label = `${days}d`;
-    }
+    const label = formatTimeRemaining(item.expiresAt, true);
     return { label: `${label} left`, color: "#4ade80", bg: "#16a34a22" };
   };
 
