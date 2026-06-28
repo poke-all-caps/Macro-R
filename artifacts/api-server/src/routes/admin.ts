@@ -234,6 +234,7 @@ function dashboardPage(): string {
             '<span class="stat">Max: ' + safeMax + ' accounts</span>' +
             '<span class="stat">Expires: ' + esc(exp.toLocaleDateString()) + '</span>' +
             (k.boundDeviceId ? '<span class="stat">Device: ' + esc(k.boundDeviceId.slice(0,8)) + '…</span>' : '<span class="stat" style="color:#fbbf24">No device bound</span>') +
+            (k.pin ? '<span class="stat" style="display:inline-flex;align-items:center;gap:6px;background:#0f172a;border:1px solid #334155;border-radius:6px;padding:2px 8px"><span style="color:#94a3b8;font-size:11px">PIN</span><span style="font-family:monospace;font-weight:700;color:#f59e0b;font-size:14px;letter-spacing:3px">' + esc(k.pin) + '</span></span>' : '<span class="stat" style="color:#475569;font-size:11px">No PIN set</span>') +
           '</div>' +
           deactivatedInfo +
           '<div class="actions">' +
@@ -243,6 +244,7 @@ function dashboardPage(): string {
             '<button class="btn-secondary" onclick="extendKey(' + JSON.stringify(safeId) + ')">+30 Days</button>' +
             '<button class="btn-secondary" onclick="editAccounts(' + JSON.stringify(safeId) + ', ' + Number(k.maxAccounts) + ')">Edit Limit</button>' +
             '<button class="btn-secondary" onclick="resetDevice(' + JSON.stringify(safeId) + ')">Reset Device</button>' +
+            (k.pin ? '<button class="btn-secondary" style="color:#f59e0b;border:1px solid #f59e0b44" onclick="clearPin(' + JSON.stringify(safeId) + ')">Clear PIN</button>' : '') +
             '<button class="' + (k.isActive ? 'btn-danger' : 'btn-success') + '" onclick="toggleKey(' + JSON.stringify(safeId) + ', ' + !k.isActive + ')">' + (k.isActive ? 'Deactivate' : 'Activate') + '</button>' +
             '<button class="btn-danger" onclick="deleteKey(' + JSON.stringify(safeId) + ')">Delete</button>' +
             '<button class="btn-secondary" onclick="viewCookies(' + JSON.stringify(safeId) + ', ' + JSON.stringify(safeKey) + ')">Cookies</button>' +
@@ -312,6 +314,12 @@ function dashboardPage(): string {
     async function deleteKey(id) {
       if (!confirm('Delete this key permanently?')) return;
       await api('DELETE', '/admin/keys/' + id);
+      loadKeys();
+    }
+
+    async function clearPin(id) {
+      if (!confirm('Clear this user\'s PIN? They will be prompted to create a new one on next login.')) return;
+      await api('DELETE', '/admin/keys/' + id + '/pin');
       loadKeys();
     }
 

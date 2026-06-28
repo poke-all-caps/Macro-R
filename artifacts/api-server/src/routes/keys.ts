@@ -246,6 +246,22 @@ router.post("/validate-admin", async (req, res) => {
   res.json({ valid: true, isAdmin: true });
 });
 
+router.delete("/admin/keys/:id/pin", requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [updated] = await db.update(licenseKeysTable)
+      .set({ pin: null, updatedAt: new Date() })
+      .where(eq(licenseKeysTable.id, id))
+      .returning({ id: licenseKeysTable.id, key: licenseKeysTable.key });
+    if (!updated) return res.status(404).json({ error: "Key not found" });
+    console.log(`[PIN CLEAR] PIN cleared for key ${updated.key} at ${new Date().toISOString()} — source IP: ${req.ip || req.headers['x-forwarded-for'] || 'unknown'}`);
+    res.json({ success: true });
+  } catch (e: any) {
+    console.error("DELETE /admin/keys/pin error:", e);
+    res.status(500).json({ error: sanitizeDbError(e) });
+  }
+});
+
 router.put("/admin/keys/:id/reset-device", requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
