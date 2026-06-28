@@ -212,7 +212,7 @@ function Field({ label, error, colors, children }: { label: string; error?: stri
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: { flex: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
   dragHandleRow: { alignItems: "center", paddingTop: 10, paddingBottom: 2 },
   dragHandle: { width: 36, height: 4, borderRadius: 2 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 8, paddingBottom: 14 },
