@@ -27,6 +27,18 @@ import { useLicense } from "@/context/LicenseContext";
 import { OvernightSlot, useSettings } from "@/context/SettingsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const KNOWN_VERSIONS: { version: string; channel: string; date: string; notes: string }[] = [
+  { version: "1.4.02", channel: "production-1-4-02", date: "Jun 2025",  notes: "Bug fixes & stability improvements" },
+  { version: "1.4.01", channel: "production-1-4-01", date: "May 2025",  notes: "Search runner performance update" },
+  { version: "1.4.00", channel: "production-1-4-00", date: "Apr 2025",  notes: "Overnight scheduling introduced" },
+  { version: "1.3.05", channel: "production-1-3-05", date: "Mar 2025",  notes: "Cookie sync reliability fix" },
+  { version: "1.3.04", channel: "production-1-3-04", date: "Feb 2025",  notes: "Daily Set toggle added" },
+  { version: "1.3.03", channel: "production-1-3-03", date: "Jan 2025",  notes: "UI polish & dark mode fixes" },
+  { version: "1.3.02", channel: "production-1-3-02", date: "Dec 2024",  notes: "License system v2" },
+  { version: "1.3.01", channel: "production-1-3-01", date: "Nov 2024",  notes: "Multi-account support" },
+  { version: "1.2.00", channel: "production-1-2-00", date: "Oct 2024",  notes: "Initial public release" },
+];
+
 function from24h(hour24: number): { hour: number; isAm: boolean } {
   return {
     hour: hour24 % 12 === 0 ? 12 : hour24 % 12,
@@ -718,38 +730,64 @@ export default function SettingsScreen() {
               </Pressable>
             </View>
 
-            <Text style={{ fontSize: 13, fontFamily: "Inter_400Regular", color: colors.textSecondary, lineHeight: 19, marginBottom: 20 }}>
-              Enter the EAS update channel name to roll back to (e.g. <Text style={{ fontFamily: "Inter_600SemiBold", color: colors.text }}>production-v1.3</Text>). The app will switch to that channel and restart.
-            </Text>
-
-            <View style={{ backgroundColor: "#fef2f2", borderRadius: 12, padding: 12, marginBottom: 20, flexDirection: "row", gap: 8 }}>
+            <View style={{ backgroundColor: "#fef2f2", borderRadius: 12, padding: 12, marginBottom: 16, flexDirection: "row", gap: 8 }}>
               <Text style={{ fontSize: 12, fontFamily: "Inter_500Medium", color: "#b91c1c", flex: 1, lineHeight: 17 }}>
-                ⚠ Downgrading may remove features or cause instability. Only proceed if you know the target version.
+                ⚠ Downgrading may remove features or cause instability. Only use a version you previously ran.
               </Text>
             </View>
 
-            <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.textSecondary, marginBottom: 8, letterSpacing: 0.4 }}>CHANNEL NAME</Text>
-            <TextInput
-              style={{
-                backgroundColor: colors.surfaceSecondary,
-                borderRadius: 12,
-                paddingHorizontal: 14,
-                paddingVertical: 13,
-                fontSize: 15,
-                fontFamily: "Inter_400Regular",
-                color: colors.text,
-                borderWidth: 1,
-                borderColor: colors.border,
-                marginBottom: 20,
-              }}
-              value={downgradeChannel}
-              onChangeText={setDowngradeChannel}
-              placeholder="e.g. production-v1.3"
-              placeholderTextColor={colors.textMuted}
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!applyingDowngrade}
-            />
+            <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.textSecondary, marginBottom: 10, letterSpacing: 0.4 }}>SELECT VERSION</Text>
+            <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
+              <View style={{ gap: 8, paddingBottom: 4 }}>
+                {KNOWN_VERSIONS.map((v) => {
+                  const selected = downgradeChannel === v.channel;
+                  return (
+                    <Pressable
+                      key={v.channel}
+                      onPress={() => {
+                        if (!applyingDowngrade) {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setDowngradeChannel(v.channel);
+                        }
+                      }}
+                      style={({ pressed }) => ({
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 12,
+                        padding: 14,
+                        borderRadius: 14,
+                        borderWidth: 1.5,
+                        borderColor: selected ? "#ef4444" : colors.border,
+                        backgroundColor: selected ? "#ef444410" : pressed ? colors.surfaceSecondary : colors.surfaceSecondary,
+                      })}
+                    >
+                      <View style={{
+                        width: 22, height: 22, borderRadius: 11, borderWidth: 2,
+                        borderColor: selected ? "#ef4444" : colors.border,
+                        alignItems: "center", justifyContent: "center",
+                        backgroundColor: selected ? "#ef4444" : "transparent",
+                      }}>
+                        {selected && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#fff" }} />}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                          <Text style={{ fontSize: 14, fontFamily: "Inter_700Bold", color: selected ? "#ef4444" : colors.text }}>
+                            v{v.version}
+                          </Text>
+                          <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textMuted }}>
+                            {v.date}
+                          </Text>
+                        </View>
+                        <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textSecondary, marginTop: 2 }}>
+                          {v.notes}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+            <View style={{ height: 16 }} />
 
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Pressable
