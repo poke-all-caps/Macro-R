@@ -27,17 +27,6 @@ import { useLicense } from "@/context/LicenseContext";
 import { OvernightSlot, useSettings } from "@/context/SettingsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KNOWN_VERSIONS: { version: string; channel: string; date: string; notes: string }[] = [
-  { version: "1.4.02", channel: "production-1-4-02", date: "Jun 2025",  notes: "Bug fixes & stability improvements" },
-  { version: "1.4.01", channel: "production-1-4-01", date: "May 2025",  notes: "Search runner performance update" },
-  { version: "1.4.00", channel: "production-1-4-00", date: "Apr 2025",  notes: "Overnight scheduling introduced" },
-  { version: "1.3.05", channel: "production-1-3-05", date: "Mar 2025",  notes: "Cookie sync reliability fix" },
-  { version: "1.3.04", channel: "production-1-3-04", date: "Feb 2025",  notes: "Daily Set toggle added" },
-  { version: "1.3.03", channel: "production-1-3-03", date: "Jan 2025",  notes: "UI polish & dark mode fixes" },
-  { version: "1.3.02", channel: "production-1-3-02", date: "Dec 2024",  notes: "License system v2" },
-  { version: "1.3.01", channel: "production-1-3-01", date: "Nov 2024",  notes: "Multi-account support" },
-  { version: "1.2.00", channel: "production-1-2-00", date: "Oct 2024",  notes: "Initial public release" },
-];
 
 function from24h(hour24: number): { hour: number; isAm: boolean } {
   return {
@@ -68,9 +57,6 @@ export default function SettingsScreen() {
   const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
   const [licenseModalVisible, setLicenseModalVisible] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
-  const [downgradeModalVisible, setDowngradeModalVisible] = useState(false);
-  const [downgradeChannel, setDowngradeChannel] = useState("");
-  const [applyingDowngrade, setApplyingDowngrade] = useState(false);
   const appVersion = Constants.expoConfig?.version ?? "—";
 
   type HistoryEntry = { date: string; version: string; channel: string; type: "upgraded" | "downgraded" };
@@ -458,30 +444,23 @@ export default function SettingsScreen() {
 
           {(isOwnerMode || isAdmin) && (
             <>
-              <Pressable
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  setDowngradeChannel("");
-                  setDowngradeModalVisible(true);
-                }}
-                style={({ pressed }) => ({
-                  marginTop: 10,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  paddingVertical: 13,
-                  borderRadius: 14,
-                  borderWidth: 1,
-                  borderColor: "#ef444440",
-                  backgroundColor: pressed ? "#ef444410" : "#ef444408",
-                })}
-              >
-                <RotateCcw size={16} color="#ef4444" />
-                <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#ef4444" }}>
-                  Downgrade Version
+              <View style={{ marginTop: 10, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, padding: 14, gap: 10 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <RotateCcw size={15} color={colors.textSecondary} />
+                  <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }}>Version Rollback</Text>
+                </View>
+                <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textSecondary, lineHeight: 18 }}>
+                  OTA rollback is not possible — this app uses <Text style={{ fontFamily: "Inter_600SemiBold", color: colors.text }}>appVersion</Text> runtime policy, so each build version is isolated. To downgrade, distribute an older APK/IPA build directly.
                 </Text>
-              </Pressable>
+                <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                  <View style={{ backgroundColor: colors.tint + "18", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }}>
+                    <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.tint }}>Runtime: appVersion</Text>
+                  </View>
+                  <View style={{ backgroundColor: colors.tint + "18", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }}>
+                    <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.tint }}>Channel: production</Text>
+                  </View>
+                </View>
+              </View>
 
               {/* ── VERSION HISTORY ─────────────────────────── */}
               <View style={{ marginTop: 16 }}>
@@ -686,168 +665,6 @@ export default function SettingsScreen() {
         </Pressable>
       </Modal>
 
-      {/* ── DOWNGRADE MODAL ──────────────────────────────── */}
-      <Modal
-        visible={downgradeModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setDowngradeModalVisible(false)}
-      >
-        <Pressable
-          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}
-          onPress={() => !applyingDowngrade && setDowngradeModalVisible(false)}
-        >
-          <Pressable
-            onPress={() => {}}
-            style={{
-              backgroundColor: colors.surface,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              paddingHorizontal: 24,
-              paddingTop: 14,
-              paddingBottom: insets.bottom + 28,
-            }}
-          >
-            <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: "center", marginBottom: 20 }} />
-
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: "#fef2f2", alignItems: "center", justifyContent: "center" }}>
-                  <RotateCcw size={16} color="#ef4444" />
-                </View>
-                <Text style={{ fontSize: 17, fontFamily: "Inter_700Bold", color: colors.text }}>Downgrade Version</Text>
-              </View>
-              <Pressable
-                onPress={() => !applyingDowngrade && setDowngradeModalVisible(false)}
-                style={({ pressed }) => ({
-                  width: 30, height: 30, borderRadius: 15,
-                  backgroundColor: colors.surfaceSecondary,
-                  alignItems: "center", justifyContent: "center",
-                  opacity: pressed ? 0.6 : 1,
-                })}
-              >
-                <X size={15} color={colors.textMuted} />
-              </Pressable>
-            </View>
-
-            <View style={{ backgroundColor: "#fef2f2", borderRadius: 12, padding: 12, marginBottom: 16, flexDirection: "row", gap: 8 }}>
-              <Text style={{ fontSize: 12, fontFamily: "Inter_500Medium", color: "#b91c1c", flex: 1, lineHeight: 17 }}>
-                ⚠ Downgrading may remove features or cause instability. Only use a version you previously ran.
-              </Text>
-            </View>
-
-            <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.textSecondary, marginBottom: 10, letterSpacing: 0.4 }}>SELECT VERSION</Text>
-            <ScrollView style={{ maxHeight: 280 }} showsVerticalScrollIndicator={false}>
-              <View style={{ gap: 8, paddingBottom: 4 }}>
-                {KNOWN_VERSIONS.map((v) => {
-                  const selected = downgradeChannel === v.channel;
-                  return (
-                    <Pressable
-                      key={v.channel}
-                      onPress={() => {
-                        if (!applyingDowngrade) {
-                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                          setDowngradeChannel(v.channel);
-                        }
-                      }}
-                      style={({ pressed }) => ({
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 12,
-                        padding: 14,
-                        borderRadius: 14,
-                        borderWidth: 1.5,
-                        borderColor: selected ? "#ef4444" : colors.border,
-                        backgroundColor: selected ? "#ef444410" : pressed ? colors.surfaceSecondary : colors.surfaceSecondary,
-                      })}
-                    >
-                      <View style={{
-                        width: 22, height: 22, borderRadius: 11, borderWidth: 2,
-                        borderColor: selected ? "#ef4444" : colors.border,
-                        alignItems: "center", justifyContent: "center",
-                        backgroundColor: selected ? "#ef4444" : "transparent",
-                      }}>
-                        {selected && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#fff" }} />}
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                          <Text style={{ fontSize: 14, fontFamily: "Inter_700Bold", color: selected ? "#ef4444" : colors.text }}>
-                            v{v.version}
-                          </Text>
-                          <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textMuted }}>
-                            {v.date}
-                          </Text>
-                        </View>
-                        <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textSecondary, marginTop: 2 }}>
-                          {v.notes}
-                        </Text>
-                      </View>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ScrollView>
-            <View style={{ height: 16 }} />
-
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Pressable
-                onPress={() => setDowngradeModalVisible(false)}
-                disabled={applyingDowngrade}
-                style={({ pressed }) => ({
-                  flex: 1,
-                  paddingVertical: 14,
-                  borderRadius: 12,
-                  alignItems: "center",
-                  backgroundColor: colors.surfaceSecondary,
-                  opacity: pressed || applyingDowngrade ? 0.6 : 1,
-                })}
-              >
-                <Text style={{ fontSize: 15, fontFamily: "Inter_600SemiBold", color: colors.textSecondary }}>Cancel</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={async () => {
-                  const ch = downgradeChannel.trim();
-                  if (!ch) return;
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-                  setApplyingDowngrade(true);
-                  try {
-                    await Updates.setExtraParamAsync("channel-name", ch);
-                    const result = await Updates.checkForUpdateAsync();
-                    if (result.isAvailable) {
-                      await Updates.fetchUpdateAsync();
-                      await addHistoryEntry({ date: new Date().toISOString(), version: appVersion, channel: ch, type: "downgraded" });
-                      await Updates.reloadAsync();
-                    } else {
-                      showAlert("No Update Found", `No update was found on channel "${ch}". Verify the channel name and try again.`, [{ text: "OK" }]);
-                      await Updates.setExtraParamAsync("channel-name", "");
-                    }
-                  } catch (e: any) {
-                    showAlert("Downgrade Failed", e?.message ?? "Could not apply downgrade. Check the channel name.", [{ text: "OK" }]);
-                    try { await Updates.setExtraParamAsync("channel-name", ""); } catch {}
-                  } finally {
-                    setApplyingDowngrade(false);
-                    setDowngradeModalVisible(false);
-                  }
-                }}
-                disabled={!downgradeChannel.trim() || applyingDowngrade}
-                style={({ pressed }) => ({
-                  flex: 1,
-                  paddingVertical: 14,
-                  borderRadius: 12,
-                  alignItems: "center",
-                  backgroundColor: !downgradeChannel.trim() || applyingDowngrade ? "#ef444460" : pressed ? "#dc2626" : "#ef4444",
-                })}
-              >
-                {applyingDowngrade
-                  ? <ActivityIndicator size="small" color="#fff" />
-                  : <Text style={{ fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" }}>Apply</Text>
-                }
-              </Pressable>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
 
       {AlertComponent}
     </KeyboardAvoidingView>
