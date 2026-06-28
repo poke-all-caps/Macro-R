@@ -24,3 +24,9 @@ id = "Vf799pIJnvMive1bjUzKi"
 uri = "file://DOCUMENTATION.md"
 type = "text"
 title = "Macro Rewards — Full Documentation"
+
+[[outputs]]
+id = "Uenp-Nk9wtQnF2UN6Ejgb"
+uri = "file://huge security update initial.md"
+type = "text"
+title = "Huge Security Update — Initial Implementation"
