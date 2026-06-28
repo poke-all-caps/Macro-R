@@ -444,24 +444,6 @@ export default function SettingsScreen() {
 
           {(isOwnerMode || isAdmin) && (
             <>
-              <View style={{ marginTop: 10, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, padding: 14, gap: 10 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <RotateCcw size={15} color={colors.textSecondary} />
-                  <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }}>Version Rollback</Text>
-                </View>
-                <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textSecondary, lineHeight: 18 }}>
-                  OTA rollback is not possible — this app uses <Text style={{ fontFamily: "Inter_600SemiBold", color: colors.text }}>appVersion</Text> runtime policy, so each build version is isolated. To downgrade, distribute an older APK/IPA build directly.
-                </Text>
-                <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
-                  <View style={{ backgroundColor: colors.tint + "18", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }}>
-                    <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.tint }}>Runtime: appVersion</Text>
-                  </View>
-                  <View style={{ backgroundColor: colors.tint + "18", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }}>
-                    <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.tint }}>Channel: production</Text>
-                  </View>
-                </View>
-              </View>
-
               {/* ── VERSION HISTORY ─────────────────────────── */}
               <View style={{ marginTop: 16 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
