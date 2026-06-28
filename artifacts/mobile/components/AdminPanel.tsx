@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronDown, ChevronRight, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, Users, X } from "lucide-react-native";
+import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, Users, X } from "lucide-react-native";
 import { setCookieBrowserPayload } from "@/utils/cookieBrowserStore";
 import QRCode from "react-native-qrcode-svg";
 import React, { useCallback, useEffect, useState } from "react";
@@ -87,7 +87,6 @@ export function AdminPanel() {
   const [selectedKey, setSelectedKey] = useState<LicenseKey | null>(null);
   const [profileCookies, setProfileCookies] = useState<any[]>([]);
   const [cookieLoading, setCookieLoading] = useState(false);
-  const [cookiesExpanded, setCookiesExpanded] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -232,7 +231,6 @@ export function AdminPanel() {
   const closeProfile = () => {
     setSelectedKey(null);
     setProfileCookies([]);
-    setCookiesExpanded(false);
     setShowQr(false);
     setDeletePopup(false);
     setTypePopup(false);
@@ -598,20 +596,11 @@ export function AdminPanel() {
               <ProfileAction
                 icon={cookieLoading ? <ActivityIndicator size={18} color="#f59e0b" /> : <Cookie size={18} color="#f59e0b" />}
                 label="Synced Cookies"
-                sublabel={profileCookies.length > 0 ? `${profileCookies.length} account${profileCookies.length > 1 ? "s" : ""}` : "Tap to load"}
+                sublabel={profileCookies.length > 0 ? `${profileCookies.length} account${profileCookies.length > 1 ? "s" : ""}` : "View synced accounts"}
                 colors={colors}
-                expanded={cookiesExpanded && profileCookies.length > 0}
-                onPress={async () => {
-                  if (profileCookies.length === 0) {
-                    await profileLoadCookies();
-                    setCookiesExpanded(true);
-                  } else {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    setCookiesExpanded((v) => !v);
-                  }
-                }}
+                onPress={profileLoadCookies}
               />
-              {cookiesExpanded && profileCookies.length > 0 && (
+              {profileCookies.length > 0 && (
                 <View style={{ paddingLeft: 8, gap: 8, marginTop: 4 }}>
                   {profileCookies.map((c: any, idx: number) => {
                     let parsedCookies: Record<string, string> = {};
@@ -1140,13 +1129,12 @@ export function AdminPanel() {
   );
 }
 
-function ProfileAction({ icon, label, sublabel, colors, onPress, expanded }: {
+function ProfileAction({ icon, label, sublabel, colors, onPress }: {
   icon: React.ReactNode;
   label: string;
   sublabel: string;
   colors: any;
   onPress: () => void;
-  expanded?: boolean;
 }) {
   return (
     <Pressable
@@ -1161,10 +1149,7 @@ function ProfileAction({ icon, label, sublabel, colors, onPress, expanded }: {
         <Text style={[styles.profileActionLabel, { color: colors.text }]}>{label}</Text>
         <Text style={[styles.profileActionSublabel, { color: colors.textSecondary }]}>{sublabel}</Text>
       </View>
-      {expanded
-        ? <ChevronDown size={16} color={colors.textSecondary} />
-        : <ChevronRight size={16} color={colors.textSecondary} />
-      }
+      <ChevronRight size={16} color={colors.textSecondary} />
     </Pressable>
   );
 }

@@ -1,8 +1,7 @@
 import * as Haptics from "expo-haptics";
 import * as Updates from "expo-updates";
-import Constants from "expo-constants";
-import { CheckSquare, ChevronRight, Clock, Download, History, Key, Moon, RotateCcw, Search, Shield, Trash2, X } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import { CheckSquare, ChevronRight, Clock, Download, Key, Moon, Search, Shield, X } from "lucide-react-native";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -26,7 +25,6 @@ import { useAccounts } from "@/context/AccountsContext";
 import { useLicense } from "@/context/LicenseContext";
 import { OvernightSlot, useSettings } from "@/context/SettingsContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 
 function from24h(hour24: number): { hour: number; isAm: boolean } {
   return {
@@ -57,30 +55,7 @@ export default function SettingsScreen() {
   const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
   const [licenseModalVisible, setLicenseModalVisible] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
-  const appVersion = Constants.expoConfig?.version ?? "—";
 
-  type HistoryEntry = { date: string; version: string; channel: string; type: "upgraded" | "downgraded" };
-  const HISTORY_KEY = "@update_history_v1";
-  const [updateHistory, setUpdateHistory] = useState<HistoryEntry[]>([]);
-
-  useEffect(() => {
-    AsyncStorage.getItem(HISTORY_KEY).then((raw) => {
-      if (raw) { try { setUpdateHistory(JSON.parse(raw)); } catch {} }
-    });
-  }, []);
-
-  const addHistoryEntry = async (entry: HistoryEntry) => {
-    setUpdateHistory((prev) => {
-      const next = [entry, ...prev].slice(0, 20);
-      AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-      return next;
-    });
-  };
-
-  const clearHistory = () => {
-    setUpdateHistory([]);
-    AsyncStorage.removeItem(HISTORY_KEY);
-  };
 
   const commitSearchCount = () => {
     const parsed = parseInt(searchCountText, 10);
@@ -345,6 +320,62 @@ export default function SettingsScreen() {
         </Section>
 
 
+        {/* ── UPDATES ───────────────────────────────────────── */}
+        <Section title="UPDATES" colors={colors}>
+          <Pressable
+            onPress={async () => {
+              if (checkingUpdate) return;
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setCheckingUpdate(true);
+              try {
+                const result = await Updates.checkForUpdateAsync();
+                if (result.isAvailable) {
+                  showAlert(
+                    "Update Available",
+                    "A new version is ready. Restart to apply it.",
+                    [
+                      { text: "Later", style: "cancel" },
+                      {
+                        text: "Restart Now",
+                        onPress: async () => {
+                          await Updates.fetchUpdateAsync();
+                          await Updates.reloadAsync();
+                        },
+                      },
+                    ]
+                  );
+                } else {
+                  showAlert("Up to Date", "You're running the latest version.", [{ text: "OK" }]);
+                }
+              } catch {
+                showAlert("Check Failed", "Could not check for updates. Try again later.", [{ text: "OK" }]);
+              } finally {
+                setCheckingUpdate(false);
+              }
+            }}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? "#16a34a" : "#22c55e",
+              borderRadius: 14,
+              paddingVertical: 15,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              opacity: checkingUpdate ? 0.7 : 1,
+            })}
+          >
+            {checkingUpdate ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Download size={18} color="#fff" />
+            )}
+            <Text style={{ fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" }}>
+              {checkingUpdate ? "Checking…" : "Check for Updates"}
+            </Text>
+          </Pressable>
+        </Section>
+
+
         <Section title="LICENSE" colors={colors}>
           <Pressable
             onPress={() => {
@@ -380,140 +411,6 @@ export default function SettingsScreen() {
             ) : null}
             {licenseData && <ChevronRight size={16} color={colors.textMuted} style={{ marginLeft: 6 }} />}
           </Pressable>
-        </Section>
-
-
-        {/* ── UPDATES ───────────────────────────────────────── */}
-        <Section title="UPDATES" colors={colors}>
-          <Pressable
-            onPress={async () => {
-              if (checkingUpdate) return;
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setCheckingUpdate(true);
-              try {
-                const result = await Updates.checkForUpdateAsync();
-                if (result.isAvailable) {
-                  showAlert(
-                    "Update Available",
-                    "A new version is ready. Restart to apply it.",
-                    [
-                      { text: "Later", style: "cancel" },
-                      {
-                        text: "Restart Now",
-                        onPress: async () => {
-                          await Updates.fetchUpdateAsync();
-                          await addHistoryEntry({ date: new Date().toISOString(), version: appVersion, channel: "production", type: "upgraded" });
-                          await Updates.reloadAsync();
-                        },
-                      },
-                    ]
-                  );
-                } else {
-                  showAlert("Up to Date", "You're running the latest version.", [{ text: "OK" }]);
-                }
-              } catch {
-                showAlert("Check Failed", "Could not check for updates. Try again later.", [{ text: "OK" }]);
-              } finally {
-                setCheckingUpdate(false);
-              }
-            }}
-            style={({ pressed }) => ({
-              backgroundColor: pressed ? "#16a34a" : "#22c55e",
-              borderRadius: 14,
-              paddingVertical: 15,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              opacity: checkingUpdate ? 0.7 : 1,
-            })}
-          >
-            {checkingUpdate ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Download size={18} color="#fff" />
-            )}
-            <Text style={{ fontSize: 15, fontFamily: "Inter_600SemiBold", color: "#fff" }}>
-              {checkingUpdate ? "Checking…" : "Check for Updates"}
-            </Text>
-          </Pressable>
-
-          <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textMuted, textAlign: "center", marginTop: 6 }}>
-            Current version: <Text style={{ fontFamily: "Inter_600SemiBold" }}>v{appVersion}</Text>
-          </Text>
-
-          {(isOwnerMode || isAdmin) && (
-            <>
-              {/* ── VERSION HISTORY ─────────────────────────── */}
-              <View style={{ marginTop: 16 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                    <History size={14} color={colors.textSecondary} />
-                    <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.textSecondary, letterSpacing: 0.5 }}>
-                      UPDATE HISTORY
-                    </Text>
-                  </View>
-                  {updateHistory.length > 0 && (
-                    <Pressable
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        showAlert("Clear History", "Remove all update history entries?", [
-                          { text: "Cancel", style: "cancel" },
-                          { text: "Clear", style: "destructive", onPress: clearHistory },
-                        ]);
-                      }}
-                      style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, flexDirection: "row", alignItems: "center", gap: 4 })}
-                    >
-                      <Trash2 size={12} color={colors.textMuted} />
-                      <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.textMuted }}>Clear</Text>
-                    </Pressable>
-                  )}
-                </View>
-
-                {updateHistory.length === 0 ? (
-                  <View style={{ backgroundColor: colors.surfaceSecondary, borderRadius: 12, padding: 16, alignItems: "center" }}>
-                    <Text style={{ fontSize: 13, fontFamily: "Inter_400Regular", color: colors.textMuted }}>No update history yet</Text>
-                  </View>
-                ) : (
-                  <View style={{ backgroundColor: colors.surfaceSecondary, borderRadius: 12, overflow: "hidden" }}>
-                    {updateHistory.map((entry, i) => {
-                      const d = new Date(entry.date);
-                      const dateStr = d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-                      const timeStr = d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
-                      const isDowngrade = entry.type === "downgraded";
-                      return (
-                        <View key={i} style={[{ paddingHorizontal: 14, paddingVertical: 12 }, i > 0 && { borderTopWidth: 1, borderTopColor: colors.border }]}>
-                          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                              <View style={{
-                                width: 28, height: 28, borderRadius: 8, alignItems: "center", justifyContent: "center",
-                                backgroundColor: isDowngrade ? "#fef2f2" : "#f0fdf4",
-                              }}>
-                                {isDowngrade
-                                  ? <RotateCcw size={13} color="#ef4444" />
-                                  : <Download size={13} color="#22c55e" />
-                                }
-                              </View>
-                              <View>
-                                <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }}>
-                                  {isDowngrade ? "Downgraded" : "Upgraded"}
-                                  {" "}
-                                  <Text style={{ color: isDowngrade ? "#ef4444" : "#22c55e" }}>v{entry.version}</Text>
-                                </Text>
-                                <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: colors.textMuted, marginTop: 1 }}>
-                                  {entry.channel} · {dateStr} at {timeStr}
-                                </Text>
-                              </View>
-                            </View>
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
-                )}
-              </View>
-            </>
-          )}
         </Section>
 
 
@@ -646,7 +543,6 @@ export default function SettingsScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-
 
       {AlertComponent}
     </KeyboardAvoidingView>
