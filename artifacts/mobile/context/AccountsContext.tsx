@@ -11,6 +11,7 @@ import { AppState, Platform, type AppStateStatus } from "react-native";
 import { fetchRewardsPoints } from "@/utils/bingSearch";
 
 import { API_BASE } from "@/utils/apiUrl";
+import { SERVER_HYDRATION_STORAGE } from "@/context/LicenseContext";
 const LICENSE_KEY_STORAGE = "@ms_rewards_license_key";
 const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 
@@ -44,6 +45,12 @@ export interface RunLog {
   errorMessage?: string;
 }
 
+export interface ServerAccount {
+  email: string;
+  name: string;
+  cookies: Record<string, string>;
+}
+
 interface AccountsContextType {
   accounts: Account[];
   logs: RunLog[];
@@ -58,6 +65,7 @@ interface AccountsContextType {
   startRun: () => void;
   stopRun: () => void;
   refreshPoints: () => Promise<void>;
+  hydrateFromServer: (serverAccounts: ServerAccount[]) => Promise<void>;
 }
 
 const AccountsContext = createContext<AccountsContextType | null>(null);
@@ -75,22 +83,89 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
   // Keep accountsRef always current so callbacks can read latest accounts without stale closures
   useEffect(() => { accountsRef.current = accounts; }, [accounts]);
 
+  const hydrateFromServer = useCallback(async (serverAccounts: ServerAccount[]) => {
+    if (!serverAccounts || serverAccounts.length === 0) return;
+    setAccounts((prev) => {
+      const merged = [...prev];
+      for (const sa of serverAccounts) {
+        const emailLower = sa.email.toLowerCase();
+        const idx = merged.findIndex((a) => a.email.toLowerCase() === emailLower);
+        if (idx >= 0) {
+          merged[idx] = {
+            ...merged[idx],
+            name: sa.name || merged[idx].name,
+            cookies: sa.cookies && Object.keys(sa.cookies).length > 0 ? sa.cookies : merged[idx].cookies,
+          };
+        } else {
+          merged.push({
+            id: Date.now().toString() + Math.random().toString(36).slice(2),
+            name: sa.name || sa.email,
+            email: emailLower,
+            status: "idle",
+            totalPoints: 0,
+            todayPoints: 0,
+            searchesCompleted: 0,
+            searchCount: 30,
+            dailySetEnabled: true,
+            enabled: true,
+            lastRun: null,
+            cookies: sa.cookies || {},
+          });
+        }
+      }
+      AsyncStorage.setItem(ACCOUNTS_KEY, JSON.stringify(merged)).catch(() => {});
+      return merged;
+    });
+  }, []);
+
   const loadFromStorage = useCallback(async () => {
     try {
-      const [accsRaw, logsRaw] = await Promise.all([
+      const [accsRaw, logsRaw, serverHydrationRaw] = await Promise.all([
         AsyncStorage.getItem(ACCOUNTS_KEY),
         AsyncStorage.getItem(LOGS_KEY),
+        AsyncStorage.getItem(SERVER_HYDRATION_STORAGE),
       ]);
+      let base: Account[] = [];
       if (accsRaw) {
         const parsed: Account[] = JSON.parse(accsRaw);
-        setAccounts(
-          parsed.map((a) => ({
-            ...a,
-            dailySetEnabled: a.dailySetEnabled ?? true,
-            enabled: a.enabled ?? true,
-          }))
-        );
+        base = parsed.map((a) => ({
+          ...a,
+          dailySetEnabled: a.dailySetEnabled ?? true,
+          enabled: a.enabled ?? true,
+        }));
       }
+      if (serverHydrationRaw) {
+        const serverAccs: ServerAccount[] = JSON.parse(serverHydrationRaw);
+        for (const sa of serverAccs) {
+          const emailLower = sa.email.toLowerCase();
+          const idx = base.findIndex((a) => a.email.toLowerCase() === emailLower);
+          if (idx >= 0) {
+            base[idx] = {
+              ...base[idx],
+              name: sa.name || base[idx].name,
+              cookies: sa.cookies && Object.keys(sa.cookies).length > 0 ? sa.cookies : base[idx].cookies,
+            };
+          } else {
+            base.push({
+              id: Date.now().toString() + Math.random().toString(36).slice(2),
+              name: sa.name || sa.email,
+              email: emailLower,
+              status: "idle",
+              totalPoints: 0,
+              todayPoints: 0,
+              searchesCompleted: 0,
+              searchCount: 30,
+              dailySetEnabled: true,
+              enabled: true,
+              lastRun: null,
+              cookies: sa.cookies || {},
+            });
+          }
+        }
+        await AsyncStorage.removeItem(SERVER_HYDRATION_STORAGE);
+        await AsyncStorage.setItem(ACCOUNTS_KEY, JSON.stringify(base));
+      }
+      setAccounts(base);
       if (logsRaw) setLogs(JSON.parse(logsRaw));
     } catch (e) {
       console.error("Failed to load data", e);
@@ -323,6 +398,7 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
         startRun,
         stopRun,
         refreshPoints,
+        hydrateFromServer,
       }}
     >
       {children}

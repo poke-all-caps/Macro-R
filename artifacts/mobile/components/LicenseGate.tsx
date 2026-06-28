@@ -22,17 +22,20 @@ import {
   Image as ImageIcon,
   X,
   Download,
+  ShieldCheck,
 } from "lucide-react-native";
 import { CameraView, Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as Updates from "expo-updates";
 import { useLicense } from "@/context/LicenseContext";
+import { useAccounts } from "@/context/AccountsContext";
 import { API_BASE } from "@/utils/apiUrl";
 import Colors from "@/constants/colors";
 
 export function LicenseGate({ children }: { children: React.ReactNode }) {
   const license = useLicense();
-  const { isLicensed, isLoading, error, activateKey } = license;
+  const { isLicensed, isLoading, error, activateKey, pinRequired, pinIsNew, submitPin } = license;
+  const { hydrateFromServer } = useAccounts();
   const scheme = useColorScheme() ?? "dark";
   const colors = Colors[scheme];
   const insets = useSafeAreaInsets();
@@ -41,6 +44,9 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   const [showScanner, setShowScanner] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [pinInput, setPinInput] = useState("");
+  const [pinSubmitting, setPinSubmitting] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
 
   const handleCheckUpdate = async () => {
     if (checkingUpdate || Platform.OS === "web") return;
@@ -88,6 +94,89 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
 
   if (isLicensed) {
     return <>{children}</>;
+  }
+
+  const handleSubmitPin = async () => {
+    if (pinInput.length !== 4 || pinSubmitting) return;
+    setPinSubmitting(true);
+    setPinError(null);
+    const result = await submitPin(pinInput);
+    if (result.success) {
+      if (result.serverAccounts && result.serverAccounts.length > 0) {
+        await hydrateFromServer(result.serverAccounts);
+      }
+    } else {
+      setPinError(result.error ?? "Invalid PIN");
+    }
+    setPinSubmitting(false);
+  };
+
+  if (pinRequired) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+          <View style={[styles.content, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 24 }]}>
+            <View style={[styles.iconContainer, { backgroundColor: "#3b82f620" }]}>
+              <ShieldCheck size={40} color="#3b82f6" />
+            </View>
+            <Text style={[styles.title, { color: colors.text }]}>
+              {pinIsNew ? "Create Your PIN" : "Enter Your PIN"}
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+              {pinIsNew
+                ? "Set a 4-digit PIN to protect your license key. This PIN will be required on future logins."
+                : "Enter your 4-digit PIN to unlock the app."}
+            </Text>
+            <View style={[styles.inputContainer, { marginBottom: 0 }]}>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: colors.surface,
+                    borderWidth: 1,
+                    borderColor: pinError ? "#ef4444" : colors.border,
+                    borderRadius: 12,
+                    color: colors.text,
+                    letterSpacing: 12,
+                    fontSize: 28,
+                    textAlign: "center",
+                    fontWeight: "700",
+                    height: 60,
+                    paddingHorizontal: 0,
+                  },
+                ]}
+                placeholder="••••"
+                placeholderTextColor={colors.textSecondary}
+                value={pinInput}
+                onChangeText={(t) => { setPinInput(t.replace(/\D/g, "").slice(0, 4)); setPinError(null); }}
+                keyboardType="number-pad"
+                maxLength={4}
+                secureTextEntry
+                autoFocus
+                returnKeyType="done"
+                onSubmitEditing={handleSubmitPin}
+              />
+            </View>
+            {pinError ? (
+              <Text style={styles.errorText}>{pinError}</Text>
+            ) : null}
+            <Pressable
+              style={({ pressed }) => [
+                styles.button,
+                { backgroundColor: pinInput.length === 4 ? "#3b82f6" : colors.border, opacity: pressed ? 0.85 : 1, marginTop: 20 },
+              ]}
+              onPress={handleSubmitPin}
+              disabled={pinInput.length !== 4 || pinSubmitting}
+            >
+              {pinSubmitting
+                ? <ActivityIndicator color="#fff" size="small" />
+                : <Text style={styles.buttonText}>{pinIsNew ? "Set PIN & Continue" : "Unlock"}</Text>
+              }
+            </Pressable>
+          </View>
+        </ScrollView>
+      </View>
+    );
   }
 
   const handleActivate = async () => {

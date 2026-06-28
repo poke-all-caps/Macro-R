@@ -1,0 +1,32 @@
+Act as a Senior Security and Full-Stack Developer (Node.js/Express & React Native).
+
+I need you to build a highly secure, "Zero Trust" backend and the corresponding frontend logic for my app. We must assume the client (APK) can be decompiled and manipulated, so all validation, counting, and state management must happen strictly on the server. Do not trust any limits or counts sent by the client.
+
+Please write the Node.js backend routes and the React Native frontend functions for the following three core systems:
+
+Core Rule: Specific Overrides General
+For all limit checks, the system must prioritize custom limits set on the individual user key. If no custom limit exists, it must fall back to the default limit for that user's Key Type (Tier).
+Logic Example: const limit = key.customLimit ?? tier.defaultLimit;
+
+System 1: 2-Step Authentication & Data Hydration (/api/validate-key)
+To prevent unauthorized data scraping and fix state-sync issues, users must log in with their userKey AND a 4-digit pin.
+
+Backend: * Add a pin field to the database. CRITICAL: Save and verify this PIN in plain text. Do NOT hash it, as the admin needs to read it directly.
+
+First-Time Login: If the key is valid but has no PIN set, require the user to set one and save it.
+
+Returning Login: Require both userKey and pin. Compare the PIN directly.
+
+Hydration: If the PIN matches, query the database for ALL accounts associated with this user and return them in the response ({ success: true, accounts: [...] }). If the PIN fails, return a 401.
+
+Frontend: Create the login flow that handles first-time PIN creation vs. returning PIN entry, and upon success, takes the accounts array from the server and instantly updates local storage/state so the user sees their data.
+
+System 2: Hack-Proof Account Slot Validation (/api/add-account)
+Backend: When a user tries to add an account, receive their userKey. Fetch their maxAccounts limit using the Specific Overrides General rule. The server must physically count the user's existing accounts in the database. If dbCount >= maxAccounts, block the request with a 403 error ("Account limit reached"). If there is space, save the new account.
+
+Frontend: Send the POST request. Handle the 403 error by showing an Alert, or update the UI on success.
+
+System 3: Hack-Proof Task Delay Validation (/api/run-task)
+Backend: Receive the userKey and the requestedDelay (in seconds). Fetch their minDelay limit using the Specific Overrides General rule. If requestedDelay < minDelay, block the request with a 400 error ("Delay too short"). If valid, proceed with the task.
+
+Frontend: Send the request and handle the error via an Alert if they try to bypass their time limit.

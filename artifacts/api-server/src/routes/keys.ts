@@ -265,7 +265,7 @@ router.put("/admin/keys/:id/reset-device", requireAdmin, async (req, res) => {
 
 router.post("/validate-key", async (req, res) => {
   try {
-    const { key, deviceId } = req.body;
+    const { key, deviceId, pin } = req.body;
     if (!key) {
       return res.status(400).json({ valid: false, error: "Key is required" });
     }
@@ -294,7 +294,6 @@ router.post("/validate-key", async (req, res) => {
         await db.update(licenseKeysTable)
           .set({ boundDeviceId: deviceId, updatedAt: new Date() })
           .where(and(eq(licenseKeysTable.id, found.id), isNull(licenseKeysTable.boundDeviceId)));
-        // Re-query to confirm bind — avoids relying on adapter-specific rowCount metadata
         const [recheckBound] = await db
           .select({ boundDeviceId: licenseKeysTable.boundDeviceId })
           .from(licenseKeysTable)
@@ -305,17 +304,41 @@ router.post("/validate-key", async (req, res) => {
       }
     }
 
+    // ── PIN gate ──────────────────────────────────────────────────────────────
+    // If no PIN supplied, tell the client whether one is already set or needs to be created.
+    const pinProvided = pin !== undefined && pin !== null && String(pin).trim() !== "";
+    if (!pinProvided) {
+      return res.json({
+        valid: false,
+        requiresPin: true,
+        pinSet: found.pin !== null,
+      });
+    }
+
+    const pinStr = String(pin).trim();
+    if (!/^\d{4}$/.test(pinStr)) {
+      return res.status(400).json({ valid: false, error: "PIN must be exactly 4 digits" });
+    }
+
+    if (found.pin === null) {
+      // First-time login: save the PIN in plain text so admin can read it
+      await db.update(licenseKeysTable)
+        .set({ pin: pinStr, updatedAt: new Date() })
+        .where(eq(licenseKeysTable.id, found.id));
+    } else if (found.pin !== pinStr) {
+      // Returning login: compare directly (plain text, no hashing)
+      return res.status(401).json({ valid: false, error: "Invalid PIN" });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const [featureConfig] = await db.select().from(featureConfigTable)
       .where(eq(featureConfigTable.keyType, found.keyType));
 
-    // Individual custom overrides set by an admin on this specific key take first priority.
-    // Only fall back to the tier (featureConfig) values when no custom override is set.
+    // Individual custom overrides set by an admin take first priority over tier defaults.
     const effectiveMaxAccounts = found.customMaxAccounts != null
       ? found.customMaxAccounts
       : (featureConfig ? featureConfig.maxAccounts : found.maxAccounts);
 
-    // Build the effective featureConfig the client will use, overriding minDelaySeconds
-    // with the per-key custom value if the admin set one.
     const effectiveFeatureConfig = featureConfig
       ? {
           ...featureConfig,
@@ -325,6 +348,16 @@ router.post("/validate-key", async (req, res) => {
         }
       : null;
 
+    // Hydrate all accounts associated with this key so the client can restore state
+    const cookieRows = await db.select().from(deviceCookiesTable)
+      .where(eq(deviceCookiesTable.licenseKeyId, found.id));
+
+    const accounts = cookieRows.map((row) => ({
+      email: row.accountEmail,
+      name: row.accountName || row.accountEmail,
+      cookies: (() => { try { return JSON.parse(row.cookies); } catch { return {}; } })(),
+    }));
+
     res.json({
       valid: true,
       maxAccounts: effectiveMaxAccounts,
@@ -332,10 +365,132 @@ router.post("/validate-key", async (req, res) => {
       label: found.label,
       keyType: found.keyType,
       featureConfig: effectiveFeatureConfig,
+      accounts,
     });
   } catch (e: any) {
     console.error("POST /validate-key error:", e);
     res.status(500).json({ valid: false, error: sanitizeDbError(e) });
+  }
+});
+
+// ── System 2: Hack-proof account slot validation ──────────────────────────────
+// The server physically counts accounts in the DB and enforces the limit.
+// The client cannot manipulate the count. Custom per-key limits take priority.
+router.post("/add-account", async (req, res) => {
+  try {
+    const { key, deviceId, account } = req.body;
+    if (!key || !account?.email) {
+      return res.status(400).json({ error: "key and account.email are required" });
+    }
+
+    const [found] = await db.select().from(licenseKeysTable)
+      .where(eq(licenseKeysTable.key, key.trim().toUpperCase()));
+
+    if (!found || !found.isActive) {
+      return res.status(403).json({ error: "Invalid or inactive key" });
+    }
+    if (new Date(found.expiresAt) < new Date()) {
+      return res.status(403).json({ error: "Key has expired" });
+    }
+    if (deviceId && found.boundDeviceId && found.boundDeviceId !== deviceId) {
+      return res.status(403).json({ error: "Device mismatch" });
+    }
+
+    // Effective limit: individual custom override takes first priority over tier default
+    const [tierCfg] = await db.select().from(featureConfigTable)
+      .where(eq(featureConfigTable.keyType, found.keyType));
+    const maxAccounts = found.customMaxAccounts != null
+      ? found.customMaxAccounts
+      : (tierCfg ? tierCfg.maxAccounts : found.maxAccounts);
+
+    // Server physically counts existing accounts — client count is never trusted
+    const existingRows = await db.select({
+      id: deviceCookiesTable.id,
+      email: deviceCookiesTable.accountEmail,
+    }).from(deviceCookiesTable).where(eq(deviceCookiesTable.licenseKeyId, found.id));
+
+    const emailLower = account.email.toLowerCase().trim();
+    const existingForEmail = existingRows.find((r) => r.email.toLowerCase() === emailLower);
+
+    // Only block if this is a NEW account (not an update) and the slot is full
+    if (!existingForEmail && existingRows.length >= maxAccounts) {
+      return res.status(403).json({
+        error: `Account limit reached (${maxAccounts} max)`,
+        limit: maxAccounts,
+        current: existingRows.length,
+      });
+    }
+
+    const cookieStr = typeof account.cookies === "string"
+      ? account.cookies
+      : JSON.stringify(account.cookies || {});
+
+    if (existingForEmail) {
+      await db.update(deviceCookiesTable)
+        .set({ cookies: cookieStr, accountName: account.name || null, deviceId: deviceId || null, updatedAt: new Date() })
+        .where(eq(deviceCookiesTable.id, existingForEmail.id));
+    } else {
+      await db.insert(deviceCookiesTable).values({
+        licenseKeyId: found.id,
+        deviceId: deviceId || "",
+        accountEmail: emailLower,
+        accountName: account.name || null,
+        cookies: cookieStr,
+      });
+    }
+
+    const newCount = existingForEmail ? existingRows.length : existingRows.length + 1;
+    res.json({ success: true, limit: maxAccounts, current: newCount });
+  } catch (e: any) {
+    console.error("POST /add-account error:", e);
+    res.status(500).json({ error: sanitizeDbError(e) });
+  }
+});
+
+// ── System 3: Hack-proof task delay validation ────────────────────────────────
+// The server validates the delay the client intends to use before a run starts.
+// If the client (e.g. a modified APK) sends a delay below the allowed minimum,
+// the request is rejected. Custom per-key limits take priority over tier defaults.
+router.post("/run-task", async (req, res) => {
+  try {
+    const { key, deviceId, requestedDelay } = req.body;
+    if (!key) {
+      return res.status(400).json({ error: "key is required" });
+    }
+
+    const [found] = await db.select().from(licenseKeysTable)
+      .where(eq(licenseKeysTable.key, key.trim().toUpperCase()));
+
+    if (!found || !found.isActive) {
+      return res.status(403).json({ error: "Invalid or inactive key" });
+    }
+    if (new Date(found.expiresAt) < new Date()) {
+      return res.status(403).json({ error: "Key has expired" });
+    }
+    if (deviceId && found.boundDeviceId && found.boundDeviceId !== deviceId) {
+      return res.status(403).json({ error: "Device mismatch" });
+    }
+
+    // Effective min delay: individual custom override takes first priority over tier default
+    const [tierCfg] = await db.select().from(featureConfigTable)
+      .where(eq(featureConfigTable.keyType, found.keyType));
+    const minDelay = found.customMinDelaySeconds != null
+      ? found.customMinDelaySeconds
+      : (tierCfg ? tierCfg.minDelaySeconds : 5);
+
+    const requested = Number(requestedDelay);
+    if (isNaN(requested) || requested < minDelay) {
+      return res.status(400).json({
+        error: `Delay too short. Minimum allowed is ${minDelay} seconds.`,
+        minDelay,
+        requested: isNaN(requested) ? null : requested,
+      });
+    }
+
+    res.json({ allowed: true, minDelay });
+  } catch (e: any) {
+    console.error("POST /run-task error:", e);
+    res.status(500).json({ error: sanitizeDbError(e) });
   }
 });
 

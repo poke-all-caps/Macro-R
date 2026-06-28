@@ -55,6 +55,7 @@ export async function initSchema(): Promise<void> {
     await client.query(`
       ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_max_accounts INTEGER;
       ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_min_delay_seconds INTEGER;
+      ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS pin TEXT;
     `);
     console.log("[db] Schema ready.");
   } finally {

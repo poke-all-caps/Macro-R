@@ -10,6 +10,7 @@ export const licenseKeysTable = pgTable("license_keys", {
   maxAccounts: integer("max_accounts").notNull().default(3),
   customMaxAccounts: integer("custom_max_accounts"),
   customMinDelaySeconds: integer("custom_min_delay_seconds"),
+  pin: text("pin"),
   isActive: boolean("is_active").notNull().default(true),
   boundDeviceId: text("bound_device_id"),
   expiresAt: timestamp("expires_at").notNull(),

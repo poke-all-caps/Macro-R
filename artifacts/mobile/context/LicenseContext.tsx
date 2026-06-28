@@ -7,11 +7,7 @@ import { scheduleExpiryNotifications, cancelExpiryNotifications } from "@/utils/
 import { API_BASE } from "@/utils/apiUrl";
 export { API_BASE } from "@/utils/apiUrl";
 
-// ─── Licensing toggle ────────────────────────────────────────────────────────
-// Set to `false` to bypass all license checks and unlock every feature.
-// Set to `true` to re-enable the license gate / key validation flow.
 export const LICENSING_ENABLED = true;
-// ─────────────────────────────────────────────────────────────────────────────
 
 const LICENSE_KEY_STORAGE = "@ms_rewards_license_key";
 const LICENSE_DATA_STORAGE = "@ms_rewards_license_data";
@@ -19,6 +15,9 @@ const ADMIN_SECRET_STORAGE = "@ms_rewards_admin_secret";
 const ADMIN_VALIDATED_AT_STORAGE = "@ms_rewards_admin_validated_at";
 const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 const ADMIN_VISIBLE_STORAGE = "@ms_rewards_admin_visible";
+const PIN_STORAGE = "@ms_rewards_pin";
+export const SERVER_HYDRATION_STORAGE = "@ms_rewards_server_hydration";
+
 export const OWNER_MODE =
   process.env.EXPO_PUBLIC_OWNER_MODE === "true";
 
@@ -49,6 +48,12 @@ export interface FeatureConfig {
   pcSearchEnabled: boolean;
 }
 
+export interface ServerAccount {
+  email: string;
+  name: string;
+  cookies: Record<string, string>;
+}
+
 const DEFAULT_FEATURE_CONFIG: FeatureConfig = {
   keyType: "basic",
   maxAccounts: 2,
@@ -61,7 +66,6 @@ const DEFAULT_FEATURE_CONFIG: FeatureConfig = {
 };
 
 const FEATURE_CONFIG_STORAGE = "@ms_rewards_feature_config";
-
 
 interface LicenseData {
   key: string;
@@ -83,8 +87,11 @@ interface LicenseContextValue {
   adminSecret: string | null;
   error: string | null;
   adminPanelVisible: boolean;
+  pinRequired: boolean;
+  pinIsNew: boolean;
   setAdminPanelVisible: (visible: boolean) => Promise<void>;
   activateKey: (key: string) => Promise<boolean>;
+  submitPin: (pin: string) => Promise<{ success: boolean; error?: string; serverAccounts?: ServerAccount[] }>;
   removeLicense: () => Promise<void>;
   revalidate: () => Promise<void>;
 }
@@ -99,8 +106,11 @@ const LicenseContext = createContext<LicenseContextValue>({
   adminSecret: null,
   error: null,
   adminPanelVisible: false,
+  pinRequired: false,
+  pinIsNew: false,
   setAdminPanelVisible: async () => {},
   activateKey: async () => false,
+  submitPin: async () => ({ success: false }),
   removeLicense: async () => {},
   revalidate: async () => {},
 });
@@ -117,7 +127,6 @@ const OWNER_FEATURE_CONFIG: FeatureConfig = {
 };
 
 export function LicenseProvider({ children }: { children: React.ReactNode }) {
-  // When licensing is disabled, short-circuit — always fully licensed & unlocked.
   if (!LICENSING_ENABLED) {
     return (
       <LicenseContext.Provider value={{
@@ -130,8 +139,11 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
         adminSecret: null,
         error: null,
         adminPanelVisible: false,
+        pinRequired: false,
+        pinIsNew: false,
         setAdminPanelVisible: async () => {},
         activateKey: async () => true,
+        submitPin: async () => ({ success: true }),
         removeLicense: async () => {},
         revalidate: async () => {},
       }}>
@@ -148,6 +160,9 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
   const [adminSecret, setAdminSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adminPanelVisible, setAdminPanelVisibleState] = useState(false);
+  const [pinRequired, setPinRequired] = useState(false);
+  const [pinIsNew, setPinIsNew] = useState(false);
+  const pendingKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     AsyncStorage.getItem(ADMIN_VISIBLE_STORAGE).then((val) => {
@@ -160,16 +175,30 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(ADMIN_VISIBLE_STORAGE, visible ? "true" : "false");
   }, []);
 
-  const validateKey = useCallback(async (key: string): Promise<{ valid: boolean; error?: string; maxAccounts?: number; expiresAt?: string; label?: string; keyType?: string; featureConfig?: FeatureConfig; offline?: boolean }> => {
+  const validateKey = useCallback(async (key: string, pin?: string): Promise<{
+    valid: boolean;
+    requiresPin?: boolean;
+    pinSet?: boolean;
+    error?: string;
+    maxAccounts?: number;
+    expiresAt?: string;
+    label?: string;
+    keyType?: string;
+    featureConfig?: FeatureConfig;
+    accounts?: ServerAccount[];
+    offline?: boolean;
+  }> => {
     try {
       const deviceId = await getDeviceId();
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 12000);
       try {
+        const body: Record<string, any> = { key, deviceId };
+        if (pin !== undefined && pin !== null) body.pin = pin;
         const resp = await fetch(`${API_BASE}/validate-key`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key, deviceId }),
+          body: JSON.stringify(body),
           signal: controller.signal,
         });
         clearTimeout(timer);
@@ -247,6 +276,37 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem(FEATURE_CONFIG_STORAGE, JSON.stringify(cfg));
   }, []);
 
+  const applyValidResult = useCallback(async (
+    storedKey: string,
+    result: { maxAccounts?: number; expiresAt?: string; label?: string; keyType?: string; featureConfig?: FeatureConfig | null },
+    prevData: LicenseData | null
+  ) => {
+    if (prevData?.keyType && result.keyType && prevData.keyType !== result.keyType) {
+      await appendTierChangeLog(prevData.keyType, result.keyType, storedKey);
+    }
+    const isOwnerKey = result.keyType === "admin";
+    const data: LicenseData = {
+      key: storedKey,
+      maxAccounts: result.maxAccounts!,
+      expiresAt: result.expiresAt!,
+      label: result.label ?? null,
+      keyType: result.keyType ?? "basic",
+      validatedAt: Date.now(),
+      featureConfig: result.featureConfig ?? null,
+    };
+    await AsyncStorage.setItem(LICENSE_DATA_STORAGE, JSON.stringify(data));
+    setLicenseData(data);
+    setIsLicensed(true);
+    setIsAdmin(isOwnerKey);
+    setError(null);
+    setPinRequired(false);
+    if (isOwnerKey) {
+      setFeatureConfig(OWNER_FEATURE_CONFIG);
+    } else if (result.featureConfig) {
+      await saveFeatureConfig(result.featureConfig);
+    }
+    scheduleExpiryNotifications(result.expiresAt!).catch(() => {});
+  }, [appendTierChangeLog, saveFeatureConfig]);
 
   const loadStoredLicense = useCallback(async () => {
     if (OWNER_MODE) {
@@ -255,7 +315,6 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     try {
-      // ── Admin secret path ─────────────────────────────────────────────────
       const storedAdminSecret = await AsyncStorage.getItem(ADMIN_SECRET_STORAGE);
       if (storedAdminSecret) {
         const result = await validateAdmin(storedAdminSecret);
@@ -287,19 +346,16 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // ── License key path ──────────────────────────────────────────────────
       const storedKey = await AsyncStorage.getItem(LICENSE_KEY_STORAGE);
       const storedData = await AsyncStorage.getItem(LICENSE_DATA_STORAGE);
+      const storedPin = await AsyncStorage.getItem(PIN_STORAGE);
 
       if (!storedKey) {
         setIsLoading(false);
         return;
       }
 
-      // Always contact the server on every launch to get authoritative key state.
-      // This prevents a user from sharing a key or retaining access after an admin
-      // restricts it — the server is the single source of truth.
-      const result = await validateKey(storedKey);
+      const result = await validateKey(storedKey, storedPin ?? undefined);
 
       if (result.valid) {
         if (!result.maxAccounts || !result.expiresAt) {
@@ -308,38 +364,31 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
           setIsLoading(false);
           return;
         }
-
-        // Detect tier change between cached state and fresh server state and log it
+        const prevData = storedData ? (JSON.parse(storedData) as LicenseData) : null;
+        await applyValidResult(storedKey, result, prevData);
+        // Write server accounts to AsyncStorage so AccountsContext can merge them on hydration
+        if (result.accounts && result.accounts.length > 0) {
+          await AsyncStorage.setItem(SERVER_HYDRATION_STORAGE, JSON.stringify(result.accounts));
+        }
+      } else if (result.requiresPin) {
+        // PIN required but not stored locally — ask the user to re-enter
+        pendingKeyRef.current = storedKey;
+        setPinIsNew(!result.pinSet);
+        setPinRequired(true);
         if (storedData) {
-          const cached: LicenseData = JSON.parse(storedData);
-          if (cached.keyType && result.keyType && cached.keyType !== result.keyType) {
-            await appendTierChangeLog(cached.keyType, result.keyType, storedKey);
+          // Fall back to cached data so features/config remain while showing PIN prompt
+          const data: LicenseData = JSON.parse(storedData);
+          if (new Date(data.expiresAt).getTime() > Date.now()) {
+            setLicenseData(data);
+            if (data.keyType === "admin") {
+              setIsAdmin(true);
+              setFeatureConfig(OWNER_FEATURE_CONFIG);
+            } else {
+              await loadCachedFeatureConfig();
+            }
           }
         }
-
-        const isOwnerKey = result.keyType === "admin";
-        const data: LicenseData = {
-          key: storedKey,
-          maxAccounts: result.maxAccounts,
-          expiresAt: result.expiresAt,
-          label: result.label ?? null,
-          keyType: result.keyType ?? "basic",
-          validatedAt: Date.now(),
-          featureConfig: result.featureConfig ?? null,
-        };
-        await AsyncStorage.setItem(LICENSE_DATA_STORAGE, JSON.stringify(data));
-        setLicenseData(data);
-        setIsLicensed(true);
-        setIsAdmin(isOwnerKey);
-        setError(null);
-        if (isOwnerKey) {
-          setFeatureConfig(OWNER_FEATURE_CONFIG);
-        } else if (result.featureConfig) {
-          await saveFeatureConfig(result.featureConfig);
-        }
-        scheduleExpiryNotifications(result.expiresAt).catch(() => {});
       } else if (result.offline && storedData) {
-        // Server unreachable — fall back to locally cached state as a grace period
         const data: LicenseData = JSON.parse(storedData);
         if (new Date(data.expiresAt).getTime() > Date.now()) {
           setLicenseData(data);
@@ -355,15 +404,9 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
           setIsLicensed(false);
         }
       } else if (result.offline) {
-        // Server unreachable and no usable cache — show connectivity error without
-        // wiping anything so the next successful launch can restore from cache.
         setError(result.error || "Could not connect to server");
         setIsLicensed(false);
       } else {
-        // Server explicitly and clearly rejected the key (deactivated, expired,
-        // device mismatch). Deny access. Do NOT delete the cache — if this was
-        // a transient server error (502, bad JSON, etc.) the cache must survive
-        // so the next offline-fallback path works correctly.
         setError(result.error || "Invalid key");
         setIsLicensed(false);
       }
@@ -379,7 +422,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       }
     }
     setIsLoading(false);
-  }, [validateKey, validateAdmin, loadCachedFeatureConfig, saveFeatureConfig, appendTierChangeLog]);
+  }, [validateKey, validateAdmin, loadCachedFeatureConfig, applyValidResult]);
 
   useEffect(() => {
     loadStoredLicense();
@@ -395,17 +438,30 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       await AsyncStorage.setItem(ADMIN_VALIDATED_AT_STORAGE, Date.now().toString());
       await AsyncStorage.removeItem(LICENSE_KEY_STORAGE);
       await AsyncStorage.removeItem(LICENSE_DATA_STORAGE);
+      await AsyncStorage.removeItem(PIN_STORAGE);
       cancelExpiryNotifications().catch(() => {});
       setAdminSecret(trimmed);
       setIsAdmin(true);
       setIsLicensed(true);
       setLicenseData(null);
       setFeatureConfig(OWNER_FEATURE_CONFIG);
+      setPinRequired(false);
       return true;
     }
 
     const upperKey = trimmed.toUpperCase();
+    // First call without PIN — server will tell us if PIN is required
     const result = await validateKey(upperKey);
+
+    if (result.requiresPin) {
+      // Key is valid; PIN step needed before granting access
+      pendingKeyRef.current = upperKey;
+      await AsyncStorage.setItem(LICENSE_KEY_STORAGE, upperKey);
+      setPinIsNew(!result.pinSet);
+      setPinRequired(true);
+      setError(null);
+      return false;
+    }
 
     if (!result.valid) {
       setError(result.error || "Invalid key");
@@ -418,7 +474,6 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     }
 
     const isOwnerKey = result.keyType === "admin";
-
     const data: LicenseData = {
       key: upperKey,
       maxAccounts: result.maxAccounts,
@@ -442,9 +497,35 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     setIsLicensed(true);
     setIsAdmin(isOwnerKey);
     setAdminSecret(null);
+    setPinRequired(false);
     if (isOwnerKey) setFeatureConfig(OWNER_FEATURE_CONFIG);
     return true;
   }, [validateKey, validateAdmin, saveFeatureConfig]);
+
+  const submitPin = useCallback(async (pin: string): Promise<{ success: boolean; error?: string; serverAccounts?: ServerAccount[] }> => {
+    const key = pendingKeyRef.current;
+    if (!key) return { success: false, error: "No pending key" };
+
+    const result = await validateKey(key, pin);
+
+    if (result.valid && result.maxAccounts && result.expiresAt) {
+      // PIN accepted — save it locally for future revalidations
+      await AsyncStorage.setItem(PIN_STORAGE, pin);
+      const prevDataRaw = await AsyncStorage.getItem(LICENSE_DATA_STORAGE);
+      const prevData = prevDataRaw ? (JSON.parse(prevDataRaw) as LicenseData) : null;
+      await applyValidResult(key, result, prevData);
+      pendingKeyRef.current = null;
+      return { success: true, serverAccounts: result.accounts ?? [] };
+    }
+
+    if (result.error) {
+      setError(result.error);
+      return { success: false, error: result.error };
+    }
+
+    setError("Authentication failed");
+    return { success: false, error: "Authentication failed" };
+  }, [validateKey, applyValidResult]);
 
   const removeLicense = useCallback(async () => {
     cancelExpiryNotifications().catch(() => {});
@@ -453,12 +534,16 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.removeItem(ADMIN_SECRET_STORAGE);
     await AsyncStorage.removeItem(ADMIN_VALIDATED_AT_STORAGE);
     await AsyncStorage.removeItem(FEATURE_CONFIG_STORAGE);
+    await AsyncStorage.removeItem(PIN_STORAGE);
+    await AsyncStorage.removeItem(SERVER_HYDRATION_STORAGE);
+    pendingKeyRef.current = null;
     setLicenseData(null);
     setFeatureConfig(DEFAULT_FEATURE_CONFIG);
     setIsLicensed(false);
     setIsAdmin(false);
     setAdminSecret(null);
     setError(null);
+    setPinRequired(false);
   }, []);
 
   const revalidate = useCallback(async () => {
@@ -467,7 +552,12 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
   }, [loadStoredLicense]);
 
   return (
-    <LicenseContext.Provider value={{ isLicensed, isAdmin, isOwnerMode: OWNER_MODE || isAdmin, isLoading, licenseData, featureConfig, adminSecret, error, adminPanelVisible, setAdminPanelVisible, activateKey, removeLicense, revalidate }}>
+    <LicenseContext.Provider value={{
+      isLicensed, isAdmin, isOwnerMode: OWNER_MODE || isAdmin, isLoading,
+      licenseData, featureConfig, adminSecret, error, adminPanelVisible,
+      pinRequired, pinIsNew,
+      setAdminPanelVisible, activateKey, submitPin, removeLicense, revalidate,
+    }}>
       {children}
     </LicenseContext.Provider>
   );

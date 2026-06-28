@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { AlertCircle, AlertTriangle, ArrowLeft, ChevronRight, Edit3, UserPlus, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -16,9 +17,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Colors from "@/constants/colors";
 import { useAccounts } from "@/context/AccountsContext";
-import { useLicense } from "@/context/LicenseContext";
+import { useLicense, API_BASE } from "@/context/LicenseContext";
 import { useSettings } from "@/context/SettingsContext";
 
 export default function AddAccountScreen() {
@@ -40,12 +42,7 @@ export default function AddAccountScreen() {
     router.push("/login-webview");
   };
 
-  const validateAndSaveManual = () => {
-    if (accounts.length >= maxAccounts) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setErrors({ email: `Account limit reached (${maxAccounts} max)` });
-      return;
-    }
+  const validateAndSaveManual = async () => {
     const errs: { name?: string; email?: string } = {};
     if (!name.trim()) errs.name = "Name is required";
     if (!email.trim()) errs.email = "Email is required";
@@ -55,12 +52,49 @@ export default function AddAccountScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
+
+    // ── System 2: server-side slot enforcement ──────────────────────────────
+    // Validate with the server before saving locally. On 403, the server has
+    // rejected the add (limit exceeded). On any network error, fall through to
+    // the existing local client-side check so the UX degrades gracefully.
+    try {
+      const storedKey = await AsyncStorage.getItem("@ms_rewards_license_key");
+      const storedDeviceId = await AsyncStorage.getItem("@ms_rewards_device_id");
+      if (storedKey) {
+        const addResp = await fetch(`${API_BASE}/add-account`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            key: storedKey,
+            deviceId: storedDeviceId,
+            account: { email: email.trim().toLowerCase(), name: name.trim(), cookies: {} },
+          }),
+        });
+        if (addResp.status === 403) {
+          const body = await addResp.json();
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+          setErrors({ email: body.error || `Account limit reached (${maxAccounts} max)` });
+          return;
+        }
+      }
+    } catch {
+      // Network error — fall through to local client-side check below
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    if (accounts.length >= maxAccounts) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setErrors({ email: `Account limit reached (${maxAccounts} max)` });
+      return;
+    }
+
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     addAccount({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       searchCount: settings.defaultSearchCount,
       dailySetEnabled: settings.dailySetEnabled,
+      enabled: true,
       lastRun: null,
       cookies: {},
     });

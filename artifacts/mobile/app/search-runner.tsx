@@ -13,10 +13,11 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCustomAlert } from "@/components/CustomAlert";
 import Colors from "@/constants/colors";
 import { Account, useAccounts } from "@/context/AccountsContext";
-import { useLicense } from "@/context/LicenseContext";
+import { useLicense, API_BASE } from "@/context/LicenseContext";
 import { useQueries } from "@/context/QueriesContext";
 import { useSettings } from "@/context/SettingsContext";
 import {
@@ -495,6 +496,40 @@ export default function SearchRunnerScreen() {
         accountIdsRef.current.includes(a.id)
       );
       let runningNotifId: string | null = null;
+
+      // ── System 3: server-side delay validation (pre-flight) ──────────────
+      // Verify that the delay the client intends to use is at or above the
+      // server-enforced minimum before ANY automation starts. A tampered APK
+      // cannot bypass this — the server rejects requests with too-short delays.
+      // On network error we fail-open (proceed) so offline runs still work.
+      try {
+        const storedKey = await AsyncStorage.getItem("@ms_rewards_license_key");
+        const storedDeviceId = await AsyncStorage.getItem("@ms_rewards_device_id");
+        if (storedKey) {
+          const requestedDelay = settings.searchDelay ?? 5;
+          const taskResp = await fetch(`${API_BASE}/run-task`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: storedKey, deviceId: storedDeviceId, requestedDelay }),
+          });
+          if (taskResp.status === 400) {
+            const body = await taskResp.json();
+            cancelled = true;
+            abortRef.current = true;
+            showAlert(
+              "Delay Too Short",
+              body.error || `Your minimum allowed delay is ${body.minDelay} seconds.`,
+              [{ text: "OK" }]
+            );
+            stopRun();
+            return;
+          }
+        }
+      } catch {
+        // Network error — proceed with local settings (fail-open)
+      }
+      // ────────────────────────────────────────────────────────────────────
+
       try {
       if (!BackgroundService?.isRunning()) {
         runningNotifId = await showRunningNotification();

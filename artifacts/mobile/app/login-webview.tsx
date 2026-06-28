@@ -18,10 +18,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import WebView, { WebViewNavigation, WebViewMessageEvent } from "react-native-webview";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCustomAlert } from "@/components/CustomAlert";
 import Colors from "@/constants/colors";
 import { useAccounts } from "@/context/AccountsContext";
-import { useLicense } from "@/context/LicenseContext";
+import { useLicense, API_BASE } from "@/context/LicenseContext";
 
 const MOBILE_USER_AGENT =
   "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
@@ -461,6 +462,36 @@ export default function LoginWebViewScreen() {
       return;
     }
 
+    // ── System 2: server-side slot enforcement ───────────────────────────────
+    // Call /add-account before saving locally so the server can enforce the limit.
+    // On 403 the server blocked the add; stop and show the server error message.
+    try {
+      const storedKey = await AsyncStorage.getItem("@ms_rewards_license_key");
+      const storedDeviceId = await AsyncStorage.getItem("@ms_rewards_device_id");
+      if (storedKey) {
+        const addResp = await fetch(`${API_BASE}/add-account`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            key: storedKey,
+            deviceId: storedDeviceId,
+            account: {
+              email: finalEmail || "user@outlook.com",
+              name: finalName || "Macro Rewards Account",
+              cookies: allCookies,
+            },
+          }),
+        });
+        if (addResp.status === 403) {
+          const body = await addResp.json();
+          setIsSaving(false);
+          showAlert("Account Limit Reached", body.error || `Your license allows up to ${maxAccounts} account${maxAccounts > 1 ? "s" : ""}.`, [{ text: "OK" }]);
+          return;
+        }
+      }
+    } catch {}
+    // ─────────────────────────────────────────────────────────────────────────
+
     if (existingAccount) {
       updateAccount(existingAccount.id, {
         cookies: allCookies,
@@ -478,6 +509,7 @@ export default function LoginWebViewScreen() {
         avatarUrl: finalAvatar || undefined,
         searchCount: 30,
         dailySetEnabled: true,
+        enabled: true,
         lastRun: null,
         cookies: allCookies,
       });
