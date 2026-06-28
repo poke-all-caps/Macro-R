@@ -107,7 +107,8 @@ export function AdminPanel() {
     };
     if (effectiveSecret) {
       headers["X-Admin-Secret"] = effectiveSecret;
-    } else if (adminLicenseKey) {
+    }
+    if (adminLicenseKey) {
       headers["X-Admin-Key"] = adminLicenseKey;
     }
     const opts: RequestInit = { method, headers };
