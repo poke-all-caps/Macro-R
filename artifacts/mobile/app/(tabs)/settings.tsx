@@ -349,7 +349,7 @@ export default function SettingsScreen() {
                   {licenseData.maxAccounts} account{licenseData.maxAccounts > 1 ? "s" : ""}
                 </Text>
                 <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: colors.textMuted, marginTop: 2 }}>
-                  Expires {new Date(licenseData.expiresAt).toLocaleDateString()}
+                  Expires {new Date(licenseData.expiresAt).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </Text>
               </View>
             ) : null}
@@ -499,7 +499,7 @@ export default function SettingsScreen() {
                   <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: colors.border }}>
                     <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: colors.textMuted, letterSpacing: 0.6, marginBottom: 4 }}>EXPIRES</Text>
                     <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: colors.text }}>
-                      {new Date(licenseData.expiresAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                      {new Date(licenseData.expiresAt).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </Text>
                   </View>
                   <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: colors.border }}>

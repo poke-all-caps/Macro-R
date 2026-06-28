@@ -232,7 +232,7 @@ function dashboardPage(): string {
           '<div class="stats">' +
             (k.label ? '<span class="stat">' + safeLabel + '</span>' : '') +
             '<span class="stat">Max: ' + safeMax + ' accounts</span>' +
-            '<span class="stat">Expires: ' + esc(exp.toLocaleDateString()) + '</span>' +
+            '<span class="stat">Expires: ' + esc(exp.toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })) + '</span>' +
             (k.boundDeviceId ? '<span class="stat">Device: ' + esc(k.boundDeviceId.slice(0,8)) + '…</span>' : '<span class="stat" style="color:#fbbf24">No device bound</span>') +
             (k.pin ? '<span class="stat" style="display:inline-flex;align-items:center;gap:6px;background:#0f172a;border:1px solid #334155;border-radius:6px;padding:2px 8px"><span style="color:#94a3b8;font-size:11px">PIN</span><span style="font-family:monospace;font-weight:700;color:#f59e0b;font-size:14px;letter-spacing:3px">' + esc(k.pin) + '</span></span>' : '<span class="stat" style="color:#475569;font-size:11px">No PIN set</span>') +
           '</div>' +

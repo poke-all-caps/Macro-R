@@ -463,7 +463,7 @@ export function AdminPanel() {
             {item.maxAccounts} account{item.maxAccounts > 1 ? "s" : ""}
           </Text>
           <Text style={[styles.metaText, { color: colors.textSecondary }]}>
-            Exp: {new Date(item.expiresAt).toLocaleDateString()}
+            Exp: {new Date(item.expiresAt).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
           </Text>
         </View>
       </Pressable>
@@ -522,7 +522,7 @@ export function AdminPanel() {
               </View>
               <View style={styles.profileInfoItem}>
                 <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Expires</Text>
-                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{new Date(selectedKey.expiresAt).toLocaleDateString()}</Text>
+                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{new Date(selectedKey.expiresAt).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</Text>
               </View>
               <View style={styles.profileInfoItem}>
                 <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Device</Text>
@@ -548,7 +548,7 @@ export function AdminPanel() {
               <ProfileAction
                 icon={<Calendar size={18} color="#10b981" />}
                 label="Extend Expiry"
-                sublabel={new Date(selectedKey.expiresAt).toLocaleDateString()}
+                sublabel={new Date(selectedKey.expiresAt).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                 colors={colors}
                 onPress={openExpiryPopup}
               />
@@ -1059,7 +1059,7 @@ export function AdminPanel() {
       <CustomAlert
         visible={expiryPopup}
         title="Set Expiry Date"
-        message={selectedKey ? `Current: ${new Date(selectedKey.expiresAt).toLocaleDateString()}` : ""}
+        message={selectedKey ? `Current: ${new Date(selectedKey.expiresAt).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}` : ""}
         icon={<View style={popupStyles.iconCircleTeal}><Calendar size={24} color="#fff" /></View>}
         onDismiss={() => setExpiryPopup(false)}
         buttons={[
