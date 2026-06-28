@@ -86,6 +86,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   extra: {
     ownerMode: IS_OWNER,
+    // apiUrl is read by the app via Constants.expoConfig.extra.apiUrl.
+    // Embedding it here (instead of relying on process.env) means EAS Update
+    // re-evaluates this file when publishing an OTA update and packages the
+    // correct URL into the update manifest — surviving every OTA push.
+    apiUrl:
+      process.env.EXPO_PUBLIC_API_URL ||
+      "https://macro-r-631x.onrender.com/api",
     eas: {
       projectId: "e44f3f61-0e90-468d-9a3d-378d6aaf7c45",
     },

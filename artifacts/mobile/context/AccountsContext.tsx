@@ -10,11 +10,7 @@ import React, {
 import { AppState, Platform, type AppStateStatus } from "react-native";
 import { fetchRewardsPoints } from "@/utils/bingSearch";
 
-const PRODUCTION_API_URL = "https://macro-r-631x.onrender.com/api";
-const API_BASE =
-  Platform.OS === "web"
-    ? "/api"
-    : process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
+import { API_BASE } from "@/utils/apiUrl";
 const LICENSE_KEY_STORAGE = "@ms_rewards_license_key";
 const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 
