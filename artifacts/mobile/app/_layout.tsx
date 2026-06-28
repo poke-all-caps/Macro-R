@@ -202,15 +202,15 @@ export default function RootLayout() {
           <GestureHandlerRootView>
             <KeyboardProvider>
               <LicenseProvider>
-                <LicenseGate>
-                  <AccountsProvider>
+                <AccountsProvider>
+                  <LicenseGate>
                     <QueriesProvider>
                       <SettingsProvider>
                         <RootLayoutNav />
                       </SettingsProvider>
                     </QueriesProvider>
-                  </AccountsProvider>
-                </LicenseGate>
+                  </LicenseGate>
+                </AccountsProvider>
               </LicenseProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
