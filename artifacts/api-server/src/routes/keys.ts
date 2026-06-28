@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { licenseKeysTable, featureConfigTable, deviceCookiesTable } from "@workspace/db/schema";
-import { eq, and, isNull } from "drizzle-orm";
+import { eq, and, isNull, isNotNull } from "drizzle-orm";
 import crypto from "crypto";
 import { requireAdmin } from "../adminSession";
 
@@ -94,10 +94,25 @@ router.put("/admin/keys/:id", requireAdmin, async (req, res) => {
 
     const updates: any = { updatedAt: new Date() };
     if (label !== undefined) updates.label = label;
-    if (maxAccounts !== undefined) updates.maxAccounts = maxAccounts;
     if (expiresAt !== undefined) updates.expiresAt = new Date(expiresAt);
     if (isActive !== undefined) updates.isActive = isActive;
     if (keyType !== undefined && validTypes.includes(keyType)) updates.keyType = keyType;
+
+    // When admin explicitly sets maxAccounts on an individual key, store it as a
+    // custom override. This takes priority over the tier config during validation.
+    if (maxAccounts !== undefined) {
+      const n = Math.max(1, Math.min(999, Number(maxAccounts)));
+      updates.maxAccounts = n;
+      updates.customMaxAccounts = n;
+    }
+
+    // When admin explicitly sets minDelaySeconds on an individual key, store it as
+    // a custom override. This takes priority over the tier config during validation.
+    const { minDelaySeconds } = req.body;
+    if (minDelaySeconds !== undefined) {
+      const n = Math.max(1, Math.min(60, Number(minDelaySeconds)));
+      updates.customMinDelaySeconds = n;
+    }
 
     const [current] = await db.select().from(licenseKeysTable).where(eq(licenseKeysTable.id, id));
     if (current) {
@@ -109,12 +124,16 @@ router.put("/admin/keys/:id", requireAdmin, async (req, res) => {
       }
     }
 
-    // If the keyType is being changed, cap maxAccounts to the new tier's limit
+    // If only the keyType is being changed (no custom maxAccounts in this request
+    // and no pre-existing custom override), sync maxAccounts to the new tier's default.
+    // If the key already has a custom override, leave it untouched.
     if (keyType !== undefined && validTypes.includes(keyType) && updates.maxAccounts === undefined) {
-      const [tierCfg] = await db.select().from(featureConfigTable).where(eq(featureConfigTable.keyType, keyType));
-      if (tierCfg) {
-        const currentMaxAccounts = current?.maxAccounts ?? 999;
-        updates.maxAccounts = Math.min(currentMaxAccounts, tierCfg.maxAccounts);
+      const hasExistingCustom = current?.customMaxAccounts != null;
+      if (!hasExistingCustom) {
+        const [tierCfg] = await db.select().from(featureConfigTable).where(eq(featureConfigTable.keyType, keyType));
+        if (tierCfg) {
+          updates.maxAccounts = tierCfg.maxAccounts;
+        }
       }
     }
 
@@ -202,12 +221,13 @@ router.put("/admin/feature-config/:keyType", requireAdmin, async (req, res) => {
       tierConfig = created;
     }
 
-    // Enforce tier maxAccounts on all existing keys of this type so no key can exceed the new limit
+    // Apply the new tier maxAccounts to all keys of this type that do NOT have an
+    // individual custom override set. Keys with a custom override keep their value.
     if (updates.maxAccounts !== undefined) {
       await db.update(licenseKeysTable)
         .set({ maxAccounts: updates.maxAccounts, updatedAt: new Date() })
-        .where(eq(licenseKeysTable.keyType, keyType));
-      console.log(`[TIER CONFIG] maxAccounts for ${keyType} tier set to ${updates.maxAccounts} — applied to all ${keyType} keys`);
+        .where(and(eq(licenseKeysTable.keyType, keyType), isNull(licenseKeysTable.customMaxAccounts)));
+      console.log(`[TIER CONFIG] maxAccounts for ${keyType} tier set to ${updates.maxAccounts} — applied to ${keyType} keys without individual overrides`);
     }
 
     res.json({ config: tierConfig });
@@ -288,10 +308,22 @@ router.post("/validate-key", async (req, res) => {
     const [featureConfig] = await db.select().from(featureConfigTable)
       .where(eq(featureConfigTable.keyType, found.keyType));
 
-    // Cap per-key maxAccounts by the tier's global limit so tier config is always enforced
-    const effectiveMaxAccounts = featureConfig
-      ? Math.min(found.maxAccounts, featureConfig.maxAccounts)
-      : found.maxAccounts;
+    // Individual custom overrides set by an admin on this specific key take first priority.
+    // Only fall back to the tier (featureConfig) values when no custom override is set.
+    const effectiveMaxAccounts = found.customMaxAccounts != null
+      ? found.customMaxAccounts
+      : (featureConfig ? featureConfig.maxAccounts : found.maxAccounts);
+
+    // Build the effective featureConfig the client will use, overriding minDelaySeconds
+    // with the per-key custom value if the admin set one.
+    const effectiveFeatureConfig = featureConfig
+      ? {
+          ...featureConfig,
+          minDelaySeconds: found.customMinDelaySeconds != null
+            ? found.customMinDelaySeconds
+            : featureConfig.minDelaySeconds,
+        }
+      : null;
 
     res.json({
       valid: true,
@@ -299,7 +331,7 @@ router.post("/validate-key", async (req, res) => {
       expiresAt: found.expiresAt,
       label: found.label,
       keyType: found.keyType,
-      featureConfig: featureConfig || null,
+      featureConfig: effectiveFeatureConfig,
     });
   } catch (e: any) {
     console.error("POST /validate-key error:", e);

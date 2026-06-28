@@ -51,6 +51,11 @@ export async function initSchema(): Promise<void> {
         ('admin',     999, 999, 1, TRUE,  TRUE,  TRUE,  TRUE)
       ON CONFLICT (key_type) DO NOTHING;
     `);
+
+    await client.query(`
+      ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_max_accounts INTEGER;
+      ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_min_delay_seconds INTEGER;
+    `);
     console.log("[db] Schema ready.");
   } finally {
     client.release();
