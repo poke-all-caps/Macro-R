@@ -230,6 +230,27 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
+  const appendTierChangeLog = useCallback(async (oldTier: string, newTier: string, keyRef: string): Promise<void> => {
+    try {
+      const entry = {
+        id: `tier-change-${Date.now()}`,
+        accountId: "system",
+        accountName: "System",
+        timestamp: new Date().toISOString(),
+        searchesDone: 0,
+        dailySetDone: false,
+        pointsEarned: 0,
+        status: "success" as const,
+        errorMessage: `License tier changed: ${oldTier.toUpperCase()} → ${newTier.toUpperCase()} (Key: ...${keyRef.slice(-9)})`,
+      };
+      const raw = await AsyncStorage.getItem("@ms_rewards_logs");
+      const logs = raw ? JSON.parse(raw) : [];
+      logs.unshift(entry);
+      if (logs.length > 200) logs.length = 200;
+      await AsyncStorage.setItem("@ms_rewards_logs", JSON.stringify(logs));
+    } catch {}
+  }, []);
+
   const saveFeatureConfig = useCallback(async (cfg: FeatureConfig) => {
     setFeatureConfig(cfg);
     await AsyncStorage.setItem(FEATURE_CONFIG_STORAGE, JSON.stringify(cfg));
@@ -243,6 +264,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     try {
+      // ── Admin secret path ─────────────────────────────────────────────────
       const storedAdminSecret = await AsyncStorage.getItem(ADMIN_SECRET_STORAGE);
       if (storedAdminSecret) {
         const result = await validateAdmin(storedAdminSecret);
@@ -274,6 +296,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // ── License key path ──────────────────────────────────────────────────
       const storedKey = await AsyncStorage.getItem(LICENSE_KEY_STORAGE);
       const storedData = await AsyncStorage.getItem(LICENSE_DATA_STORAGE);
 
@@ -282,39 +305,11 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      if (storedData) {
-        const data: LicenseData = JSON.parse(storedData);
-        const now = Date.now();
-        const expiresAt = new Date(data.expiresAt).getTime();
-
-        if (expiresAt < now) {
-          setError("License key has expired");
-          setIsLicensed(false);
-          setIsLoading(false);
-          return;
-        }
-
-        const hoursSinceValidation = (now - data.validatedAt) / (1000 * 60 * 60);
-        if (hoursSinceValidation < 24) {
-          setLicenseData(data);
-          setIsLicensed(true);
-          if (data.keyType === "admin") {
-            setIsAdmin(true);
-            setFeatureConfig(OWNER_FEATURE_CONFIG);
-          } else {
-            await loadCachedFeatureConfig();
-          }
-          setIsLoading(false);
-          validateKey(storedKey).then(async (r) => {
-            if (r.valid && r.featureConfig && data.keyType !== "admin") {
-              await saveFeatureConfig(r.featureConfig);
-            }
-          }).catch(() => {});
-          return;
-        }
-      }
-
+      // Always contact the server on every launch to get authoritative key state.
+      // This prevents a user from sharing a key or retaining access after an admin
+      // restricts it — the server is the single source of truth.
       const result = await validateKey(storedKey);
+
       if (result.valid) {
         if (!result.maxAccounts || !result.expiresAt) {
           setError("Server returned incomplete license data");
@@ -322,6 +317,15 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
           setIsLoading(false);
           return;
         }
+
+        // Detect tier change between cached state and fresh server state and log it
+        if (storedData) {
+          const cached: LicenseData = JSON.parse(storedData);
+          if (cached.keyType && result.keyType && cached.keyType !== result.keyType) {
+            await appendTierChangeLog(cached.keyType, result.keyType, storedKey);
+          }
+        }
+
         const isOwnerKey = result.keyType === "admin";
         const data: LicenseData = {
           key: storedKey,
@@ -344,6 +348,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
         }
         scheduleExpiryNotifications(result.expiresAt).catch(() => {});
       } else if (result.offline && storedData) {
+        // Server unreachable — fall back to locally cached state as a grace period
         const data: LicenseData = JSON.parse(storedData);
         if (new Date(data.expiresAt).getTime() > Date.now()) {
           setLicenseData(data);
@@ -359,6 +364,9 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
           setIsLicensed(false);
         }
       } else {
+        // Server explicitly rejected the key (deactivated, expired, device mismatch, etc.)
+        // Overwrite local state immediately and deny access
+        await AsyncStorage.removeItem(LICENSE_DATA_STORAGE);
         setError(result.error || "Invalid key");
         setIsLicensed(false);
       }
@@ -374,7 +382,7 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
       }
     }
     setIsLoading(false);
-  }, [validateKey, validateAdmin, loadCachedFeatureConfig, saveFeatureConfig]);
+  }, [validateKey, validateAdmin, loadCachedFeatureConfig, saveFeatureConfig, appendTierChangeLog]);
 
   useEffect(() => {
     loadStoredLicense();

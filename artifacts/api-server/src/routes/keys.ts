@@ -99,10 +99,22 @@ router.put("/admin/keys/:id", requireAdmin, async (req, res) => {
     if (isActive !== undefined) updates.isActive = isActive;
     if (keyType !== undefined && validTypes.includes(keyType)) updates.keyType = keyType;
 
-    if (isActive !== undefined) {
-      const [current] = await db.select().from(licenseKeysTable).where(eq(licenseKeysTable.id, id));
-      if (current) {
+    const [current] = await db.select().from(licenseKeysTable).where(eq(licenseKeysTable.id, id));
+    if (current) {
+      if (isActive !== undefined && current.isActive !== isActive) {
         console.log(`[KEY STATUS CHANGE] Key ${current.key} (${current.label || 'no label'}) changed from isActive=${current.isActive} to isActive=${isActive} at ${new Date().toISOString()} — source IP: ${req.ip || req.headers['x-forwarded-for'] || 'unknown'}`);
+      }
+      if (keyType !== undefined && validTypes.includes(keyType) && current.keyType !== keyType) {
+        console.log(`[TIER CHANGE] Key ${current.key} (${current.label || 'no label'}) tier changed from ${current.keyType} to ${keyType} at ${new Date().toISOString()} — source IP: ${req.ip || req.headers['x-forwarded-for'] || 'unknown'}`);
+      }
+    }
+
+    // If the keyType is being changed, cap maxAccounts to the new tier's limit
+    if (keyType !== undefined && validTypes.includes(keyType) && updates.maxAccounts === undefined) {
+      const [tierCfg] = await db.select().from(featureConfigTable).where(eq(featureConfigTable.keyType, keyType));
+      if (tierCfg) {
+        const currentMaxAccounts = current?.maxAccounts ?? 999;
+        updates.maxAccounts = Math.min(currentMaxAccounts, tierCfg.maxAccounts);
       }
     }
 
@@ -182,13 +194,23 @@ router.put("/admin/feature-config/:keyType", requireAdmin, async (req, res) => {
       .where(eq(featureConfigTable.keyType, keyType))
       .returning();
 
-    if (!updated) {
+    let tierConfig = updated;
+    if (!tierConfig) {
       const [created] = await db.insert(featureConfigTable)
         .values({ keyType, ...updates })
         .returning();
-      return res.json({ config: created });
+      tierConfig = created;
     }
-    res.json({ config: updated });
+
+    // Enforce tier maxAccounts on all existing keys of this type so no key can exceed the new limit
+    if (updates.maxAccounts !== undefined) {
+      await db.update(licenseKeysTable)
+        .set({ maxAccounts: updates.maxAccounts, updatedAt: new Date() })
+        .where(eq(licenseKeysTable.keyType, keyType));
+      console.log(`[TIER CONFIG] maxAccounts for ${keyType} tier set to ${updates.maxAccounts} — applied to all ${keyType} keys`);
+    }
+
+    res.json({ config: tierConfig });
   } catch (e: any) {
     console.error("PUT /admin/feature-config error:", e);
     res.status(500).json({ error: sanitizeDbError(e) });
@@ -266,9 +288,14 @@ router.post("/validate-key", async (req, res) => {
     const [featureConfig] = await db.select().from(featureConfigTable)
       .where(eq(featureConfigTable.keyType, found.keyType));
 
+    // Cap per-key maxAccounts by the tier's global limit so tier config is always enforced
+    const effectiveMaxAccounts = featureConfig
+      ? Math.min(found.maxAccounts, featureConfig.maxAccounts)
+      : found.maxAccounts;
+
     res.json({
       valid: true,
-      maxAccounts: found.maxAccounts,
+      maxAccounts: effectiveMaxAccounts,
       expiresAt: found.expiresAt,
       label: found.label,
       keyType: found.keyType,
