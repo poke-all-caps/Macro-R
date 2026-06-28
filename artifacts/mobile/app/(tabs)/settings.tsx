@@ -320,6 +320,44 @@ export default function SettingsScreen() {
         </Section>
 
 
+        <Section title="LICENSE" colors={colors}>
+          <Pressable
+            onPress={() => {
+              if (licenseData) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setLicenseModalVisible(true);
+              }
+            }}
+            style={({ pressed }) => [
+              styles.row,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                opacity: pressed && licenseData ? 0.7 : 1,
+              },
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.rowLabel, { color: colors.text }]}>License Key</Text>
+              <Text style={[styles.rowSublabel, { color: colors.textSecondary }]}>
+                {licenseData ? `${licenseData.key.slice(0, 9)}...` : "Not activated"}
+              </Text>
+            </View>
+            {licenseData ? (
+              <View style={{ alignItems: "flex-end" }}>
+                <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.accent }}>
+                  {licenseData.maxAccounts} account{licenseData.maxAccounts > 1 ? "s" : ""}
+                </Text>
+                <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: colors.textMuted, marginTop: 2 }}>
+                  Expires {new Date(licenseData.expiresAt).toLocaleDateString()}
+                </Text>
+              </View>
+            ) : null}
+            {licenseData && <ChevronRight size={16} color={colors.textMuted} style={{ marginLeft: 6 }} />}
+          </Pressable>
+        </Section>
+
+
         {/* ── UPDATES ───────────────────────────────────────── */}
         <Section title="UPDATES" colors={colors}>
           <Pressable
@@ -374,45 +412,6 @@ export default function SettingsScreen() {
             </Text>
           </Pressable>
         </Section>
-
-
-        <Section title="LICENSE" colors={colors}>
-          <Pressable
-            onPress={() => {
-              if (licenseData) {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                setLicenseModalVisible(true);
-              }
-            }}
-            style={({ pressed }) => [
-              styles.row,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                opacity: pressed && licenseData ? 0.7 : 1,
-              },
-            ]}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.rowLabel, { color: colors.text }]}>License Key</Text>
-              <Text style={[styles.rowSublabel, { color: colors.textSecondary }]}>
-                {licenseData ? `${licenseData.key.slice(0, 9)}...` : "Not activated"}
-              </Text>
-            </View>
-            {licenseData ? (
-              <View style={{ alignItems: "flex-end" }}>
-                <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: colors.accent }}>
-                  {licenseData.maxAccounts} account{licenseData.maxAccounts > 1 ? "s" : ""}
-                </Text>
-                <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: colors.textMuted, marginTop: 2 }}>
-                  Expires {new Date(licenseData.expiresAt).toLocaleDateString()}
-                </Text>
-              </View>
-            ) : null}
-            {licenseData && <ChevronRight size={16} color={colors.textMuted} style={{ marginLeft: 6 }} />}
-          </Pressable>
-        </Section>
-
 
         <View style={{ height: insets.bottom + 40 }} />
       </ScrollView>
