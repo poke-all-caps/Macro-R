@@ -151,6 +151,14 @@ function dashboardPage(): string {
           </select>
         </div>
         <div class="form-group">
+          <label>Expiry Hour (0–23)</label>
+          <input type="number" id="newExpHour" value="23" min="0" max="23">
+        </div>
+        <div class="form-group">
+          <label>Expiry Minute (0–59)</label>
+          <input type="number" id="newExpMinute" value="59" min="0" max="59">
+        </div>
+        <div class="form-group">
           <label>Key Type</label>
           <select id="newKeyType">
             <option value="basic">Basic</option>
@@ -259,15 +267,22 @@ function dashboardPage(): string {
       const amount = parseInt(document.getElementById('newExpAmount').value) || 30;
       const unit = document.getElementById('newExpUnit').value;
       const keyType = document.getElementById('newKeyType').value;
+      const hour = parseInt(document.getElementById('newExpHour').value);
+      const minute = parseInt(document.getElementById('newExpMinute').value);
+      if (isNaN(hour) || hour < 0 || hour > 23) { alert('Hour must be between 0 and 23.'); return; }
+      if (isNaN(minute) || minute < 0 || minute > 59) { alert('Minute must be between 0 and 59.'); return; }
       const d = new Date();
       if (unit === 'months') d.setMonth(d.getMonth() + amount);
       else if (unit === 'years') d.setFullYear(d.getFullYear() + amount);
       else d.setDate(d.getDate() + amount);
+      d.setHours(hour, minute, 0, 0);
       const expiresAt = d.toISOString();
       await api('POST', '/admin/keys', { label, maxAccounts, expiresAt, keyType });
       document.getElementById('newLabel').value = '';
       document.getElementById('newExpAmount').value = '30';
       document.getElementById('newExpUnit').value = 'days';
+      document.getElementById('newExpHour').value = '23';
+      document.getElementById('newExpMinute').value = '59';
       document.getElementById('newKeyType').value = 'basic';
       loadKeys();
     }
