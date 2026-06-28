@@ -132,11 +132,19 @@ export function AdminPanel() {
     try {
       const data = await apiCall("GET", "/admin/keys");
       setKeys(data.keys || []);
-    } catch {
-      showError("Failed to Load Keys", "Could not connect to the server. Check your connection and try again.");
+    } catch (e: any) {
+      const authMode = effectiveSecret
+        ? "secret"
+        : adminLicenseKey
+          ? `key:…${adminLicenseKey.slice(-6)}`
+          : "none";
+      showError(
+        "Failed to Load Keys",
+        `Auth: ${authMode}\nURL: ${API_BASE}\n\n${e?.message ?? "Unknown error"}`,
+      );
     }
     setLoading(false);
-  }, [apiCall]);
+  }, [apiCall, effectiveSecret, adminLicenseKey]);
 
   const loadFeatureConfigs = useCallback(async () => {
     try {
