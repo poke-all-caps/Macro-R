@@ -27,6 +27,7 @@ import { CameraView, Camera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as Updates from "expo-updates";
 import { useLicense } from "@/context/LicenseContext";
+import { API_BASE } from "@/utils/apiUrl";
 import Colors from "@/constants/colors";
 
 export function LicenseGate({ children }: { children: React.ReactNode }) {
@@ -209,6 +210,13 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
               </View>
 
               {error && <Text style={styles.errorText}>{error}</Text>}
+
+            {/* ── DEBUG: remove before next release ── */}
+            <View style={styles.debugBox}>
+              <Text style={styles.debugLabel}>DEBUG — API URL</Text>
+              <Text style={styles.debugUrl} selectable>{API_BASE}</Text>
+            </View>
+            {/* ─────────────────────────────────────── */}
 
               <Pressable
                 onPress={handleActivate}
@@ -480,5 +488,27 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingBottom: 40,
     paddingTop: 12,
+  },
+  debugBox: {
+    marginTop: 20,
+    padding: 12,
+    backgroundColor: "#1e1b4b",
+    borderWidth: 2,
+    borderColor: "#f59e0b",
+    borderRadius: 8,
+    width: "100%",
+  },
+  debugLabel: {
+    color: "#f59e0b",
+    fontSize: 11,
+    fontFamily: "Inter_700Bold",
+    marginBottom: 6,
+    letterSpacing: 1,
+  },
+  debugUrl: {
+    color: "#a5f3fc",
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    lineBreakStrategyIOS: "standard",
   },
 });
