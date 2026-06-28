@@ -354,10 +354,16 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
           setError("License key has expired");
           setIsLicensed(false);
         }
+      } else if (result.offline) {
+        // Server unreachable and no usable cache — show connectivity error without
+        // wiping anything so the next successful launch can restore from cache.
+        setError(result.error || "Could not connect to server");
+        setIsLicensed(false);
       } else {
-        // Server explicitly rejected the key (deactivated, expired, device mismatch, etc.)
-        // Overwrite local state immediately and deny access
-        await AsyncStorage.removeItem(LICENSE_DATA_STORAGE);
+        // Server explicitly and clearly rejected the key (deactivated, expired,
+        // device mismatch). Deny access. Do NOT delete the cache — if this was
+        // a transient server error (502, bad JSON, etc.) the cache must survive
+        // so the next offline-fallback path works correctly.
         setError(result.error || "Invalid key");
         setIsLicensed(false);
       }
