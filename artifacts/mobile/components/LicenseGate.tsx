@@ -148,153 +148,162 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: insets.bottom + 24 }]}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-        automaticallyAdjustKeyboardInsets={true}
-        showsVerticalScrollIndicator={false}
-        bounces={false}
-      >
-      <View style={styles.content}>
-        <View style={[styles.iconContainer, { backgroundColor: colors.card }]}>
-          <Lock size={48} color="#3b82f6" />
-        </View>
-
-        <Text style={[styles.title, { color: colors.text }]}>
-          License Required
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Enter your license key or scan a QR code
-        </Text>
-
-        <View style={styles.inputContainer}>
-          <View
-            style={[
-              styles.inputWrapper,
-              {
-                backgroundColor: colors.card,
-                borderColor: error ? "#ef4444" : colors.border,
-              },
-            ]}
-          >
-            <KeyRound
-              size={18}
-              color={colors.textSecondary}
-              style={{ marginRight: 10 }}
-            />
-            <TextInput
-              style={[styles.input, { color: colors.text }]}
-              placeholder="XXXX-XXXX-XXXX-XXXX"
-              placeholderTextColor={colors.textSecondary}
-              value={keyInput}
-              onChangeText={setKeyInput}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              returnKeyType="done"
-              onSubmitEditing={handleActivate}
-            />
-            {Platform.OS !== "web" && (
-              <Pressable onPress={openScanner} style={{ padding: 4 }}>
-                <ScanLine size={22} color="#3b82f6" />
-              </Pressable>
-            )}
-          </View>
-
-          {error && <Text style={styles.errorText}>{error}</Text>}
-
-          <Pressable
-            onPress={handleActivate}
-            disabled={submitting || !keyInput.trim()}
-            style={({ pressed }) => [
-              styles.button,
-              {
-                opacity:
-                  submitting || !keyInput.trim() ? 0.5 : pressed ? 0.85 : 1,
-              },
-            ]}
-          >
-            {submitting ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Activate</Text>
-            )}
-          </Pressable>
-
-          {Platform.OS !== "web" && (
-            <View style={styles.scanRow}>
-              <Pressable
-                onPress={openScanner}
-                style={({ pressed }) => [
-                  styles.scanButton,
-                  {
-                    backgroundColor: colors.card,
-                    borderColor: colors.border,
-                    opacity: pressed ? 0.85 : 1,
-                    flex: 1,
-                  },
-                ]}
-              >
-                <ScanLine size={18} color="#3b82f6" />
-                <Text style={[styles.scanButtonText, { color: colors.text }]}>
-                  Scan QR
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={pickFromGallery}
-                style={({ pressed }) => [
-                  styles.scanButton,
-                  {
-                    backgroundColor: colors.card,
-                    borderColor: colors.border,
-                    opacity: pressed ? 0.85 : 1,
-                    flex: 1,
-                  },
-                ]}
-              >
-                <ImageIcon size={18} color="#3b82f6" />
-                <Text style={[styles.scanButtonText, { color: colors.text }]}>
-                  Gallery
-                </Text>
-              </Pressable>
-            </View>
-          )}
-
-          {Platform.OS !== "web" && (
-            <Pressable
-              onPress={handleCheckUpdate}
-              disabled={checkingUpdate}
-              style={({ pressed }) => [
-                styles.updateButton,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                  opacity: pressed || checkingUpdate ? 0.7 : 1,
-                },
-              ]}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <ScrollView
+          style={[styles.container, { backgroundColor: colors.background }]}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top, paddingBottom: insets.bottom + 24 },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets={true}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <View style={styles.content}>
+            <View
+              style={[styles.iconContainer, { backgroundColor: colors.card }]}
             >
-              {checkingUpdate ? (
-                <ActivityIndicator size="small" color="#059669" />
-              ) : (
-                <Download size={16} color="#059669" />
-              )}
-              <Text
+              <Lock size={48} color="#3b82f6" />
+            </View>
+
+            <Text style={[styles.title, { color: colors.text }]}>
+              License Required
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+              Enter your license key or scan a QR code
+            </Text>
+
+            <View style={styles.inputContainer}>
+              <View
                 style={[
-                  styles.updateButtonText,
-                  { color: colors.textSecondary },
+                  styles.inputWrapper,
+                  {
+                    backgroundColor: colors.card,
+                    borderColor: error ? "#ef4444" : colors.border,
+                  },
                 ]}
               >
-                {checkingUpdate ? "Checking…" : "Update App"}
-              </Text>
-            </Pressable>
-          )}
-        </View>
-      </View>
-      </ScrollView>
-    </TouchableWithoutFeedback>
+                <KeyRound
+                  size={18}
+                  color={colors.textSecondary}
+                  style={{ marginRight: 10 }}
+                />
+                <TextInput
+                  style={[styles.input, { color: colors.text }]}
+                  placeholder="XX88XX-XXXX-XXXX-XXXX"
+                  placeholderTextColor={colors.textSecondary}
+                  value={keyInput}
+                  onChangeText={setKeyInput}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  onSubmitEditing={handleActivate}
+                />
+                {Platform.OS !== "web" && (
+                  <Pressable onPress={openScanner} style={{ padding: 4 }}>
+                    <ScanLine size={22} color="#3b82f6" />
+                  </Pressable>
+                )}
+              </View>
+
+              {error && <Text style={styles.errorText}>{error}</Text>}
+
+              <Pressable
+                onPress={handleActivate}
+                disabled={submitting || !keyInput.trim()}
+                style={({ pressed }) => [
+                  styles.button,
+                  {
+                    opacity:
+                      submitting || !keyInput.trim() ? 0.5 : pressed ? 0.85 : 1,
+                  },
+                ]}
+              >
+                {submitting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Activate</Text>
+                )}
+              </Pressable>
+
+              {Platform.OS !== "web" && (
+                <View style={styles.scanRow}>
+                  <Pressable
+                    onPress={openScanner}
+                    style={({ pressed }) => [
+                      styles.scanButton,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: colors.border,
+                        opacity: pressed ? 0.85 : 1,
+                        flex: 1,
+                      },
+                    ]}
+                  >
+                    <ScanLine size={18} color="#3b82f6" />
+                    <Text
+                      style={[styles.scanButtonText, { color: colors.text }]}
+                    >
+                      Scan QR
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={pickFromGallery}
+                    style={({ pressed }) => [
+                      styles.scanButton,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: colors.border,
+                        opacity: pressed ? 0.85 : 1,
+                        flex: 1,
+                      },
+                    ]}
+                  >
+                    <ImageIcon size={18} color="#3b82f6" />
+                    <Text
+                      style={[styles.scanButtonText, { color: colors.text }]}
+                    >
+                      Gallery
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+
+              {Platform.OS !== "web" && (
+                <Pressable
+                  onPress={handleCheckUpdate}
+                  disabled={checkingUpdate}
+                  style={({ pressed }) => [
+                    styles.updateButton,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: colors.border,
+                      opacity: pressed || checkingUpdate ? 0.7 : 1,
+                    },
+                  ]}
+                >
+                  {checkingUpdate ? (
+                    <ActivityIndicator size="small" color="#059669" />
+                  ) : (
+                    <Download size={16} color="#059669" />
+                  )}
+                  <Text
+                    style={[
+                      styles.updateButtonText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    {checkingUpdate ? "Checking…" : "Update App"}
+                  </Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
 
       <Modal
         visible={showScanner}

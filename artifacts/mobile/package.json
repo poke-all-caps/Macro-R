@@ -8,7 +8,7 @@
     "build": "node scripts/build.js",
     "serve": "node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "update": "eas update --branch preview --message"
+    "update": "EXPO_PUBLIC_API_URL=https://macro-r-631x.onrender.com/api eas update --branch preview --message"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

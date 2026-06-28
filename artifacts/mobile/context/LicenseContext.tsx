@@ -19,15 +19,15 @@ const DEVICE_ID_STORAGE = "@ms_rewards_device_id";
 const ADMIN_VISIBLE_STORAGE = "@ms_rewards_admin_visible";
 // On web, use a relative URL so the browser always resolves it to the same
 // origin — no CORS issues, no env var dependency.
-// On native EAS builds, use EXPO_PUBLIC_API_URL baked in via eas.json.
+// EXPO_PUBLIC_API_URL is baked in at build time via eas.json build env.
+// EXPO_PUBLIC_DOMAIN must NOT be used as a native fallback — it is set to the
+// Replit dev domain in the local dev shell and would be baked into OTA bundles,
+// pointing installed apps at the ephemeral dev server instead of production.
 const PRODUCTION_API_URL = "https://macro-r-631x.onrender.com/api";
 export const API_BASE: string =
   Platform.OS === "web"
     ? "/api"
-    : process.env.EXPO_PUBLIC_API_URL ||
-      (process.env.EXPO_PUBLIC_DOMAIN
-        ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
-        : PRODUCTION_API_URL);
+    : process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
 export const OWNER_MODE =
   process.env.EXPO_PUBLIC_OWNER_MODE === "true";
 

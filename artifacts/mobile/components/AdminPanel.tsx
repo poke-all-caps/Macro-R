@@ -26,11 +26,11 @@ import Colors from "@/constants/colors";
 import { useLicense } from "@/context/LicenseContext";
 import { CustomAlert } from "@/components/CustomAlert";
 
+const PRODUCTION_API_URL = "https://macro-r-631x.onrender.com/api";
 const API_BASE =
-  process.env.EXPO_PUBLIC_API_URL ||
-  (process.env.EXPO_PUBLIC_DOMAIN
-    ? `https://${process.env.EXPO_PUBLIC_DOMAIN}/api`
-    : "");
+  Platform.OS === "web"
+    ? "/api"
+    : process.env.EXPO_PUBLIC_API_URL || PRODUCTION_API_URL;
 const OWNER_ADMIN_SECRET = process.env.EXPO_PUBLIC_ADMIN_SECRET || "";
 
 const KEY_TYPES = ["basic", "premium", "unlimited", "admin"] as const;
