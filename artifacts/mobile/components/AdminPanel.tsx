@@ -70,11 +70,13 @@ export function AdminPanel() {
   const insets = useSafeAreaInsets();
   const { adminSecret, licenseData, removeLicense } = useLicense();
 
-  const [activeTab, setActiveTab] = useState<"keys" | "config">("keys");
+  const [activeTab, setActiveTab] = useState<"keys" | "config" | "deleted">("keys");
   const [keys, setKeys] = useState<LicenseKey[]>([]);
   const [featureConfigs, setFeatureConfigs] = useState<FeatureConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [configLoading, setConfigLoading] = useState(true);
+  const [deletedAccounts, setDeletedAccounts] = useState<any[]>([]);
+  const [deletedLoading, setDeletedLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [newMaxAccounts, setNewMaxAccounts] = useState("3");
@@ -168,10 +170,37 @@ export function AdminPanel() {
     }
   }, [apiCall, loadFeatureConfigs]);
 
+  const loadDeletedAccounts = useCallback(async () => {
+    setDeletedLoading(true);
+    try {
+      const data = await apiCall("GET", "/admin/deleted-accounts");
+      setDeletedAccounts(data.deletedAccounts || []);
+    } catch {
+      showError("Load Failed", "Could not load deleted accounts archive.");
+    }
+    setDeletedLoading(false);
+  }, [apiCall]);
+
+  const restoreDeletedAccount = useCallback(async (id: string, email: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      await apiCall("POST", `/admin/deleted-accounts/${id}/restore`);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      showSuccess("Restored", `${email} has been restored to its key's active slots.`);
+      loadDeletedAccounts();
+      loadKeys();
+    } catch (e: any) {
+      let msg = "Could not restore this account.";
+      try { msg = JSON.parse(e.message).error || msg; } catch {}
+      showError("Restore Failed", msg);
+    }
+  }, [apiCall, loadDeletedAccounts, loadKeys]);
+
   useEffect(() => {
     loadKeys();
     loadFeatureConfigs();
-  }, [loadKeys, loadFeatureConfigs]);
+    loadDeletedAccounts();
+  }, [loadKeys, loadFeatureConfigs, loadDeletedAccounts]);
 
   const createKey = async () => {
     if (creating) return;
@@ -727,12 +756,24 @@ export function AdminPanel() {
             style={[styles.tabBtn, { backgroundColor: activeTab === "config" ? "#3b82f6" : colors.surfaceSecondary, borderColor: activeTab === "config" ? "#3b82f6" : colors.border }]}
           >
             <Settings size={14} color={activeTab === "config" ? "#fff" : colors.textSecondary} />
-            <Text style={[styles.tabBtnText, { color: activeTab === "config" ? "#fff" : colors.textSecondary }]}>Feature Config</Text>
+            <Text style={[styles.tabBtnText, { color: activeTab === "config" ? "#fff" : colors.textSecondary }]}>Config</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => { setActiveTab("deleted"); loadDeletedAccounts(); }}
+            style={[styles.tabBtn, { backgroundColor: activeTab === "deleted" ? "#ef4444" : colors.surfaceSecondary, borderColor: activeTab === "deleted" ? "#ef4444" : colors.border }]}
+          >
+            <Trash2 size={14} color={activeTab === "deleted" ? "#fff" : colors.textSecondary} />
+            <Text style={[styles.tabBtnText, { color: activeTab === "deleted" ? "#fff" : colors.textSecondary }]}>Deleted</Text>
+            {deletedAccounts.length > 0 && (
+              <View style={{ backgroundColor: "#ef4444", borderRadius: 8, minWidth: 16, height: 16, alignItems: "center", justifyContent: "center", paddingHorizontal: 3, marginLeft: 2 }}>
+                <Text style={{ color: "#fff", fontSize: 10, fontFamily: "Inter_700Bold" }}>{deletedAccounts.length}</Text>
+              </View>
+            )}
           </Pressable>
         </View>
       </View>
 
-      {activeTab === "keys" ? (
+      {activeTab === "keys" && (
       <>
       <View style={[styles.createSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Pressable
@@ -874,7 +915,8 @@ export function AdminPanel() {
         />
       )}
       </>
-      ) : (
+      )}
+      {activeTab === "config" && (
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
@@ -928,6 +970,87 @@ export function AdminPanel() {
                       colors={colors}
                       onToggle={(v) => updateFeatureConfig(cfg.keyType, { dailySetEnabled: v })}
                     />
+                  </View>
+                </View>
+              );
+            })
+          )}
+        </ScrollView>
+      )}
+      {activeTab === "deleted" && (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
+        >
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12, marginTop: 4 }}>
+            <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>
+              {deletedAccounts.length} archived account{deletedAccounts.length !== 1 ? "s" : ""}
+            </Text>
+            <Pressable onPress={loadDeletedAccounts} style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}>
+              <RefreshCw size={16} color={colors.textSecondary} />
+            </Pressable>
+          </View>
+
+          {deletedLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#ef4444" />
+            </View>
+          ) : deletedAccounts.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Trash2 size={48} color={colors.textSecondary} />
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No deleted accounts</Text>
+            </View>
+          ) : (
+            deletedAccounts.map((item) => {
+              const deletedAt = item.deletedAt
+                ? new Date(item.deletedAt).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })
+                : "—";
+              const keyShort = item.licenseKey ? item.licenseKey.slice(0, 4) + "-****-****" : "Unknown key";
+              const hasCookies = item.cookies && item.cookies.length > 2;
+              return (
+                <View key={item.id} style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 12 }]}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: colors.text }}>
+                        {item.accountName || item.accountEmail}
+                      </Text>
+                      <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>
+                        {item.accountEmail}
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={() => restoreDeletedAccount(item.id, item.accountEmail)}
+                      style={({ pressed }) => ({
+                        backgroundColor: "#16a34a",
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 4,
+                        opacity: pressed ? 0.8 : 1,
+                      })}
+                    >
+                      <RotateCcw size={12} color="#fff" />
+                      <Text style={{ color: "#fff", fontSize: 12, fontFamily: "Inter_600SemiBold" }}>Restore</Text>
+                    </Pressable>
+                  </View>
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                    <View style={{ backgroundColor: colors.surfaceSecondary, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                      <Text style={{ fontSize: 11, color: colors.textSecondary, fontFamily: "Inter_400Regular" }}>
+                        Deleted {deletedAt}
+                      </Text>
+                    </View>
+                    <View style={{ backgroundColor: "#1e293b", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: "#334155" }}>
+                      <Text style={{ fontSize: 11, color: "#3b82f6", fontFamily: "Inter_500Medium" }}>
+                        {keyShort}
+                      </Text>
+                    </View>
+                    <View style={{ backgroundColor: hasCookies ? "#16a34a22" : "#dc262622", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+                      <Text style={{ fontSize: 11, color: hasCookies ? "#4ade80" : "#f87171", fontFamily: "Inter_400Regular" }}>
+                        {hasCookies ? "Has cookies" : "No cookies"}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               );
