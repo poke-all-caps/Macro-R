@@ -156,6 +156,46 @@ export async function requestExactAlarmPermission(): Promise<void> {
   } catch {}
 }
 
+export async function requestDisplayOverApps(): Promise<void> {
+  if (Platform.OS !== "android") return;
+  try {
+    const IntentLauncher = require("expo-intent-launcher");
+    if (IntentLauncher?.startActivityAsync) {
+      await IntentLauncher.startActivityAsync(
+        "android.settings.action.MANAGE_OVERLAY_PERMISSION",
+        { data: "package:com.msrewards.automation" }
+      );
+    }
+  } catch {
+    try { Linking.openSettings(); } catch {}
+  }
+}
+
+export async function requestFullScreenIntent(): Promise<void> {
+  if (Platform.OS !== "android") return;
+  try {
+    const IntentLauncher = require("expo-intent-launcher");
+    if (IntentLauncher?.startActivityAsync) {
+      // Android 14+ has a dedicated page; older versions handle it via channel importance
+      await IntentLauncher.startActivityAsync(
+        "android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT",
+        { data: "package:com.msrewards.automation" }
+      );
+    }
+  } catch {
+    // Fallback: open notification settings for the app
+    try {
+      const IntentLauncher = require("expo-intent-launcher");
+      await IntentLauncher.startActivityAsync(
+        "android.settings.APP_NOTIFICATION_SETTINGS",
+        { extra: { "android.provider.extra.APP_PACKAGE": "com.msrewards.automation" } }
+      );
+    } catch {
+      try { Linking.openSettings(); } catch {}
+    }
+  }
+}
+
 export async function requestBatteryOptimizationExemption(): Promise<void> {
   if (Platform.OS !== "android") return;
   try {

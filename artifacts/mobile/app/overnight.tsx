@@ -25,7 +25,9 @@ import {
   checkNotificationPermission,
   isNotificationsAvailable,
   requestBatteryOptimizationExemption,
+  requestDisplayOverApps,
   requestExactAlarmPermission,
+  requestFullScreenIntent,
   requestNotificationPermission,
   scheduleOvernightNotifications,
   showOvernightPersistentNotification,
@@ -77,6 +79,8 @@ export default function OvernightScreen() {
   const [notifPerm, setNotifPerm] = useState<PermStatus>("undetermined");
   const [batteryOpened, setBatteryOpened] = useState(false);
   const [alarmOpened, setAlarmOpened] = useState(false);
+  const [overlayOpened, setOverlayOpened] = useState(false);
+  const [fullScreenOpened, setFullScreenOpened] = useState(false);
 
   const refreshPerms = useCallback(async () => {
     if (Platform.OS !== "android") return;
@@ -99,6 +103,10 @@ export default function OvernightScreen() {
     setBatteryOpened(true);
     await requestExactAlarmPermission();
     setAlarmOpened(true);
+    await requestDisplayOverApps();
+    setOverlayOpened(true);
+    await requestFullScreenIntent();
+    setFullScreenOpened(true);
     await refreshPerms();
   };
   const isShowingDefaults = previousUserSlots !== null;
@@ -545,6 +553,60 @@ export default function OvernightScreen() {
                 <View style={[styles.permBadge, { backgroundColor: alarmOpened ? "#DCFCE7" : "#FEF3C7" }]}>
                   <Text style={[styles.permBadgeText, { color: alarmOpened ? "#16A34A" : "#92400E" }]}>
                     {alarmOpened ? "✓ Done" : "Open"}
+                  </Text>
+                </View>
+              </Pressable>
+
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+              {/* Display over other apps */}
+              <Pressable
+                onPress={async () => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  await requestDisplayOverApps();
+                  setOverlayOpened(true);
+                }}
+                style={({ pressed }) => [styles.permRow, { opacity: pressed ? 0.7 : 1 }]}
+              >
+                <View style={[styles.permIconBg, { backgroundColor: overlayOpened ? "#F0FDF4" : "#FFF7ED" }]}>
+                  <Moon size={16} color={overlayOpened ? "#16A34A" : "#D97706"} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.permTitle, { color: colors.text }]}>Display Over Other Apps</Text>
+                  <Text style={[styles.permDesc, { color: colors.textSecondary }]}>
+                    {overlayOpened ? "Setting opened — enable to allow overlay on other apps" : "Allows the app to show alerts on top of other running apps"}
+                  </Text>
+                </View>
+                <View style={[styles.permBadge, { backgroundColor: overlayOpened ? "#DCFCE7" : "#FEF3C7" }]}>
+                  <Text style={[styles.permBadgeText, { color: overlayOpened ? "#16A34A" : "#92400E" }]}>
+                    {overlayOpened ? "✓ Done" : "Open"}
+                  </Text>
+                </View>
+              </Pressable>
+
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+              {/* Full-screen notifications */}
+              <Pressable
+                onPress={async () => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  await requestFullScreenIntent();
+                  setFullScreenOpened(true);
+                }}
+                style={({ pressed }) => [styles.permRow, { opacity: pressed ? 0.7 : 1 }]}
+              >
+                <View style={[styles.permIconBg, { backgroundColor: fullScreenOpened ? "#F0FDF4" : "#FFF7ED" }]}>
+                  <Zap size={16} color={fullScreenOpened ? "#16A34A" : "#D97706"} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.permTitle, { color: colors.text }]}>Full-Screen Notifications (Android 14+)</Text>
+                  <Text style={[styles.permDesc, { color: colors.textSecondary }]}>
+                    {fullScreenOpened ? "Setting opened — enable to allow full-screen alerts when screen is locked" : "Shows overnight run alerts on your lock screen even when the phone is asleep"}
+                  </Text>
+                </View>
+                <View style={[styles.permBadge, { backgroundColor: fullScreenOpened ? "#DCFCE7" : "#FEF3C7" }]}>
+                  <Text style={[styles.permBadgeText, { color: fullScreenOpened ? "#16A34A" : "#92400E" }]}>
+                    {fullScreenOpened ? "✓ Done" : "Open"}
                   </Text>
                 </View>
               </Pressable>
