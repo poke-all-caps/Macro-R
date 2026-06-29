@@ -257,9 +257,14 @@ export async function runBackgroundSearches(): Promise<void> {
   }
 
   console.log("[BackgroundSearch] Starting background search run");
-  const runningNotifId = await showBgRunningNotification();
 
-  try {
+  let BackgroundService: any = null;
+  try { BackgroundService = require("react-native-background-actions").default; } catch {}
+
+  // Core search logic — runs either inside BackgroundService or directly.
+  // BackgroundService reference is captured in the closure so we can call
+  // updateNotification() to drive the progress-bar notification.
+  const doSearchCore = async () => {
     const accounts = await getAccounts();
     if (accounts.length === 0) {
       console.log("[BackgroundSearch] No accounts found");
@@ -270,6 +275,7 @@ export async function runBackgroundSearches(): Promise<void> {
     const searchCount = settings.searchCount ?? settings.defaultSearchCount ?? 30;
     const pcEnabled = settings.pcSearchEnabled ?? true;
     const pcSearchCount = settings.pcSearchCount ?? 30;
+    const totalPerAccount = searchCount + (pcEnabled ? pcSearchCount : 0);
     const totalNeeded = searchCount + (pcEnabled ? pcSearchCount : 0);
     const queries = await getQueriesAndRotate(totalNeeded);
 
@@ -296,37 +302,67 @@ export async function runBackgroundSearches(): Promise<void> {
 
       await updateAccountInStorage(account.id, { status: "running" });
 
+      const acctLabel = account.name || account.email;
+
+      // Kick off notification for this account
+      if (BackgroundService?.isRunning()) {
+        BackgroundService.updateNotification({
+          taskTitle: `Macro Rewards — ${acctLabel}`,
+          taskDesc: `Search 0/${totalPerAccount} (0%)`,
+          progressBar: { max: 100, value: 0, indeterminate: false },
+        }).catch(() => {});
+      }
+
       const pointsBefore = await fetchRewardsPoints(cookies);
       let searchesDone = 0;
       let networkLost = false;
 
+      // Mobile searches
       for (let i = 0; i < searchCount; i++) {
         const query = queries[i] ?? `microsoft rewards tip ${i + 1}`;
-
         const result = await performBingSearch(query, cookies);
         if (result.networkError) {
-          console.log(`[BackgroundSearch] ${account.name}: Network lost, stopping`);
+          console.log(`[BackgroundSearch] ${acctLabel}: Network lost, stopping`);
           networkLost = true;
           break;
         }
         if (result.ok) searchesDone++;
+
+        const pct = Math.round(((i + 1) / totalPerAccount) * 100);
+        if (BackgroundService?.isRunning()) {
+          BackgroundService.updateNotification({
+            taskTitle: `Macro Rewards — ${acctLabel}`,
+            taskDesc: `Search ${i + 1}/${totalPerAccount} (${pct}%)`,
+            progressBar: { max: 100, value: pct, indeterminate: false },
+          }).catch(() => {});
+        }
 
         if (i < searchCount - 1) {
           await sleep(1500 + Math.floor(Math.random() * 1000));
         }
       }
 
+      // PC searches
       if (pcEnabled && !networkLost) {
         const pcQueries = queries.slice(searchCount);
         for (let i = 0; i < pcSearchCount; i++) {
           const query = pcQueries[i] ?? `windows tips ${i + 1}`;
-
           const result = await performBingSearch(query, cookies, BING_PC_UA);
           if (result.networkError) {
-            console.log(`[BackgroundSearch] ${account.name}: Network lost during PC searches`);
+            console.log(`[BackgroundSearch] ${acctLabel}: Network lost during PC searches`);
             break;
           }
           if (result.ok) searchesDone++;
+
+          const totalDone = searchCount + i + 1;
+          const pct = Math.round((totalDone / totalPerAccount) * 100);
+          if (BackgroundService?.isRunning()) {
+            BackgroundService.updateNotification({
+              taskTitle: `Macro Rewards — ${acctLabel}`,
+              taskDesc: `Search ${totalDone}/${totalPerAccount} (${pct}%)`,
+              progressBar: { max: 100, value: pct, indeterminate: false },
+            }).catch(() => {});
+          }
 
           if (i < pcSearchCount - 1) {
             await sleep(1500 + Math.floor(Math.random() * 1000));
@@ -360,9 +396,7 @@ export async function runBackgroundSearches(): Promise<void> {
         backgroundRun: true,
       });
 
-      console.log(
-        `[BackgroundSearch] ${account.name}: ${searchesDone} searches (mobile+PC), +${earned} points`
-      );
+      console.log(`[BackgroundSearch] ${acctLabel}: ${searchesDone} searches, +${earned} points`);
     }
 
     await showNotification(
@@ -371,7 +405,34 @@ export async function runBackgroundSearches(): Promise<void> {
     );
 
     console.log("[BackgroundSearch] Finished all accounts");
+  };
+
+  // Try to start as a foreground service so we get the native progress-bar
+  // notification (same look as the manual Search button).
+  const fgServiceAvailable = BackgroundService && !BackgroundService.isRunning();
+  let runningNotifId: string | null = null;
+
+  try {
+    if (fgServiceAvailable) {
+      await BackgroundService.start(doSearchCore, {
+        taskName: "MacroRewardsSearch",
+        taskTitle: "Macro Rewards — Overnight Search",
+        taskDesc: "Starting background searches…",
+        taskIcon: { name: "ic_launcher", type: "mipmap" },
+        color: "#3B82F6",
+        linkingURI: "mobile://",
+        progressBar: { max: 100, value: 0, indeterminate: true },
+      });
+    } else {
+      // BackgroundService already in use or unavailable — fall back to a
+      // plain expo-notification while running the search directly.
+      runningNotifId = await showBgRunningNotification();
+      await doSearchCore();
+    }
   } finally {
+    if (BackgroundService?.isRunning()) {
+      BackgroundService.stop().catch(() => {});
+    }
     await dismissBgRunningNotification(runningNotifId);
     inMemoryLock = false;
     await AsyncStorage.setItem(BG_LAST_RUN_KEY, Date.now().toString());
