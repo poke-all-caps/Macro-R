@@ -174,6 +174,19 @@ function NotificationHandler() {
 
     const receivedSub = addNotificationReceivedListener(async (notification: any) => {
       const action = notification?.request?.content?.data?.action;
+      // Scheduled overnight trigger — run searches automatically in background,
+      // no user interaction or screen navigation needed.
+      if (action === "bg_search_trigger") {
+        console.log("[NotificationHandler] Overnight trigger received in foreground — running background search silently");
+        try {
+          const { runBackgroundSearches, isBackgroundRunning: isBgRunning } = require("@/utils/backgroundSearch");
+          const running = await isBgRunning();
+          if (!running) await runBackgroundSearches();
+        } catch (e) {
+          console.log("[NotificationHandler] Foreground bg search failed:", e);
+        }
+        return;
+      }
       if (action === "start_run") {
         await handleStartRun();
       }

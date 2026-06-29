@@ -27,8 +27,9 @@ export function registerBackgroundNotificationTask(): void {
         return;
       }
       const action = data?.notification?.request?.content?.data?.action;
-      if (action === "start_run") {
-        console.log("[BackgroundTask] Notification received — running searches in background");
+      // Handle both the new silent bg trigger and legacy start_run action
+      if (action === "bg_search_trigger" || action === "start_run") {
+        console.log("[BackgroundTask] Overnight trigger received — auto-running background searches");
         try {
           const bgSearch = require("./backgroundSearch");
           const run = bgSearch.runBackgroundSearches ?? bgSearch.default?.runBackgroundSearches;
@@ -38,15 +39,8 @@ export function registerBackgroundNotificationTask(): void {
             throw new Error("runBackgroundSearches not found in module");
           }
         } catch (e) {
-          console.log("[BackgroundTask] Background search failed, falling back to app launch:", e);
+          console.log("[BackgroundTask] Background search failed, setting pending flag:", e);
           await AsyncStorage.setItem(PENDING_RUN_KEY, "true");
-          try {
-            await Linking.openURL("mobile://start-run");
-          } catch {
-            try {
-              await Linking.openURL("mobile://");
-            } catch {}
-          }
         }
       }
     });
@@ -194,19 +188,19 @@ export async function scheduleOvernightNotifications(
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {}
 
-  // Use the dedicated alarm channel so it bypasses DND and shows on lock screen
-  const channelId = Platform.OS === "android" ? "macro-rewards-alarm" : undefined;
+  // Use the silent persistent channel — these are background wake triggers, NOT user-facing alarms.
+  // They fire at the scheduled time and wake up the background task to auto-run searches silently.
+  const channelId = Platform.OS === "android" ? "macro-rewards-persistent" : undefined;
   let count = 0;
 
-  const alarmContent = {
-    title: "⏰ Macro Rewards — Overnight Run",
-    body: "Tap to open and start your overnight Bing searches.",
-    data: { action: "start_run" },
-    sound: "default",
-    priority: "max",
-    // Show full content on lock screen (not just "1 notification")
+  const triggerContent = {
+    title: "Macro Rewards — Running overnight searches",
+    body: "Background searches are running automatically.",
+    data: { action: "bg_search_trigger" },
+    sound: false,
     ...(Platform.OS === "android" && {
       channelId,
+      priority: "low",
       sticky: false,
     }),
   };
@@ -214,7 +208,7 @@ export async function scheduleOvernightNotifications(
   for (const slot of slots) {
     try {
       await Notifications.scheduleNotificationAsync({
-        content: alarmContent,
+        content: triggerContent,
         trigger: {
           type: "daily",
           hour: slot.hour,
@@ -223,7 +217,7 @@ export async function scheduleOvernightNotifications(
         } as any,
       });
       count++;
-      console.log(`[Notifications] Scheduled alarm for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
+      console.log(`[Notifications] Scheduled bg trigger for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
     } catch (e) {
       console.log(`[Notifications] daily trigger failed for ${slot.hour}:${String(slot.minute).padStart(2, '0')}:`, e);
       // Fallback: calculate exact seconds until target time
@@ -234,7 +228,7 @@ export async function scheduleOvernightNotifications(
         if (target <= now) target.setDate(target.getDate() + 1);
         const seconds = Math.max(60, Math.floor((target.getTime() - now.getTime()) / 1000));
         await Notifications.scheduleNotificationAsync({
-          content: alarmContent,
+          content: triggerContent,
           trigger: {
             type: "timeInterval",
             seconds,
@@ -242,7 +236,7 @@ export async function scheduleOvernightNotifications(
           } as any,
         });
         count++;
-        console.log(`[Notifications] Fallback alarm: ${seconds}s for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
+        console.log(`[Notifications] Fallback trigger: ${seconds}s for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
       } catch (e2) {
         console.log(`[Notifications] Fallback also failed:`, e2);
       }
