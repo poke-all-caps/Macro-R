@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowLeft, Battery, Bell, Calendar, CheckSquare, Clock, 
 import React, { useCallback, useState } from "react";
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -486,22 +487,42 @@ export default function OvernightScreen() {
 
             <View style={[styles.card, { backgroundColor: colors.surface }]}>
               {/* Notifications */}
-              <View style={styles.permRow}>
+              <Pressable
+                onPress={async () => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  if (notifPerm === "denied") {
+                    // Already denied — Android won't show dialog again, go to Settings
+                    Linking.openSettings();
+                  } else {
+                    await requestNotificationPermission();
+                  }
+                  await refreshPerms();
+                }}
+                style={({ pressed }) => [styles.permRow, { opacity: pressed ? 0.7 : 1 }]}
+              >
                 <View style={[styles.permIconBg, { backgroundColor: notifPerm === "granted" ? "#F0FDF4" : "#FFF7ED" }]}>
                   <Bell size={16} color={notifPerm === "granted" ? "#16A34A" : "#D97706"} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.permTitle, { color: colors.text }]}>Notifications</Text>
                   <Text style={[styles.permDesc, { color: colors.textSecondary }]}>
-                    {notifPerm === "granted" ? "Granted — schedule can fire alerts" : "Required to show schedule status & completion alerts"}
+                    {notifPerm === "granted"
+                      ? "Granted — schedule can fire alerts"
+                      : notifPerm === "denied"
+                      ? "Denied — tap to open Settings and enable manually"
+                      : "Tap to allow notifications for schedule alerts"}
                   </Text>
                 </View>
-                <View style={[styles.permBadge, { backgroundColor: notifPerm === "granted" ? "#DCFCE7" : "#FEF3C7" }]}>
-                  <Text style={[styles.permBadgeText, { color: notifPerm === "granted" ? "#16A34A" : "#92400E" }]}>
-                    {notifPerm === "granted" ? "✓ On" : "Needed"}
+                <View style={[styles.permBadge, {
+                  backgroundColor: notifPerm === "granted" ? "#DCFCE7" : notifPerm === "denied" ? "#FEE2E2" : "#FEF3C7"
+                }]}>
+                  <Text style={[styles.permBadgeText, {
+                    color: notifPerm === "granted" ? "#16A34A" : notifPerm === "denied" ? "#B91C1C" : "#92400E"
+                  }]}>
+                    {notifPerm === "granted" ? "✓ On" : notifPerm === "denied" ? "Blocked" : "Allow"}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
 
               <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
