@@ -30,7 +30,7 @@ export default function AddAccountScreen() {
   const { accounts, addAccount } = useAccounts();
   const { licenseData, featureConfig } = useLicense();
   const { settings } = useSettings();
-  const maxAccounts = featureConfig?.maxAccounts ?? licenseData?.maxAccounts ?? 999;
+  const maxAccounts = licenseData?.maxAccounts ?? featureConfig?.maxAccounts ?? 999;
 
   const [showManual, setShowManual] = useState(false);
   const [name, setName] = useState("");
