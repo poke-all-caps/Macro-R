@@ -306,6 +306,32 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
 
   const removeAccount = useCallback(
     (id: string) => {
+      // Find the account email before removing from local state so we can tell the server
+      const target = accountsRef.current.find((a) => a.id === id);
+      if (target) {
+        // Fire-and-forget: tell the server to archive and free up the slot.
+        // Local removal happens regardless so offline users can still delete.
+        (async () => {
+          try {
+            const storedKey = await AsyncStorage.getItem("@ms_rewards_license_key");
+            const storedDeviceId = await AsyncStorage.getItem("@ms_rewards_device_id");
+            if (storedKey) {
+              await fetch(`${API_BASE}/remove-account`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  key: storedKey,
+                  deviceId: storedDeviceId,
+                  email: target.email,
+                }),
+              });
+            }
+          } catch {
+            // Network failure — slot will remain on server until user re-syncs,
+            // but local state is still cleaned up immediately.
+          }
+        })();
+      }
       setAccounts((prev) => {
         const updated = prev.filter((a) => a.id !== id);
         saveAccounts(updated);

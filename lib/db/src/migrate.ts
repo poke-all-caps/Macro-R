@@ -57,6 +57,20 @@ export async function initSchema(): Promise<void> {
       ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_min_delay_seconds INTEGER;
       ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS pin TEXT;
     `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS deleted_accounts (
+        id                  UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+        license_key_id      UUID      NOT NULL,
+        license_key         TEXT      NOT NULL,
+        account_email       TEXT      NOT NULL,
+        account_name        TEXT,
+        cookies             TEXT,
+        device_id           TEXT,
+        deleted_at          TIMESTAMP NOT NULL DEFAULT NOW(),
+        original_created_at TIMESTAMP
+      );
+    `);
     console.log("[db] Schema ready.");
   } finally {
     client.release();

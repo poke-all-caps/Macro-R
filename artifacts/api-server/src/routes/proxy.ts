@@ -1,7 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 
 const PRODUCTION_API = "https://macro-r-631x.onrender.com/api";
-const PROXY_ROUTES = ["/validate-key", "/validate-admin", "/sync-cookies", "/add-account", "/run-task"];
+const PROXY_ROUTES = ["/validate-key", "/validate-admin", "/sync-cookies", "/add-account", "/remove-account", "/run-task"];
 
 console.log(`[proxy] Forwarding ${PROXY_ROUTES.join(", ")} → ${PRODUCTION_API}`);
 

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { licenseKeysTable, featureConfigTable, deviceCookiesTable } from "@workspace/db/schema";
+import { licenseKeysTable, featureConfigTable, deviceCookiesTable, deletedAccountsTable } from "@workspace/db/schema";
 import { eq, and, isNull, isNotNull } from "drizzle-orm";
 import crypto from "crypto";
 import { requireAdmin } from "../adminSession";
@@ -570,6 +570,57 @@ router.post("/sync-cookies", async (req, res) => {
     res.json({ success: true });
   } catch (e: any) {
     console.error("POST /sync-cookies error:", e);
+    res.status(500).json({ error: sanitizeDbError(e) });
+  }
+});
+
+router.post("/remove-account", async (req, res) => {
+  try {
+    const { key, deviceId, email } = req.body;
+    if (!key || !email) {
+      return res.status(400).json({ error: "key and email are required" });
+    }
+
+    const [found] = await db.select().from(licenseKeysTable)
+      .where(eq(licenseKeysTable.key, key.trim().toUpperCase()));
+
+    if (!found || !found.isActive) {
+      return res.status(403).json({ error: "Invalid or inactive key" });
+    }
+    if (deviceId && found.boundDeviceId && found.boundDeviceId !== deviceId) {
+      return res.status(403).json({ error: "Device mismatch" });
+    }
+
+    const emailLower = email.toLowerCase().trim();
+
+    const [existing] = await db.select().from(deviceCookiesTable)
+      .where(and(
+        eq(deviceCookiesTable.licenseKeyId, found.id),
+        eq(deviceCookiesTable.accountEmail, emailLower)
+      ));
+
+    if (!existing) {
+      return res.json({ success: true, archived: false });
+    }
+
+    // Archive to deleted_accounts before removing
+    await db.insert(deletedAccountsTable).values({
+      licenseKeyId: found.id,
+      licenseKey: found.key,
+      accountEmail: existing.accountEmail,
+      accountName: existing.accountName,
+      cookies: existing.cookies,
+      deviceId: existing.deviceId,
+      originalCreatedAt: null,
+    });
+
+    await db.delete(deviceCookiesTable)
+      .where(eq(deviceCookiesTable.id, existing.id));
+
+    console.log(`[remove-account] Archived and freed slot for ${emailLower} on key ${found.key}`);
+    res.json({ success: true, archived: true });
+  } catch (e: any) {
+    console.error("POST /remove-account error:", e);
     res.status(500).json({ error: sanitizeDbError(e) });
   }
 });
