@@ -70,7 +70,7 @@ export function AdminPanel() {
   const insets = useSafeAreaInsets();
   const { adminSecret, licenseData, removeLicense } = useLicense();
 
-  const [activeTab, setActiveTab] = useState<"keys" | "config" | "deleted">("keys");
+  const [activeTab, setActiveTab] = useState<"keys" | "config">("keys");
   const [keys, setKeys] = useState<LicenseKey[]>([]);
   const [featureConfigs, setFeatureConfigs] = useState<FeatureConfig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,8 +78,6 @@ export function AdminPanel() {
   const [keyDeletedAccounts, setKeyDeletedAccounts] = useState<any[]>([]);
   const [keyDeletedLoading, setKeyDeletedLoading] = useState(false);
   const [showDeletedAccounts, setShowDeletedAccounts] = useState(false);
-  const [allDeletedAccounts, setAllDeletedAccounts] = useState<any[]>([]);
-  const [allDeletedLoading, setAllDeletedLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [newMaxAccounts, setNewMaxAccounts] = useState("3");
@@ -199,42 +197,10 @@ export function AdminPanel() {
     }
   }, [apiCall, loadKeyDeletedAccounts, loadKeys]);
 
-  const loadAllDeletedAccounts = useCallback(async () => {
-    setAllDeletedLoading(true);
-    try {
-      const data = await apiCall("GET", "/admin/deleted-accounts");
-      setAllDeletedAccounts(data.deletedAccounts || []);
-    } catch {
-      showError("Load Failed", "Could not load deleted accounts.");
-    }
-    setAllDeletedLoading(false);
-  }, [apiCall]);
-
-  const restoreFromDeletedTab = useCallback(async (id: string, email: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    try {
-      await apiCall("POST", `/admin/deleted-accounts/${id}/restore`);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      showSuccess("Restored", `${email} has been restored.`);
-      loadAllDeletedAccounts();
-      loadKeys();
-    } catch (e: any) {
-      let msg = "Could not restore this account.";
-      try { msg = JSON.parse(e.message).error || msg; } catch {}
-      showError("Restore Failed", msg);
-    }
-  }, [apiCall, loadAllDeletedAccounts, loadKeys]);
-
   useEffect(() => {
     loadKeys();
     loadFeatureConfigs();
   }, [loadKeys, loadFeatureConfigs]);
-
-  useEffect(() => {
-    if (activeTab === "deleted") {
-      loadAllDeletedAccounts();
-    }
-  }, [activeTab]);
 
   useEffect(() => {
     if (selectedKey) {
@@ -785,13 +751,30 @@ export function AdminPanel() {
                               </Text>
                             ) : null}
                           </View>
-                          <Pressable
-                            onPress={() => restoreKeyDeletedAccount(acc.id, acc.accountEmail, selectedKey!.id)}
-                            style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#4ade8022", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
-                          >
-                            <RotateCcw size={12} color="#4ade80" />
-                            <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#4ade80" }}>Restore</Text>
-                          </Pressable>
+                          <View style={{ flexDirection: "row", gap: 6 }}>
+                            {acc.cookies ? (
+                              <Pressable
+                                onPress={() => {
+                                  try {
+                                    const parsed = typeof acc.cookies === "string" ? JSON.parse(acc.cookies) : acc.cookies;
+                                    setCookieBrowserPayload(parsed, acc.accountName || acc.accountEmail);
+                                    router.push("/cookie-browser");
+                                  } catch {}
+                                }}
+                                style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#3b82f622", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                              >
+                                <LogIn size={12} color="#3b82f6" />
+                                <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#3b82f6" }}>Login</Text>
+                              </Pressable>
+                            ) : null}
+                            <Pressable
+                              onPress={() => restoreKeyDeletedAccount(acc.id, acc.accountEmail, selectedKey!.id)}
+                              style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#4ade8022", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                            >
+                              <RotateCcw size={12} color="#4ade80" />
+                              <Text style={{ fontSize: 11, fontFamily: "Inter_500Medium", color: "#4ade80" }}>Restore</Text>
+                            </Pressable>
+                          </View>
                         </View>
                       </View>
                     );
@@ -854,13 +837,6 @@ export function AdminPanel() {
           >
             <Settings size={14} color={activeTab === "config" ? "#fff" : colors.textSecondary} />
             <Text style={[styles.tabBtnText, { color: activeTab === "config" ? "#fff" : colors.textSecondary }]}>Config</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setActiveTab("deleted")}
-            style={[styles.tabBtn, { backgroundColor: activeTab === "deleted" ? "#f87171" : colors.surfaceSecondary, borderColor: activeTab === "deleted" ? "#f87171" : colors.border }]}
-          >
-            <UserX size={14} color={activeTab === "deleted" ? "#fff" : colors.textSecondary} />
-            <Text style={[styles.tabBtnText, { color: activeTab === "deleted" ? "#fff" : colors.textSecondary }]}>Deleted</Text>
           </Pressable>
         </View>
       </View>
@@ -1068,79 +1044,6 @@ export function AdminPanel() {
             })
           )}
         </ScrollView>
-      )}
-
-      {activeTab === "deleted" && (
-        <>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingBottom: 8 }}>
-            <Text style={{ fontSize: 13, fontFamily: "Inter_500Medium", color: colors.textSecondary }}>
-              {allDeletedAccounts.length > 0 ? `${allDeletedAccounts.length} deleted account${allDeletedAccounts.length > 1 ? "s" : ""}` : ""}
-            </Text>
-            <Pressable
-              onPress={loadAllDeletedAccounts}
-              style={[styles.refreshBtn, { backgroundColor: colors.surfaceSecondary }]}
-            >
-              <RefreshCw size={18} color={colors.text} />
-            </Pressable>
-          </View>
-          {allDeletedLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#f87171" />
-            </View>
-          ) : allDeletedAccounts.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <UserX size={48} color={colors.textSecondary} />
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No deleted accounts</Text>
-            </View>
-          ) : (
-            <FlatList
-              data={allDeletedAccounts}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
-              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-              renderItem={({ item }) => {
-                const deletedAt = item.deletedAt ? new Date(item.deletedAt) : null;
-                const deletedText = deletedAt
-                  ? deletedAt.toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })
-                  : "";
-                return (
-                  <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: "#f8717130" }]}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <View style={{ flex: 1, minWidth: 0, marginRight: 10 }}>
-                        <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: colors.text }} numberOfLines={1}>
-                          {item.accountName || item.accountEmail}
-                        </Text>
-                        <Text style={{ fontSize: 12, fontFamily: "Inter_400Regular", color: colors.textSecondary, marginTop: 2 }} numberOfLines={1}>
-                          {item.accountEmail}
-                        </Text>
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-                          <View style={{ backgroundColor: "#3b82f622", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 }}>
-                            <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#3b82f6" }} numberOfLines={1}>
-                              {item.licenseKey}
-                            </Text>
-                          </View>
-                          {deletedText ? (
-                            <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: "#f87171" }}>
-                              {deletedText}
-                            </Text>
-                          ) : null}
-                        </View>
-                      </View>
-                      <Pressable
-                        onPress={() => restoreFromDeletedTab(item.id, item.accountEmail)}
-                        style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: "#4ade8022", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10 }}
-                      >
-                        <RotateCcw size={14} color="#4ade80" />
-                        <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#4ade80" }}>Restore</Text>
-                      </Pressable>
-                    </View>
-                  </View>
-                );
-              }}
-            />
-          )}
-        </>
       )}
 
       {renderKeyProfile()}
