@@ -455,18 +455,31 @@ function dashboardPage(): string {
         var deletedAt = r.deletedAt ? new Date(r.deletedAt).toLocaleString(undefined, { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
         var keyShort = esc((r.licenseKey || '').slice(0, 4)) + '-****-****';
         var hasCookies = r.cookies && r.cookies.length > 2;
-        return '<div class="card" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">' +
+        var safeId = esc(r.id);
+        return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
           '<div>' +
             '<div style="font-weight:600;color:#e2e8f0;font-size:14px">' + esc(r.accountName || r.accountEmail) + '</div>' +
             '<div style="color:#94a3b8;font-size:12px;margin-top:2px">' + esc(r.accountEmail) + '</div>' +
-            '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">' +
+            '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
               '<span class="badge inactive" style="font-size:11px">Deleted ' + esc(deletedAt) + '</span>' +
               '<span class="stat" style="font-family:monospace;color:#3b82f6">' + keyShort + '</span>' +
               (hasCookies ? '<span class="badge active" style="font-size:10px">Has cookies</span>' : '<span class="badge expired" style="font-size:10px">No cookies</span>') +
             '</div>' +
           '</div>' +
+          '<button class="btn-success" style="padding:6px 14px;font-size:12px;white-space:nowrap" onclick="restoreAccount(' + JSON.stringify(safeId) + ')">Restore</button>' +
         '</div>';
       }).join('');
+    }
+
+    async function restoreAccount(id) {
+      if (!confirm('Restore this account? It will be moved back to the active slot on its original key.')) return;
+      var res = await api('POST', '/admin/deleted-accounts/' + id + '/restore');
+      if (res.error) {
+        alert('Restore failed: ' + res.error);
+      } else {
+        loadDeletedAccounts();
+        loadKeys();
+      }
     }
 
     async function loadFeatureConfig() {

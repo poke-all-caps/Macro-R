@@ -625,6 +625,63 @@ router.post("/remove-account", async (req, res) => {
   }
 });
 
+router.post("/admin/deleted-accounts/:id/restore", requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [archived] = await db.select().from(deletedAccountsTable)
+      .where(eq(deletedAccountsTable.id, id));
+    if (!archived) {
+      return res.status(404).json({ error: "Deleted account record not found" });
+    }
+
+    const [key] = await db.select().from(licenseKeysTable)
+      .where(eq(licenseKeysTable.id, archived.licenseKeyId));
+    if (!key) {
+      return res.status(404).json({ error: "The license key this account belonged to no longer exists" });
+    }
+
+    // Check slot availability before restoring
+    const [tierCfg] = await db.select().from(featureConfigTable)
+      .where(eq(featureConfigTable.keyType, key.keyType));
+    const maxAccounts = (key.customMaxAccounts !== null && key.customMaxAccounts !== undefined)
+      ? key.customMaxAccounts
+      : (tierCfg ? tierCfg.maxAccounts : key.maxAccounts);
+
+    const existingRows = await db.select().from(deviceCookiesTable)
+      .where(eq(deviceCookiesTable.licenseKeyId, key.id));
+    if (existingRows.length >= maxAccounts) {
+      return res.status(409).json({
+        error: `Cannot restore: key is already at its account limit (${maxAccounts} max, ${existingRows.length} current)`,
+      });
+    }
+
+    // Check if a live row already exists for this email (avoid duplicate)
+    const alreadyLive = existingRows.find(
+      (r) => r.accountEmail.toLowerCase() === archived.accountEmail.toLowerCase()
+    );
+    if (alreadyLive) {
+      return res.status(409).json({ error: "An active account with this email already exists on this key" });
+    }
+
+    await db.insert(deviceCookiesTable).values({
+      licenseKeyId: key.id,
+      deviceId: archived.deviceId || "",
+      accountEmail: archived.accountEmail,
+      accountName: archived.accountName,
+      cookies: archived.cookies || "{}",
+    });
+
+    // Remove from archive
+    await db.delete(deletedAccountsTable).where(eq(deletedAccountsTable.id, id));
+
+    console.log(`[restore-account] Restored ${archived.accountEmail} to key ${key.key}`);
+    res.json({ success: true });
+  } catch (e: any) {
+    console.error("POST /admin/deleted-accounts/restore error:", e);
+    res.status(500).json({ error: sanitizeDbError(e) });
+  }
+});
+
 router.get("/admin/deleted-accounts", requireAdmin, async (req, res) => {
   try {
     const rows = await db
