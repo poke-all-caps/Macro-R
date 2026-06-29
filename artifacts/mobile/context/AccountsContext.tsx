@@ -43,6 +43,7 @@ export interface RunLog {
   pointsEarned: number;
   status: "success" | "failed";
   errorMessage?: string;
+  backgroundRun?: boolean;
 }
 
 export interface ServerAccount {
