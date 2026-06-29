@@ -31,6 +31,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+      "android.permission.USE_FULL_SCREEN_INTENT",
+      "android.permission.SYSTEM_ALERT_WINDOW",
       "android.permission.CAMERA",
       "android.permission.READ_MEDIA_IMAGES",
       "android.permission.READ_EXTERNAL_STORAGE",

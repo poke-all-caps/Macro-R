@@ -85,21 +85,31 @@ export async function setupNotificationHandler(): Promise<void> {
     });
 
     if (Platform.OS === "android") {
+      // General channel — status updates, completion notices
       await Notifications.setNotificationChannelAsync("macro-rewards", {
-        name: "Macro Rewards",
-        importance: Notifications.AndroidImportance.MAX,
+        name: "Macro Rewards — Status",
+        importance: Notifications.AndroidImportance.HIGH,
         sound: "default",
         vibrationPattern: [0, 250, 250, 250],
         enableVibrate: true,
-        bypassDnd: true,
+        bypassDnd: false,
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
       });
 
-      try {
-        await Notifications.deleteNotificationChannelAsync("default");
-      } catch {}
-      try {
-        await Notifications.deleteNotificationChannelAsync("alarms");
-      } catch {}
+      // Alarm channel — overnight schedule triggers; bypasses DND, full lock-screen
+      await Notifications.setNotificationChannelAsync("macro-rewards-alarm", {
+        name: "Macro Rewards — Overnight Alarm",
+        importance: Notifications.AndroidImportance.MAX,
+        sound: "default",
+        vibrationPattern: [0, 500, 200, 500, 200, 500],
+        enableVibrate: true,
+        bypassDnd: true,
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+        showBadge: true,
+      });
+
+      try { await Notifications.deleteNotificationChannelAsync("default"); } catch {}
+      try { await Notifications.deleteNotificationChannelAsync("alarms"); } catch {}
     }
   } catch {}
 }
@@ -173,20 +183,27 @@ export async function scheduleOvernightNotifications(
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {}
 
-  const channelId = Platform.OS === "android" ? "macro-rewards" : undefined;
+  // Use the dedicated alarm channel so it bypasses DND and shows on lock screen
+  const channelId = Platform.OS === "android" ? "macro-rewards-alarm" : undefined;
   let count = 0;
+
+  const alarmContent = {
+    title: "⏰ Macro Rewards — Overnight Run",
+    body: "Tap to open and start your overnight Bing searches.",
+    data: { action: "start_run" },
+    sound: "default",
+    priority: "max",
+    // Show full content on lock screen (not just "1 notification")
+    ...(Platform.OS === "android" && {
+      channelId,
+      sticky: false,
+    }),
+  };
 
   for (const slot of slots) {
     try {
       await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Macro Rewards — Overnight Run",
-          body: "Starting your overnight Bing searches...",
-          data: { action: "start_run" },
-          sound: "default",
-          priority: "max",
-          ...(Platform.OS === "android" && { channelId }),
-        },
+        content: alarmContent,
         trigger: {
           type: "daily",
           hour: slot.hour,
@@ -195,7 +212,7 @@ export async function scheduleOvernightNotifications(
         } as any,
       });
       count++;
-      console.log(`[Notifications] Scheduled daily notification for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
+      console.log(`[Notifications] Scheduled alarm for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
     } catch (e) {
       console.log(`[Notifications] daily trigger failed for ${slot.hour}:${String(slot.minute).padStart(2, '0')}:`, e);
       // Fallback: calculate exact seconds until target time
@@ -206,14 +223,7 @@ export async function scheduleOvernightNotifications(
         if (target <= now) target.setDate(target.getDate() + 1);
         const seconds = Math.max(60, Math.floor((target.getTime() - now.getTime()) / 1000));
         await Notifications.scheduleNotificationAsync({
-          content: {
-            title: "Macro Rewards — Overnight Run",
-            body: "Starting your overnight Bing searches...",
-            data: { action: "start_run" },
-            sound: "default",
-            priority: "max",
-            ...(Platform.OS === "android" && { channelId }),
-          },
+          content: alarmContent,
           trigger: {
             type: "timeInterval",
             seconds,
@@ -221,7 +231,7 @@ export async function scheduleOvernightNotifications(
           } as any,
         });
         count++;
-        console.log(`[Notifications] Fallback: scheduled timeInterval ${seconds}s for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
+        console.log(`[Notifications] Fallback alarm: ${seconds}s for ${slot.hour}:${String(slot.minute).padStart(2, '0')}`);
       } catch (e2) {
         console.log(`[Notifications] Fallback also failed:`, e2);
       }
@@ -269,12 +279,17 @@ export async function showRunningNotification(): Promise<string | null> {
   try {
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: "Macro Rewards — Searching...",
-        body: "Overnight search is running. Tap to open and stop.",
+        title: "Macro Rewards — Searches Running",
+        body: "Tap to return to the search screen and monitor progress.",
         data: { action: "open_running" },
         sound: false,
         sticky: true,
-        ...(Platform.OS === "android" && { channelId: "macro-rewards" }),
+        priority: "max",
+        ...(Platform.OS === "android" && {
+          channelId: "macro-rewards",
+          // Show notification content on lock screen (not just "1 notification")
+          lockscreenVisibility: 1, // VISIBILITY_PUBLIC
+        }),
       },
       trigger: null,
     });
