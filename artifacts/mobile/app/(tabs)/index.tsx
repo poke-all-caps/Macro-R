@@ -41,7 +41,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const { showAlert, AlertComponent } = useCustomAlert();
-  const maxAccounts = featureConfig.maxAccounts;
+  const maxAccounts = licenseData?.maxAccounts ?? featureConfig.maxAccounts;
   const maxSearches = featureConfig.maxSearches;
   const minDelay = featureConfig.minDelaySeconds;
   const dailySetAllowed = featureConfig.dailySetEnabled && settings.dailySetEnabled;
@@ -280,11 +280,11 @@ export default function HomeScreen() {
               styles.headerBtn,
               {
                 backgroundColor: colors.surfaceSecondary,
-                opacity: pressed ? 0.7 : 1,
+                opacity: accounts.length >= maxAccounts ? 0.35 : pressed ? 0.7 : 1,
               },
             ]}
           >
-            <Plus size={20} color={colors.text} />
+            <Plus size={20} color={accounts.length >= maxAccounts ? colors.textSecondary : colors.text} />
           </Pressable>
         </View>
       </View>
