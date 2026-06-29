@@ -237,10 +237,12 @@ export default function OvernightScreen() {
     setScheduledCount(scheduled);
     setScheduling(false);
     const slotList = settings.overnightSlots.map((s, i) => `  Run ${i + 1}: ${formatSlot(s)}`).join("\n");
+
+    const missingPerms = Platform.OS === "android" && (!batteryOpened || !alarmOpened || !overlayOpened || !fullScreenOpened);
     showAlert(
       "Overnight Schedule Active",
-      `${scheduled} daily alarm${scheduled !== 1 ? "s" : ""} set.\n\n${slotList}\n\nA status notification will stay in your notification bar with quick Search and Edit Schedule buttons.\n\nSearches will also run automatically in the background at these times — even if the app is closed.`,
-      [{ text: "Got it" }]
+      `${scheduled} daily alarm${scheduled !== 1 ? "s" : ""} set.\n\n${slotList}\n\nA status notification will stay in your notification bar with quick Search and Edit Schedule buttons.\n\nSearches will also run automatically in the background at these times — even if the app is closed.${missingPerms ? "\n\n⚠️ Some permissions haven't been granted yet. Scroll up and tap 'Grant All' to avoid Android blocking overnight runs." : ""}`,
+      [{ text: missingPerms ? "Grant Permissions" : "Got it", onPress: missingPerms ? handleGrantAll : undefined }]
     );
   };
 

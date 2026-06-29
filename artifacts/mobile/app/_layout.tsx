@@ -7,6 +7,7 @@ import {
   Inter_800ExtraBold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { router, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -30,6 +31,7 @@ import {
   registerBackgroundNotificationTask,
   showOvernightPersistentNotification,
   hasPersistentNotification,
+  requestNotificationPermission,
 } from "@/utils/notifications";
 import { registerBackgroundSearchTask, isBackgroundRunning, scheduleBackgroundFetch, isBackgroundFetchEnabled } from "@/utils/backgroundSearch";
 import { startKeepAlive } from "@/utils/keepAlive";
@@ -75,6 +77,13 @@ function NotificationHandler() {
 
   useEffect(() => {
     setupNotificationHandler();
+    // Ask for notification permission on first launch (once only)
+    AsyncStorage.getItem("@ms_rewards_notif_asked").then((asked) => {
+      if (!asked) {
+        AsyncStorage.setItem("@ms_rewards_notif_asked", "true");
+        requestNotificationPermission().catch(() => {});
+      }
+    });
     // Re-register background fetch on startup ONLY if the user previously
     // applied a schedule (BG_FETCH_ENABLED_KEY === "true").  This survives
     // app restarts and reinstalls without overriding a cleared schedule.
