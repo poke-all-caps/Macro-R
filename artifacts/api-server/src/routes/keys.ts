@@ -625,6 +625,19 @@ router.post("/remove-account", async (req, res) => {
   }
 });
 
+router.get("/admin/deleted-accounts", requireAdmin, async (req, res) => {
+  try {
+    const rows = await db
+      .select()
+      .from(deletedAccountsTable)
+      .orderBy(deletedAccountsTable.deletedAt);
+    res.json({ deletedAccounts: rows.reverse() });
+  } catch (e: any) {
+    console.error("GET /admin/deleted-accounts error:", e);
+    res.status(500).json({ error: sanitizeDbError(e) });
+  }
+});
+
 router.get("/admin/keys/:id/cookies", requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;

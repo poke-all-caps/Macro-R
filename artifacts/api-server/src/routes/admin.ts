@@ -192,6 +192,15 @@ function dashboardPage(): string {
   <h2 style="margin-top:32px;margin-bottom:16px;color:#fff">Feature Config (per Key Type)</h2>
   <div id="featureConfigList"></div>
 
+  <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h2 style="margin:0;color:#fff">Deleted Accounts (Archive)</h2>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" id="deletedSearchInput" placeholder="Filter by email or key…" style="width:220px;padding:7px 12px;font-size:13px" oninput="filterDeleted()">
+      <button class="btn-secondary" style="padding:7px 14px;font-size:13px" onclick="loadDeletedAccounts()">Refresh</button>
+    </div>
+  </div>
+  <div id="deletedAccountsList"></div>
+
   <script>
     const API = window.location.pathname.replace(/\\/admin\\/?$/, '');
 
@@ -414,6 +423,51 @@ function dashboardPage(): string {
 
     loadKeys();
     loadFeatureConfig();
+    loadDeletedAccounts();
+
+    var _allDeletedAccounts = [];
+
+    async function loadDeletedAccounts() {
+      var el = document.getElementById('deletedAccountsList');
+      el.innerHTML = '<div class="no-keys" style="padding:24px;color:#64748b">Loading…</div>';
+      var data = await api('GET', '/admin/deleted-accounts');
+      _allDeletedAccounts = data.deletedAccounts || [];
+      renderDeleted(_allDeletedAccounts);
+    }
+
+    function filterDeleted() {
+      var q = document.getElementById('deletedSearchInput').value.toLowerCase().trim();
+      if (!q) { renderDeleted(_allDeletedAccounts); return; }
+      renderDeleted(_allDeletedAccounts.filter(function(r) {
+        return (r.accountEmail || '').toLowerCase().includes(q) ||
+               (r.accountName  || '').toLowerCase().includes(q) ||
+               (r.licenseKey   || '').toLowerCase().includes(q);
+      }));
+    }
+
+    function renderDeleted(rows) {
+      var el = document.getElementById('deletedAccountsList');
+      if (!rows || rows.length === 0) {
+        el.innerHTML = '<div class="no-keys" style="padding:24px;color:#64748b">No deleted accounts yet.</div>';
+        return;
+      }
+      el.innerHTML = rows.map(function(r) {
+        var deletedAt = r.deletedAt ? new Date(r.deletedAt).toLocaleString(undefined, { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+        var keyShort = esc((r.licenseKey || '').slice(0, 4)) + '-****-****';
+        var hasCookies = r.cookies && r.cookies.length > 2;
+        return '<div class="card" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">' +
+          '<div>' +
+            '<div style="font-weight:600;color:#e2e8f0;font-size:14px">' + esc(r.accountName || r.accountEmail) + '</div>' +
+            '<div style="color:#94a3b8;font-size:12px;margin-top:2px">' + esc(r.accountEmail) + '</div>' +
+            '<div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">' +
+              '<span class="badge inactive" style="font-size:11px">Deleted ' + esc(deletedAt) + '</span>' +
+              '<span class="stat" style="font-family:monospace;color:#3b82f6">' + keyShort + '</span>' +
+              (hasCookies ? '<span class="badge active" style="font-size:10px">Has cookies</span>' : '<span class="badge expired" style="font-size:10px">No cookies</span>') +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
 
     async function loadFeatureConfig() {
       const { configs } = await api('GET', '/admin/feature-config');
