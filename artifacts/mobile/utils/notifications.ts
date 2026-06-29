@@ -102,6 +102,19 @@ export async function setupNotificationHandler(): Promise<void> {
         showBadge: true,
       });
 
+      // Trigger channel — silent background wake signal; importance MIN so it
+      // delivers to the app and fires the background task but never appears in
+      // the notification shade, makes no sound, and shows no heads-up display.
+      await Notifications.setNotificationChannelAsync("macro-rewards-trigger", {
+        name: "Macro Rewards — Background Trigger",
+        importance: Notifications.AndroidImportance.MIN,
+        sound: undefined,
+        enableVibrate: false,
+        bypassDnd: false,
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.SECRET,
+        showBadge: false,
+      });
+
       // Persistent channel — always-on overnight status indicator (silent, no vibration)
       // Must be DEFAULT importance so Android honours the ongoing/non-dismissable flag.
       await Notifications.setNotificationChannelAsync("macro-rewards-persistent", {
@@ -248,20 +261,21 @@ export async function scheduleOvernightNotifications(
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {}
 
-  // Use the silent persistent channel — these are background wake triggers, NOT user-facing alarms.
-  // They fire at the scheduled time and wake up the background task to auto-run searches silently.
-  const channelId = Platform.OS === "android" ? "macro-rewards-persistent" : undefined;
+  // Use the MIN-importance trigger channel — delivers silently to the app to
+  // wake the background task, but never appears in the notification shade.
+  const channelId = Platform.OS === "android" ? "macro-rewards-trigger" : undefined;
   let count = 0;
 
   const triggerContent = {
-    title: "Macro Rewards — Running overnight searches",
-    body: "Background searches are running automatically.",
+    title: " ",
+    body: " ",
     data: { action: "bg_search_trigger" },
     sound: false,
     ...(Platform.OS === "android" && {
       channelId,
-      priority: "low",
+      priority: "min",
       sticky: false,
+      lockscreenVisibility: 0,
     }),
   };
 
