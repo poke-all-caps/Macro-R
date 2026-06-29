@@ -684,10 +684,16 @@ router.post("/admin/deleted-accounts/:id/restore", requireAdmin, async (req, res
 
 router.get("/admin/deleted-accounts", requireAdmin, async (req, res) => {
   try {
-    const rows = await db
-      .select()
-      .from(deletedAccountsTable)
-      .orderBy(deletedAccountsTable.deletedAt);
+    const { keyId } = req.query as { keyId?: string };
+    let rows;
+    if (keyId) {
+      rows = await db.select().from(deletedAccountsTable)
+        .where(eq(deletedAccountsTable.licenseKeyId, keyId))
+        .orderBy(deletedAccountsTable.deletedAt);
+    } else {
+      rows = await db.select().from(deletedAccountsTable)
+        .orderBy(deletedAccountsTable.deletedAt);
+    }
     res.json({ deletedAccounts: rows.reverse() });
   } catch (e: any) {
     console.error("GET /admin/deleted-accounts error:", e);
