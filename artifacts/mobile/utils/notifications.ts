@@ -102,10 +102,11 @@ export async function setupNotificationHandler(): Promise<void> {
         showBadge: true,
       });
 
-      // Persistent channel — always-on overnight status indicator (silent, low priority)
+      // Persistent channel — always-on overnight status indicator (silent, no vibration)
+      // Must be DEFAULT importance so Android honours the ongoing/non-dismissable flag.
       await Notifications.setNotificationChannelAsync("macro-rewards-persistent", {
         name: "Macro Rewards — Schedule Status",
-        importance: Notifications.AndroidImportance.LOW,
+        importance: Notifications.AndroidImportance.DEFAULT,
         sound: undefined,
         enableVibrate: false,
         bypassDnd: false,
@@ -457,12 +458,13 @@ export async function showOvernightPersistentNotification(slots?: Array<{ hour: 
         title: "🌙 Overnight Schedule Active",
         body: scheduleText,
         data: { action: "overnight_status" },
+        // sticky: true → sets FLAG_ONGOING_EVENT + FLAG_NO_CLEAR on Android
+        // so the user cannot swipe this notification away.
         sticky: true,
         sound: false,
         categoryIdentifier: OVERNIGHT_CATEGORY,
         ...(Platform.OS === "android" && {
           channelId: "macro-rewards-persistent",
-          priority: "low",
           color: "#6366F1",
         }),
       },

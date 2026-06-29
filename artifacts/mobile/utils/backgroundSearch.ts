@@ -141,6 +141,38 @@ async function showNotification(title: string, body: string): Promise<void> {
   } catch {}
 }
 
+async function showBgRunningNotification(): Promise<string | null> {
+  try {
+    const Notifications = require("expo-notifications");
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Macro Rewards — Searches Running",
+        body: "Overnight searches are running in the background.",
+        data: { action: "open_running" },
+        sound: false,
+        sticky: true,
+        priority: "max",
+        ...(Platform.OS === "android" && {
+          channelId: "macro-rewards",
+          lockscreenVisibility: 1,
+        }),
+      },
+      trigger: null,
+    });
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+async function dismissBgRunningNotification(id: string | null): Promise<void> {
+  if (!id) return;
+  try {
+    const Notifications = require("expo-notifications");
+    await Notifications.dismissNotificationAsync(id);
+  } catch {}
+}
+
 export function isAppInForeground(): boolean {
   return AppState.currentState === "active";
 }
@@ -225,6 +257,7 @@ export async function runBackgroundSearches(): Promise<void> {
   }
 
   console.log("[BackgroundSearch] Starting background search run");
+  const runningNotifId = await showBgRunningNotification();
 
   try {
     const accounts = await getAccounts();
@@ -339,6 +372,7 @@ export async function runBackgroundSearches(): Promise<void> {
 
     console.log("[BackgroundSearch] Finished all accounts");
   } finally {
+    await dismissBgRunningNotification(runningNotifId);
     inMemoryLock = false;
     await AsyncStorage.setItem(BG_LAST_RUN_KEY, Date.now().toString());
     await AsyncStorage.removeItem(BG_RUNNING_KEY);
