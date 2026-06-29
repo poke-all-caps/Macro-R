@@ -25,6 +25,8 @@ import {
   isNotificationsAvailable,
   requestNotificationPermission,
   scheduleOvernightNotifications,
+  showOvernightPersistentNotification,
+  dismissOvernightPersistentNotification,
 } from "@/utils/notifications";
 import { scheduleBackgroundFetch, unscheduleBackgroundFetch } from "@/utils/backgroundSearch";
 
@@ -190,12 +192,13 @@ export default function OvernightScreen() {
     }
     const { scheduled } = await scheduleOvernightNotifications(settings.overnightSlots);
     await scheduleBackgroundFetch().catch(() => {});
+    await showOvernightPersistentNotification(settings.overnightSlots).catch(() => {});
     setScheduledCount(scheduled);
     setScheduling(false);
     const slotList = settings.overnightSlots.map((s, i) => `  Run ${i + 1}: ${formatSlot(s)}`).join("\n");
     showAlert(
       "Overnight Schedule Active",
-      `${scheduled} daily alarm${scheduled !== 1 ? "s" : ""} set.\n\n${slotList}\n\nSearches will run automatically at these times — even if the app is closed — as long as battery optimization is disabled for the app.\n\nTip: Go to Settings → Apps → Macro R → Battery → Unrestricted to ensure reliable overnight runs.`,
+      `${scheduled} daily alarm${scheduled !== 1 ? "s" : ""} set.\n\n${slotList}\n\nA status notification will stay in your notification bar with quick Search and Edit Schedule buttons.\n\nSearches will also run automatically in the background at these times — even if the app is closed.`,
       [{ text: "Got it" }]
     );
   };
@@ -203,6 +206,7 @@ export default function OvernightScreen() {
   const handleClearSchedule = async () => {
     await cancelAllScheduledNotifications();
     await unscheduleBackgroundFetch().catch(() => {});
+    await dismissOvernightPersistentNotification().catch(() => {});
     setScheduledCount(0);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     showAlert("Schedule Cleared", "All overnight notifications have been removed.", [{ text: "OK" }]);

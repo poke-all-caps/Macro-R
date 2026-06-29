@@ -108,6 +108,17 @@ export async function setupNotificationHandler(): Promise<void> {
         showBadge: true,
       });
 
+      // Persistent channel — always-on overnight status indicator (silent, low priority)
+      await Notifications.setNotificationChannelAsync("macro-rewards-persistent", {
+        name: "Macro Rewards — Schedule Status",
+        importance: Notifications.AndroidImportance.LOW,
+        sound: undefined,
+        enableVibrate: false,
+        bypassDnd: false,
+        lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+        showBadge: false,
+      });
+
       try { await Notifications.deleteNotificationChannelAsync("default"); } catch {}
       try { await Notifications.deleteNotificationChannelAsync("alarms"); } catch {}
     }
@@ -401,6 +412,91 @@ export async function getInitialNotificationResponse(): Promise<any | null> {
   } catch {
     return null;
   }
+}
+
+// ── Persistent 24/7 overnight status notification ───────────────────────────
+const PERSISTENT_NOTIF_ID_KEY = "@ms_rewards_persistent_notif_id";
+const OVERNIGHT_CATEGORY = "overnight-controls";
+
+async function setupOvernightNotificationCategory(): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications || Platform.OS === "web") return;
+  try {
+    await Notifications.setNotificationCategoryAsync(OVERNIGHT_CATEGORY, [
+      {
+        identifier: "search_now",
+        buttonTitle: "Search Now",
+        options: { opensAppToForeground: true },
+      },
+      {
+        identifier: "edit_schedule",
+        buttonTitle: "Edit Schedule",
+        options: { opensAppToForeground: true },
+      },
+    ]);
+  } catch (e) {
+    console.log("[Notifications] Failed to set overnight category:", e);
+  }
+}
+
+export async function showOvernightPersistentNotification(slots?: Array<{ hour: number; minute: number }>): Promise<void> {
+  if (Platform.OS === "web") return;
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+
+  await dismissOvernightPersistentNotification();
+  await setupOvernightNotificationCategory();
+
+  let scheduleText = "Searches will run automatically at scheduled times.";
+  if (slots && slots.length > 0) {
+    const fmt = (h: number, m: number) => {
+      const ampm = h < 12 ? "AM" : "PM";
+      const h12 = h % 12 === 0 ? 12 : h % 12;
+      return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
+    };
+    scheduleText = "Next runs: " + slots.map((s) => fmt(s.hour, s.minute)).join(" · ");
+  }
+
+  try {
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "🌙 Overnight Schedule Active",
+        body: scheduleText,
+        data: { action: "overnight_status" },
+        sticky: true,
+        sound: false,
+        categoryIdentifier: OVERNIGHT_CATEGORY,
+        ...(Platform.OS === "android" && {
+          channelId: "macro-rewards-persistent",
+          priority: "low",
+          color: "#6366F1",
+        }),
+      },
+      trigger: null,
+    });
+    await AsyncStorage.setItem(PERSISTENT_NOTIF_ID_KEY, id);
+    console.log("[Notifications] Persistent overnight notification shown:", id);
+  } catch (e) {
+    console.log("[Notifications] Failed to show persistent notification:", e);
+  }
+}
+
+export async function dismissOvernightPersistentNotification(): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
+  try {
+    const id = await AsyncStorage.getItem(PERSISTENT_NOTIF_ID_KEY);
+    if (id) {
+      try { await Notifications.dismissNotificationAsync(id); } catch {}
+      try { await Notifications.cancelScheduledNotificationAsync(id); } catch {}
+      await AsyncStorage.removeItem(PERSISTENT_NOTIF_ID_KEY);
+    }
+  } catch {}
+}
+
+export async function hasPersistentNotification(): Promise<boolean> {
+  const id = await AsyncStorage.getItem(PERSISTENT_NOTIF_ID_KEY);
+  return !!id;
 }
 
 export async function setPendingRun(): Promise<void> {

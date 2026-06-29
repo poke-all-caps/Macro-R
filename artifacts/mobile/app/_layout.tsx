@@ -28,6 +28,8 @@ import {
   setupNotificationHandler,
   setPendingRun,
   registerBackgroundNotificationTask,
+  showOvernightPersistentNotification,
+  hasPersistentNotification,
 } from "@/utils/notifications";
 import { registerBackgroundSearchTask, isBackgroundRunning, scheduleBackgroundFetch, isBackgroundFetchEnabled } from "@/utils/backgroundSearch";
 import { startKeepAlive } from "@/utils/keepAlive";
@@ -81,6 +83,12 @@ function NotificationHandler() {
         scheduleBackgroundFetch().catch((e) =>
           console.log("[Layout] Background fetch re-register failed:", e)
         );
+        // Restore the persistent 24/7 notification if it was previously active
+        hasPersistentNotification().then((has) => {
+          if (!has) {
+            showOvernightPersistentNotification().catch(() => {});
+          }
+        });
       }
     });
 
@@ -121,16 +129,46 @@ function NotificationHandler() {
     getInitialNotificationResponse().then(async (response) => {
       if (!response) return;
       const action = response?.notification?.request?.content?.data?.action;
+      const actionIdentifier = response?.actionIdentifier;
+
+      if (actionIdentifier === "search_now") {
+        console.log("[NotificationHandler] Cold-start: Search Now tapped");
+        await handleStartRun();
+        return;
+      }
+      if (actionIdentifier === "edit_schedule") {
+        console.log("[NotificationHandler] Cold-start: Edit Schedule tapped");
+        router.navigate("/overnight");
+        return;
+      }
       if (action === "start_run" || action === "open_running") {
         console.log("[NotificationHandler] Cold-start notification response — starting run");
         await handleStartRun();
+      }
+      if (action === "overnight_status") {
+        router.navigate("/overnight");
       }
     });
 
     const responseSub = addNotificationResponseListener(async (response: any) => {
       const action = response?.notification?.request?.content?.data?.action;
+      const actionIdentifier = response?.actionIdentifier;
+
+      // Buttons on the persistent overnight notification
+      if (actionIdentifier === "search_now") {
+        await handleStartRun();
+        return;
+      }
+      if (actionIdentifier === "edit_schedule") {
+        router.navigate("/overnight");
+        return;
+      }
+
       if (action === "start_run" || action === "open_running") {
         await handleStartRun();
+      }
+      if (action === "overnight_status") {
+        router.navigate("/overnight");
       }
     });
 
