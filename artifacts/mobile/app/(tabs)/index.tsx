@@ -30,6 +30,10 @@ import { useLicense } from "@/context/LicenseContext";
 import { formatTimeRemaining } from "@/utils/time";
 import { useSettings } from "@/context/SettingsContext";
 import { consumePendingRun } from "@/utils/notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const ACTIVE_RUN_KEY = "@ms_rewards_active_run";
+const ACTIVE_RUN_MAX_AGE_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 export default function HomeScreen() {
   const scheme = useColorScheme() ?? "light";
@@ -70,22 +74,59 @@ export default function HomeScreen() {
     }, [isRunning, refreshPoints])
   );
 
-  // Auto-start run on cold-start: home screen gains focus after app was launched from a notification tap
+  // Auto-start or auto-resume a run when the home screen gains focus:
+  // 1. Notification-triggered pending run (overnight schedule tapped)
+  // 2. Interrupted active run (process was killed while searching — auto-resumes on reopen)
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      consumePendingRun().then((pending) => {
+      const checkAndResume = async () => {
         const enabled = accounts.filter((a) => a.enabled ?? true);
-        if (!active || !pending || isRunning || enabled.length === 0) return;
-        startRun();
-        router.push({
-          pathname: "/search-runner",
-          params: {
-            accountIds: JSON.stringify(enabled.map((a) => a.id)),
-            mode: settings.overnightDailySet ? "both" : "searchonly",
-          },
-        });
-      });
+        if (!active || isRunning || enabled.length === 0) return;
+
+        // Priority 1: notification-triggered pending run
+        const pending = await consumePendingRun();
+        if (pending) {
+          if (!active) return;
+          startRun();
+          router.push({
+            pathname: "/search-runner",
+            params: {
+              accountIds: JSON.stringify(enabled.map((a) => a.id)),
+              mode: settings.overnightDailySet ? "both" : "searchonly",
+            },
+          });
+          return;
+        }
+
+        // Priority 2: interrupted active run (app was killed mid-search)
+        try {
+          const raw = await AsyncStorage.getItem(ACTIVE_RUN_KEY);
+          if (!raw || !active) return;
+          const { accountIds: savedIds, mode: savedMode, startedAt } = JSON.parse(raw);
+          // Only resume if the run started within the last 2 hours
+          if (Date.now() - startedAt > ACTIVE_RUN_MAX_AGE_MS) {
+            await AsyncStorage.removeItem(ACTIVE_RUN_KEY);
+            return;
+          }
+          // Filter to account IDs that still exist on this device
+          const validIds = (savedIds as string[]).filter((id) =>
+            accounts.some((a) => a.id === id)
+          );
+          if (validIds.length === 0) {
+            await AsyncStorage.removeItem(ACTIVE_RUN_KEY);
+            return;
+          }
+          startRun();
+          router.push({
+            pathname: "/search-runner",
+            params: { accountIds: JSON.stringify(validIds), mode: savedMode },
+          });
+        } catch {
+          await AsyncStorage.removeItem(ACTIVE_RUN_KEY).catch(() => {});
+        }
+      };
+      checkAndResume();
       return () => { active = false; };
     }, [isRunning, accounts, settings.overnightDailySet, startRun])
   );

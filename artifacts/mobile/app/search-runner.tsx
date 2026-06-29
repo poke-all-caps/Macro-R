@@ -41,6 +41,8 @@ if (Platform.OS === "android") {
   } catch {}
 }
 
+const ACTIVE_RUN_KEY = "@ms_rewards_active_run";
+
 // Flushes the WebView OS cookie jar and loads the given account's cookies into
 // it so the Daily Set WebView is always authenticated as the correct account.
 // Uses dynamic require so the native module is only loaded in real device builds
@@ -753,6 +755,8 @@ export default function SearchRunnerScreen() {
           });
       } finally {
         stopRun();
+        // Clear the persisted run so home screen doesn't try to auto-resume
+        try { await AsyncStorage.removeItem(ACTIVE_RUN_KEY); } catch {}
         try {
           if (BackgroundService?.isRunning()) {
             await BackgroundService.stop().catch(() => {});
@@ -765,6 +769,14 @@ export default function SearchRunnerScreen() {
     };
 
     const startWithBackground = async () => {
+      // Persist run params so if the process is killed, reopening the app auto-resumes
+      try {
+        await AsyncStorage.setItem(
+          ACTIVE_RUN_KEY,
+          JSON.stringify({ accountIds, mode, startedAt: Date.now() })
+        );
+      } catch {}
+
       try {
         const isRunning = BackgroundService ? BackgroundService.isRunning() : false;
         if (BackgroundService && !isRunning) {
@@ -773,11 +785,11 @@ export default function SearchRunnerScreen() {
               async () => { await run(); },
               {
                 taskName: "MacroRewardsSearch",
-                taskTitle: "Macro Rewards",
-                taskDesc: "Running Bing searches…",
+                taskTitle: "Macro Rewards — running searches",
+                taskDesc: "Tap to return to the search screen",
                 taskIcon: { name: "ic_launcher", type: "mipmap" },
                 color: "#3B82F6",
-                linkingURI: undefined,
+                linkingURI: "mobile://",
                 progressBar: { max: 100, value: 0, indeterminate: true },
               }
             );
@@ -823,6 +835,7 @@ export default function SearchRunnerScreen() {
         style: "destructive",
         onPress: async () => {
           abortRef.current = true;
+          try { await AsyncStorage.removeItem(ACTIVE_RUN_KEY); } catch {}
           try {
             if (BackgroundService?.isRunning()) {
               await BackgroundService.stop().catch(() => {});
