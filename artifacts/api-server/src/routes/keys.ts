@@ -415,9 +415,10 @@ router.post("/add-account", async (req, res) => {
     // Effective limit: individual custom override takes first priority over tier default
     const [tierCfg] = await db.select().from(featureConfigTable)
       .where(eq(featureConfigTable.keyType, found.keyType));
-    const maxAccounts = found.customMaxAccounts != null
+    const maxAccounts = (found.customMaxAccounts !== null && found.customMaxAccounts !== undefined)
       ? found.customMaxAccounts
       : (tierCfg ? tierCfg.maxAccounts : found.maxAccounts);
+    console.log("Custom Key Limit:", found.customMaxAccounts, "| Tier Default:", tierCfg?.maxAccounts ?? found.maxAccounts, "| Final Limit Applied:", maxAccounts);
 
     // Server physically counts existing accounts — client count is never trusted
     const existingRows = await db.select({
