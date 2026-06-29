@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { router, useFocusEffect } from "expo-router";
 import { AlertTriangle, ArrowLeft, Battery, Bell, Calendar, CheckSquare, Clock, Minus, Moon, Plus, RotateCcw, Zap } from "lucide-react-native";
@@ -92,6 +93,26 @@ export default function OvernightScreen() {
   useFocusEffect(
     useCallback(() => {
       refreshPerms();
+      if (Platform.OS !== "android") return;
+      // Auto-trigger all permissions on first overnight screen visit
+      AsyncStorage.getItem("@ms_rewards_overnight_perms_asked").then(async (asked) => {
+        if (!asked) {
+          await AsyncStorage.setItem("@ms_rewards_overnight_perms_asked", "true");
+          // Small delay so the screen renders before system dialogs appear
+          setTimeout(async () => {
+            await requestNotificationPermission().catch(() => {});
+            await requestBatteryOptimizationExemption().catch(() => {});
+            setBatteryOpened(true);
+            await requestExactAlarmPermission().catch(() => {});
+            setAlarmOpened(true);
+            await requestDisplayOverApps().catch(() => {});
+            setOverlayOpened(true);
+            await requestFullScreenIntent().catch(() => {});
+            setFullScreenOpened(true);
+            await refreshPerms();
+          }, 600);
+        }
+      });
     }, [refreshPerms])
   );
 

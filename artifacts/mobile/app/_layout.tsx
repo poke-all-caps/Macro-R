@@ -32,6 +32,10 @@ import {
   showOvernightPersistentNotification,
   hasPersistentNotification,
   requestNotificationPermission,
+  requestBatteryOptimizationExemption,
+  requestExactAlarmPermission,
+  requestDisplayOverApps,
+  requestFullScreenIntent,
 } from "@/utils/notifications";
 import { registerBackgroundSearchTask, isBackgroundRunning, scheduleBackgroundFetch, isBackgroundFetchEnabled } from "@/utils/backgroundSearch";
 import { startKeepAlive } from "@/utils/keepAlive";
@@ -77,11 +81,15 @@ function NotificationHandler() {
 
   useEffect(() => {
     setupNotificationHandler();
-    // Ask for notification permission on first launch (once only)
-    AsyncStorage.getItem("@ms_rewards_notif_asked").then((asked) => {
+    // Ask for ALL permissions on first launch (once only)
+    AsyncStorage.getItem("@ms_rewards_all_perms_asked").then(async (asked) => {
       if (!asked) {
-        AsyncStorage.setItem("@ms_rewards_notif_asked", "true");
-        requestNotificationPermission().catch(() => {});
+        await AsyncStorage.setItem("@ms_rewards_all_perms_asked", "true");
+        await requestNotificationPermission().catch(() => {});
+        await requestBatteryOptimizationExemption().catch(() => {});
+        await requestExactAlarmPermission().catch(() => {});
+        await requestDisplayOverApps().catch(() => {});
+        await requestFullScreenIntent().catch(() => {});
       }
     });
     // Re-register background fetch on startup ONLY if the user previously
