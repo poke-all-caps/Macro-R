@@ -281,8 +281,12 @@ export async function runBackgroundSearches(): Promise<void> {
 
     let totalSearchesDone = 0;
     let totalPointsEarned = 0;
+    const totalAccounts = accounts.length;
 
-    for (const account of accounts) {
+    for (let ai = 0; ai < accounts.length; ai++) {
+      const account = accounts[ai];
+      const acctNum = ai + 1;
+
       const cookies = account.cookies;
       if (!cookies || !cookies._U) {
         console.log(`[BackgroundSearch] ${account.name}: No cookies, skipping`);
@@ -303,15 +307,19 @@ export async function runBackgroundSearches(): Promise<void> {
       await updateAccountInStorage(account.id, { status: "running" });
 
       const acctLabel = account.name || account.email;
+      const acctPrefix = totalAccounts > 1 ? `Account ${acctNum}/${totalAccounts} · ` : "";
 
-      // Kick off notification for this account
-      if (BackgroundService?.isRunning()) {
+      const updateNotif = (searchDone: number, pct: number, indeterminate = false) => {
+        if (!BackgroundService?.isRunning()) return;
         BackgroundService.updateNotification({
           taskTitle: `Macro Rewards — ${acctLabel}`,
-          taskDesc: `Search 0/${totalPerAccount} (0%)`,
-          progressBar: { max: 100, value: 0, indeterminate: false },
+          taskDesc: `${acctPrefix}Search ${searchDone}/${totalPerAccount} (${pct}%)`,
+          progressBar: { max: 100, value: pct, indeterminate },
         }).catch(() => {});
-      }
+      };
+
+      // Kick off notification for this account
+      updateNotif(0, 0, false);
 
       const pointsBefore = await fetchRewardsPoints(cookies);
       let searchesDone = 0;
@@ -329,13 +337,7 @@ export async function runBackgroundSearches(): Promise<void> {
         if (result.ok) searchesDone++;
 
         const pct = Math.round(((i + 1) / totalPerAccount) * 100);
-        if (BackgroundService?.isRunning()) {
-          BackgroundService.updateNotification({
-            taskTitle: `Macro Rewards — ${acctLabel}`,
-            taskDesc: `Search ${i + 1}/${totalPerAccount} (${pct}%)`,
-            progressBar: { max: 100, value: pct, indeterminate: false },
-          }).catch(() => {});
-        }
+        updateNotif(i + 1, pct);
 
         if (i < searchCount - 1) {
           await sleep(1500 + Math.floor(Math.random() * 1000));
@@ -356,13 +358,7 @@ export async function runBackgroundSearches(): Promise<void> {
 
           const totalDone = searchCount + i + 1;
           const pct = Math.round((totalDone / totalPerAccount) * 100);
-          if (BackgroundService?.isRunning()) {
-            BackgroundService.updateNotification({
-              taskTitle: `Macro Rewards — ${acctLabel}`,
-              taskDesc: `Search ${totalDone}/${totalPerAccount} (${pct}%)`,
-              progressBar: { max: 100, value: pct, indeterminate: false },
-            }).catch(() => {});
-          }
+          updateNotif(totalDone, pct);
 
           if (i < pcSearchCount - 1) {
             await sleep(1500 + Math.floor(Math.random() * 1000));
