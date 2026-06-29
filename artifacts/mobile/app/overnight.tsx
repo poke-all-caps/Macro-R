@@ -1,7 +1,7 @@
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import { ArrowLeft, Calendar, CheckSquare, Minus, Moon, Plus, RotateCcw, Zap } from "lucide-react-native";
-import React, { useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { AlertTriangle, ArrowLeft, Battery, Bell, Calendar, CheckSquare, Clock, Minus, Moon, Plus, RotateCcw, Zap } from "lucide-react-native";
+import React, { useCallback, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -22,7 +22,10 @@ import { useLicense } from "@/context/LicenseContext";
 import { DEFAULT_OVERNIGHT_SLOTS, OvernightSlot, useSettings } from "@/context/SettingsContext";
 import {
   cancelAllScheduledNotifications,
+  checkNotificationPermission,
   isNotificationsAvailable,
+  requestBatteryOptimizationExemption,
+  requestExactAlarmPermission,
   requestNotificationPermission,
   scheduleOvernightNotifications,
   showOvernightPersistentNotification,
@@ -69,6 +72,35 @@ export default function OvernightScreen() {
   const [scheduledCount, setScheduledCount] = useState<number | null>(null);
   const [isEditingSchedule, setIsEditingSchedule] = useState(false);
   const [previousUserSlots, setPreviousUserSlots] = useState<OvernightSlot[] | null>(null);
+
+  type PermStatus = "granted" | "denied" | "undetermined";
+  const [notifPerm, setNotifPerm] = useState<PermStatus>("undetermined");
+  const [batteryOpened, setBatteryOpened] = useState(false);
+  const [alarmOpened, setAlarmOpened] = useState(false);
+
+  const refreshPerms = useCallback(async () => {
+    if (Platform.OS !== "android") return;
+    const n = await checkNotificationPermission();
+    setNotifPerm(n);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshPerms();
+    }, [refreshPerms])
+  );
+
+  const handleGrantAll = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (notifPerm !== "granted") {
+      await requestNotificationPermission();
+    }
+    await requestBatteryOptimizationExemption();
+    setBatteryOpened(true);
+    await requestExactAlarmPermission();
+    setAlarmOpened(true);
+    await refreshPerms();
+  };
   const isShowingDefaults = previousUserSlots !== null;
 
   const [slotHourTexts, setSlotHourTexts] = useState<string[]>(() =>
@@ -428,6 +460,107 @@ export default function OvernightScreen() {
           </View>
         </View>
 
+        {/* Permissions — Android only */}
+        {Platform.OS === "android" && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>REQUIRED PERMISSIONS</Text>
+              <Pressable
+                onPress={handleGrantAll}
+                style={({ pressed }) => [
+                  styles.editBtn,
+                  { backgroundColor: colors.tint, opacity: pressed ? 0.7 : 1 },
+                ]}
+              >
+                <Text style={[styles.editBtnText, { color: "#fff" }]}>Grant All</Text>
+              </Pressable>
+            </View>
+
+            <View style={[styles.card, { backgroundColor: colors.surface }]}>
+              {/* Notifications */}
+              <View style={styles.permRow}>
+                <View style={[styles.permIconBg, { backgroundColor: notifPerm === "granted" ? "#F0FDF4" : "#FFF7ED" }]}>
+                  <Bell size={16} color={notifPerm === "granted" ? "#16A34A" : "#D97706"} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.permTitle, { color: colors.text }]}>Notifications</Text>
+                  <Text style={[styles.permDesc, { color: colors.textSecondary }]}>
+                    {notifPerm === "granted" ? "Granted — schedule can fire alerts" : "Required to show schedule status & completion alerts"}
+                  </Text>
+                </View>
+                <View style={[styles.permBadge, { backgroundColor: notifPerm === "granted" ? "#DCFCE7" : "#FEF3C7" }]}>
+                  <Text style={[styles.permBadgeText, { color: notifPerm === "granted" ? "#16A34A" : "#92400E" }]}>
+                    {notifPerm === "granted" ? "✓ On" : "Needed"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+              {/* Battery optimization */}
+              <Pressable
+                onPress={async () => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  await requestBatteryOptimizationExemption();
+                  setBatteryOpened(true);
+                }}
+                style={({ pressed }) => [styles.permRow, { opacity: pressed ? 0.7 : 1 }]}
+              >
+                <View style={[styles.permIconBg, { backgroundColor: batteryOpened ? "#F0FDF4" : "#FFF7ED" }]}>
+                  <Battery size={16} color={batteryOpened ? "#16A34A" : "#D97706"} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.permTitle, { color: colors.text }]}>Battery Optimization</Text>
+                  <Text style={[styles.permDesc, { color: colors.textSecondary }]}>
+                    {batteryOpened ? "Setting opened — tap to re-open if needed" : "Tap to exempt this app so Android doesn't kill background tasks"}
+                  </Text>
+                </View>
+                <View style={[styles.permBadge, { backgroundColor: batteryOpened ? "#DCFCE7" : "#FEF3C7" }]}>
+                  <Text style={[styles.permBadgeText, { color: batteryOpened ? "#16A34A" : "#92400E" }]}>
+                    {batteryOpened ? "✓ Done" : "Open"}
+                  </Text>
+                </View>
+              </Pressable>
+
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+              {/* Exact alarm */}
+              <Pressable
+                onPress={async () => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  await requestExactAlarmPermission();
+                  setAlarmOpened(true);
+                }}
+                style={({ pressed }) => [styles.permRow, { opacity: pressed ? 0.7 : 1 }]}
+              >
+                <View style={[styles.permIconBg, { backgroundColor: alarmOpened ? "#F0FDF4" : "#FFF7ED" }]}>
+                  <Clock size={16} color={alarmOpened ? "#16A34A" : "#D97706"} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.permTitle, { color: colors.text }]}>Exact Alarm (Android 12+)</Text>
+                  <Text style={[styles.permDesc, { color: colors.textSecondary }]}>
+                    {alarmOpened ? "Setting opened — enable to allow precise schedule timing" : "Allows searches to start at the exact scheduled time"}
+                  </Text>
+                </View>
+                <View style={[styles.permBadge, { backgroundColor: alarmOpened ? "#DCFCE7" : "#FEF3C7" }]}>
+                  <Text style={[styles.permBadgeText, { color: alarmOpened ? "#16A34A" : "#92400E" }]}>
+                    {alarmOpened ? "✓ Done" : "Open"}
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+
+            {/* Build notice */}
+            <View style={[styles.buildNotice, { backgroundColor: "#EFF6FF", borderColor: "#BFDBFE" }]}>
+              <AlertTriangle size={14} color="#2563EB" />
+              <Text style={[styles.buildNoticeText, { color: "#1E40AF" }]}>
+                <Text style={{ fontFamily: "Inter_600SemiBold" }}>New build required</Text>
+                {" — background search, foreground service, and exact alarms require a development build (EAS Build). These features do not work in Expo Go."}
+              </Text>
+            </View>
+          </View>
+        )}
+
         {/* Actions */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>ACTIONS</Text>
@@ -526,4 +659,12 @@ const styles = StyleSheet.create({
   unavailableCard: { borderRadius: 14, borderWidth: 1, padding: 16, gap: 6 },
   unavailableTitle: { fontSize: 14, fontFamily: "Inter_600SemiBold" },
   unavailableDesc: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 19 },
+  permRow: { flexDirection: "row", alignItems: "center", paddingVertical: 13, paddingHorizontal: 16, gap: 12 },
+  permIconBg: { width: 32, height: 32, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  permTitle: { fontSize: 13, fontFamily: "Inter_500Medium" },
+  permDesc: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1, lineHeight: 15 },
+  permBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  permBadgeText: { fontSize: 11, fontFamily: "Inter_600SemiBold" },
+  buildNotice: { flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 12, marginTop: 10, borderRadius: 10, borderWidth: 1 },
+  buildNoticeText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
 });

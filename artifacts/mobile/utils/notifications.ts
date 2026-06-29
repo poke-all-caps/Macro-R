@@ -134,6 +134,18 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
 }
 
+export async function checkNotificationPermission(): Promise<"granted" | "denied" | "undetermined"> {
+  if (Platform.OS === "web") return "undetermined";
+  const Notifications = getNotifications();
+  if (!Notifications) return "undetermined";
+  try {
+    const { status } = await Notifications.getPermissionsAsync();
+    return status as "granted" | "denied" | "undetermined";
+  } catch {
+    return "undetermined";
+  }
+}
+
 export async function requestExactAlarmPermission(): Promise<void> {
   if (Platform.OS !== "android") return;
   try {
@@ -144,28 +156,35 @@ export async function requestExactAlarmPermission(): Promise<void> {
   } catch {}
 }
 
+export async function requestBatteryOptimizationExemption(): Promise<void> {
+  if (Platform.OS !== "android") return;
+  try {
+    const IntentLauncher = require("expo-intent-launcher");
+    if (IntentLauncher?.startActivityAsync) {
+      // Opens the system dialog specifically for this app: "Allow app to ignore battery optimizations?"
+      await IntentLauncher.startActivityAsync(
+        "android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        { data: "package:com.msrewards.automation" }
+      );
+      return;
+    }
+  } catch {}
+  // Fallback: open battery optimization list
+  try {
+    const IntentLauncher = require("expo-intent-launcher");
+    await IntentLauncher.startActivityAsync("android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS");
+  } catch {
+    try { Linking.openSettings(); } catch {}
+  }
+}
+
 export async function promptBatteryOptimization(): Promise<void> {
   if (Platform.OS !== "android") return;
   const key = "@ms_rewards_battery_opt_prompted";
   const prompted = await AsyncStorage.getItem(key);
   if (prompted) return;
-
   await AsyncStorage.setItem(key, "true");
-  Alert.alert(
-    "Disable Battery Optimization",
-    "For scheduled notifications to fire on time, you need to disable battery optimization for this app.\n\nGo to: Settings → Apps → Macro R → Battery → Unrestricted",
-    [
-      { text: "Later", style: "cancel" },
-      {
-        text: "Open Settings",
-        onPress: () => {
-          try {
-            Linking.openSettings();
-          } catch {}
-        },
-      },
-    ]
-  );
+  await requestBatteryOptimizationExemption();
 }
 
 export interface ScheduleSlot {
