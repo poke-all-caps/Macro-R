@@ -472,30 +472,39 @@ export default function OvernightScreen() {
                   </Text>
                 </Pressable>
 
-                <View style={[styles.divider, { backgroundColor: colors.border }]} />
+                {featureConfig.dailySetEnabled && (
+                  <>
+                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-                <View style={styles.settingRow}>
-                  <View style={styles.settingLabel}>
-                    <View style={[styles.iconBg, { backgroundColor: "#F5F3FF" }]}>
-                      <CheckSquare size={16} color="#7C3AED" />
+                    <View style={styles.settingRow}>
+                      <View style={styles.settingLabel}>
+                        <View style={[styles.iconBg, { backgroundColor: "#F5F3FF" }]}>
+                          <CheckSquare size={16} color="#7C3AED" />
+                        </View>
+                        <View style={styles.labelText}>
+                          <Text style={[styles.settingTitle, { color: colors.text }]}>Daily Sets in overnight runs</Text>
+                          <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                            {!settings.dailySetEnabled
+                              ? "Daily Set is off in Settings — enable it there first"
+                              : settings.overnightDailySet
+                              ? "Daily Set will run after searches"
+                              : "Searches only — Daily Set skipped"}
+                          </Text>
+                        </View>
+                      </View>
+                      <Switch
+                        value={settings.dailySetEnabled && settings.overnightDailySet}
+                        disabled={!settings.dailySetEnabled}
+                        onValueChange={(val) => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          updateSettings({ overnightDailySet: val });
+                        }}
+                        trackColor={{ false: colors.border, true: "#7C3AED" }}
+                        thumbColor="#fff"
+                      />
                     </View>
-                    <View style={styles.labelText}>
-                      <Text style={[styles.settingTitle, { color: colors.text }]}>Daily Sets in overnight runs</Text>
-                      <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
-                        {settings.overnightDailySet ? "Daily Set will run after searches" : "Searches only — Daily Set skipped"}
-                      </Text>
-                    </View>
-                  </View>
-                  <Switch
-                    value={settings.overnightDailySet}
-                    onValueChange={(val) => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      updateSettings({ overnightDailySet: val });
-                    }}
-                    trackColor={{ false: colors.border, true: "#7C3AED" }}
-                    thumbColor="#fff"
-                  />
-                </View>
+                  </>
+                )}
               </>
             )}
           </View>
