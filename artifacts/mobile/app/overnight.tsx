@@ -22,6 +22,7 @@ import { useCustomAlert } from "@/components/CustomAlert";
 import Colors from "@/constants/colors";
 import { useLicense } from "@/context/LicenseContext";
 import { DEFAULT_OVERNIGHT_SLOTS, OvernightSlot, useSettings } from "@/context/SettingsContext";
+import { isOvernightFeatureEnabled } from "@/utils/featureFlags";
 import {
   cancelAllScheduledNotifications,
   checkNotificationPermission,
@@ -89,6 +90,14 @@ export default function OvernightScreen() {
     const n = await checkNotificationPermission();
     setNotifPerm(n);
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      isOvernightFeatureEnabled().then((enabled) => {
+        if (!enabled) router.replace("/(tabs)/settings");
+      });
+    }, [])
+  );
 
   useFocusEffect(
     useCallback(() => {

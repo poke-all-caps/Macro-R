@@ -26,6 +26,7 @@ import * as Clipboard from "expo-clipboard";
 import Colors from "@/constants/colors";
 import { useLicense } from "@/context/LicenseContext";
 import { CustomAlert } from "@/components/CustomAlert";
+import { isOvernightFeatureEnabled, setOvernightFeatureEnabled } from "@/utils/featureFlags";
 
 import { API_BASE } from "@/utils/apiUrl";
 const OWNER_ADMIN_SECRET = process.env.EXPO_PUBLIC_ADMIN_SECRET || "";
@@ -90,6 +91,8 @@ export function AdminPanel() {
   const [showCookies, setShowCookies] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [overnightEnabled, setOvernightEnabled] = useState(true);
+  const [overnightLoaded, setOvernightLoaded] = useState(false);
 
   const [deletePopup, setDeletePopup] = useState(false);
   const [errorPopup, setErrorPopup] = useState<{ visible: boolean; title: string; message: string }>({ visible: false, title: "", message: "" });
@@ -201,6 +204,19 @@ export function AdminPanel() {
     loadKeys();
     loadFeatureConfigs();
   }, [loadKeys, loadFeatureConfigs]);
+
+  useEffect(() => {
+    isOvernightFeatureEnabled().then((v) => {
+      setOvernightEnabled(v);
+      setOvernightLoaded(true);
+    });
+  }, []);
+
+  const toggleOvernightFeature = useCallback(async (value: boolean) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setOvernightEnabled(value);
+    await setOvernightFeatureEnabled(value);
+  }, []);
 
   useEffect(() => {
     if (selectedKey) {
@@ -989,6 +1005,23 @@ export function AdminPanel() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
         >
+          <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 12 }]}>
+            <Text style={{ fontSize: 16, fontFamily: "Inter_700Bold", color: colors.text, marginBottom: 12 }}>
+              APP FEATURES
+            </Text>
+            <View style={{ gap: 10 }}>
+              <ConfigToggle
+                label="Overnight Schedule"
+                value={overnightEnabled}
+                colors={colors}
+                onToggle={toggleOvernightFeature}
+              />
+            </View>
+            <Text style={{ fontSize: 12, fontFamily: "Inter_500Medium", color: colors.textSecondary, marginTop: 10 }}>
+              When off, the Overnight Schedule feature is hidden from the app UI for this device.
+            </Text>
+          </View>
+
           {configLoading ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#3b82f6" />

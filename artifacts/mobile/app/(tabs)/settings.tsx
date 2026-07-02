@@ -18,12 +18,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCustomAlert } from "@/components/CustomAlert";
 import Colors from "@/constants/colors";
 import { useAccounts } from "@/context/AccountsContext";
 import { useLicense } from "@/context/LicenseContext";
 import { OvernightSlot, useSettings } from "@/context/SettingsContext";
+import { isOvernightFeatureEnabled } from "@/utils/featureFlags";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function from24h(hour24: number): { hour: number; isAm: boolean } {
@@ -55,7 +56,13 @@ export default function SettingsScreen() {
   const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
   const [licenseModalVisible, setLicenseModalVisible] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [overnightFeatureEnabled, setOvernightFeatureEnabled] = useState(true);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      isOvernightFeatureEnabled().then(setOvernightFeatureEnabled);
+    }, [])
+  );
 
   const commitSearchCount = () => {
     const parsed = parseInt(searchCountText, 10);
@@ -252,6 +259,7 @@ export default function SettingsScreen() {
         </Section>
 
         {/* ── OVERNIGHT MODE ────────────────────────────────── */}
+        {overnightFeatureEnabled && (
         <Section title="OVERNIGHT MODE" colors={colors}>
           <Pressable
             onPress={() => {
@@ -318,6 +326,7 @@ export default function SettingsScreen() {
             )}
           </Pressable>
         </Section>
+        )}
 
 
         <Section title="LICENSE" colors={colors}>
