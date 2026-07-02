@@ -91,6 +91,59 @@ async function injectAccountCookies(
   }
 }
 
+// Polls the DOM for up to maxMs for the Daily Set cards to actually render.
+// This is what makes the "page load" timing settings meaningful — the WebView's
+// onLoadEnd event fires as soon as the raw HTML/JS document loads, which for a
+// modern SPA like rewards.microsoft.com happens in a few seconds, long before
+// the client-side app has hydrated and rendered the activity cards. Without
+// this poll, the click script would run immediately after onLoadEnd and find
+// nothing, always reporting "could not find any activities" regardless of the
+// configured timeout.
+function makeWaitForCardsScript(maxMs: number): string {
+  return `
+(function() {
+  try {
+    var start = Date.now();
+    var maxMs = ${Math.max(1000, maxMs)};
+    var selector = 'a.cursor-pointer[class*="bgCardOnPrimaryDefault"],' +
+      'a[class*="bgCardOnPrimaryDefault"],' +
+      'div.cursor-pointer[class*="bgCardOnPrimaryDefault"] a[href],' +
+      '[class*="bgCardOnPrimaryDefault"] a[href],' +
+      'mee-rewards-daily-set-item a[href],' +
+      '[class*="dailySet"] a[href],' +
+      '[class*="daily-set"] a[href],' +
+      '[class*="DailySet"] a[href],' +
+      '[data-bi-an*="DailySet"] a[href],' +
+      '[data-bi-an*="dailyset"] a[href],' +
+      '[data-m*="DailySet"] a[href],' +
+      'section[class*="daily-set"] a[href],' +
+      'div[class*="daily-set"] a[href],' +
+      '[data-bi-id*="dailyset"] a[href],' +
+      '[data-bi-id*="DailySet"] a[href],' +
+      '.ds-card-sec a[href],' +
+      '[class*="ds-card"] a[href]';
+    function hasCards() {
+      try { return document.querySelectorAll(selector).length > 0; } catch (e) { return false; }
+    }
+    function tick() {
+      if (hasCards()) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'cards_ready', found: true, waitedMs: Date.now() - start }));
+        return;
+      }
+      if (Date.now() - start >= maxMs) {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'cards_ready', found: false, waitedMs: Date.now() - start }));
+        return;
+      }
+      setTimeout(tick, 400);
+    }
+    tick();
+  } catch (e) {
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'cards_ready', found: false, error: String(e) }));
+  }
+})(); true;
+`;
+}
+
 function makeClickScript(alreadyClicked: string[]): string {
   return `
 (function() {
@@ -434,8 +487,18 @@ export default function SearchRunnerScreen() {
     const REWARDS_URL = "https://rewards.microsoft.com/";
     onStatus("Daily Set: loading Rewards page…");
     setWebViewUrl(REWARDS_URL);
+    let loadStart = Date.now();
     try { await waitForLoad(t1); } catch {}
-    await sleep(3000);
+    let remaining = Math.max(1500, t1 - (Date.now() - loadStart));
+    onStatus("Daily Set: waiting for activities to render…");
+    webViewRef.current?.injectJavaScript(makeWaitForCardsScript(remaining));
+    let readyMsg = await waitForMessage("cards_ready", remaining + 1500);
+    if (!readyMsg?.found) {
+      // Cards never rendered within the configured timeout — fall back to a
+      // short settle sleep so the click script still gets a chance to run
+      // rather than scanning an empty page immediately.
+      await sleep(1000);
+    }
 
     for (let attempt = 0; attempt < MAX_CARDS; attempt++) {
       if (abortRef.current) break;
@@ -443,8 +506,15 @@ export default function SearchRunnerScreen() {
       if (attempt > 0) {
         onStatus(`Daily Set: back to Rewards (${completed} done so far)…`);
         navigateTo(REWARDS_URL);
+        loadStart = Date.now();
         try { await waitForLoad(t2); } catch {}
-        await sleep(3000);
+        remaining = Math.max(1500, t2 - (Date.now() - loadStart));
+        onStatus("Daily Set: waiting for activities to render…");
+        webViewRef.current?.injectJavaScript(makeWaitForCardsScript(remaining));
+        readyMsg = await waitForMessage("cards_ready", remaining + 1500);
+        if (!readyMsg?.found) {
+          await sleep(1000);
+        }
       }
 
       onStatus("Daily Set: scanning for next activity…");
