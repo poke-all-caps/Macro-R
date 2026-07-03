@@ -149,8 +149,6 @@ export default function OvernightScreen() {
     initMinuteTexts(settings.overnightSlots)
   );
 
-  const backgroundEnabled = featureConfig?.backgroundEnabled ?? false;
-
   const updateSlotHourText = (index: number, text: string) => {
     const next = [...slotHourTexts];
     next[index] = text;
@@ -245,10 +243,6 @@ export default function OvernightScreen() {
   };
 
   const handleApplySchedule = async () => {
-    if (!backgroundEnabled) {
-      showAlert("Feature Locked", "Background automation is not available with your current license. Upgrade to a premium key to use overnight scheduling.");
-      return;
-    }
     if (Platform.OS === "web") {
       showAlert("Not Available", "Notifications require a real device.");
       return;
