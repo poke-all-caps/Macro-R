@@ -112,6 +112,7 @@ function makeWaitForCardsScript(maxMs: number): string {
         href.indexOf('bing.com/quiz') !== -1 ||
         href.indexOf('bing.com/play') !== -1 ||
         href.indexOf('bing.com/fun') !== -1 ||
+        href.indexOf('bing.com/know') !== -1 ||
         href.indexOf('rewardschallenges') !== -1 ||
         href.indexOf('rewards.microsoft.com/go/') !== -1 ||
         href.indexOf('rewards.bing.com/go/') !== -1
@@ -157,6 +158,7 @@ function makeClickScript(alreadyClicked: string[]): string {
         href.indexOf('bing.com/quiz') !== -1 ||
         href.indexOf('bing.com/play') !== -1 ||
         href.indexOf('bing.com/fun') !== -1 ||
+        href.indexOf('bing.com/know') !== -1 ||
         href.indexOf('rewardschallenges') !== -1 ||
         href.indexOf('rewards.microsoft.com/go/') !== -1 ||
         href.indexOf('rewards.bing.com/go/') !== -1
