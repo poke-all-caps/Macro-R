@@ -106,34 +106,14 @@ function makeWaitForCardsScript(maxMs: number): string {
     var start = Date.now();
     var maxMs = ${Math.max(1000, maxMs)};
 
-    // Tier 1: new Tailwind div-based cards (2025 redesign) — no href required.
-    // Cards are <div> elements identified by their design-token class combination.
-    var tier1Selector = '[class*="bgCardOnPrimaryDefaultRest"][class*="cursor-pointer"]';
-
-    // Tier 2: legacy Angular/class-attribute selectors — still require a[href].
-    var tier2Selector =
-      'a.cursor-pointer[class*="bgCardOnPrimaryDefault"],' +
-      'a[class*="bgCardOnPrimaryDefault"],' +
-      'mee-rewards-daily-set-item a[href],' +
-      '[class*="dailySet"] a[href],' +
-      '[class*="daily-set"] a[href],' +
-      '[class*="DailySet"] a[href],' +
-      '[data-bi-an*="DailySet"] a[href],' +
-      '[data-bi-an*="dailyset"] a[href],' +
-      '[data-m*="DailySet"] a[href],' +
-      'section[class*="daily-set"] a[href],' +
-      'div[class*="daily-set"] a[href],' +
-      '[data-bi-id*="dailyset"] a[href],' +
-      '[data-bi-id*="DailySet"] a[href],' +
-      '.ds-card-sec a[href],' +
-      '[class*="ds-card"] a[href]';
-
     function hasCards() {
       try {
-        return (
-          document.querySelectorAll(tier1Selector).length > 0 ||
-          document.querySelectorAll(tier2Selector).length > 0
-        );
+        var anchors = document.querySelectorAll('a[href]');
+        for (var i = 0; i < anchors.length; i++) {
+          var href = (anchors[i].href || anchors[i].getAttribute('href') || '').toLowerCase();
+          if (href.indexOf('bing.com/search') !== -1) return true;
+        }
+        return false;
       } catch (e) { return false; }
     }
     function tick() {
@@ -160,185 +140,29 @@ function makeClickScript(alreadyClicked: string[]): string {
 (function() {
   try {
     var alreadyClicked = ${JSON.stringify(alreadyClicked)};
+    var anchors = document.querySelectorAll('a[href]');
 
-    // Build a stable ID from the card's data attributes, href, or inner text so
-    // we can deduplicate across page reloads without relying on DOM positions.
-    // For new div-based cards that have no href, we fall back to data-activity-id
-    // then to a normalised slice of the element's inner text.
-    function getCardId(el) {
+    for (var i = 0; i < anchors.length; i++) {
+      var el = anchors[i];
       var href = (el.href || el.getAttribute('href') || '').toLowerCase().trim();
-      var activityId = el.getAttribute('data-activity-id') || '';
-      var container = el.closest('[data-activity-id], [data-bi-id], [data-m], [id]');
-      var attrId = activityId || (container
-        ? (container.getAttribute('data-activity-id') ||
-           container.getAttribute('data-bi-id') ||
-           container.getAttribute('data-m') ||
-           container.id || '')
-        : '');
-      // If neither an href nor a data attribute is available, fall back to the
-      // first 80 chars of normalised inner text as a best-effort stable key.
-      var textKey = (!href && !attrId)
-        ? (el.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 80).toLowerCase()
-        : '';
-      return (attrId + '||' + href + '||' + textKey);
-    }
 
-    // Signals that a card has already been completed — check the element itself
-    // and its closest card container.
-    var completedSignals = [
-      '[class*="complete"]', '[class*="completed"]',
-      '[class*="done"]', '[aria-checked="true"]',
-      '[class*="checked"]', '[class*="earned"]',
-      '[class*="finish"]', '[class*="finished"]',
-      '[class*="lockup-disabled"]', '[class*="c-card-disabled"]',
-      '[aria-disabled="true"]',
-    ];
+      if (href.indexOf('bing.com/search') === -1) continue;
+      if (alreadyClicked.indexOf(href) !== -1) continue;
 
-    function isCompleted(el) {
-      for (var s of completedSignals) {
-        if (el.matches && el.matches(s)) return true;
-        if (el.closest(s)) return true;
-      }
-      var card = el.closest(
-        '[class*="card"], [data-activity-id], [class*="ds-"], [class*="punchcard"],' +
-        '[class*="c-card"], [class*="offer"], [class*="lockup"], li[class]'
-      );
-      if (card) {
-        for (var s of completedSignals) {
-          if (card.querySelector(s)) return true;
-        }
-        if (card.querySelector('svg[class*="check"], svg[class*="complete"], [class*="check-icon"]')) return true;
-      }
-      return false;
-    }
-
-    // Only follow links that are genuine Daily Set activity links.
-    // Deliberately narrow: rewards /go/ redirects and bing quiz/search URLs.
-    // Does NOT include generic microsoft.com/rewards or bing.com/rewards home
-    // pages — those are the dashboard itself, not activities.
-    function isDailySetActivityHref(href) {
-      if (!href) return false;
-      var h = href.toLowerCase();
-      return (
-        h.indexOf('rewards.microsoft.com/go/') !== -1 ||
-        h.indexOf('rewards.bing.com/go/') !== -1 ||
-        h.indexOf('bing.com/search?') !== -1 ||
-        h.indexOf('bing.com/quiz') !== -1 ||
-        h.indexOf('bing.com/know') !== -1 ||
-        h.indexOf('rewardschallenges') !== -1
-      );
-    }
-
-    // ── Tier 1: new Tailwind div-based cards (2025 redesign) ────────────────
-    // Cards are now <div> elements with JavaScript onClick — no <a href> exists.
-    // We match them by their two invariant design-token classes and dispatch the
-    // click directly to the <div> container itself.
-    var tailwindCardCandidates = Array.from(
-      document.querySelectorAll(
-        '[class*="bgCardOnPrimaryDefaultRest"][class*="cursor-pointer"]'
-      )
-    );
-
-    // Keywords that identify Goal / Redeem cards — must never be clicked.
-    var goalTextExclusions = [
-      'redeem', 'league of legends', 'roblox', 'gift card', 'set goal', 'your goal'
-    ];
-
-    for (var ti = 0; ti < tailwindCardCandidates.length; ti++) {
-      var tEl = tailwindCardCandidates[ti];
-
-      // ── Link check ──────────────────────────────────────────────────────────
-      // If the card contains an <a> with an href, that href must pass the
-      // Daily Set activity whitelist. A /redeem or unrecognised href means this
-      // is a Goal/Redeem card — skip it.
-      var childAnchor = tEl.querySelector('a[href]');
-      if (childAnchor) {
-        var childHref = (childAnchor.href || childAnchor.getAttribute('href') || '').toLowerCase().trim();
-        if (childHref && !isDailySetActivityHref(childHref)) continue;
-      }
-
-      // ── Text exclusion check ─────────────────────────────────────────────
-      // Goal cards contain recognisable reward/product names. Skip any card
-      // whose text content matches one of the known exclusion strings.
-      var cardText = (tEl.textContent || '').toLowerCase();
-      var isGoalCard = false;
-      for (var gi = 0; gi < goalTextExclusions.length; gi++) {
-        if (cardText.indexOf(goalTextExclusions[gi]) !== -1) { isGoalCard = true; break; }
-      }
-      if (isGoalCard) continue;
-
-      if (isCompleted(tEl)) continue;
-
-      var tCardId = getCardId(tEl);
-      if (alreadyClicked.indexOf(tCardId) !== -1) continue;
-
-      var tText = (
-        tEl.textContent ||
-        tEl.getAttribute('aria-label') ||
-        tEl.getAttribute('title') || ''
+      var text = (
+        el.textContent ||
+        el.getAttribute('aria-label') ||
+        el.getAttribute('title') || ''
       ).trim().replace(/\\s+/g, ' ').slice(0, 60);
 
-      tEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       window.ReactNativeWebView.postMessage(JSON.stringify({
         type: 'card_clicked', found: true,
-        text: tText || 'Activity', href: '', cardId: tCardId,
+        text: text || 'Activity', href: href, cardId: href,
       }));
       return;
     }
 
-    // ── Tier 2: older Angular/class-attribute selectors (pre-2024 layout) ──────
-    var selectors = [
-      'mee-rewards-daily-set-item a[href]',
-      '[class*="dailySet"] a[href]',
-      '[class*="daily-set"] a[href]',
-      '[class*="DailySet"] a[href]',
-      '[data-bi-an*="DailySet"] a[href]',
-      '[data-bi-an*="dailyset"] a[href]',
-      '[data-m*="DailySet"] a[href]',
-      'section[class*="daily-set"] a[href]',
-      'div[class*="daily-set"] a[href]',
-      '[data-bi-id*="dailyset"] a[href]',
-      '[data-bi-id*="DailySet"] a[href]',
-      '.ds-card-sec a[href]',
-      '[class*="ds-card"] a[href]',
-    ];
-
-    for (var sel of selectors) {
-      var matches = Array.from(document.querySelectorAll(sel));
-      for (var i = 0; i < matches.length; i++) {
-        var el = matches[i];
-        var href = (el.href || el.getAttribute('href') || '').toLowerCase().trim();
-
-        // Skip links that don't look like actual activity destinations.
-        // This is the key guard — it prevents clicking nav links, banners,
-        // and other non-activity anchors that live inside the same containers.
-        if (!isDailySetActivityHref(href)) continue;
-        if (isCompleted(el)) continue;
-
-        var cardId = getCardId(el);
-        if (alreadyClicked.indexOf(cardId) !== -1) continue;
-        if (href && alreadyClicked.indexOf(href) !== -1) continue;
-
-        var text = (
-          el.textContent ||
-          el.getAttribute('aria-label') ||
-          el.getAttribute('title') || ''
-        ).trim().replace(/\\s+/g, ' ').slice(0, 60);
-
-        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-
-        window.ReactNativeWebView.postMessage(JSON.stringify({
-          type: 'card_clicked', found: true,
-          text: text || 'Activity', href: href, cardId: cardId,
-        }));
-        return;
-      }
-    }
-
-    // ── No card found — report done ────────────────────────────────────────
-    // The old fallback that searched arbitrary headings for "daily set" text
-    // and walked up the DOM has been intentionally removed. It was too broad
-    // and clicked promotions, streaks, and other non-Daily-Set activities.
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'card_clicked', found: false }));
   } catch(e) {
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'card_clicked', found: false, error: String(e) }));
