@@ -106,12 +106,23 @@ function makeWaitForCardsScript(maxMs: number): string {
     var start = Date.now();
     var maxMs = ${Math.max(1000, maxMs)};
 
+    function isActivityHref(href) {
+      return (
+        href.indexOf('bing.com/search') !== -1 ||
+        href.indexOf('bing.com/quiz') !== -1 ||
+        href.indexOf('bing.com/play') !== -1 ||
+        href.indexOf('bing.com/fun') !== -1 ||
+        href.indexOf('rewardschallenges') !== -1 ||
+        href.indexOf('rewards.microsoft.com/go/') !== -1 ||
+        href.indexOf('rewards.bing.com/go/') !== -1
+      );
+    }
     function hasCards() {
       try {
         var anchors = document.querySelectorAll('a[href]');
         for (var i = 0; i < anchors.length; i++) {
           var href = (anchors[i].href || anchors[i].getAttribute('href') || '').toLowerCase();
-          if (href.indexOf('bing.com/search') !== -1) return true;
+          if (isActivityHref(href)) return true;
         }
         return false;
       } catch (e) { return false; }
@@ -140,13 +151,24 @@ function makeClickScript(alreadyClicked: string[]): string {
 (function() {
   try {
     var alreadyClicked = ${JSON.stringify(alreadyClicked)};
+    function isActivityHref(href) {
+      return (
+        href.indexOf('bing.com/search') !== -1 ||
+        href.indexOf('bing.com/quiz') !== -1 ||
+        href.indexOf('bing.com/play') !== -1 ||
+        href.indexOf('bing.com/fun') !== -1 ||
+        href.indexOf('rewardschallenges') !== -1 ||
+        href.indexOf('rewards.microsoft.com/go/') !== -1 ||
+        href.indexOf('rewards.bing.com/go/') !== -1
+      );
+    }
     var anchors = document.querySelectorAll('a[href]');
 
     for (var i = 0; i < anchors.length; i++) {
       var el = anchors[i];
       var href = (el.href || el.getAttribute('href') || '').toLowerCase().trim();
 
-      if (href.indexOf('bing.com/search') === -1) continue;
+      if (!isActivityHref(href)) continue;
       if (alreadyClicked.indexOf(href) !== -1) continue;
 
       var text = (
