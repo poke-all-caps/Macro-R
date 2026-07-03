@@ -242,7 +242,13 @@ export default function OvernightScreen() {
     setScheduledCount(null);
   };
 
+  const backgroundEnabled = featureConfig?.backgroundEnabled ?? true;
+
   const handleApplySchedule = async () => {
+    if (!backgroundEnabled) {
+      showAlert("Unavailable", "Overnight scheduling has been disabled by the administrator.");
+      return;
+    }
     if (Platform.OS === "web") {
       showAlert("Not Available", "Notifications require a real device.");
       return;

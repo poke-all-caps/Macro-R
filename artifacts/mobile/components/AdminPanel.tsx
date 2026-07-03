@@ -215,8 +215,17 @@ export function AdminPanel() {
   const toggleOvernightFeature = useCallback(async (value: boolean) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setOvernightEnabled(value);
+    // Write locally so the admin's own UI updates immediately
     await setOvernightFeatureEnabled(value);
-  }, []);
+    // Push to the server — update backgroundEnabled for every key type so
+    // all users see the change on their next app launch / revalidation.
+    const KEY_TYPES_ALL = ["basic", "premium", "unlimited", "admin"];
+    await Promise.all(
+      KEY_TYPES_ALL.map((kt) =>
+        apiCall("PUT", `/admin/feature-config/${kt}`, { backgroundEnabled: value }).catch(() => {})
+      )
+    );
+  }, [apiCall]);
 
   useEffect(() => {
     if (selectedKey) {
@@ -1018,7 +1027,7 @@ export function AdminPanel() {
               />
             </View>
             <Text style={{ fontSize: 12, fontFamily: "Inter_500Medium", color: colors.textSecondary, marginTop: 10 }}>
-              When off, the Overnight Schedule feature is hidden from the app UI for this device.
+              When off, the Overnight Schedule feature is hidden from the app UI for all users.
             </Text>
           </View>
 

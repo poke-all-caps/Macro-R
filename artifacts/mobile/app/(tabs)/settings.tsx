@@ -24,7 +24,6 @@ import Colors from "@/constants/colors";
 import { useAccounts } from "@/context/AccountsContext";
 import { useLicense } from "@/context/LicenseContext";
 import { OvernightSlot, useSettings } from "@/context/SettingsContext";
-import { isOvernightFeatureEnabled } from "@/utils/featureFlags";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function from24h(hour24: number): { hour: number; isAm: boolean } {
@@ -56,13 +55,9 @@ export default function SettingsScreen() {
   const [delayText, setDelayText] = useState(String(settings.searchDelay ?? 5));
   const [licenseModalVisible, setLicenseModalVisible] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
-  const [overnightFeatureEnabled, setOvernightFeatureEnabled] = useState(true);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      isOvernightFeatureEnabled().then(setOvernightFeatureEnabled);
-    }, [])
-  );
+  // Overnight visibility is driven by the server-side backgroundEnabled flag so
+  // the admin toggle affects all users, not just the admin's own device.
+  const overnightFeatureEnabled = featureConfig.backgroundEnabled;
 
   const commitSearchCount = () => {
     const parsed = parseInt(searchCountText, 10);
