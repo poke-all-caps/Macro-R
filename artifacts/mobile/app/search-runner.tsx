@@ -239,8 +239,34 @@ function makeClickScript(alreadyClicked: string[]): string {
       )
     );
 
+    // Keywords that identify Goal / Redeem cards — must never be clicked.
+    var goalTextExclusions = [
+      'redeem', 'league of legends', 'roblox', 'gift card', 'set goal', 'your goal'
+    ];
+
     for (var ti = 0; ti < tailwindCardCandidates.length; ti++) {
       var tEl = tailwindCardCandidates[ti];
+
+      // ── Link check ──────────────────────────────────────────────────────────
+      // If the card contains an <a> with an href, that href must pass the
+      // Daily Set activity whitelist. A /redeem or unrecognised href means this
+      // is a Goal/Redeem card — skip it.
+      var childAnchor = tEl.querySelector('a[href]');
+      if (childAnchor) {
+        var childHref = (childAnchor.href || childAnchor.getAttribute('href') || '').toLowerCase().trim();
+        if (childHref && !isDailySetActivityHref(childHref)) continue;
+      }
+
+      // ── Text exclusion check ─────────────────────────────────────────────
+      // Goal cards contain recognisable reward/product names. Skip any card
+      // whose text content matches one of the known exclusion strings.
+      var cardText = (tEl.textContent || '').toLowerCase();
+      var isGoalCard = false;
+      for (var gi = 0; gi < goalTextExclusions.length; gi++) {
+        if (cardText.indexOf(goalTextExclusions[gi]) !== -1) { isGoalCard = true; break; }
+      }
+      if (isGoalCard) continue;
+
       if (isCompleted(tEl)) continue;
 
       var tCardId = getCardId(tEl);
