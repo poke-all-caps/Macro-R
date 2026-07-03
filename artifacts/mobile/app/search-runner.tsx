@@ -105,10 +105,15 @@ function makeWaitForCardsScript(maxMs: number): string {
   try {
     var start = Date.now();
     var maxMs = ${Math.max(1000, maxMs)};
-    var selector = 'a.cursor-pointer[class*="bgCardOnPrimaryDefault"],' +
+
+    // Tier 1: new Tailwind div-based cards (2025 redesign) — no href required.
+    // Cards are <div> elements identified by their design-token class combination.
+    var tier1Selector = '[class*="bgCardOnPrimaryDefaultRest"][class*="cursor-pointer"]';
+
+    // Tier 2: legacy Angular/class-attribute selectors — still require a[href].
+    var tier2Selector =
+      'a.cursor-pointer[class*="bgCardOnPrimaryDefault"],' +
       'a[class*="bgCardOnPrimaryDefault"],' +
-      'div.cursor-pointer[class*="bgCardOnPrimaryDefault"] a[href],' +
-      '[class*="bgCardOnPrimaryDefault"] a[href],' +
       'mee-rewards-daily-set-item a[href],' +
       '[class*="dailySet"] a[href],' +
       '[class*="daily-set"] a[href],' +
@@ -122,8 +127,14 @@ function makeWaitForCardsScript(maxMs: number): string {
       '[data-bi-id*="DailySet"] a[href],' +
       '.ds-card-sec a[href],' +
       '[class*="ds-card"] a[href]';
+
     function hasCards() {
-      try { return document.querySelectorAll(selector).length > 0; } catch (e) { return false; }
+      try {
+        return (
+          document.querySelectorAll(tier1Selector).length > 0 ||
+          document.querySelectorAll(tier2Selector).length > 0
+        );
+      } catch (e) { return false; }
     }
     function tick() {
       if (hasCards()) {
@@ -150,18 +161,26 @@ function makeClickScript(alreadyClicked: string[]): string {
   try {
     var alreadyClicked = ${JSON.stringify(alreadyClicked)};
 
-    // Build a stable ID from the card's data attributes + href so we can
-    // deduplicate across page reloads without relying on DOM positions.
+    // Build a stable ID from the card's data attributes, href, or inner text so
+    // we can deduplicate across page reloads without relying on DOM positions.
+    // For new div-based cards that have no href, we fall back to data-activity-id
+    // then to a normalised slice of the element's inner text.
     function getCardId(el) {
       var href = (el.href || el.getAttribute('href') || '').toLowerCase().trim();
+      var activityId = el.getAttribute('data-activity-id') || '';
       var container = el.closest('[data-activity-id], [data-bi-id], [data-m], [id]');
-      var attrId = container
+      var attrId = activityId || (container
         ? (container.getAttribute('data-activity-id') ||
            container.getAttribute('data-bi-id') ||
            container.getAttribute('data-m') ||
            container.id || '')
+        : '');
+      // If neither an href nor a data attribute is available, fall back to the
+      // first 80 chars of normalised inner text as a best-effort stable key.
+      var textKey = (!href && !attrId)
+        ? (el.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 80).toLowerCase()
         : '';
-      return (attrId + '||' + href);
+      return (attrId + '||' + href + '||' + textKey);
     }
 
     // Signals that a card has already been completed — check the element itself
@@ -210,45 +229,33 @@ function makeClickScript(alreadyClicked: string[]): string {
       );
     }
 
-    // ── Tier 1: new Tailwind-based card selectors (rewards.microsoft.com 2024 redesign) ──
-    // The redesigned page uses design-token utility classes. The Daily Set card
-    // elements have a distinctive class combination: bg-bgCardOnPrimaryDefaultRest +
-    // cursor-pointer + flex-row. We find all of them (capped at 3), skip completed
-    // ones, and click the first unvisited one.
-    // These card elements ARE the anchor tags (or contain them), so we handle both cases.
+    // ── Tier 1: new Tailwind div-based cards (2025 redesign) ────────────────
+    // Cards are now <div> elements with JavaScript onClick — no <a href> exists.
+    // We match them by their two invariant design-token classes and dispatch the
+    // click directly to the <div> container itself.
     var tailwindCardCandidates = Array.from(
       document.querySelectorAll(
-        'a.cursor-pointer[class*="bgCardOnPrimaryDefault"],' +
-        'a[class*="bgCardOnPrimaryDefault"],' +
-        // Also try the container div if the anchor is the card itself
-        'div.cursor-pointer[class*="bgCardOnPrimaryDefault"] a[href],' +
-        '[class*="bgCardOnPrimaryDefault"] a[href]'
+        '[class*="bgCardOnPrimaryDefaultRest"][class*="cursor-pointer"]'
       )
     );
 
     for (var ti = 0; ti < tailwindCardCandidates.length; ti++) {
       var tEl = tailwindCardCandidates[ti];
-      // Resolve to the anchor element
-      var aEl = (tEl.tagName === 'A') ? tEl : tEl.closest('a') || tEl.querySelector('a');
-      if (!aEl) continue;
-      var tHref = (aEl.href || aEl.getAttribute('href') || '').toLowerCase().trim();
-      if (!isDailySetActivityHref(tHref)) continue;
-      if (isCompleted(aEl)) continue;
+      if (isCompleted(tEl)) continue;
 
-      var tCardId = getCardId(aEl);
+      var tCardId = getCardId(tEl);
       if (alreadyClicked.indexOf(tCardId) !== -1) continue;
-      if (tHref && alreadyClicked.indexOf(tHref) !== -1) continue;
 
       var tText = (
-        aEl.textContent ||
-        aEl.getAttribute('aria-label') ||
-        aEl.getAttribute('title') || ''
+        tEl.textContent ||
+        tEl.getAttribute('aria-label') ||
+        tEl.getAttribute('title') || ''
       ).trim().replace(/\\s+/g, ' ').slice(0, 60);
 
-      aEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+      tEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
       window.ReactNativeWebView.postMessage(JSON.stringify({
         type: 'card_clicked', found: true,
-        text: tText || 'Activity', href: tHref, cardId: tCardId,
+        text: tText || 'Activity', href: '', cardId: tCardId,
       }));
       return;
     }

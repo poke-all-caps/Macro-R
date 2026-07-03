@@ -1,3 +1,4 @@
+/*
 import { ExpoConfig, ConfigContext } from "expo/config";
 
 const IS_OWNER = process.env.EXPO_PUBLIC_OWNER_MODE === "true";
@@ -103,4 +104,111 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   owner: "meoow123",
+});
+*/
+import { ExpoConfig, ConfigContext } from "expo/config";
+
+const IS_OWNER = process.env.EXPO_PUBLIC_OWNER_MODE === "true";
+
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  name: "Macro R",
+  // Updated Slug
+  slug: "rewards-macro",
+  version: "1.4.03",
+  orientation: "portrait",
+  icon: "./assets/images/iconn.png",
+  scheme: "mobile",
+  userInterfaceStyle: "automatic",
+  newArchEnabled: true,
+  splash: {
+    image: "./assets/images/splash-icon.png",
+    resizeMode: "contain",
+    backgroundColor: "#0f172a",
+  },
+  ios: {
+    supportsTablet: false,
+    bundleIdentifier: "com.msrewards.automation",
+  },
+  android: {
+    package: "com.msrewards.automation",
+    permissions: [
+      "android.permission.SCHEDULE_EXACT_ALARM",
+      "android.permission.USE_EXACT_ALARM",
+      "android.permission.RECEIVE_BOOT_COMPLETED",
+      "android.permission.VIBRATE",
+      "android.permission.WAKE_LOCK",
+      "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+      "android.permission.USE_FULL_SCREEN_INTENT",
+      "android.permission.SYSTEM_ALERT_WINDOW",
+      "android.permission.CAMERA",
+      "android.permission.READ_MEDIA_IMAGES",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+    ],
+  },
+  web: {
+    favicon: "./assets/images/icon.png",
+  },
+  plugins: [
+    [
+      "expo-router",
+      {
+        origin: "https://replit.com/",
+      },
+    ],
+    "expo-font",
+    "expo-web-browser",
+    [
+      "expo-notifications",
+      {
+        icon: "./assets/images/notification-icon.png",
+        color: "#3B82F6",
+        sounds: [],
+      },
+    ],
+    "expo-task-manager",
+    "./plugins/withBackgroundActions",
+    "expo-updates",
+    [
+      "expo-camera",
+      {
+        cameraPermission:
+          "Allow Macro R to access your camera to scan QR codes.",
+      },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "Allow Macro R to access your photos to scan QR codes from images.",
+        cameraPermission:
+          "Allow Macro R to access your camera to scan QR codes.",
+      },
+    ],
+  ],
+  updates: {
+    // Updated URL ID
+    url: "https://u.expo.dev/2bd28ff8-467e-4f50-ac24-480e85cdda44",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
+  },
+  experiments: {
+    typedRoutes: true,
+    reactCompiler: true,
+  },
+  extra: {
+    ownerMode: IS_OWNER,
+    apiUrl:
+      process.env.EXPO_PUBLIC_API_URL ||
+      "https://macro-r-631x.onrender.com/api",
+    eas: {
+      // Updated Project ID
+      projectId: "2bd28ff8-467e-4f50-ac24-480e85cdda44",
+    },
+  },
+  // Updated Owner
+  owner: "macro-r11",
 });
