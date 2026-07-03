@@ -71,6 +71,31 @@ export async function initSchema(): Promise<void> {
         original_created_at TIMESTAMP
       );
     `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS invite_codes (
+        id         UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+        code       TEXT      NOT NULL UNIQUE,
+        status     TEXT      NOT NULL DEFAULT 'unused',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS kyc_submissions (
+        id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+        invite_code      TEXT      NOT NULL UNIQUE,
+        full_name        TEXT      NOT NULL,
+        father_name      TEXT      NOT NULL,
+        mother_name      TEXT      NOT NULL,
+        grandfather_name TEXT      NOT NULL,
+        id_front         TEXT      NOT NULL,
+        id_back          TEXT      NOT NULL,
+        kyc_status       TEXT      NOT NULL DEFAULT 'pending',
+        admin_note       TEXT,
+        created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
     console.log("[db] Schema ready.");
   } finally {
     client.release();

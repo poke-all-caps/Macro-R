@@ -71,7 +71,7 @@ export function AdminPanel() {
   const insets = useSafeAreaInsets();
   const { adminSecret, licenseData, removeLicense } = useLicense();
 
-  const [activeTab, setActiveTab] = useState<"keys" | "config">("keys");
+  const [activeTab, setActiveTab] = useState<"keys" | "config" | "kyc">("keys");
   const [keys, setKeys] = useState<LicenseKey[]>([]);
   const [featureConfigs, setFeatureConfigs] = useState<FeatureConfig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +100,15 @@ export function AdminPanel() {
   const [typePopup, setTypePopup] = useState(false);
   const [limitPopup, setLimitPopup] = useState(false);
   const [limitInput, setLimitInput] = useState("");
+
+  // KYC tab state
+  const [inviteCodes, setInviteCodes] = useState<Array<{ id: string; code: string; status: string; createdAt: string }>>([]);
+  const [kycList, setKycList] = useState<Array<{ id: string; inviteCode: string; fullName: string; kycStatus: string; adminNote: string | null; createdAt: string }>>([]);
+  const [kycLoading, setKycLoading] = useState(false);
+  const [creatingCode, setCreatingCode] = useState(false);
+  const [newCodeInput, setNewCodeInput] = useState("");
+  const [kycActionLoading, setKycActionLoading] = useState<string | null>(null);
+  const [kycNoteInput, setKycNoteInput] = useState("");
   const [expiryPopup, setExpiryPopup] = useState(false);
   const [expiryYear, setExpiryYear] = useState("");
   const [expiryMonth, setExpiryMonth] = useState("");
@@ -204,6 +213,62 @@ export function AdminPanel() {
     loadKeys();
     loadFeatureConfigs();
   }, [loadKeys, loadFeatureConfigs]);
+
+  const loadKycData = useCallback(async () => {
+    setKycLoading(true);
+    try {
+      const [codesRes, subRes] = await Promise.all([
+        fetch(`${API_BASE}/admin/invite-codes`, { headers: { "x-admin-secret": OWNER_ADMIN_SECRET } }),
+        fetch(`${API_BASE}/admin/kyc`, { headers: { "x-admin-secret": OWNER_ADMIN_SECRET } }),
+      ]);
+      if (codesRes.ok) { const d = await codesRes.json(); setInviteCodes(d.codes ?? []); }
+      if (subRes.ok) { const d = await subRes.json(); setKycList(d.submissions ?? []); }
+    } catch { /* ignore */ }
+    setKycLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "kyc") loadKycData();
+  }, [activeTab, loadKycData]);
+
+  const handleCreateInviteCode = async () => {
+    setCreatingCode(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/invite-codes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-secret": OWNER_ADMIN_SECRET },
+        body: JSON.stringify({ code: newCodeInput.trim().toUpperCase() || undefined }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        setNewCodeInput("");
+        await Clipboard.setStringAsync(d.code?.code ?? "");
+        loadKycData();
+        Alert.alert("Code Created", `Code: ${d.code?.code ?? ""}\n\nCopied to clipboard.`);
+      } else {
+        Alert.alert("Error", d.error ?? "Failed to create code");
+      }
+    } catch { Alert.alert("Error", "Network error"); }
+    setCreatingCode(false);
+  };
+
+  const handleKycDecision = async (subId: string, decision: "verified" | "rejected", note?: string) => {
+    setKycActionLoading(subId);
+    try {
+      const res = await fetch(`${API_BASE}/admin/kyc/${subId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "x-admin-secret": OWNER_ADMIN_SECRET },
+        body: JSON.stringify({ kycStatus: decision, adminNote: note ?? null }),
+      });
+      if (res.ok) {
+        await loadKycData();
+      } else {
+        const d = await res.json();
+        Alert.alert("Error", d.error ?? "Failed to update status");
+      }
+    } catch { Alert.alert("Error", "Network error"); }
+    setKycActionLoading(null);
+  };
 
   useEffect(() => {
     isOvernightFeatureEnabled().then((v) => {
@@ -863,6 +928,13 @@ export function AdminPanel() {
             <Settings size={14} color={activeTab === "config" ? "#fff" : colors.textSecondary} />
             <Text style={[styles.tabBtnText, { color: activeTab === "config" ? "#fff" : colors.textSecondary }]}>Config</Text>
           </Pressable>
+          <Pressable
+            onPress={() => setActiveTab("kyc")}
+            style={[styles.tabBtn, { backgroundColor: activeTab === "kyc" ? "#10b981" : colors.surfaceSecondary, borderColor: activeTab === "kyc" ? "#10b981" : colors.border }]}
+          >
+            <Shield size={14} color={activeTab === "kyc" ? "#fff" : colors.textSecondary} />
+            <Text style={[styles.tabBtnText, { color: activeTab === "kyc" ? "#fff" : colors.textSecondary }]}>KYC</Text>
+          </Pressable>
         </View>
       </View>
 
@@ -1085,6 +1157,117 @@ export function AdminPanel() {
               );
             })
           )}
+        </ScrollView>
+      )}
+
+      {activeTab === "kyc" && (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
+        >
+          {/* ── Invite Codes ── */}
+          <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 12 }]}>
+            <Text style={{ fontSize: 15, fontFamily: "Inter_700Bold", color: colors.text, marginBottom: 12 }}>INVITE CODES</Text>
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+              <TextInput
+                style={{ flex: 1, height: 40, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 12, fontSize: 14, fontFamily: "Inter_500Medium" }}
+                placeholder="Custom code (optional)"
+                placeholderTextColor={colors.textSecondary}
+                value={newCodeInput}
+                onChangeText={(t) => setNewCodeInput(t.toUpperCase())}
+                autoCapitalize="characters"
+              />
+              <Pressable
+                onPress={handleCreateInviteCode}
+                disabled={creatingCode}
+                style={({ pressed }) => ({ backgroundColor: "#10b981", borderRadius: 8, height: 40, paddingHorizontal: 14, justifyContent: "center", alignItems: "center", opacity: pressed || creatingCode ? 0.7 : 1 })}
+              >
+                {creatingCode ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>+ Generate</Text>}
+              </Pressable>
+            </View>
+            {kycLoading ? (
+              <ActivityIndicator size="small" color="#3b82f6" />
+            ) : inviteCodes.length === 0 ? (
+              <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>No invite codes yet.</Text>
+            ) : (
+              inviteCodes.map((ic) => (
+                <View key={ic.id} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+                  <View>
+                    <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{ic.code}</Text>
+                    <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 11, marginTop: 2 }}>{new Date(ic.createdAt).toLocaleDateString()}</Text>
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: ic.status === "unused" ? "#64748b22" : ic.status === "pending" ? "#f59e0b22" : "#10b98122" }}>
+                      <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: ic.status === "unused" ? "#64748b" : ic.status === "pending" ? "#f59e0b" : "#10b981" }}>{ic.status}</Text>
+                    </View>
+                    <Pressable onPress={() => Clipboard.setStringAsync(ic.code)} style={{ padding: 4 }}>
+                      <Copy size={14} color={colors.textSecondary} />
+                    </Pressable>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+
+          {/* ── KYC Submissions ── */}
+          <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <Text style={{ fontSize: 15, fontFamily: "Inter_700Bold", color: colors.text }}>KYC SUBMISSIONS</Text>
+              <Pressable onPress={loadKycData} style={{ padding: 4 }}>
+                <RefreshCw size={16} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+            {kycLoading ? (
+              <ActivityIndicator size="small" color="#3b82f6" />
+            ) : kycList.length === 0 ? (
+              <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>No submissions yet.</Text>
+            ) : (
+              kycList.map((sub) => (
+                <View key={sub.id} style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingVertical: 12 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{sub.fullName}</Text>
+                      <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Code: {sub.inviteCode}</Text>
+                      <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 11, marginTop: 1 }}>{new Date(sub.createdAt).toLocaleString()}</Text>
+                    </View>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: sub.kycStatus === "pending" ? "#f59e0b22" : sub.kycStatus === "verified" ? "#10b98122" : "#ef444422" }}>
+                      <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: sub.kycStatus === "pending" ? "#f59e0b" : sub.kycStatus === "verified" ? "#10b981" : "#ef4444" }}>{sub.kycStatus}</Text>
+                    </View>
+                  </View>
+                  {sub.kycStatus === "pending" && (
+                    <View style={{ gap: 6 }}>
+                      <TextInput
+                        style={{ height: 36, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 10, fontSize: 12, fontFamily: "Inter_400Regular" }}
+                        placeholder="Optional rejection reason..."
+                        placeholderTextColor={colors.textSecondary}
+                        value={kycActionLoading === sub.id ? "" : kycNoteInput}
+                        onChangeText={setKycNoteInput}
+                      />
+                      <View style={{ flexDirection: "row", gap: 8 }}>
+                        <Pressable
+                          onPress={() => { handleKycDecision(sub.id, "verified"); setKycNoteInput(""); }}
+                          disabled={kycActionLoading === sub.id}
+                          style={({ pressed }) => ({ flex: 1, height: 36, borderRadius: 8, backgroundColor: "#10b981", justifyContent: "center", alignItems: "center", opacity: kycActionLoading === sub.id ? 0.5 : pressed ? 0.8 : 1 })}
+                        >
+                          {kycActionLoading === sub.id ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>✓ Approve</Text>}
+                        </Pressable>
+                        <Pressable
+                          onPress={() => { handleKycDecision(sub.id, "rejected", kycNoteInput || undefined); setKycNoteInput(""); }}
+                          disabled={kycActionLoading === sub.id}
+                          style={({ pressed }) => ({ flex: 1, height: 36, borderRadius: 8, backgroundColor: "#ef4444", justifyContent: "center", alignItems: "center", opacity: kycActionLoading === sub.id ? 0.5 : pressed ? 0.8 : 1 })}
+                        >
+                          <Text style={{ color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>✗ Reject</Text>
+                        </Pressable>
+                      </View>
+                    </View>
+                  )}
+                  {sub.adminNote ? (
+                    <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 6, fontStyle: "italic" }}>Note: {sub.adminNote}</Text>
+                  ) : null}
+                </View>
+              ))
+            )}
+          </View>
         </ScrollView>
       )}
 

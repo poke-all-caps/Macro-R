@@ -19,6 +19,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LicenseGate } from "@/components/LicenseGate";
 import { AccountsProvider, useAccounts } from "@/context/AccountsContext";
+import { KycProvider } from "@/context/KycContext";
 import { LicenseProvider } from "@/context/LicenseContext";
 import { QueriesProvider } from "@/context/QueriesContext";
 import { SettingsProvider, useSettings } from "@/context/SettingsContext";
@@ -269,6 +270,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView>
             <KeyboardProvider>
+              <KycProvider>
               <LicenseProvider>
                 <AccountsProvider>
                   <LicenseGate>
@@ -280,6 +282,7 @@ export default function RootLayout() {
                   </LicenseGate>
                 </AccountsProvider>
               </LicenseProvider>
+              </KycProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>

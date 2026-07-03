@@ -3,6 +3,7 @@ import healthRouter from "./health";
 import proxyRouter from "./proxy";
 import keysRouter from "./keys";
 import adminRouter from "./admin";
+import inviteRouter from "./invite";
 
 const router: IRouter = Router();
 
@@ -21,5 +22,6 @@ if (!process.env.RENDER) {
 
 router.use(keysRouter);
 router.use(adminRouter);
+router.use(inviteRouter);
 
 export default router;
