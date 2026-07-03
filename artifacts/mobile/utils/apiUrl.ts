@@ -16,9 +16,21 @@ const PRODUCTION_API_URL = "https://macro-r-631x.onrender.com/api";
 //
 // Web always uses a relative path so the browser resolves it against the same
 // origin — no CORS issues and no env var dependency.
-export const API_BASE: string =
+//
+// normaliseApiUrl ensures the resolved URL always ends with "/api" so that a
+// misconfigured env var (e.g. bare "https://macro-r.onrender.com" without the
+// path) never silently produces 404s on every admin route.
+function normaliseApiUrl(url: string): string {
+  const stripped = url.replace(/\/+$/, ""); // remove any trailing slashes
+  return stripped.endsWith("/api") ? stripped : `${stripped}/api`;
+}
+
+const rawUrl: string =
   Platform.OS === "web"
     ? "/api"
     : ((Constants.expoConfig?.extra?.apiUrl as string | undefined) ??
        process.env.EXPO_PUBLIC_API_URL ??
        PRODUCTION_API_URL);
+
+export const API_BASE: string =
+  Platform.OS === "web" ? "/api" : normaliseApiUrl(rawUrl);
