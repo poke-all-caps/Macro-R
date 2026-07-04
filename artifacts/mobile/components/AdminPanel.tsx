@@ -132,11 +132,24 @@ export function AdminPanel() {
     const opts: RequestInit = { method, headers };
     if (body) opts.body = JSON.stringify(body);
     const resp = await fetch(`${API_BASE}${path}`, opts);
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => "Request failed");
-      throw new Error(text);
+    const rawText = await resp.text().catch(() => "");
+    let parsed: any = null;
+    try {
+      parsed = rawText ? JSON.parse(rawText) : null;
+    } catch {
+      parsed = null;
     }
-    return resp.json();
+    if (!resp.ok) {
+      const message =
+        parsed?.error ??
+        parsed?.message ??
+        (rawText && rawText.length < 300 ? rawText : `Request failed (${resp.status})`);
+      throw new Error(message);
+    }
+    if (parsed === null) {
+      throw new Error(`Unexpected response from server (status ${resp.status})`);
+    }
+    return parsed;
   }, [effectiveSecret, adminLicenseKey]);
 
   const showError = (title: string, message: string) => {
