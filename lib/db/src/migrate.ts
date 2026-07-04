@@ -6,8 +6,24 @@ import { pool } from "./index";
  * No drizzle-kit CLI required at runtime.
  */
 export async function initSchema(): Promise<void> {
-  const client = await pool.connect();
+  console.log("[db] Connecting to database...");
+
+  let client;
   try {
+    client = await pool.connect();
+    console.log("[db] Connection established.");
+  } catch (err) {
+    console.error("[db] FATAL: Could not connect to database:", err);
+    throw err;
+  }
+
+  try {
+    // ── Verify connectivity ──────────────────────────────────────────────────
+    const { rows } = await client.query("SELECT NOW() AS now");
+    console.log(`[db] DB time check OK: ${rows[0]?.now}`);
+
+    // ── Core tables ──────────────────────────────────────────────────────────
+    console.log("[db] Creating core tables...");
     await client.query(`
       CREATE TABLE IF NOT EXISTS license_keys (
         id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -43,7 +59,11 @@ export async function initSchema(): Promise<void> {
         updated_at       TIMESTAMP NOT NULL DEFAULT NOW(),
         CONSTRAINT uq_key_email UNIQUE (license_key_id, account_email)
       );
+    `);
+    console.log("[db] Core tables OK.");
 
+    // ── Seed feature_config defaults ────────────────────────────────────────
+    await client.query(`
       INSERT INTO feature_config (key_type, max_accounts, max_searches, min_delay_seconds, background_enabled, custom_queries_enabled, daily_set_enabled, pc_search_enabled) VALUES
         ('basic',     2,   20,  5, FALSE, FALSE, TRUE,  FALSE),
         ('premium',   5,   40,  3, TRUE,  TRUE,  TRUE,  TRUE),
@@ -51,13 +71,19 @@ export async function initSchema(): Promise<void> {
         ('admin',     999, 999, 1, TRUE,  TRUE,  TRUE,  TRUE)
       ON CONFLICT (key_type) DO NOTHING;
     `);
+    console.log("[db] feature_config seeded.");
 
+    // ── license_keys column additions (idempotent) ───────────────────────────
+    console.log("[db] Applying license_keys column migrations...");
     await client.query(`
       ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_max_accounts INTEGER;
       ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_min_delay_seconds INTEGER;
       ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS pin TEXT;
     `);
+    console.log("[db] license_keys columns OK.");
 
+    // ── deleted_accounts ──────────────────────────────────────────────────────
+    console.log("[db] Creating deleted_accounts table...");
     await client.query(`
       CREATE TABLE IF NOT EXISTS deleted_accounts (
         id                  UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -71,7 +97,10 @@ export async function initSchema(): Promise<void> {
         original_created_at TIMESTAMP
       );
     `);
+    console.log("[db] deleted_accounts OK.");
 
+    // ── Phase 1: invite_codes ─────────────────────────────────────────────────
+    console.log("[db] Creating invite_codes table...");
     await client.query(`
       CREATE TABLE IF NOT EXISTS invite_codes (
         id         UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -80,7 +109,12 @@ export async function initSchema(): Promise<void> {
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
+    `);
+    console.log("[db] invite_codes OK.");
 
+    // ── Phase 1: kyc_submissions ──────────────────────────────────────────────
+    console.log("[db] Creating kyc_submissions table...");
+    await client.query(`
       CREATE TABLE IF NOT EXISTS kyc_submissions (
         id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
         invite_code      TEXT      NOT NULL UNIQUE,
@@ -96,7 +130,20 @@ export async function initSchema(): Promise<void> {
         updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("[db] Schema ready.");
+    console.log("[db] kyc_submissions OK.");
+
+    // ── Final verification: list all tables ───────────────────────────────────
+    const { rows: tables } = await client.query(`
+      SELECT tablename FROM pg_tables
+      WHERE schemaname = 'public'
+      ORDER BY tablename;
+    `);
+    console.log("[db] Tables in public schema:", tables.map((r: { tablename: string }) => r.tablename).join(", "));
+    console.log("[db] Schema initialization complete.");
+
+  } catch (err) {
+    console.error("[db] Schema initialization FAILED:", err);
+    throw err;
   } finally {
     client.release();
   }

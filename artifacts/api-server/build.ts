@@ -39,15 +39,20 @@ const allowlist = [
 
 async function pushSchema() {
   const { execSync } = await import("child_process");
+  if (!process.env.DATABASE_URL) {
+    console.warn("[build] DATABASE_URL not set — skipping drizzle-kit push. Tables will be created at runtime via initSchema().");
+    return;
+  }
   try {
-    console.log("pushing database schema...");
+    console.log("[build] DATABASE_URL found — pushing schema via drizzle-kit...");
     execSync("pnpm --filter @workspace/db run push", {
       stdio: "inherit",
       cwd: path.resolve(__dirname, "../.."),
     });
-    console.log("schema push complete");
+    console.log("[build] drizzle-kit push complete.");
   } catch (err) {
-    console.warn("schema push failed (may not have DB access during build):", err);
+    console.warn("[build] drizzle-kit push failed (DB may not be reachable at build time). Tables will be created at runtime via initSchema().");
+    console.warn("[build] Error:", err);
   }
 }
 
