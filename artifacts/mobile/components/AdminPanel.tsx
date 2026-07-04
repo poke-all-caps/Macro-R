@@ -218,8 +218,8 @@ export function AdminPanel() {
     setKycLoading(true);
     try {
       const [codesRes, subRes] = await Promise.all([
-        fetch(`${API_BASE}/admin/invite-codes`, { headers: { "x-admin-secret": OWNER_ADMIN_SECRET } }),
-        fetch(`${API_BASE}/admin/kyc`, { headers: { "x-admin-secret": OWNER_ADMIN_SECRET } }),
+        fetch(`${API_BASE}/admin/invite-codes`, { headers: { "x-admin-secret": effectiveSecret } }),
+        fetch(`${API_BASE}/admin/kyc`, { headers: { "x-admin-secret": effectiveSecret } }),
       ]);
       if (codesRes.ok) { const d = await codesRes.json(); setInviteCodes(d.codes ?? []); }
       if (subRes.ok) { const d = await subRes.json(); setKycList(d.submissions ?? []); }
@@ -236,7 +236,7 @@ export function AdminPanel() {
     try {
       const res = await fetch(`${API_BASE}/admin/invite-codes`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-secret": OWNER_ADMIN_SECRET },
+        headers: { "Content-Type": "application/json", "x-admin-secret": effectiveSecret },
         body: JSON.stringify({ code: newCodeInput.trim().toUpperCase() || undefined }),
       });
       const d = await res.json();
@@ -257,7 +257,7 @@ export function AdminPanel() {
     try {
       const res = await fetch(`${API_BASE}/admin/kyc/${subId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "x-admin-secret": OWNER_ADMIN_SECRET },
+        headers: { "Content-Type": "application/json", "x-admin-secret": effectiveSecret },
         body: JSON.stringify({ kycStatus: decision, adminNote: note ?? null }),
       });
       if (res.ok) {
