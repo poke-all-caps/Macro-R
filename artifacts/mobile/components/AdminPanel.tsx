@@ -217,15 +217,17 @@ export function AdminPanel() {
   const loadKycData = useCallback(async () => {
     setKycLoading(true);
     try {
-      const [codesRes, subRes] = await Promise.all([
-        fetch(`${API_BASE}/admin/invite-codes`, { headers: { "x-admin-secret": effectiveSecret } }),
-        fetch(`${API_BASE}/admin/kyc`, { headers: { "x-admin-secret": effectiveSecret } }),
+      const [codesData, subData] = await Promise.all([
+        apiCall("GET", "/admin/invite-codes"),
+        apiCall("GET", "/admin/kyc"),
       ]);
-      if (codesRes.ok) { const d = await codesRes.json(); setInviteCodes(d.codes ?? []); }
-      if (subRes.ok) { const d = await subRes.json(); setKycList(d.submissions ?? []); }
-    } catch { /* ignore */ }
+      setInviteCodes(codesData.codes ?? []);
+      setKycList(subData.submissions ?? []);
+    } catch (e: any) {
+      showError("KYC Load Failed", e?.message ?? "Could not load KYC data");
+    }
     setKycLoading(false);
-  }, []);
+  }, [apiCall]);
 
   useEffect(() => {
     if (activeTab === "kyc") loadKycData();
@@ -234,39 +236,28 @@ export function AdminPanel() {
   const handleCreateInviteCode = async () => {
     setCreatingCode(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/invite-codes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-secret": effectiveSecret },
-        body: JSON.stringify({ code: newCodeInput.trim().toUpperCase() || undefined }),
-      });
-      const d = await res.json();
-      if (res.ok) {
-        setNewCodeInput("");
-        await Clipboard.setStringAsync(d.code?.code ?? "");
-        loadKycData();
-        Alert.alert("Code Created", `Code: ${d.code?.code ?? ""}\n\nCopied to clipboard.`);
-      } else {
-        Alert.alert("Error", d.error ?? "Failed to create code");
-      }
-    } catch { Alert.alert("Error", "Network error"); }
+      const body: Record<string, string> = {};
+      const trimmed = newCodeInput.trim().toUpperCase();
+      if (trimmed) body.code = trimmed;
+      const d = await apiCall("POST", "/admin/invite-codes", body);
+      setNewCodeInput("");
+      await Clipboard.setStringAsync(d.code?.code ?? "");
+      loadKycData();
+      Alert.alert("Code Created", `Code: ${d.code?.code ?? ""}\n\nCopied to clipboard.`);
+    } catch (e: any) {
+      Alert.alert("Error", e?.message ?? "Failed to create code");
+    }
     setCreatingCode(false);
   };
 
   const handleKycDecision = async (subId: string, decision: "verified" | "rejected", note?: string) => {
     setKycActionLoading(subId);
     try {
-      const res = await fetch(`${API_BASE}/admin/kyc/${subId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", "x-admin-secret": effectiveSecret },
-        body: JSON.stringify({ kycStatus: decision, adminNote: note ?? null }),
-      });
-      if (res.ok) {
-        await loadKycData();
-      } else {
-        const d = await res.json();
-        Alert.alert("Error", d.error ?? "Failed to update status");
-      }
-    } catch { Alert.alert("Error", "Network error"); }
+      await apiCall("PUT", `/admin/kyc/${subId}`, { kycStatus: decision, adminNote: note ?? null });
+      await loadKycData();
+    } catch (e: any) {
+      Alert.alert("Error", e?.message ?? "Failed to update KYC status");
+    }
     setKycActionLoading(null);
   };
 
