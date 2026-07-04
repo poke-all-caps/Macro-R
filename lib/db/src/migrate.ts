@@ -132,6 +132,24 @@ export async function initSchema(): Promise<void> {
     `);
     console.log("[db] kyc_submissions OK.");
 
+    // ── Phase 2: kyc_submissions column additions (idempotent) ──────────────
+    console.log("[db] Applying kyc_submissions column migrations...");
+    await client.query(`
+      ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
+      ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS license_key_id UUID;
+      ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS review_email_sent_at TIMESTAMP;
+      ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS approval_email_sent_at TIMESTAMP;
+    `);
+    console.log("[db] kyc_submissions columns OK.");
+
+    // ── Phase 2: feature_config trial tier ───────────────────────────────────
+    await client.query(`
+      INSERT INTO feature_config (key_type, max_accounts, max_searches, min_delay_seconds, background_enabled, custom_queries_enabled, daily_set_enabled, pc_search_enabled) VALUES
+        ('trial', 3, 20, 5, FALSE, FALSE, TRUE, FALSE)
+      ON CONFLICT (key_type) DO NOTHING;
+    `);
+    console.log("[db] trial tier seeded.");
+
     // ── Final verification: list all tables ───────────────────────────────────
     const { rows: tables } = await client.query(`
       SELECT tablename FROM pg_tables

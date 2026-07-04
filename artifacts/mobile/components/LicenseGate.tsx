@@ -76,6 +76,7 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   const [inviteInput, setInviteInput] = useState("");
   const [inviteValidating, setInviteValidating] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [kycEmail, setKycEmail] = useState("");
   const [kycFullName, setKycFullName] = useState("");
   const [kycFatherName, setKycFatherName] = useState("");
   const [kycMotherName, setKycMotherName] = useState("");
@@ -314,8 +315,13 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
 
   // ── KYC form submission ──────────────────────────────────────────────────────
   const handleKycSubmit = async () => {
-    if (!kycFullName.trim() || !kycFatherName.trim() || !kycMotherName.trim() || !kycGrandfatherName.trim()) {
-      setKycError("All name fields are required.");
+    if (!kycEmail.trim() || !kycFullName.trim() || !kycFatherName.trim() || !kycMotherName.trim() || !kycGrandfatherName.trim()) {
+      setKycError("All fields, including your email, are required.");
+      return;
+    }
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!EMAIL_RE.test(kycEmail.trim())) {
+      setKycError("Please enter a valid email address.");
       return;
     }
     if (!idFront || !idBack) {
@@ -330,6 +336,7 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: inviteInput.trim().toUpperCase(),
+          email: kycEmail.trim().toLowerCase(),
           fullName: kycFullName.trim(),
           fatherName: kycFatherName.trim(),
           motherName: kycMotherName.trim(),
@@ -553,6 +560,26 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
             <Text style={[styles.title, { color: colors.text }]}>Identity Verification</Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
               Please provide your details and a photo of your national ID
+            </Text>
+          </View>
+
+          <View style={{ marginBottom: 14 }}>
+            <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Email Address</Text>
+            <View style={[styles.inputWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <TextInput
+                style={[styles.input, { color: colors.text }]}
+                placeholder="you@example.com"
+                placeholderTextColor={colors.textSecondary}
+                value={kycEmail}
+                onChangeText={setKycEmail}
+                autoCorrect={false}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                returnKeyType="next"
+              />
+            </View>
+            <Text style={[styles.fieldHint, { color: colors.textSecondary }]}>
+              We'll email you your license key here once approved
             </Text>
           </View>
 
@@ -941,6 +968,7 @@ const styles = StyleSheet.create({
   backText: { fontSize: 14, fontFamily: "Inter_500Medium" },
   // KYC form fields
   fieldLabel: { fontSize: 12, fontFamily: "Inter_600SemiBold", marginBottom: 6, letterSpacing: 0.5 },
+  fieldHint: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 6 },
   photoBox: {
     height: 120, borderRadius: 12, borderWidth: 1, borderStyle: "dashed",
     justifyContent: "center", alignItems: "center", marginBottom: 4, overflow: "hidden",

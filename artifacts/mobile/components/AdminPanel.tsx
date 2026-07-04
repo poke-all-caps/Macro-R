@@ -31,10 +31,11 @@ import { isOvernightFeatureEnabled, setOvernightFeatureEnabled } from "@/utils/f
 import { API_BASE } from "@/utils/apiUrl";
 const OWNER_ADMIN_SECRET = process.env.EXPO_PUBLIC_ADMIN_SECRET || "";
 
-const KEY_TYPES = ["basic", "premium", "unlimited", "admin"] as const;
+const KEY_TYPES = ["trial", "basic", "premium", "unlimited", "admin"] as const;
 type KeyType = typeof KEY_TYPES[number];
 
 const KEY_TYPE_COLORS: Record<KeyType, { color: string; bg: string }> = {
+  trial: { color: "#22d3ee", bg: "#0891b222" },
   basic: { color: "#94a3b8", bg: "#64748b22" },
   premium: { color: "#a78bfa", bg: "#7c3aed22" },
   unlimited: { color: "#fbbf24", bg: "#d9770622" },
@@ -103,7 +104,7 @@ export function AdminPanel() {
 
   // KYC tab state
   const [inviteCodes, setInviteCodes] = useState<Array<{ id: string; code: string; status: string; createdAt: string }>>([]);
-  const [kycList, setKycList] = useState<Array<{ id: string; inviteCode: string; fullName: string; kycStatus: string; adminNote: string | null; createdAt: string }>>([]);
+  const [kycList, setKycList] = useState<Array<{ id: string; inviteCode: string; email: string; fullName: string; kycStatus: string; adminNote: string | null; licenseKey: string | null; createdAt: string }>>([]);
   const [kycLoading, setKycLoading] = useState(false);
   const [creatingCode, setCreatingCode] = useState(false);
   const [newCodeInput, setNewCodeInput] = useState("");
@@ -288,7 +289,7 @@ export function AdminPanel() {
     await setOvernightFeatureEnabled(value);
     // Push to the server — update backgroundEnabled for every key type so
     // all users see the change on their next app launch / revalidation.
-    const KEY_TYPES_ALL = ["basic", "premium", "unlimited", "admin"];
+    const KEY_TYPES_ALL = ["trial", "basic", "premium", "unlimited", "admin"];
     await Promise.all(
       KEY_TYPES_ALL.map((kt) =>
         apiCall("PUT", `/admin/feature-config/${kt}`, { backgroundEnabled: value }).catch(() => {})
@@ -1231,6 +1232,9 @@ export function AdminPanel() {
                   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                     <View style={{ flex: 1, marginRight: 8 }}>
                       <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{sub.fullName}</Text>
+                      {sub.email ? (
+                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>{sub.email}</Text>
+                      ) : null}
                       <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Code: {sub.inviteCode}</Text>
                       <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 11, marginTop: 1 }}>{new Date(sub.createdAt).toLocaleString()}</Text>
                     </View>
@@ -1267,6 +1271,11 @@ export function AdminPanel() {
                   )}
                   {sub.adminNote ? (
                     <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 6, fontStyle: "italic" }}>Note: {sub.adminNote}</Text>
+                  ) : null}
+                  {sub.licenseKey ? (
+                    <View style={{ marginTop: 8, padding: 8, borderRadius: 8, backgroundColor: "#22d3ee15", borderWidth: 1, borderColor: "#22d3ee40" }}>
+                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "#22d3ee", fontSize: 12 }}>License Key: {sub.licenseKey}</Text>
+                    </View>
                   ) : null}
                 </View>
               ))

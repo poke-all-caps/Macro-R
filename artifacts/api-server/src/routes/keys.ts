@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { requireAdmin } from "../adminSession";
 
 const DEFAULT_CONFIGS = [
+  { keyType: "trial", maxAccounts: 3, maxSearches: 20, minDelaySeconds: 5, backgroundEnabled: false, customQueriesEnabled: false, dailySetEnabled: true, pcSearchEnabled: false },
   { keyType: "basic", maxAccounts: 2, maxSearches: 20, minDelaySeconds: 5, backgroundEnabled: false, customQueriesEnabled: false, dailySetEnabled: true, pcSearchEnabled: false },
   { keyType: "premium", maxAccounts: 5, maxSearches: 40, minDelaySeconds: 3, backgroundEnabled: true, customQueriesEnabled: true, dailySetEnabled: true, pcSearchEnabled: true },
   { keyType: "unlimited", maxAccounts: 999, maxSearches: 999, minDelaySeconds: 3, backgroundEnabled: true, customQueriesEnabled: true, dailySetEnabled: true, pcSearchEnabled: true },
@@ -70,7 +71,7 @@ router.get("/admin/keys", requireAdmin, async (_req, res) => {
 router.post("/admin/keys", requireAdmin, async (req, res) => {
   try {
     const { label, maxAccounts, expiresAt, keyType } = req.body;
-    const validTypes = ["basic", "premium", "unlimited", "admin"];
+    const validTypes = ["trial", "basic", "premium", "unlimited", "admin"];
     const key = generateKey();
     const [created] = await db.insert(licenseKeysTable).values({
       key,
@@ -90,7 +91,7 @@ router.put("/admin/keys/:id", requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { label, maxAccounts, expiresAt, isActive, keyType } = req.body;
-    const validTypes = ["basic", "premium", "unlimited", "admin"];
+    const validTypes = ["trial", "basic", "premium", "unlimited", "admin"];
 
     const updates: any = { updatedAt: new Date() };
     if (label !== undefined) updates.label = label;
@@ -181,7 +182,7 @@ router.get("/admin/feature-config", requireAdmin, async (_req, res) => {
 router.put("/admin/feature-config/:keyType", requireAdmin, async (req, res) => {
   try {
     const { keyType } = req.params;
-    const validTypes = ["basic", "premium", "unlimited", "admin"];
+    const validTypes = ["trial", "basic", "premium", "unlimited", "admin"];
     if (!validTypes.includes(keyType)) {
       return res.status(400).json({ error: "Invalid key type" });
     }
