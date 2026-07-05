@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -104,7 +105,9 @@ export function AdminPanel() {
 
   // KYC tab state
   const [inviteCodes, setInviteCodes] = useState<Array<{ id: string; code: string; status: string; createdAt: string }>>([]);
-  const [kycList, setKycList] = useState<Array<{ id: string; inviteCode: string; email: string; fullName: string; kycStatus: string; adminNote: string | null; licenseKey: string | null; createdAt: string }>>([]);
+  const [kycList, setKycList] = useState<Array<{ id: string; inviteCode: string; email: string; fullName: string; fatherName: string; motherName: string; grandfatherName: string; kycStatus: string; adminNote: string | null; licenseKey: string | null; createdAt: string }>>([]);
+  const [kycDocsLoadingId, setKycDocsLoadingId] = useState<string | null>(null);
+  const [kycDocsModal, setKycDocsModal] = useState<{ idFront: string; idBack: string; fullName: string } | null>(null);
   const [kycLoading, setKycLoading] = useState(false);
   const [creatingCode, setCreatingCode] = useState(false);
   const [newCodeInput, setNewCodeInput] = useState("");
@@ -273,6 +276,22 @@ export function AdminPanel() {
       Alert.alert("Error", e?.message ?? "Failed to update KYC status");
     }
     setKycActionLoading(null);
+  };
+
+  const handleViewKycDocuments = async (subId: string, fullName: string) => {
+    setKycDocsLoadingId(subId);
+    try {
+      const data = await apiCall("GET", `/admin/kyc/${subId}`);
+      const sub = data.submission;
+      if (!sub?.idFront || !sub?.idBack) {
+        Alert.alert("No Documents", "This submission has no ID photos on file.");
+        return;
+      }
+      setKycDocsModal({ idFront: sub.idFront, idBack: sub.idBack, fullName });
+    } catch (e: any) {
+      Alert.alert("Error", e?.message ?? "Failed to load ID documents");
+    }
+    setKycDocsLoadingId(null);
   };
 
   useEffect(() => {
@@ -1236,7 +1255,27 @@ export function AdminPanel() {
                         <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>{sub.email}</Text>
                       ) : null}
                       <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Code: {sub.inviteCode}</Text>
+                      {sub.fatherName ? (
+                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Father: {sub.fatherName}</Text>
+                      ) : null}
+                      {sub.motherName ? (
+                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Mother: {sub.motherName}</Text>
+                      ) : null}
+                      {sub.grandfatherName ? (
+                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Grandfather: {sub.grandfatherName}</Text>
+                      ) : null}
                       <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 11, marginTop: 1 }}>{new Date(sub.createdAt).toLocaleString()}</Text>
+                      <Pressable
+                        onPress={() => handleViewKycDocuments(sub.id, sub.fullName)}
+                        disabled={kycDocsLoadingId === sub.id}
+                        style={({ pressed }) => ({ marginTop: 8, alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: colors.surfaceSecondary, opacity: kycDocsLoadingId === sub.id ? 0.6 : pressed ? 0.8 : 1 })}
+                      >
+                        {kycDocsLoadingId === sub.id ? (
+                          <ActivityIndicator size="small" color={colors.tint} />
+                        ) : (
+                          <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.tint }}>View ID Documents</Text>
+                        )}
+                      </Pressable>
                     </View>
                     <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: sub.kycStatus === "pending" ? "#f59e0b22" : sub.kycStatus === "verified" ? "#10b98122" : "#ef444422" }}>
                       <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: sub.kycStatus === "pending" ? "#f59e0b" : sub.kycStatus === "verified" ? "#10b981" : "#ef4444" }}>{sub.kycStatus}</Text>
@@ -1285,6 +1324,44 @@ export function AdminPanel() {
       )}
 
       {renderKeyProfile()}
+
+      <Modal
+        visible={!!kycDocsModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setKycDocsModal(null)}
+      >
+        <View style={[styles.profileContainer, { backgroundColor: colors.background }]}>
+          <View style={[styles.profileHeader, { paddingTop: Platform.OS === "ios" ? 16 : insets.top + 8 }]}>
+            <Pressable onPress={() => setKycDocsModal(null)} style={styles.profileCloseBtn}>
+              <X size={22} color={colors.text} />
+            </Pressable>
+            <Text style={[styles.profileTitle, { color: colors.text }]}>ID Documents</Text>
+            <View style={{ width: 40 }} />
+          </View>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 40, paddingHorizontal: 16 }}>
+            {kycDocsModal?.fullName ? (
+              <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 16, marginTop: 8, marginBottom: 16 }}>{kycDocsModal.fullName}</Text>
+            ) : null}
+            <Text style={{ fontFamily: "Inter_600SemiBold", color: colors.textSecondary, fontSize: 13, marginBottom: 8 }}>Front of ID</Text>
+            {kycDocsModal?.idFront ? (
+              <Image
+                source={{ uri: kycDocsModal.idFront }}
+                style={{ width: "100%", aspectRatio: 4 / 3, borderRadius: 12, backgroundColor: colors.card, marginBottom: 20 }}
+                resizeMode="contain"
+              />
+            ) : null}
+            <Text style={{ fontFamily: "Inter_600SemiBold", color: colors.textSecondary, fontSize: 13, marginBottom: 8 }}>Back of ID</Text>
+            {kycDocsModal?.idBack ? (
+              <Image
+                source={{ uri: kycDocsModal.idBack }}
+                style={{ width: "100%", aspectRatio: 4 / 3, borderRadius: 12, backgroundColor: colors.card, marginBottom: 20 }}
+                resizeMode="contain"
+              />
+            ) : null}
+          </ScrollView>
+        </View>
+      </Modal>
 
       <CustomAlert
         visible={deletePopup}
