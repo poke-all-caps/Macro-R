@@ -36,6 +36,7 @@ import {
 } from "lucide-react-native";
 import { CameraView, Camera as ExpoCamera } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import * as Updates from "expo-updates";
 import { useLicense } from "@/context/LicenseContext";
 import { useAccounts } from "@/context/AccountsContext";
@@ -262,6 +263,36 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   };
 
   // ── KYC image picker ─────────────────────────────────────────────────────────
+  // Only PNG/JPEG source images are accepted, and every photo is re-encoded
+  // as a resized, compressed JPEG before it ever gets set into state or sent
+  // to the server. This keeps request payloads small (protects the API's body
+  // size limit and the DB) and guarantees a single, predictable image format.
+  const ALLOWED_PICKER_TYPES = ["image/png", "image/jpeg", "image/jpg"];
+  const MAX_ID_IMAGE_DIMENSION = 1600;
+
+  const compressIdImage = async (uri: string, mimeType?: string): Promise<string | null> => {
+    if (mimeType && !ALLOWED_PICKER_TYPES.includes(mimeType.toLowerCase())) {
+      Alert.alert("Unsupported File Type", "Please select a PNG or JPEG image.");
+      return null;
+    }
+    try {
+      const manipulated = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: MAX_ID_IMAGE_DIMENSION } }],
+        {
+          compress: 0.6,
+          format: ImageManipulator.SaveFormat.JPEG,
+          base64: true,
+        }
+      );
+      if (!manipulated.base64) return null;
+      return `data:image/jpeg;base64,${manipulated.base64}`;
+    } catch {
+      Alert.alert("Image Error", "Could not process that image. Please try another one.");
+      return null;
+    }
+  };
+
   const pickIdImage = (side: "front" | "back") => {
     Alert.alert("Add ID Photo", `Select source for the ${side} of your ID`, [
       {
@@ -276,11 +307,12 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
           }
           const result = await ImagePicker.launchCameraAsync({
             quality: 0.7,
-            base64: true,
             allowsEditing: true,
           });
-          if (!result.canceled && result.assets[0]?.base64) {
-            const uri = `data:image/jpeg;base64,${result.assets[0].base64}`;
+          const asset = result.assets?.[0];
+          if (!result.canceled && asset?.uri) {
+            const uri = await compressIdImage(asset.uri, asset.mimeType);
+            if (!uri) return;
             if (side === "front") setIdFront(uri);
             else setIdBack(uri);
           }
@@ -299,11 +331,12 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
           const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ["images"],
             quality: 0.7,
-            base64: true,
             allowsEditing: true,
           });
-          if (!result.canceled && result.assets[0]?.base64) {
-            const uri = `data:image/jpeg;base64,${result.assets[0].base64}`;
+          const asset = result.assets?.[0];
+          if (!result.canceled && asset?.uri) {
+            const uri = await compressIdImage(asset.uri, asset.mimeType);
+            if (!uri) return;
             if (side === "front") setIdFront(uri);
             else setIdBack(uri);
           }

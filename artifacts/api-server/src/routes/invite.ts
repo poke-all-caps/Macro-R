@@ -19,6 +19,18 @@ function generateLicenseKey(): string {
   return segments.join("-");
 }
 
+// Only PNG/JPEG data URLs are accepted for ID photos. This is enforced
+// server-side too (not just in the mobile client) so a malicious or
+// non-standard client can't smuggle arbitrary files/formats into the DB.
+const ALLOWED_IMAGE_DATA_URL = /^data:image\/(png|jpe?g);base64,([A-Za-z0-9+/]+=*)$/i;
+
+function validateIdImage(value: unknown): string | null {
+  if (typeof value !== "string") return "ID images must be provided as image data.";
+  const match = value.match(ALLOWED_IMAGE_DATA_URL);
+  if (!match) return "ID images must be a PNG or JPEG photo.";
+  return null;
+}
+
 // ── Public: validate an invite code ──────────────────────────────────────────
 // Returns: { valid, status, kycStatus? }
 // inviteCode.status: "unused" | "pending" | "resolved"
@@ -85,8 +97,18 @@ router.post("/invite/kyc-submit", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "This invite code has already been used", status: invite.status });
     }
 
-    // Enforce a size cap on the base64 images (~5 MB each after encoding)
-    const MAX_B64 = 7 * 1024 * 1024;
+    // Only PNG/JPEG data URLs are accepted (mobile client compresses to JPEG,
+    // but we validate independently in case of a non-standard client).
+    const frontFormatError = validateIdImage(idFront);
+    if (frontFormatError) return res.status(400).json({ error: frontFormatError });
+    const backFormatError = validateIdImage(idBack);
+    if (backFormatError) return res.status(400).json({ error: backFormatError });
+
+    // Enforce a size cap on the base64 images. The mobile client compresses
+    // and resizes photos before upload, so a well-behaved client should
+    // never come close to this; it exists to protect the DB/server from
+    // oversized payloads slipping through.
+    const MAX_B64 = 4 * 1024 * 1024;
     if (idFront.length > MAX_B64 || idBack.length > MAX_B64) {
       return res.status(400).json({ error: "ID images are too large. Please use a smaller image." });
     }
