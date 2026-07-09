@@ -13,6 +13,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Switch,
@@ -126,6 +127,7 @@ export function AdminPanel() {
   const [inviteStatusFilter, setInviteStatusFilter] = useState<"all" | "unused" | "pending" | "resolved">("all");
   const [kycSearch, setKycSearch] = useState("");
   const [kycStatusFilter, setKycStatusFilter] = useState<"all" | "pending" | "verified" | "rejected">("all");
+  const [refreshing, setRefreshing] = useState(false);
 
   const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
   const adminLicenseKey = licenseData?.keyType === "admin" ? licenseData.key : null;
@@ -256,6 +258,22 @@ export function AdminPanel() {
   useEffect(() => {
     if (activeTab === "kyc") loadKycData();
   }, [activeTab, loadKycData]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      if (activeTab === "keys") {
+        await loadKeys();
+      } else if (activeTab === "config") {
+        await loadFeatureConfigs();
+      } else {
+        await loadKycData();
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }, [activeTab, loadKeys, loadFeatureConfigs, loadKycData]);
 
   const filteredInviteCodes = useMemo(() => {
     const q = inviteSearch.trim().toUpperCase();
@@ -1168,10 +1186,11 @@ export function AdminPanel() {
             <Text style={[styles.title, { color: colors.text }]}>Admin Panel</Text>
           </View>
           <Pressable
-              onPress={loadKeys}
-              style={[styles.refreshBtn, { backgroundColor: colors.surfaceSecondary }]}
+              onPress={handleRefresh}
+              disabled={refreshing}
+              style={[styles.refreshBtn, { backgroundColor: colors.surfaceSecondary, opacity: refreshing ? 0.6 : 1 }]}
             >
-              <RefreshCw size={20} color={colors.text} />
+              {refreshing ? <ActivityIndicator size="small" color={colors.text} /> : <RefreshCw size={20} color={colors.text} />}
             </Pressable>
         </View>
 
@@ -1339,6 +1358,9 @@ export function AdminPanel() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.text} colors={["#3b82f6"]} />
+          }
         />
       )}
       </>
@@ -1347,6 +1369,9 @@ export function AdminPanel() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.text} colors={["#3b82f6"]} />
+          }
         >
           <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 12 }]}>
             <Text style={{ fontSize: 16, fontFamily: "Inter_700Bold", color: colors.text, marginBottom: 12 }}>
@@ -1426,6 +1451,9 @@ export function AdminPanel() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 20 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.text} colors={["#3b82f6"]} />
+          }
         >
           {/* ── Invite Codes ── */}
           <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 12 }]}>
