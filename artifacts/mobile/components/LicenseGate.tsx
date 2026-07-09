@@ -956,8 +956,8 @@ const styles = StyleSheet.create({
     marginTop: 8, textAlign: "center",
   },
   button: {
-    backgroundColor: "#3b82f6", borderRadius: 12, height: 50,
-    justifyContent: "center", alignItems: "center", marginTop: 16,
+    backgroundColor: "#3b82f6", borderRadius: 12, height: 50, width: "100%",
+    justifyContent: "center", alignItems: "center", marginTop: 16, paddingHorizontal: 24,
   },
   buttonText: { color: "#fff", fontSize: 16, fontFamily: "Inter_600SemiBold" },
   scanRow: { flexDirection: "row", gap: 10, marginTop: 12 },
