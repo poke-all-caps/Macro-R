@@ -791,6 +791,13 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   // ── LICENSE ENTRY step (gateStep === "license" or default) ───────────────────
   return (
     <>
+      <Pressable
+        style={[styles.backBtnFloating, { top: insets.top + 12 }]}
+        onPress={() => setGateStep("gateway")}
+      >
+        <ArrowLeft size={20} color={colors.textSecondary} />
+        <Text style={[styles.backText, { color: colors.textSecondary }]}>Back</Text>
+      </Pressable>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <ScrollView
           style={[styles.container, { backgroundColor: colors.background }]}
@@ -805,12 +812,6 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
           bounces={false}
         >
           <View style={styles.content}>
-            {/* Back to gateway */}
-            <Pressable style={styles.backBtn} onPress={() => setGateStep("gateway")}>
-              <ArrowLeft size={20} color={colors.textSecondary} />
-              <Text style={[styles.backText, { color: colors.textSecondary }]}>Back</Text>
-            </Pressable>
-
             <View style={[styles.iconContainer, { backgroundColor: colors.card }]}>
               <Lock size={48} color="#3b82f6" />
             </View>
@@ -997,6 +998,11 @@ const styles = StyleSheet.create({
   backBtn: {
     flexDirection: "row", alignItems: "center", gap: 6,
     alignSelf: "flex-start", marginBottom: 20, paddingVertical: 4,
+  },
+  backBtnFloating: {
+    position: "absolute", left: 24, zIndex: 10,
+    flexDirection: "row", alignItems: "center", gap: 6,
+    paddingVertical: 4,
   },
   backText: { fontSize: 14, fontFamily: "Inter_500Medium" },
   // KYC form fields
