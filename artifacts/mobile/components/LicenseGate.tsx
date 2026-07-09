@@ -515,19 +515,22 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
   // ── INVITE CODE step ─────────────────────────────────────────────────────────
   if (gateStep === "invite") {
     return (
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <ScrollView
-          style={[styles.container, { backgroundColor: colors.background }]}
-          contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+      <>
+        <Pressable
+          style={[styles.backBtnFloating, { top: insets.top + 12 }]}
+          onPress={() => setGateStep("gateway")}
         >
-          <View style={styles.content}>
-            <Pressable style={styles.backBtn} onPress={() => setGateStep("gateway")}>
-              <ArrowLeft size={20} color={colors.textSecondary} />
-              <Text style={[styles.backText, { color: colors.textSecondary }]}>Back</Text>
-            </Pressable>
-
+          <ArrowLeft size={20} color={colors.textSecondary} />
+          <Text style={[styles.backText, { color: colors.textSecondary }]}>Back</Text>
+        </Pressable>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <ScrollView
+            style={[styles.container, { backgroundColor: colors.background }]}
+            contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.content}>
             <View style={[styles.iconContainer, { backgroundColor: "#8b5cf620" }]}>
               <Ticket size={40} color="#8b5cf6" />
             </View>
@@ -565,9 +568,10 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
                   : <Text style={styles.buttonText}>Verify Code</Text>}
               </Pressable>
             </View>
-          </View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </>
     );
   }
 
