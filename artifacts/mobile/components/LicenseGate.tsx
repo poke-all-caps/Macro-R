@@ -97,6 +97,15 @@ export function LicenseGate({ children }: { children: React.ReactNode }) {
     setGateReady(true);
   }, [kyc.isLoaded]);
 
+  // ── clear stale PIN input whenever the PIN prompt (re-)appears ──────────────
+  useEffect(() => {
+    if (pinRequired) {
+      setPinInput("");
+      setPinError(null);
+      setPinSubmitting(false);
+    }
+  }, [pinRequired]);
+
   // ── update check ────────────────────────────────────────────────────────────
   const handleCheckUpdate = async () => {
     if (checkingUpdate || Platform.OS === "web") return;
