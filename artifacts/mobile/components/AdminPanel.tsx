@@ -119,6 +119,9 @@ export function AdminPanel() {
   const [expiryDay, setExpiryDay] = useState("");
   const [expiryHour, setExpiryHour] = useState("23");
   const [expiryMinute, setExpiryMinute] = useState("59");
+  const [selectedInvite, setSelectedInvite] = useState<{ id: string; code: string; status: string; createdAt: string } | null>(null);
+  const [deleteInvitePopup, setDeleteInvitePopup] = useState(false);
+  const [selectedKyc, setSelectedKyc] = useState<{ id: string; inviteCode: string; email: string; fullName: string; fatherName: string; motherName: string; grandfatherName: string; kycStatus: string; adminNote: string | null; licenseKey: string | null; createdAt: string } | null>(null);
 
   const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
   const adminLicenseKey = licenseData?.keyType === "admin" ? licenseData.key : null;
@@ -276,6 +279,38 @@ export function AdminPanel() {
       Alert.alert("Error", e?.message ?? "Failed to update KYC status");
     }
     setKycActionLoading(null);
+  };
+
+  const openInviteProfile = (item: { id: string; code: string; status: string; createdAt: string }) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedInvite(item);
+  };
+
+  const closeInviteProfile = () => {
+    setSelectedInvite(null);
+    setDeleteInvitePopup(false);
+  };
+
+  const handleDeleteInviteCode = async () => {
+    if (!selectedInvite) return;
+    setDeleteInvitePopup(false);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    try {
+      await apiCall("DELETE", `/admin/invite-codes/${selectedInvite.id}`);
+      await loadKycData();
+      closeInviteProfile();
+    } catch (e: any) {
+      showError("Error", e?.message ?? "Failed to delete invite code.");
+    }
+  };
+
+  const openKycProfile = (item: typeof selectedKyc) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedKyc(item);
+  };
+
+  const closeKycProfile = () => {
+    setSelectedKyc(null);
   };
 
   const handleViewKycDocuments = async (subId: string, fullName: string) => {
@@ -915,6 +950,184 @@ export function AdminPanel() {
     );
   };
 
+  const renderInviteProfile = () => {
+    if (!selectedInvite) return null;
+    const statusColor = selectedInvite.status === "unused" ? "#64748b" : selectedInvite.status === "pending" ? "#f59e0b" : "#10b981";
+    return (
+      <Modal
+        visible={!!selectedInvite}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={closeInviteProfile}
+      >
+        <View style={[styles.profileContainer, { backgroundColor: colors.background }]}>
+          <View style={[styles.profileHeader, { paddingTop: Platform.OS === "ios" ? 16 : insets.top + 8 }]}>
+            <Pressable onPress={closeInviteProfile} style={styles.profileCloseBtn}>
+              <X size={22} color={colors.text} />
+            </Pressable>
+            <Text style={[styles.profileTitle, { color: colors.text }]}>Invite Code</Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
+            <View style={[styles.profileKeySection, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Pressable onPress={() => { Clipboard.setStringAsync(selectedInvite.code); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); }} style={styles.profileKeyRow}>
+                <Text style={styles.profileKeyText}>{selectedInvite.code}</Text>
+                <Copy size={18} color="#3b82f680" />
+              </Pressable>
+              <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+                <View style={[styles.badge, { backgroundColor: `${statusColor}22`, paddingHorizontal: 12, paddingVertical: 4 }]}>
+                  <Text style={[styles.badgeText, { color: statusColor, fontSize: 13 }]}>{selectedInvite.status.toUpperCase()}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={[styles.profileInfoGrid, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={styles.profileInfoItem}>
+                <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Created</Text>
+                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{new Date(selectedInvite.createdAt).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</Text>
+              </View>
+            </View>
+
+            <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
+              <Pressable
+                onPress={() => setDeleteInvitePopup(true)}
+                style={({ pressed }) => [
+                  styles.deleteBtn,
+                  { opacity: pressed ? 0.85 : 1 },
+                ]}
+              >
+                <Trash2 size={18} color="#fff" />
+                <Text style={styles.deleteBtnText}>Delete Invite Code</Text>
+              </Pressable>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderKycProfile = () => {
+    if (!selectedKyc) return null;
+    const sub = selectedKyc;
+    const statusColor = sub.kycStatus === "pending" ? "#f59e0b" : sub.kycStatus === "verified" ? "#10b981" : "#ef4444";
+    return (
+      <Modal
+        visible={!!selectedKyc}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={closeKycProfile}
+      >
+        <View style={[styles.profileContainer, { backgroundColor: colors.background }]}>
+          <View style={[styles.profileHeader, { paddingTop: Platform.OS === "ios" ? 16 : insets.top + 8 }]}>
+            <Pressable onPress={closeKycProfile} style={styles.profileCloseBtn}>
+              <X size={22} color={colors.text} />
+            </Pressable>
+            <Text style={[styles.profileTitle, { color: colors.text }]}>KYC Submission</Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}>
+            <View style={[styles.profileKeySection, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.profileKeyText, { color: colors.text, fontSize: 18 }]}>{sub.fullName}</Text>
+              <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+                <View style={[styles.badge, { backgroundColor: `${statusColor}22`, paddingHorizontal: 12, paddingVertical: 4 }]}>
+                  <Text style={[styles.badgeText, { color: statusColor, fontSize: 13 }]}>{sub.kycStatus.toUpperCase()}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={[styles.profileInfoGrid, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={styles.profileInfoItem}>
+                <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Email</Text>
+                <Text style={[styles.profileInfoValue, { color: colors.text }]} numberOfLines={1}>{sub.email || "—"}</Text>
+              </View>
+              <View style={styles.profileInfoItem}>
+                <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Invite Code</Text>
+                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{sub.inviteCode}</Text>
+              </View>
+              <View style={styles.profileInfoItem}>
+                <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Father</Text>
+                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{sub.fatherName || "—"}</Text>
+              </View>
+              <View style={styles.profileInfoItem}>
+                <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Mother</Text>
+                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{sub.motherName || "—"}</Text>
+              </View>
+              <View style={styles.profileInfoItem}>
+                <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Grandfather</Text>
+                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{sub.grandfatherName || "—"}</Text>
+              </View>
+              <View style={styles.profileInfoItem}>
+                <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Submitted</Text>
+                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{new Date(sub.createdAt).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</Text>
+              </View>
+              {sub.licenseKey && (
+                <View style={styles.profileInfoItem}>
+                  <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>License Key</Text>
+                  <Text style={[styles.profileInfoValue, { color: "#22d3ee" }]} numberOfLines={1}>{sub.licenseKey}</Text>
+                </View>
+              )}
+              {sub.adminNote && (
+                <View style={[styles.profileInfoItem, { width: "100%" }]}>
+                  <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Admin Note</Text>
+                  <Text style={[styles.profileInfoValue, { color: colors.text, fontFamily: "Inter_400Regular" }]}>{sub.adminNote}</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={[styles.profileActionsSection, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <Text style={[styles.profileSectionTitle, { color: colors.text }]}>Actions</Text>
+
+              <ProfileAction
+                icon={kycDocsLoadingId === sub.id ? <ActivityIndicator size={18} color="#3b82f6" /> : <ExternalLink size={18} color="#3b82f6" />}
+                label="View ID Documents"
+                sublabel="Front and back of ID"
+                colors={colors}
+                onPress={() => handleViewKycDocuments(sub.id, sub.fullName)}
+              />
+
+              {sub.kycStatus === "pending" && (
+                <>
+                  <ProfileAction
+                    icon={kycActionLoading === sub.id ? <ActivityIndicator size={18} color="#10b981" /> : <Check size={18} color="#10b981" />}
+                    label="Approve"
+                    sublabel="Verify submission and issue license"
+                    colors={colors}
+                    onPress={async () => {
+                      await handleKycDecision(sub.id, "verified");
+                      closeKycProfile();
+                    }}
+                  />
+                  <ProfileAction
+                    icon={kycActionLoading === sub.id ? <ActivityIndicator size={18} color="#ef4444" /> : <X size={18} color="#ef4444" />}
+                    label="Reject"
+                    sublabel={kycNoteInput ? `Reason: ${kycNoteInput}` : "Tap to reject without a note"}
+                    colors={colors}
+                    onPress={async () => {
+                      await handleKycDecision(sub.id, "rejected", kycNoteInput || undefined);
+                      setKycNoteInput("");
+                      closeKycProfile();
+                    }}
+                  />
+                  <View style={{ paddingHorizontal: 12, paddingBottom: 8 }}>
+                    <TextInput
+                      style={{ height: 40, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 10, fontSize: 13, fontFamily: "Inter_400Regular" }}
+                      placeholder="Optional rejection reason..."
+                      placeholderTextColor={colors.textSecondary}
+                      value={kycNoteInput}
+                      onChangeText={setKycNoteInput}
+                    />
+                  </View>
+                </>
+              )}
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+    );
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
@@ -1215,7 +1428,11 @@ export function AdminPanel() {
               <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>No invite codes yet.</Text>
             ) : (
               inviteCodes.map((ic) => (
-                <View key={ic.id} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+                <Pressable
+                  key={ic.id}
+                  onPress={() => openInviteProfile(ic)}
+                  style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border, opacity: pressed ? 0.7 : 1 })}
+                >
                   <View>
                     <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{ic.code}</Text>
                     <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 11, marginTop: 2 }}>{new Date(ic.createdAt).toLocaleDateString()}</Text>
@@ -1224,11 +1441,9 @@ export function AdminPanel() {
                     <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: ic.status === "unused" ? "#64748b22" : ic.status === "pending" ? "#f59e0b22" : "#10b98122" }}>
                       <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: ic.status === "unused" ? "#64748b" : ic.status === "pending" ? "#f59e0b" : "#10b981" }}>{ic.status}</Text>
                     </View>
-                    <Pressable onPress={() => Clipboard.setStringAsync(ic.code)} style={{ padding: 4 }}>
-                      <Copy size={14} color={colors.textSecondary} />
-                    </Pressable>
+                    <ChevronRight size={16} color={colors.textSecondary} />
                   </View>
-                </View>
+                </Pressable>
               ))
             )}
           </View>
@@ -1247,76 +1462,24 @@ export function AdminPanel() {
               <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>No submissions yet.</Text>
             ) : (
               kycList.map((sub) => (
-                <View key={sub.id} style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingVertical: 12 }}>
-                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                    <View style={{ flex: 1, marginRight: 8 }}>
-                      <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{sub.fullName}</Text>
-                      {sub.email ? (
-                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>{sub.email}</Text>
-                      ) : null}
-                      <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Code: {sub.inviteCode}</Text>
-                      {sub.fatherName ? (
-                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Father: {sub.fatherName}</Text>
-                      ) : null}
-                      {sub.motherName ? (
-                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Mother: {sub.motherName}</Text>
-                      ) : null}
-                      {sub.grandfatherName ? (
-                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>Grandfather: {sub.grandfatherName}</Text>
-                      ) : null}
-                      <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 11, marginTop: 1 }}>{new Date(sub.createdAt).toLocaleString()}</Text>
-                      <Pressable
-                        onPress={() => handleViewKycDocuments(sub.id, sub.fullName)}
-                        disabled={kycDocsLoadingId === sub.id}
-                        style={({ pressed }) => ({ marginTop: 8, alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, backgroundColor: colors.surfaceSecondary, opacity: kycDocsLoadingId === sub.id ? 0.6 : pressed ? 0.8 : 1 })}
-                      >
-                        {kycDocsLoadingId === sub.id ? (
-                          <ActivityIndicator size="small" color={colors.tint} />
-                        ) : (
-                          <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: colors.tint }}>View ID Documents</Text>
-                        )}
-                      </Pressable>
-                    </View>
+                <Pressable
+                  key={sub.id}
+                  onPress={() => openKycProfile(sub)}
+                  style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border, opacity: pressed ? 0.7 : 1 })}
+                >
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{sub.fullName}</Text>
+                    <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }} numberOfLines={1}>
+                      {sub.email || `Code: ${sub.inviteCode}`}
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: sub.kycStatus === "pending" ? "#f59e0b22" : sub.kycStatus === "verified" ? "#10b98122" : "#ef444422" }}>
                       <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: sub.kycStatus === "pending" ? "#f59e0b" : sub.kycStatus === "verified" ? "#10b981" : "#ef4444" }}>{sub.kycStatus}</Text>
                     </View>
+                    <ChevronRight size={16} color={colors.textSecondary} />
                   </View>
-                  {sub.kycStatus === "pending" && (
-                    <View style={{ gap: 6 }}>
-                      <TextInput
-                        style={{ height: 36, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 10, fontSize: 12, fontFamily: "Inter_400Regular" }}
-                        placeholder="Optional rejection reason..."
-                        placeholderTextColor={colors.textSecondary}
-                        value={kycActionLoading === sub.id ? "" : kycNoteInput}
-                        onChangeText={setKycNoteInput}
-                      />
-                      <View style={{ flexDirection: "row", gap: 8 }}>
-                        <Pressable
-                          onPress={() => { handleKycDecision(sub.id, "verified"); setKycNoteInput(""); }}
-                          disabled={kycActionLoading === sub.id}
-                          style={({ pressed }) => ({ flex: 1, height: 36, borderRadius: 8, backgroundColor: "#10b981", justifyContent: "center", alignItems: "center", opacity: kycActionLoading === sub.id ? 0.5 : pressed ? 0.8 : 1 })}
-                        >
-                          {kycActionLoading === sub.id ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>✓ Approve</Text>}
-                        </Pressable>
-                        <Pressable
-                          onPress={() => { handleKycDecision(sub.id, "rejected", kycNoteInput || undefined); setKycNoteInput(""); }}
-                          disabled={kycActionLoading === sub.id}
-                          style={({ pressed }) => ({ flex: 1, height: 36, borderRadius: 8, backgroundColor: "#ef4444", justifyContent: "center", alignItems: "center", opacity: kycActionLoading === sub.id ? 0.5 : pressed ? 0.8 : 1 })}
-                        >
-                          <Text style={{ color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>✗ Reject</Text>
-                        </Pressable>
-                      </View>
-                    </View>
-                  )}
-                  {sub.adminNote ? (
-                    <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 6, fontStyle: "italic" }}>Note: {sub.adminNote}</Text>
-                  ) : null}
-                  {sub.licenseKey ? (
-                    <View style={{ marginTop: 8, padding: 8, borderRadius: 8, backgroundColor: "#22d3ee15", borderWidth: 1, borderColor: "#22d3ee40" }}>
-                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "#22d3ee", fontSize: 12 }}>License Key: {sub.licenseKey}</Text>
-                    </View>
-                  ) : null}
-                </View>
+                </Pressable>
               ))
             )}
           </View>
@@ -1324,6 +1487,20 @@ export function AdminPanel() {
       )}
 
       {renderKeyProfile()}
+      {renderInviteProfile()}
+      {renderKycProfile()}
+
+      <CustomAlert
+        visible={deleteInvitePopup}
+        title="Delete Invite Code"
+        message={`Are you sure you want to permanently delete this invite code?\n\n${selectedInvite?.code ?? ""}`}
+        icon={<View style={popupStyles.iconCircleRed}><Trash2 size={24} color="#fff" /></View>}
+        onDismiss={() => setDeleteInvitePopup(false)}
+        buttons={[
+          { text: "Cancel", style: "cancel" },
+          { text: "Delete", style: "destructive", onPress: handleDeleteInviteCode },
+        ]}
+      />
 
       <Modal
         visible={!!kycDocsModal}
