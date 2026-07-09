@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, 
 import { setCookieBrowserPayload } from "@/utils/cookieBrowserStore";
 import { formatTimeRemaining } from "@/utils/time";
 import QRCode from "react-native-qrcode-svg";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -122,6 +122,10 @@ export function AdminPanel() {
   const [selectedInvite, setSelectedInvite] = useState<{ id: string; code: string; status: string; createdAt: string } | null>(null);
   const [deleteInvitePopup, setDeleteInvitePopup] = useState(false);
   const [selectedKyc, setSelectedKyc] = useState<{ id: string; inviteCode: string; email: string; fullName: string; fatherName: string; motherName: string; grandfatherName: string; kycStatus: string; adminNote: string | null; licenseKey: string | null; createdAt: string } | null>(null);
+  const [inviteSearch, setInviteSearch] = useState("");
+  const [inviteStatusFilter, setInviteStatusFilter] = useState<"all" | "unused" | "pending" | "resolved">("all");
+  const [kycSearch, setKycSearch] = useState("");
+  const [kycStatusFilter, setKycStatusFilter] = useState<"all" | "pending" | "verified" | "rejected">("all");
 
   const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
   const adminLicenseKey = licenseData?.keyType === "admin" ? licenseData.key : null;
@@ -252,6 +256,27 @@ export function AdminPanel() {
   useEffect(() => {
     if (activeTab === "kyc") loadKycData();
   }, [activeTab, loadKycData]);
+
+  const filteredInviteCodes = useMemo(() => {
+    const q = inviteSearch.trim().toUpperCase();
+    return inviteCodes.filter((ic) => {
+      if (inviteStatusFilter !== "all" && ic.status !== inviteStatusFilter) return false;
+      if (q && !ic.code.toUpperCase().includes(q)) return false;
+      return true;
+    });
+  }, [inviteCodes, inviteSearch, inviteStatusFilter]);
+
+  const filteredKycList = useMemo(() => {
+    const q = kycSearch.trim().toLowerCase();
+    return kycList.filter((sub) => {
+      if (kycStatusFilter !== "all" && sub.kycStatus !== kycStatusFilter) return false;
+      if (q) {
+        const haystack = `${sub.fullName} ${sub.email} ${sub.inviteCode}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [kycList, kycSearch, kycStatusFilter]);
 
   const handleCreateInviteCode = async () => {
     setCreatingCode(true);
@@ -1422,12 +1447,36 @@ export function AdminPanel() {
                 {creatingCode ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>+ Generate</Text>}
               </Pressable>
             </View>
+            <TextInput
+              style={{ height: 38, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 12, fontSize: 13, fontFamily: "Inter_400Regular", marginBottom: 10 }}
+              placeholder="Search by code..."
+              placeholderTextColor={colors.textSecondary}
+              value={inviteSearch}
+              onChangeText={setInviteSearch}
+              autoCapitalize="characters"
+            />
+            <View style={{ flexDirection: "row", gap: 6, marginBottom: 10 }}>
+              {(["all", "unused", "pending", "resolved"] as const).map((f) => {
+                const selected = inviteStatusFilter === f;
+                return (
+                  <Pressable
+                    key={f}
+                    onPress={() => setInviteStatusFilter(f)}
+                    style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: selected ? "#3b82f622" : colors.background, borderWidth: 1, borderColor: selected ? "#3b82f6" : colors.border }}
+                  >
+                    <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: selected ? "#3b82f6" : colors.textSecondary }}>{f.charAt(0).toUpperCase() + f.slice(1)}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
             {kycLoading ? (
               <ActivityIndicator size="small" color="#3b82f6" />
-            ) : inviteCodes.length === 0 ? (
-              <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>No invite codes yet.</Text>
+            ) : filteredInviteCodes.length === 0 ? (
+              <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>
+                {inviteCodes.length === 0 ? "No invite codes yet." : "No matching invite codes."}
+              </Text>
             ) : (
-              inviteCodes.map((ic) => (
+              filteredInviteCodes.map((ic) => (
                 <Pressable
                   key={ic.id}
                   onPress={() => openInviteProfile(ic)}
@@ -1456,12 +1505,35 @@ export function AdminPanel() {
                 <RefreshCw size={16} color={colors.textSecondary} />
               </Pressable>
             </View>
+            <TextInput
+              style={{ height: 38, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 12, fontSize: 13, fontFamily: "Inter_400Regular", marginBottom: 10 }}
+              placeholder="Search by name, email, or code..."
+              placeholderTextColor={colors.textSecondary}
+              value={kycSearch}
+              onChangeText={setKycSearch}
+            />
+            <View style={{ flexDirection: "row", gap: 6, marginBottom: 10 }}>
+              {(["all", "pending", "verified", "rejected"] as const).map((f) => {
+                const selected = kycStatusFilter === f;
+                return (
+                  <Pressable
+                    key={f}
+                    onPress={() => setKycStatusFilter(f)}
+                    style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: selected ? "#3b82f622" : colors.background, borderWidth: 1, borderColor: selected ? "#3b82f6" : colors.border }}
+                  >
+                    <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: selected ? "#3b82f6" : colors.textSecondary }}>{f.charAt(0).toUpperCase() + f.slice(1)}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
             {kycLoading ? (
               <ActivityIndicator size="small" color="#3b82f6" />
-            ) : kycList.length === 0 ? (
-              <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>No submissions yet.</Text>
+            ) : filteredKycList.length === 0 ? (
+              <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>
+                {kycList.length === 0 ? "No submissions yet." : "No matching submissions."}
+              </Text>
             ) : (
-              kycList.map((sub) => (
+              filteredKycList.map((sub) => (
                 <Pressable
                   key={sub.id}
                   onPress={() => openKycProfile(sub)}
