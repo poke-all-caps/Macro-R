@@ -55,6 +55,8 @@ interface LicenseKey {
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
+  inviteCode?: string | null;
+  inviteCodeStatus?: string | null;
 }
 
 interface FeatureConfig {
@@ -105,6 +107,7 @@ export function AdminPanel() {
   const [limitInput, setLimitInput] = useState("");
 
   // KYC tab state
+  const [kycSubTab, setKycSubTab] = useState<"invites" | "submissions">("invites");
   const [inviteCodes, setInviteCodes] = useState<Array<{ id: string; code: string; status: string; createdAt: string }>>([]);
   const [kycList, setKycList] = useState<Array<{ id: string; inviteCode: string; email: string; fullName: string; fatherName: string; motherName: string; grandfatherName: string; kycStatus: string; adminNote: string | null; licenseKey: string | null; createdAt: string }>>([]);
   const [kycDocsLoadingId, setKycDocsLoadingId] = useState<string | null>(null);
@@ -429,7 +432,15 @@ export function AdminPanel() {
         setNewExpUnit("days");
         setNewKeyType("basic");
         await loadKeys();
-        showSuccess("Key Created", result.key.key, result.key.key);
+        if (result.inviteCode) {
+          showSuccess(
+            "Key Created",
+            `${result.key.key}\n\nInvite code included: ${result.inviteCode}`,
+            result.key.key,
+          );
+        } else {
+          showSuccess("Key Created", result.key.key, result.key.key);
+        }
       }
     } catch {
       showError("Creation Failed", "Could not create the key. Try again.");
@@ -695,6 +706,15 @@ export function AdminPanel() {
             Exp: {new Date(item.expiresAt).toLocaleString(undefined, { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
           </Text>
         </View>
+        {item.inviteCode && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+            <Ticket size={13} color="#3b82f6" />
+            <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#3b82f6", letterSpacing: 0.5 }}>{item.inviteCode}</Text>
+            <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: item.inviteCodeStatus === "unused" ? "#64748b22" : item.inviteCodeStatus === "pending" ? "#f59e0b22" : "#10b98122" }}>
+              <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: item.inviteCodeStatus === "unused" ? "#64748b" : item.inviteCodeStatus === "pending" ? "#f59e0b" : "#10b981" }}>{item.inviteCodeStatus}</Text>
+            </View>
+          </View>
+        )}
       </Pressable>
     );
   };
@@ -767,6 +787,21 @@ export function AdminPanel() {
                 <View style={styles.profileInfoItem}>
                   <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Device ID</Text>
                   <Text style={[styles.profileInfoValue, { color: "#f59e0b", fontSize: 10 }]} numberOfLines={1}>{selectedKey.boundDeviceId}</Text>
+                </View>
+              )}
+              {selectedKey.inviteCode && (
+                <View style={[styles.profileInfoItem, { width: "100%" }]}>
+                  <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Invite Code</Text>
+                  <Pressable
+                    onPress={() => { Clipboard.setStringAsync(selectedKey.inviteCode!); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); }}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+                  >
+                    <Text style={[styles.profileInfoValue, { color: "#3b82f6", letterSpacing: 0.5 }]}>{selectedKey.inviteCode}</Text>
+                    <Copy size={14} color="#3b82f680" />
+                    <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: selectedKey.inviteCodeStatus === "unused" ? "#64748b22" : selectedKey.inviteCodeStatus === "pending" ? "#f59e0b22" : "#10b98122" }}>
+                      <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: selectedKey.inviteCodeStatus === "unused" ? "#64748b" : selectedKey.inviteCodeStatus === "pending" ? "#f59e0b" : "#10b981" }}>{selectedKey.inviteCodeStatus}</Text>
+                    </View>
+                  </Pressable>
                 </View>
               )}
             </View>
@@ -1078,16 +1113,23 @@ export function AdminPanel() {
                   <Text style={[styles.badgeText, { color: statusColor, fontSize: 13 }]}>{sub.kycStatus.toUpperCase()}</Text>
                 </View>
               </View>
+              <Pressable
+                onPress={() => { Clipboard.setStringAsync(sub.inviteCode); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); }}
+                style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 14, backgroundColor: "#3b82f614", borderWidth: 1, borderColor: "#3b82f640", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10 }}
+              >
+                <Ticket size={16} color="#3b82f6" />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 10, fontFamily: "Inter_600SemiBold", color: "#3b82f6", textTransform: "uppercase", letterSpacing: 0.5 }}>Referred By</Text>
+                  <Text style={{ fontSize: 15, fontFamily: "Inter_700Bold", color: colors.text, letterSpacing: 0.5 }}>{sub.inviteCode}</Text>
+                </View>
+                <Copy size={15} color="#3b82f680" />
+              </Pressable>
             </View>
 
             <View style={[styles.profileInfoGrid, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.profileInfoItem}>
                 <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Email</Text>
                 <Text style={[styles.profileInfoValue, { color: colors.text }]} numberOfLines={1}>{sub.email || "—"}</Text>
-              </View>
-              <View style={styles.profileInfoItem}>
-                <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Invite Code</Text>
-                <Text style={[styles.profileInfoValue, { color: colors.text }]}>{sub.inviteCode}</Text>
               </View>
               <View style={styles.profileInfoItem}>
                 <Text style={[styles.profileInfoLabel, { color: colors.textSecondary }]}>Father</Text>
@@ -1455,8 +1497,27 @@ export function AdminPanel() {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.text} colors={["#3b82f6"]} />
           }
         >
+          {/* ── Sub-tab switcher ── */}
+          <View style={{ flexDirection: "row", gap: 8, marginBottom: 18 }}>
+            <Pressable
+              onPress={() => setKycSubTab("invites")}
+              style={[styles.tabBtn, { backgroundColor: kycSubTab === "invites" ? "#3b82f6" : colors.surfaceSecondary, borderColor: kycSubTab === "invites" ? "#3b82f6" : colors.border }]}
+            >
+              <Ticket size={14} color={kycSubTab === "invites" ? "#fff" : colors.textSecondary} />
+              <Text style={[styles.tabBtnText, { color: kycSubTab === "invites" ? "#fff" : colors.textSecondary }]}>Invite Codes</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setKycSubTab("submissions")}
+              style={[styles.tabBtn, { backgroundColor: kycSubTab === "submissions" ? "#10b981" : colors.surfaceSecondary, borderColor: kycSubTab === "submissions" ? "#10b981" : colors.border }]}
+            >
+              <Shield size={14} color={kycSubTab === "submissions" ? "#fff" : colors.textSecondary} />
+              <Text style={[styles.tabBtnText, { color: kycSubTab === "submissions" ? "#fff" : colors.textSecondary }]}>KYC Submissions</Text>
+            </Pressable>
+          </View>
+
           {/* ── Invite Codes ── */}
-          <View style={{ marginBottom: 24 }}>
+          {kycSubTab === "invites" && (
+          <View>
             <View style={styles.sectionHeaderRow}>
               <View style={styles.sectionHeaderLeft}>
                 <View style={[styles.sectionIcon, { backgroundColor: "#3b82f622" }]}>
@@ -1548,8 +1609,10 @@ export function AdminPanel() {
               </View>
             )}
           </View>
+          )}
 
           {/* ── KYC Submissions ── */}
+          {kycSubTab === "submissions" && (
           <View>
             <View style={styles.sectionHeaderRow}>
               <View style={styles.sectionHeaderLeft}>
@@ -1611,9 +1674,17 @@ export function AdminPanel() {
                   >
                     <View style={{ flex: 1, marginRight: 8 }}>
                       <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{sub.fullName}</Text>
-                      <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }} numberOfLines={1}>
-                        {sub.email || `Code: ${sub.inviteCode}`}
-                      </Text>
+                      {sub.email ? (
+                        <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }} numberOfLines={1}>
+                          {sub.email}
+                        </Text>
+                      ) : null}
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 }}>
+                        <Ticket size={11} color="#3b82f6" />
+                        <Text style={{ fontFamily: "Inter_600SemiBold", color: "#3b82f6", fontSize: 11, letterSpacing: 0.3 }} numberOfLines={1}>
+                          Referred by {sub.inviteCode}
+                        </Text>
+                      </View>
                     </View>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: sub.kycStatus === "pending" ? "#f59e0b22" : sub.kycStatus === "verified" ? "#10b98122" : "#ef444422" }}>
@@ -1625,9 +1696,8 @@ export function AdminPanel() {
                 ))}
               </View>
             )}
-              ))
-            )}
           </View>
+          )}
         </ScrollView>
       )}
 

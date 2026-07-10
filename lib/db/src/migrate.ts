@@ -142,6 +142,13 @@ export async function initSchema(): Promise<void> {
     `);
     console.log("[db] kyc_submissions columns OK.");
 
+    // ── Phase 3: invite_codes column additions (idempotent) ─────────────────
+    console.log("[db] Applying invite_codes column migrations...");
+    await client.query(`
+      ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS license_key_id UUID;
+    `);
+    console.log("[db] invite_codes columns OK.");
+
     // ── Phase 2: feature_config trial tier ───────────────────────────────────
     await client.query(`
       INSERT INTO feature_config (key_type, max_accounts, max_searches, min_delay_seconds, background_enabled, custom_queries_enabled, daily_set_enabled, pc_search_enabled) VALUES

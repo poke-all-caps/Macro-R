@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { licenseKeysTable, featureConfigTable, deviceCookiesTable, deletedAccountsTable } from "@workspace/db/schema";
-import { eq, and, isNull, isNotNull } from "drizzle-orm";
+import { licenseKeysTable, featureConfigTable, deviceCookiesTable, deletedAccountsTable, inviteCodesTable } from "@workspace/db/schema";
+import { eq, and, isNull, isNotNull, inArray } from "drizzle-orm";
 import crypto from "crypto";
 import { requireAdmin } from "../adminSession";
 
@@ -58,10 +58,39 @@ function generateKey(): string {
   return segments.join("-");
 }
 
+function generateInviteCodeForKey(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
 router.get("/admin/keys", requireAdmin, async (_req, res) => {
   try {
     const keys = await db.select().from(licenseKeysTable).orderBy(licenseKeysTable.createdAt);
-    res.json({ keys });
+
+    // Attach the invite code that was auto-generated alongside each key (Basic
+    // keys get one at creation time) so the admin panel can show it inline.
+    const keyIds = keys.map((k) => k.id);
+    const codeMap = new Map<string, { code: string; status: string }>();
+    if (keyIds.length > 0) {
+      const codes = await db
+        .select({ licenseKeyId: inviteCodesTable.licenseKeyId, code: inviteCodesTable.code, status: inviteCodesTable.status })
+        .from(inviteCodesTable)
+        .where(inArray(inviteCodesTable.licenseKeyId, keyIds));
+      for (const c of codes) {
+        if (c.licenseKeyId) codeMap.set(c.licenseKeyId, { code: c.code, status: c.status });
+      }
+    }
+    const withInviteCodes = keys.map((k) => ({
+      ...k,
+      inviteCode: codeMap.get(k.id)?.code ?? null,
+      inviteCodeStatus: codeMap.get(k.id)?.status ?? null,
+    }));
+
+    res.json({ keys: withInviteCodes });
   } catch (e: any) {
     console.error("GET /admin/keys error:", e);
     res.status(500).json({ error: sanitizeDbError(e) });
@@ -72,15 +101,28 @@ router.post("/admin/keys", requireAdmin, async (req, res) => {
   try {
     const { label, maxAccounts, expiresAt, keyType } = req.body;
     const validTypes = ["trial", "basic", "premium", "unlimited", "admin"];
+    const resolvedType = validTypes.includes(keyType) ? keyType : "basic";
     const key = generateKey();
     const [created] = await db.insert(licenseKeysTable).values({
       key,
       label: label || null,
-      keyType: validTypes.includes(keyType) ? keyType : "basic",
+      keyType: resolvedType,
       maxAccounts: maxAccounts ?? 3,
       expiresAt: new Date(expiresAt),
     }).returning();
-    res.json({ key: created });
+
+    // Every new Basic key ships with a fresh, working invite code so the
+    // admin can immediately hand it out for onboarding/KYC.
+    let inviteCode: string | null = null;
+    if (resolvedType === "basic") {
+      const [createdCode] = await db
+        .insert(inviteCodesTable)
+        .values({ code: generateInviteCodeForKey(), licenseKeyId: created.id })
+        .returning();
+      inviteCode = createdCode.code;
+    }
+
+    res.json({ key: created, inviteCode });
   } catch (e: any) {
     console.error("POST /admin/keys error:", e);
     res.status(500).json({ error: sanitizeDbError(e) });
