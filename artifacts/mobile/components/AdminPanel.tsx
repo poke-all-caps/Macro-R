@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Trash2, UserX, Users, X } from "lucide-react-native";
+import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Ticket, Trash2, UserX, Users, X } from "lucide-react-native";
 import { setCookieBrowserPayload } from "@/utils/cookieBrowserStore";
 import { formatTimeRemaining } from "@/utils/time";
 import QRCode from "react-native-qrcode-svg";
@@ -1456,130 +1456,175 @@ export function AdminPanel() {
           }
         >
           {/* ── Invite Codes ── */}
-          <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border, marginBottom: 12 }]}>
-            <Text style={{ fontSize: 15, fontFamily: "Inter_700Bold", color: colors.text, marginBottom: 12 }}>INVITE CODES</Text>
-            <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+          <View style={{ marginBottom: 24 }}>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionHeaderLeft}>
+                <View style={[styles.sectionIcon, { backgroundColor: "#3b82f622" }]}>
+                  <Ticket size={16} color="#3b82f6" />
+                </View>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Invite Codes</Text>
+                <View style={[styles.countPill, { backgroundColor: colors.surfaceSecondary }]}>
+                  <Text style={[styles.countPillText, { color: colors.textSecondary }]}>{inviteCodes.length}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <TextInput
+                  style={[styles.searchInput, { borderColor: colors.border, backgroundColor: colors.background, color: colors.text }]}
+                  placeholder="Custom code (optional)"
+                  placeholderTextColor={colors.textSecondary}
+                  value={newCodeInput}
+                  onChangeText={(t) => setNewCodeInput(t.toUpperCase())}
+                  autoCapitalize="characters"
+                />
+                <Pressable
+                  onPress={handleCreateInviteCode}
+                  disabled={creatingCode}
+                  style={({ pressed }) => ({ backgroundColor: "#10b981", borderRadius: 10, height: 42, paddingHorizontal: 14, justifyContent: "center", alignItems: "center", opacity: pressed || creatingCode ? 0.7 : 1 })}
+                >
+                  {creatingCode ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>+ Generate</Text>}
+                </Pressable>
+              </View>
+
+              <View style={styles.sectionDivider} />
+
               <TextInput
-                style={{ flex: 1, height: 40, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 12, fontSize: 14, fontFamily: "Inter_500Medium" }}
-                placeholder="Custom code (optional)"
+                style={[styles.searchInput, { borderColor: colors.border, backgroundColor: colors.background, color: colors.text, marginBottom: 10 }]}
+                placeholder="Search by code..."
                 placeholderTextColor={colors.textSecondary}
-                value={newCodeInput}
-                onChangeText={(t) => setNewCodeInput(t.toUpperCase())}
+                value={inviteSearch}
+                onChangeText={setInviteSearch}
                 autoCapitalize="characters"
               />
-              <Pressable
-                onPress={handleCreateInviteCode}
-                disabled={creatingCode}
-                style={({ pressed }) => ({ backgroundColor: "#10b981", borderRadius: 8, height: 40, paddingHorizontal: 14, justifyContent: "center", alignItems: "center", opacity: pressed || creatingCode ? 0.7 : 1 })}
-              >
-                {creatingCode ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" }}>+ Generate</Text>}
-              </Pressable>
+              <View style={{ flexDirection: "row", gap: 6 }}>
+                {(["all", "unused", "pending", "resolved"] as const).map((f) => {
+                  const selected = inviteStatusFilter === f;
+                  return (
+                    <Pressable
+                      key={f}
+                      onPress={() => setInviteStatusFilter(f)}
+                      style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: selected ? "#3b82f622" : colors.background, borderWidth: 1, borderColor: selected ? "#3b82f6" : colors.border }}
+                    >
+                      <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: selected ? "#3b82f6" : colors.textSecondary }}>{f.charAt(0).toUpperCase() + f.slice(1)}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
-            <TextInput
-              style={{ height: 38, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 12, fontSize: 13, fontFamily: "Inter_400Regular", marginBottom: 10 }}
-              placeholder="Search by code..."
-              placeholderTextColor={colors.textSecondary}
-              value={inviteSearch}
-              onChangeText={setInviteSearch}
-              autoCapitalize="characters"
-            />
-            <View style={{ flexDirection: "row", gap: 6, marginBottom: 10 }}>
-              {(["all", "unused", "pending", "resolved"] as const).map((f) => {
-                const selected = inviteStatusFilter === f;
-                return (
-                  <Pressable
-                    key={f}
-                    onPress={() => setInviteStatusFilter(f)}
-                    style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: selected ? "#3b82f622" : colors.background, borderWidth: 1, borderColor: selected ? "#3b82f6" : colors.border }}
-                  >
-                    <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: selected ? "#3b82f6" : colors.textSecondary }}>{f.charAt(0).toUpperCase() + f.slice(1)}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+
             {kycLoading ? (
-              <ActivityIndicator size="small" color="#3b82f6" />
+              <ActivityIndicator size="small" color="#3b82f6" style={{ marginTop: 16 }} />
             ) : filteredInviteCodes.length === 0 ? (
-              <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>
-                {inviteCodes.length === 0 ? "No invite codes yet." : "No matching invite codes."}
-              </Text>
+              <View style={[styles.sectionEmptyCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>
+                  {inviteCodes.length === 0 ? "No invite codes yet." : "No matching invite codes."}
+                </Text>
+              </View>
             ) : (
-              filteredInviteCodes.map((ic) => (
-                <Pressable
-                  key={ic.id}
-                  onPress={() => openInviteProfile(ic)}
-                  style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border, opacity: pressed ? 0.7 : 1 })}
-                >
-                  <View>
-                    <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{ic.code}</Text>
-                    <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 11, marginTop: 2 }}>{new Date(ic.createdAt).toLocaleDateString()}</Text>
-                  </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: ic.status === "unused" ? "#64748b22" : ic.status === "pending" ? "#f59e0b22" : "#10b98122" }}>
-                      <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: ic.status === "unused" ? "#64748b" : ic.status === "pending" ? "#f59e0b" : "#10b981" }}>{ic.status}</Text>
+              <View style={{ gap: 10, marginTop: 12 }}>
+                {filteredInviteCodes.map((ic) => (
+                  <Pressable
+                    key={ic.id}
+                    onPress={() => openInviteProfile(ic)}
+                    style={({ pressed }) => [
+                      styles.listItemCard,
+                      { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+                    ]}
+                  >
+                    <View>
+                      <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14, letterSpacing: 0.5 }}>{ic.code}</Text>
+                      <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 11, marginTop: 2 }}>{new Date(ic.createdAt).toLocaleDateString()}</Text>
                     </View>
-                    <ChevronRight size={16} color={colors.textSecondary} />
-                  </View>
-                </Pressable>
-              ))
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: ic.status === "unused" ? "#64748b22" : ic.status === "pending" ? "#f59e0b22" : "#10b98122" }}>
+                        <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: ic.status === "unused" ? "#64748b" : ic.status === "pending" ? "#f59e0b" : "#10b981" }}>{ic.status}</Text>
+                      </View>
+                      <ChevronRight size={16} color={colors.textSecondary} />
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
             )}
           </View>
 
           {/* ── KYC Submissions ── */}
-          <View style={[styles.keyCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <Text style={{ fontSize: 15, fontFamily: "Inter_700Bold", color: colors.text }}>KYC SUBMISSIONS</Text>
-              <Pressable onPress={loadKycData} style={{ padding: 4 }}>
+          <View>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionHeaderLeft}>
+                <View style={[styles.sectionIcon, { backgroundColor: "#10b98122" }]}>
+                  <Shield size={16} color="#10b981" />
+                </View>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>KYC Submissions</Text>
+                <View style={[styles.countPill, { backgroundColor: colors.surfaceSecondary }]}>
+                  <Text style={[styles.countPillText, { color: colors.textSecondary }]}>{kycList.length}</Text>
+                </View>
+              </View>
+              <Pressable onPress={loadKycData} style={{ padding: 6 }}>
                 <RefreshCw size={16} color={colors.textSecondary} />
               </Pressable>
             </View>
-            <TextInput
-              style={{ height: 38, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background, color: colors.text, paddingHorizontal: 12, fontSize: 13, fontFamily: "Inter_400Regular", marginBottom: 10 }}
-              placeholder="Search by name, email, or code..."
-              placeholderTextColor={colors.textSecondary}
-              value={kycSearch}
-              onChangeText={setKycSearch}
-            />
-            <View style={{ flexDirection: "row", gap: 6, marginBottom: 10 }}>
-              {(["all", "pending", "verified", "rejected"] as const).map((f) => {
-                const selected = kycStatusFilter === f;
-                return (
-                  <Pressable
-                    key={f}
-                    onPress={() => setKycStatusFilter(f)}
-                    style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: selected ? "#3b82f622" : colors.background, borderWidth: 1, borderColor: selected ? "#3b82f6" : colors.border }}
-                  >
-                    <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: selected ? "#3b82f6" : colors.textSecondary }}>{f.charAt(0).toUpperCase() + f.slice(1)}</Text>
-                  </Pressable>
-                );
-              })}
+
+            <View style={[styles.sectionCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+              <TextInput
+                style={[styles.searchInput, { borderColor: colors.border, backgroundColor: colors.background, color: colors.text, marginBottom: 10 }]}
+                placeholder="Search by name, email, or code..."
+                placeholderTextColor={colors.textSecondary}
+                value={kycSearch}
+                onChangeText={setKycSearch}
+              />
+              <View style={{ flexDirection: "row", gap: 6 }}>
+                {(["all", "pending", "verified", "rejected"] as const).map((f) => {
+                  const selected = kycStatusFilter === f;
+                  return (
+                    <Pressable
+                      key={f}
+                      onPress={() => setKycStatusFilter(f)}
+                      style={{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: selected ? "#3b82f622" : colors.background, borderWidth: 1, borderColor: selected ? "#3b82f6" : colors.border }}
+                    >
+                      <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: selected ? "#3b82f6" : colors.textSecondary }}>{f.charAt(0).toUpperCase() + f.slice(1)}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
+
             {kycLoading ? (
-              <ActivityIndicator size="small" color="#3b82f6" />
+              <ActivityIndicator size="small" color="#3b82f6" style={{ marginTop: 16 }} />
             ) : filteredKycList.length === 0 ? (
-              <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>
-                {kycList.length === 0 ? "No submissions yet." : "No matching submissions."}
-              </Text>
+              <View style={[styles.sectionEmptyCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontFamily: "Inter_400Regular" }}>
+                  {kycList.length === 0 ? "No submissions yet." : "No matching submissions."}
+                </Text>
+              </View>
             ) : (
-              filteredKycList.map((sub) => (
-                <Pressable
-                  key={sub.id}
-                  onPress={() => openKycProfile(sub)}
-                  style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border, opacity: pressed ? 0.7 : 1 })}
-                >
-                  <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{sub.fullName}</Text>
-                    <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }} numberOfLines={1}>
-                      {sub.email || `Code: ${sub.inviteCode}`}
-                    </Text>
-                  </View>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: sub.kycStatus === "pending" ? "#f59e0b22" : sub.kycStatus === "verified" ? "#10b98122" : "#ef444422" }}>
-                      <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: sub.kycStatus === "pending" ? "#f59e0b" : sub.kycStatus === "verified" ? "#10b981" : "#ef4444" }}>{sub.kycStatus}</Text>
+              <View style={{ gap: 10, marginTop: 12 }}>
+                {filteredKycList.map((sub) => (
+                  <Pressable
+                    key={sub.id}
+                    onPress={() => openKycProfile(sub)}
+                    style={({ pressed }) => [
+                      styles.listItemCard,
+                      { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+                    ]}
+                  >
+                    <View style={{ flex: 1, marginRight: 8 }}>
+                      <Text style={{ fontFamily: "Inter_700Bold", color: colors.text, fontSize: 14 }}>{sub.fullName}</Text>
+                      <Text style={{ fontFamily: "Inter_400Regular", color: colors.textSecondary, fontSize: 12, marginTop: 2 }} numberOfLines={1}>
+                        {sub.email || `Code: ${sub.inviteCode}`}
+                      </Text>
                     </View>
-                    <ChevronRight size={16} color={colors.textSecondary} />
-                  </View>
-                </Pressable>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: sub.kycStatus === "pending" ? "#f59e0b22" : sub.kycStatus === "verified" ? "#10b98122" : "#ef444422" }}>
+                        <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: sub.kycStatus === "pending" ? "#f59e0b" : sub.kycStatus === "verified" ? "#10b981" : "#ef4444" }}>{sub.kycStatus}</Text>
+                      </View>
+                      <ChevronRight size={16} color={colors.textSecondary} />
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            )}
               ))
             )}
           </View>
@@ -2132,6 +2177,74 @@ const popupStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  sectionHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  sectionIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily: "Inter_700Bold",
+  },
+  countPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+    minWidth: 22,
+    alignItems: "center",
+  },
+  countPillText: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+  },
+  sectionCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 14,
+  },
+  sectionDivider: {
+    height: 1,
+    backgroundColor: "rgba(148,163,184,0.2)",
+    marginVertical: 14,
+  },
+  searchInput: {
+    flex: 1,
+    height: 42,
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+  },
+  sectionEmptyCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 20,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  listItemCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
   header: { paddingHorizontal: 20, paddingBottom: 16 },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
