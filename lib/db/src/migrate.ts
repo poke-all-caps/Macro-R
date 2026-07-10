@@ -149,6 +149,37 @@ export async function initSchema(): Promise<void> {
     `);
     console.log("[db] invite_codes columns OK.");
 
+    // ── Phase 3: license_keys column additions (idempotent) ─────────────────
+    console.log("[db] Applying license_keys tier/invite column migrations...");
+    await client.query(`
+      ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS can_invite BOOLEAN NOT NULL DEFAULT FALSE;
+    `);
+    console.log("[db] license_keys tier/invite columns OK.");
+
+    // ── Phase 3: upgrade_requests ─────────────────────────────────────────────
+    console.log("[db] Creating upgrade_requests table...");
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS upgrade_requests (
+        id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+        license_key_id   UUID      NOT NULL,
+        requested_tier   TEXT      NOT NULL,
+        transaction_id   TEXT,
+        receipt_link     TEXT,
+        status           TEXT      NOT NULL DEFAULT 'pending',
+        admin_note       TEXT,
+        created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+    console.log("[db] upgrade_requests OK.");
+
+    // ── Phase 3: existing paid/admin keys get canInvite retroactively ────────
+    await client.query(`
+      UPDATE license_keys SET can_invite = TRUE
+      WHERE key_type IN ('basic', 'premium', 'unlimited', 'admin') AND can_invite = FALSE;
+    `);
+    console.log("[db] Retroactive can_invite backfill OK.");
+
     // ── Phase 2: feature_config trial tier ───────────────────────────────────
     await client.query(`
       INSERT INTO feature_config (key_type, max_accounts, max_searches, min_delay_seconds, background_enabled, custom_queries_enabled, daily_set_enabled, pc_search_enabled) VALUES

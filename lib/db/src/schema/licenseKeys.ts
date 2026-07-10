@@ -13,6 +13,7 @@ export const licenseKeysTable = pgTable("license_keys", {
   pin: text("pin"),
   isActive: boolean("is_active").notNull().default(true),
   boundDeviceId: text("bound_device_id"),
+  canInvite: boolean("can_invite").notNull().default(false),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

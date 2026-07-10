@@ -24,3 +24,4 @@ export * from "./deletedAccounts";
 export * from "./inviteCodes";
 export * from "./kycSubmissions";
 export * from "./globalConfig";
+export * from "./upgradeRequests";

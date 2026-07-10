@@ -147,6 +147,45 @@ router.post("/invite/kyc-submit", async (req: Request, res: Response) => {
   }
 });
 
+// ── Public: user generates their own invite code (requires canInvite=true) ──
+// This is the referral endpoint — only license keys that have been upgraded
+// (or created as basic/premium/unlimited/admin) are allowed to invite others.
+router.post("/invite/generate", async (req: Request, res: Response) => {
+  try {
+    const { key } = req.body;
+    if (!key || typeof key !== "string") {
+      return res.status(400).json({ error: "key is required" });
+    }
+
+    const [found] = await db
+      .select()
+      .from(licenseKeysTable)
+      .where(eq(licenseKeysTable.key, key.trim().toUpperCase()));
+
+    if (!found) {
+      return res.status(404).json({ error: "License key not found" });
+    }
+    if (!found.isActive) {
+      return res.status(403).json({ error: "Key has been deactivated" });
+    }
+    if (!found.canInvite) {
+      return res.status(403).json({ error: "Upgrade your plan to unlock referral invites" });
+    }
+
+    const code = generateInviteCode();
+    const [created] = await db
+      .insert(inviteCodesTable)
+      .values({ code, licenseKeyId: found.id })
+      .returning();
+
+    console.log(`[INVITE GENERATE] Key ${found.key} generated invite code ${code}`);
+    return res.json({ success: true, code: created });
+  } catch (e: any) {
+    console.error("POST /invite/generate error:", e);
+    return res.status(500).json({ error: "Server error. Please try again." });
+  }
+});
+
 // ── Admin: list invite codes ──────────────────────────────────────────────────
 router.get("/admin/invite-codes", requireAdmin, async (_req: Request, res: Response) => {
   try {

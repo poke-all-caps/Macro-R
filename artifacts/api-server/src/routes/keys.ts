@@ -103,11 +103,15 @@ router.post("/admin/keys", requireAdmin, async (req, res) => {
     const validTypes = ["trial", "basic", "premium", "unlimited", "admin"];
     const resolvedType = validTypes.includes(keyType) ? keyType : "basic";
     const key = generateKey();
+    // Admin-issued keys (as opposed to self-serve trial signups) are already
+    // trusted/paid tiers, so they can invite referrals immediately.
+    const canInvite = resolvedType !== "trial";
     const [created] = await db.insert(licenseKeysTable).values({
       key,
       label: label || null,
       keyType: resolvedType,
       maxAccounts: maxAccounts ?? 3,
+      canInvite,
       expiresAt: new Date(expiresAt),
     }).returning();
 
@@ -423,6 +427,7 @@ router.post("/validate-key", async (req, res) => {
       expiresAt: found.expiresAt,
       label: found.label,
       keyType: found.keyType,
+      canInvite: found.canInvite,
       featureConfig: effectiveFeatureConfig,
       accounts,
     });

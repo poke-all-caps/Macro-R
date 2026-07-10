@@ -4,6 +4,8 @@ import proxyRouter from "./proxy";
 import keysRouter from "./keys";
 import adminRouter from "./admin";
 import inviteRouter from "./invite";
+import configRouter from "./config";
+import upgradesRouter from "./upgrades";
 
 const router: IRouter = Router();
 
@@ -23,5 +25,7 @@ if (!process.env.RENDER) {
 router.use(keysRouter);
 router.use(adminRouter);
 router.use(inviteRouter);
+router.use(configRouter);
+router.use(upgradesRouter);
 
 export default router;
