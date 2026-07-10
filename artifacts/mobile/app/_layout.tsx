@@ -236,6 +236,7 @@ function RootLayoutNav() {
         <Stack.Screen name="admin-panel" options={{ presentation: "fullScreenModal", headerShown: false }} />
         <Stack.Screen name="daily-set-settings" options={{ headerShown: false }} />
         <Stack.Screen name="overnight" options={{ headerShown: false }} />
+        <Stack.Screen name="upgrade" options={{ headerShown: false }} />
       </Stack>
     </>
   );

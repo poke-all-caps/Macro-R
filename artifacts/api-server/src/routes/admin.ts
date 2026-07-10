@@ -193,6 +193,28 @@ function dashboardPage(): string {
   <div id="featureConfigList"></div>
 
   <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h2 style="margin:0;color:#fff">Upgrade Requests</h2>
+    <button class="btn-secondary" style="padding:7px 14px;font-size:13px" onclick="loadUpgradeRequests()">Refresh</button>
+  </div>
+  <div id="upgradeRequestsList"></div>
+
+  <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h2 style="margin:0;color:#fff">Tiers & Payment Methods (Upgrade Screen Config)</h2>
+    <button class="btn-primary" style="padding:7px 14px;font-size:13px" onclick="saveTierConfig()">Save</button>
+  </div>
+  <div class="card">
+    <div class="form-group">
+      <label>Tiers (JSON array — id, label, price, currency, period, features[])</label>
+      <textarea id="tiersJson" rows="8" style="width:100%;background:#0f172a;color:#fff;border:1px solid #334155;border-radius:8px;padding:8px 12px;font-size:12px;font-family:monospace"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Payment Methods (JSON array — id, label, details)</label>
+      <textarea id="paymentMethodsJson" rows="6" style="width:100%;background:#0f172a;color:#fff;border:1px solid #334155;border-radius:8px;padding:8px 12px;font-size:12px;font-family:monospace"></textarea>
+    </div>
+    <div id="tierConfigStatus" style="font-size:12px;color:#94a3b8"></div>
+  </div>
+
+  <div style="margin-top:40px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <h2 style="margin:0;color:#fff">Deleted Accounts (Archive)</h2>
     <div style="display:flex;gap:8px;align-items:center">
       <input type="text" id="deletedSearchInput" placeholder="Filter by email or key…" style="width:220px;padding:7px 12px;font-size:13px" oninput="filterDeleted()">
@@ -214,6 +236,17 @@ function dashboardPage(): string {
 
     function esc(s) {
       return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    // Only allow http(s) URLs to become clickable links — rejects javascript:,
+    // data:, and other schemes that could execute script in the admin's session
+    // if a malicious user submits a crafted "receipt link" upgrade request.
+    function safeHttpUrl(raw) {
+      try {
+        const u = new URL(String(raw));
+        if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+      } catch {}
+      return null;
     }
 
     function toggleCreateForm() {
@@ -511,6 +544,79 @@ function dashboardPage(): string {
       await api('PUT', '/admin/feature-config/' + keyType, updates);
       loadFeatureConfig();
     }
+
+    // ── Upgrade Requests ─────────────────────────────────────────────────
+    async function loadUpgradeRequests() {
+      const el = document.getElementById('upgradeRequestsList');
+      el.innerHTML = '<div class="no-keys" style="padding:24px;color:#64748b">Loading…</div>';
+      const data = await api('GET', '/admin/upgrades');
+      const requests = data.requests || [];
+      if (requests.length === 0) {
+        el.innerHTML = '<div class="no-keys">No upgrade requests</div>';
+        return;
+      }
+      el.innerHTML = requests.map(function(r) {
+        const safeId = esc(r.id);
+        const created = r.createdAt ? new Date(r.createdAt).toLocaleString(undefined, { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+        const statusBadge = r.status === 'approved' ? 'active' : r.status === 'rejected' ? 'expired' : 'inactive';
+        const safeReceiptUrl = r.receiptLink ? safeHttpUrl(r.receiptLink) : null;
+        const proof = r.transactionId
+          ? '<span class="stat">Txn: ' + esc(r.transactionId) + '</span>'
+          : (safeReceiptUrl
+              ? '<a href="' + esc(safeReceiptUrl) + '" target="_blank" rel="noopener noreferrer" class="stat" style="color:#3b82f6">View Receipt</a>'
+              : (r.receiptLink ? '<span class="stat" style="color:#f87171">Unsafe link rejected: ' + esc(r.receiptLink) + '</span>' : ''));
+        return '<div class="card">' +
+          '<div class="row"><span style="font-weight:700;color:#fff">' + esc(r.licenseKey || r.licenseKeyId) + '</span>' +
+            '<span style="display:flex;gap:6px"><span class="badge type-premium">' + esc(r.requestedTier).toUpperCase() + '</span><span class="badge ' + statusBadge + '">' + esc(r.status).toUpperCase() + '</span></span></div>' +
+          '<div class="stats">' + proof + '<span class="stat">Submitted: ' + esc(created) + '</span></div>' +
+          (r.adminNote ? '<div class="stat" style="margin-top:6px;color:#94a3b8">Note: ' + esc(r.adminNote) + '</div>' : '') +
+          (r.status === 'pending' ? '<div class="actions">' +
+            '<button class="btn-success" onclick="reviewUpgrade(' + JSON.stringify(safeId) + ', \\'approved\\')">Approve</button>' +
+            '<button class="btn-danger" onclick="reviewUpgrade(' + JSON.stringify(safeId) + ', \\'rejected\\')">Reject</button>' +
+          '</div>' : '') +
+        '</div>';
+      }).join('');
+    }
+
+    async function reviewUpgrade(id, status) {
+      const adminNote = status === 'rejected' ? (prompt('Reason for rejection (optional):') || undefined) : undefined;
+      if (status === 'approved' && !confirm('Approve this upgrade? The license will be updated immediately.')) return;
+      const res = await api('PUT', '/admin/upgrades/' + id, { status, adminNote });
+      if (res.error) { alert('Failed: ' + res.error); return; }
+      loadUpgradeRequests();
+      loadKeys();
+    }
+
+    // ── Tier / Payment Method config ────────────────────────────────────
+    async function loadTierConfig() {
+      const data = await api('GET', '/admin/config');
+      document.getElementById('tiersJson').value = JSON.stringify(data.tiers ?? [], null, 2);
+      document.getElementById('paymentMethodsJson').value = JSON.stringify(data.paymentMethods ?? [], null, 2);
+    }
+
+    async function saveTierConfig() {
+      const statusEl = document.getElementById('tierConfigStatus');
+      let tiers, paymentMethods;
+      try {
+        tiers = JSON.parse(document.getElementById('tiersJson').value);
+        paymentMethods = JSON.parse(document.getElementById('paymentMethodsJson').value);
+      } catch (e) {
+        statusEl.style.color = '#f87171';
+        statusEl.textContent = 'Invalid JSON: ' + e.message;
+        return;
+      }
+      const res = await api('PUT', '/admin/config', { tiers, paymentMethods });
+      if (res.error) {
+        statusEl.style.color = '#f87171';
+        statusEl.textContent = 'Save failed: ' + res.error;
+        return;
+      }
+      statusEl.style.color = '#4ade80';
+      statusEl.textContent = 'Saved at ' + new Date().toLocaleTimeString();
+    }
+
+    loadUpgradeRequests();
+    loadTierConfig();
   </script>
 </body>
 </html>`;

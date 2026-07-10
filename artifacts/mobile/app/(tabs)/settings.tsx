@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import * as Updates from "expo-updates";
-import { CheckSquare, ChevronRight, Clock, Download, Key, Moon, Search, Shield, X } from "lucide-react-native";
+import { CheckSquare, ChevronRight, Clock, Crown, Download, Key, Moon, Search, Shield, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -359,6 +359,31 @@ export default function SettingsScreen() {
             ) : null}
             {licenseData && <ChevronRight size={16} color={colors.textMuted} style={{ marginLeft: 6 }} />}
           </Pressable>
+
+          {licenseData?.keyType === "trial" && (
+            <Pressable
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                router.push("/upgrade");
+              }}
+              style={({ pressed }) => ({
+                marginTop: 10,
+                borderRadius: 14,
+                paddingVertical: 14,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                backgroundColor: pressed ? "#6D28D9" : "#7C3AED",
+                opacity: pressed ? 0.9 : 1,
+              })}
+            >
+              <Crown size={17} color="#fff" />
+              <Text style={{ fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" }}>
+                Upgrade Plan
+              </Text>
+            </Pressable>
+          )}
         </Section>
 
 
