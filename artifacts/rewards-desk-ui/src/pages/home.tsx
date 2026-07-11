@@ -1,28 +1,19 @@
-import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
 import {
-  CheckCircle2, PlayCircle, AlertCircle, Minus, Plus,
-  Users, Square, Play, Download, Settings2, MoreVertical,
+  CheckCircle2, PlayCircle, AlertCircle,
+  Play, Download, Settings2, MoreVertical,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
 
-// ─── Tiny helpers ────────────────────────────────────────────────────────────
-
-function avatarColor(name: string) {
-  const colors = [
-    'bg-indigo-500', 'bg-violet-500', 'bg-blue-500',
-    'bg-teal-500',   'bg-rose-500',   'bg-amber-500',
-  ];
-  return colors[(name.charCodeAt(0) || 0) % colors.length];
-}
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function sessionFresh(lastRun?: string | null): boolean {
   if (!lastRun) return false;
   return Date.now() - new Date(lastRun).getTime() < 24 * 60 * 60 * 1000;
 }
 
-// ─── Account card (matching the screenshot style) ────────────────────────────
+// ─── Account card ─────────────────────────────────────────────────────────────
 
 function AccountCard({
   account,
@@ -46,11 +37,8 @@ function AccountCard({
 
   return (
     <div className="bg-[hsl(220,32%,14%)] rounded-2xl p-4 flex flex-col gap-4">
-
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3 min-w-0">
-          {/* Always solid blue avatar, matching mobile */}
           <div className="w-11 h-11 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg shrink-0">
             {initial}
           </div>
@@ -64,7 +52,6 @@ function AccountCard({
         </button>
       </div>
 
-      {/* Status */}
       <div className="text-[14px]">
         {status === 'idle' ? (
           <div className="flex items-center gap-2">
@@ -83,7 +70,6 @@ function AccountCard({
         )}
       </div>
 
-      {/* Three equal icon buttons — always the same trio */}
       <div className="flex gap-2">
         <button
           onClick={() => onRun(account.id)}
@@ -103,178 +89,91 @@ function AccountCard({
   );
 }
 
-// ─── Page ────────────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const { status, runNow } = useBotStatus();
   const { accounts, isLoading: accountsLoading } = useAccounts();
-
-  const [searchCount, setSearchCount] = useState(30);
-  const [delay, setDelay]             = useState(5);
 
   const isRunning = status?.isRunning ?? false;
   const done      = accounts.filter(a => a.status === 'done').length;
   const running   = accounts.filter(a => a.status === 'running').length;
   const failed    = accounts.filter(a => a.status === 'failed').length;
 
-  const handleRunAll = () => { if (!isRunning) runNow.mutate({ data: {} }); };
-  const handleRunOne = (id: string) => { if (!isRunning) runNow.mutate({ data: { accountIds: [id] } }); };
+  const handleRunOne = (id: string) => {
+    if (!isRunning) runNow.mutate({ data: { accountIds: [id] } });
+  };
 
   return (
     <div className="p-6 space-y-5 min-h-full">
 
       {/* ── Page header ──────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-white">Accounts</h1>
-        <div className="flex items-center gap-4">
-          {/* Run All / Stop */}
-          {isRunning ? (
-            <button className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors">
-              <Square className="w-3.5 h-3.5 fill-current" />
-              Stop
-            </button>
-          ) : (
-            <button
-              onClick={handleRunAll}
-              disabled={runNow.isPending || accountsLoading}
-              className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm font-semibold transition-colors"
-            >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              Run All
-            </button>
-          )}
+      <h1 className="text-xl font-bold text-white">Accounts</h1>
 
-          {/* Badge */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Users className="w-4 h-4" />
-            <span>{accounts.length} Accounts Connected</span>
+      {/* ── Instance Status (full width) ─────────────────────────────────── */}
+      <div className="bg-[hsl(220,35%,11%)] border border-border rounded-xl p-5">
+        <p className="text-sm font-semibold text-white mb-5">Instance Status</p>
+        <div className="flex items-center">
+
+          <div className="flex flex-1 items-center gap-3">
+            <CheckCircle2 className="w-7 h-7 text-green-400 shrink-0" />
+            <div>
+              <p className="text-3xl font-bold text-white leading-none">{done}</p>
+              <p className="text-xs text-muted-foreground mt-1">Done</p>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* ── Two info panels ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4">
+          <div className="w-px self-stretch bg-border mx-2" />
 
-        {/* Instance Status */}
-        <div className="bg-[hsl(220,35%,11%)] border border-border rounded-xl p-5">
-          <p className="text-sm font-semibold text-white mb-5">Instance Status</p>
-          <div className="flex items-center">
-
-            <div className="flex flex-1 items-center gap-3">
-              <CheckCircle2 className="w-7 h-7 text-green-400 shrink-0" />
-              <div>
-                <p className="text-3xl font-bold text-white leading-none">{done}</p>
-                <p className="text-xs text-muted-foreground mt-1">Done</p>
-              </div>
+          <div className="flex flex-1 items-center gap-3 px-4">
+            <PlayCircle className="w-7 h-7 text-blue-400 shrink-0" />
+            <div>
+              <p className="text-3xl font-bold text-white leading-none">{running}</p>
+              <p className="text-xs text-muted-foreground mt-1">Running</p>
             </div>
-
-            <div className="w-px self-stretch bg-border mx-2" />
-
-            <div className="flex flex-1 items-center gap-3 px-4">
-              <PlayCircle className="w-7 h-7 text-blue-400 shrink-0" />
-              <div>
-                <p className="text-3xl font-bold text-white leading-none">{running}</p>
-                <p className="text-xs text-muted-foreground mt-1">Running</p>
-              </div>
-            </div>
-
-            <div className="w-px self-stretch bg-border mx-2" />
-
-            <div className="flex flex-1 items-center gap-3 px-4">
-              <AlertCircle className="w-7 h-7 text-red-400 shrink-0" />
-              <div>
-                <p className="text-3xl font-bold text-white leading-none">{failed}</p>
-                <p className="text-xs text-muted-foreground mt-1">Failed</p>
-              </div>
-            </div>
-
           </div>
-        </div>
 
-        {/* Global Execution Parameters */}
-        <div className="bg-[hsl(220,35%,11%)] border border-border rounded-xl p-5">
-          <p className="text-sm font-semibold text-white mb-4">Global Execution Parameters</p>
-          <div className="flex items-end gap-5">
-            {/* Search Count */}
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs text-muted-foreground">Search Count</span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setSearchCount(v => Math.max(1, v - 1))}
-                  className="w-7 h-7 flex items-center justify-center rounded bg-white/8 hover:bg-white/15 text-foreground border border-border transition-colors"
-                >
-                  <Minus className="w-3 h-3" />
-                </button>
-                <span className="w-10 text-center font-semibold text-white text-sm">{searchCount}</span>
-                <button
-                  onClick={() => setSearchCount(v => Math.min(50, v + 1))}
-                  className="w-7 h-7 flex items-center justify-center rounded bg-white/8 hover:bg-white/15 text-foreground border border-border transition-colors"
-                >
-                  <Plus className="w-3 h-3" />
-                </button>
-              </div>
+          <div className="w-px self-stretch bg-border mx-2" />
+
+          <div className="flex flex-1 items-center gap-3 px-4">
+            <AlertCircle className="w-7 h-7 text-red-400 shrink-0" />
+            <div>
+              <p className="text-3xl font-bold text-white leading-none">{failed}</p>
+              <p className="text-xs text-muted-foreground mt-1">Failed</p>
             </div>
-
-            {/* Delay */}
-            <div className="flex flex-col gap-1.5">
-              <span className="text-xs text-muted-foreground">Delay</span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setDelay(v => Math.max(1, v - 1))}
-                  className="w-7 h-7 flex items-center justify-center rounded bg-white/8 hover:bg-white/15 text-foreground border border-border transition-colors"
-                >
-                  <Minus className="w-3 h-3" />
-                </button>
-                <span className="w-10 text-center font-semibold text-white text-sm">{delay}s</span>
-                <button
-                  onClick={() => setDelay(v => Math.max(1, v + 1))}
-                  className="w-7 h-7 flex items-center justify-center rounded bg-white/8 hover:bg-white/15 text-foreground border border-border transition-colors"
-                >
-                  <Plus className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-
-            {/* Apply Config */}
-            <button className="ml-auto px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium transition-colors shrink-0">
-              Apply Config
-            </button>
           </div>
+
         </div>
       </div>
 
       {/* ── Account grid ─────────────────────────────────────────────────── */}
-      <div className="flex gap-4 min-h-0">
+      <div>
+        <h2 className="text-sm font-semibold text-white mb-3">Accounts</h2>
 
-        {/* Account cards — 2 × N grid */}
-        <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-semibold text-white mb-3">Accounts</h2>
-
-          {accountsLoading ? (
-            <div className="grid grid-cols-2 gap-3">
-              {Array(4).fill(0).map((_, i) => (
-                <div key={i} className="h-40 rounded-xl bg-white/5 border border-border animate-pulse" />
-              ))}
-            </div>
-          ) : accounts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 border border-dashed border-border rounded-xl text-muted-foreground text-sm">
-              No accounts yet — add one from the Accounts page.
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {accounts.map(account => (
-                <AccountCard
-                  key={account.id}
-                  account={account}
-                  onRun={handleRunOne}
-                  globalRunning={isRunning}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
+        {accountsLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {Array(4).fill(0).map((_, i) => (
+              <div key={i} className="h-40 rounded-xl bg-white/5 border border-border animate-pulse" />
+            ))}
+          </div>
+        ) : accounts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 border border-dashed border-border rounded-xl text-muted-foreground text-sm">
+            No accounts yet — add one from the Accounts page.
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {accounts.map(account => (
+              <AccountCard
+                key={account.id}
+                account={account}
+                onRun={handleRunOne}
+                globalRunning={isRunning}
+              />
+            ))}
+          </div>
+        )}
       </div>
+
     </div>
   );
 }
