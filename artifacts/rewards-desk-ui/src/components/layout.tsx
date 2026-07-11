@@ -1,10 +1,10 @@
 import { Link, useLocation } from "wouter";
 import {
-  Users, Settings, Terminal, Search, Bell,
-  LayoutGrid, List, FileText, Cog,
-  ChevronDown, Activity,
+  Users, Settings, Search, Bell,
+  LayoutGrid, List, FileText, Cog, Key,
 } from "lucide-react";
 import { useBotStatus, useAccounts } from "@/hooks/use-desk";
+import { useLicense, TIER_META } from "@/hooks/use-license";
 
 const NAV_ITEMS = [
   { href: "/",         label: "Accounts",      icon: Users },
@@ -19,6 +19,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { status } = useBotStatus();
   const { accounts } = useAccounts();
+  const { licenseData } = useLicense();
+
+  const tier     = licenseData?.keyType ?? 'basic';
+  const tierMeta = TIER_META[tier] ?? TIER_META.basic;
+  const keyShort = licenseData ? `${licenseData.key.slice(0, 9)}…` : '—';
+  const expiry   = licenseData
+    ? new Date(licenseData.expiresAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+    : null;
 
   const isRunning = status?.isRunning ?? false;
   const activeCount = accounts.filter(a => a.status === "running").length;
@@ -66,15 +74,44 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          {/* User */}
-          <button className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[hsl(220,35%,13%)] border border-border hover:bg-white/5 transition-colors">
-            <div className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">U</div>
-            <div className="flex flex-col items-start text-left">
-              <span className="text-xs font-medium text-white leading-none">User</span>
-              <span className="text-[10px] text-muted-foreground leading-none mt-0.5">user@outlook.com</span>
+          {/* License card */}
+          <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-[hsl(220,35%,13%)] border border-border min-w-0">
+            {/* Icon */}
+            <div className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
+              style={{ background: tierMeta.bg }}>
+              <Key className="w-3.5 h-3.5" style={{ color: tierMeta.color }} />
             </div>
-            <ChevronDown className="w-3 h-3 text-muted-foreground ml-1" />
-          </button>
+
+            {/* Key + expiry */}
+            <div className="flex flex-col items-start min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-mono font-medium text-white leading-none tracking-wide">
+                  {keyShort}
+                </span>
+                {/* Tier badge */}
+                <span
+                  className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full leading-none"
+                  style={{ color: tierMeta.color, background: tierMeta.bg }}
+                >
+                  {tierMeta.label}
+                </span>
+              </div>
+              <span className="text-[10px] text-muted-foreground leading-none mt-0.5">
+                {expiry ? `Exp ${expiry}` : 'Not activated'}
+              </span>
+            </div>
+
+            {/* Slots */}
+            {licenseData && (
+              <div className="flex flex-col items-end ml-1 shrink-0">
+                <span className="text-[11px] font-semibold text-white leading-none">
+                  {accounts.length}
+                  <span className="text-muted-foreground font-normal">/{licenseData.maxAccounts}</span>
+                </span>
+                <span className="text-[10px] text-muted-foreground leading-none mt-0.5">slots</span>
+              </div>
+            )}
+          </div>
 
           {/* Settings gear */}
           <button className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
