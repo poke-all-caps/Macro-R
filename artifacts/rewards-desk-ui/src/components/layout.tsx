@@ -35,13 +35,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col h-screen bg-background text-foreground font-sans overflow-hidden">
 
       {/* ── Top Navbar ─────────────────────────────────────────────────────── */}
-      <header className="flex items-center h-12 px-4 border-b border-border shrink-0 bg-[hsl(220,38%,9%)] z-20">
+      <header className="flex items-center h-14 px-4 border-b border-border shrink-0 bg-[hsl(220,38%,9%)] z-20">
         {/* Logo */}
-        <div className="flex items-center gap-2 w-40 shrink-0">
-          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
-            <span className="text-primary-foreground font-bold text-sm">M</span>
+        <div className="flex items-center gap-3 w-52 shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
+            <span className="text-primary-foreground font-bold text-base">M</span>
           </div>
-          <span className="font-semibold text-sm text-white">Macro Rewards</span>
+          <span className="font-semibold text-base text-white">Macro Rewards</span>
         </div>
 
 
