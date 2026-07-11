@@ -30,3 +30,9 @@ id = "Uenp-Nk9wtQnF2UN6Ejgb"
 uri = "file://huge security update initial.md"
 type = "text"
 title = "Huge Security Update — Full In-Depth Change Log"
+
+[[outputs]]
+id = "egYVYAmxkbrTB5wNhTV3O"
+uri = "file://codebase-export.txt"
+type = "text"
+title = "Macro Rewards — Source Export"
