@@ -79,19 +79,19 @@ function AccountCard({
           onClick={() => onRun(account.id)}
           disabled={globalRunning}
           title="Run"
-          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-[hsl(220,28%,22%)] hover:bg-primary/20 hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-white transition-colors border border-transparent hover:border-primary/30"
+          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-slate-700/50 text-slate-300 hover:bg-blue-600/20 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-600/40 hover:border-blue-500/40"
         >
           <Play className="w-5 h-5" />
         </button>
         <button
           title="Export"
-          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-[hsl(220,28%,22%)] hover:bg-white/10 text-muted-foreground hover:text-white transition-colors border border-transparent hover:border-border"
+          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white transition-colors border border-slate-600/40"
         >
           <Download className="w-5 h-5" />
         </button>
         <button
           title="Settings"
-          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-[hsl(220,28%,22%)] hover:bg-white/10 text-muted-foreground hover:text-white transition-colors border border-transparent hover:border-border"
+          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white transition-colors border border-slate-600/40"
         >
           <Settings2 className="w-5 h-5" />
         </button>
