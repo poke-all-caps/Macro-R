@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: desk
+    description: Rewards Desk desktop automation
 paths:
   /healthz:
     get:
@@ -24,6 +26,109 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /desk/accounts:
+    get:
+      operationId: listAccounts
+      tags: [desk]
+      summary: List all accounts
+      description: Returns all saved Microsoft Reward accounts
+      responses:
+        "200":
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DeskAccount"
+    post:
+      operationId: addAccount
+      tags: [desk]
+      summary: Add a new account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeskAccountInput"
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeskAccount"
+
+  /desk/accounts/{id}:
+    delete:
+      operationId: deleteAccount
+      tags: [desk]
+      summary: Delete an account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteResult"
+
+  /desk/run-now:
+    post:
+      operationId: runNow
+      tags: [desk]
+      summary: Trigger automation run
+      description: Starts the Bing search automation for all active accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunInput"
+      responses:
+        "200":
+          description: Run started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunResult"
+
+  /desk/status:
+    get:
+      operationId: getBotStatus
+      tags: [desk]
+      summary: Get bot status
+      description: Returns current bot running state and last run info
+      responses:
+        "200":
+          description: Bot status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStatus"
+
+  /desk/logs:
+    get:
+      operationId: getRunLogs
+      tags: [desk]
+      summary: Get recent run logs
+      description: Returns the last 50 run log entries across all accounts
+      responses:
+        "200":
+          description: Run logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RunLog"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +139,97 @@ components:
       required:
         - status
 
+    DeskAccount:
+      type: object
+      required: [id, email, name, status, totalPoints, todayPoints, lastRun]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [idle, running, done, failed]
+        totalPoints:
+          type: integer
+        todayPoints:
+          type: integer
+        lastRun:
+          type: ["string", "null"]
+        searchesCompleted:
+          type: integer
+
+    DeskAccountInput:
+      type: object
+      required: [email, name]
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+
+    DeleteResult:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+
+    RunInput:
+      type: object
+      properties:
+        accountIds:
+          type: array
+          items:
+            type: string
+          description: Specific account IDs to run (omit to run all)
+
+    RunResult:
+      type: object
+      required: [started, message]
+      properties:
+        started:
+          type: boolean
+        message:
+          type: string
+        runId:
+          type: string
+
+    BotStatus:
+      type: object
+      required: [isRunning, currentAccount, lastRunAt, totalSearchesToday]
+      properties:
+        isRunning:
+          type: boolean
+        currentAccount:
+          type: ["string", "null"]
+        lastRunAt:
+          type: ["string", "null"]
+        totalSearchesToday:
+          type: integer
+        activeRunId:
+          type: ["string", "null"]
+
+    RunLog:
+      type: object
+      required: [id, accountId, accountName, timestamp, searchesDone, pointsEarned, status]
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+        accountName:
+          type: string
+        timestamp:
+          type: string
+        searchesDone:
+          type: integer
+        pointsEarned:
+          type: integer
+        status:
+          type: string
+          enum: [success, failed, running]
+        errorMessage:
+          type: ["string", "null"]

@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/rewards-desk-ui/"
+title = "Rewards Desk UI"
+version = "1.0.0"
+id = "artifacts/rewards-desk-ui"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/rewards-desk-ui/" ]
+localPort = 25829
+
+[services.development]
+run = "pnpm --filter @workspace/rewards-desk-ui run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/rewards-desk-ui", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/rewards-desk-ui/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25829"
+BASE_PATH = "/rewards-desk-ui/"

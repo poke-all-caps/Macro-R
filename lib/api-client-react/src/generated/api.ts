@@ -5,18 +5,30 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  BotStatus,
+  DeleteResult,
+  DeskAccount,
+  DeskAccountInput,
+  HealthStatus,
+  RunInput,
+  RunLog,
+  RunResult,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -92,6 +104,489 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns all saved Microsoft Reward accounts
+ * @summary List all accounts
+ */
+export const getListAccountsUrl = () => {
+  return `/api/desk/accounts`;
+};
+
+export const listAccounts = async (
+  options?: RequestInit,
+): Promise<DeskAccount[]> => {
+  return customFetch<DeskAccount[]>(getListAccountsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListAccountsQueryKey = () => {
+  return [`/api/desk/accounts`] as const;
+};
+
+export const getListAccountsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listAccounts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listAccounts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListAccountsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listAccounts>>> = ({
+    signal,
+  }) => listAccounts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listAccounts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListAccountsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listAccounts>>
+>;
+export type ListAccountsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all accounts
+ */
+
+export function useListAccounts<
+  TData = Awaited<ReturnType<typeof listAccounts>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listAccounts>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListAccountsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Add a new account
+ */
+export const getAddAccountUrl = () => {
+  return `/api/desk/accounts`;
+};
+
+export const addAccount = async (
+  deskAccountInput: DeskAccountInput,
+  options?: RequestInit,
+): Promise<DeskAccount> => {
+  return customFetch<DeskAccount>(getAddAccountUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(deskAccountInput),
+  });
+};
+
+export const getAddAccountMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addAccount>>,
+    TError,
+    { data: BodyType<DeskAccountInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof addAccount>>,
+  TError,
+  { data: BodyType<DeskAccountInput> },
+  TContext
+> => {
+  const mutationKey = ["addAccount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof addAccount>>,
+    { data: BodyType<DeskAccountInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return addAccount(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AddAccountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof addAccount>>
+>;
+export type AddAccountMutationBody = BodyType<DeskAccountInput>;
+export type AddAccountMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Add a new account
+ */
+export const useAddAccount = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addAccount>>,
+    TError,
+    { data: BodyType<DeskAccountInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof addAccount>>,
+  TError,
+  { data: BodyType<DeskAccountInput> },
+  TContext
+> => {
+  return useMutation(getAddAccountMutationOptions(options));
+};
+
+/**
+ * @summary Delete an account
+ */
+export const getDeleteAccountUrl = (id: string) => {
+  return `/api/desk/accounts/${id}`;
+};
+
+export const deleteAccount = async (
+  id: string,
+  options?: RequestInit,
+): Promise<DeleteResult> => {
+  return customFetch<DeleteResult>(getDeleteAccountUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteAccountMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAccount>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteAccount>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["deleteAccount"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteAccount>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteAccount(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteAccountMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteAccount>>
+>;
+
+export type DeleteAccountMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete an account
+ */
+export const useDeleteAccount = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAccount>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteAccount>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getDeleteAccountMutationOptions(options));
+};
+
+/**
+ * Starts the Bing search automation for all active accounts
+ * @summary Trigger automation run
+ */
+export const getRunNowUrl = () => {
+  return `/api/desk/run-now`;
+};
+
+export const runNow = async (
+  runInput: RunInput,
+  options?: RequestInit,
+): Promise<RunResult> => {
+  return customFetch<RunResult>(getRunNowUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(runInput),
+  });
+};
+
+export const getRunNowMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof runNow>>,
+    TError,
+    { data: BodyType<RunInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof runNow>>,
+  TError,
+  { data: BodyType<RunInput> },
+  TContext
+> => {
+  const mutationKey = ["runNow"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof runNow>>,
+    { data: BodyType<RunInput> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return runNow(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RunNowMutationResult = NonNullable<
+  Awaited<ReturnType<typeof runNow>>
+>;
+export type RunNowMutationBody = BodyType<RunInput>;
+export type RunNowMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Trigger automation run
+ */
+export const useRunNow = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof runNow>>,
+    TError,
+    { data: BodyType<RunInput> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof runNow>>,
+  TError,
+  { data: BodyType<RunInput> },
+  TContext
+> => {
+  return useMutation(getRunNowMutationOptions(options));
+};
+
+/**
+ * Returns current bot running state and last run info
+ * @summary Get bot status
+ */
+export const getGetBotStatusUrl = () => {
+  return `/api/desk/status`;
+};
+
+export const getBotStatus = async (
+  options?: RequestInit,
+): Promise<BotStatus> => {
+  return customFetch<BotStatus>(getGetBotStatusUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetBotStatusQueryKey = () => {
+  return [`/api/desk/status`] as const;
+};
+
+export const getGetBotStatusQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBotStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getBotStatus>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetBotStatusQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getBotStatus>>> = ({
+    signal,
+  }) => getBotStatus({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBotStatus>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBotStatusQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBotStatus>>
+>;
+export type GetBotStatusQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get bot status
+ */
+
+export function useGetBotStatus<
+  TData = Awaited<ReturnType<typeof getBotStatus>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getBotStatus>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBotStatusQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns the last 50 run log entries across all accounts
+ * @summary Get recent run logs
+ */
+export const getGetRunLogsUrl = () => {
+  return `/api/desk/logs`;
+};
+
+export const getRunLogs = async (options?: RequestInit): Promise<RunLog[]> => {
+  return customFetch<RunLog[]>(getGetRunLogsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetRunLogsQueryKey = () => {
+  return [`/api/desk/logs`] as const;
+};
+
+export const getGetRunLogsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRunLogs>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getRunLogs>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetRunLogsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getRunLogs>>> = ({
+    signal,
+  }) => getRunLogs({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRunLogs>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRunLogsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRunLogs>>
+>;
+export type GetRunLogsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get recent run logs
+ */
+
+export function useGetRunLogs<
+  TData = Awaited<ReturnType<typeof getRunLogs>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getRunLogs>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRunLogsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

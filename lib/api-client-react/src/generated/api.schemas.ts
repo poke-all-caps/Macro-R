@@ -8,3 +8,76 @@
 export interface HealthStatus {
   status: string;
 }
+
+export type DeskAccountStatus =
+  (typeof DeskAccountStatus)[keyof typeof DeskAccountStatus];
+
+export const DeskAccountStatus = {
+  idle: "idle",
+  running: "running",
+  done: "done",
+  failed: "failed",
+} as const;
+
+export interface DeskAccount {
+  id: string;
+  email: string;
+  name: string;
+  status: DeskAccountStatus;
+  totalPoints: number;
+  todayPoints: number;
+  /** @nullable */
+  lastRun: string | null;
+  searchesCompleted?: number;
+}
+
+export interface DeskAccountInput {
+  email: string;
+  name: string;
+}
+
+export interface DeleteResult {
+  success: boolean;
+}
+
+export interface RunInput {
+  /** Specific account IDs to run (omit to run all) */
+  accountIds?: string[];
+}
+
+export interface RunResult {
+  started: boolean;
+  message: string;
+  runId?: string;
+}
+
+export interface BotStatus {
+  isRunning: boolean;
+  /** @nullable */
+  currentAccount: string | null;
+  /** @nullable */
+  lastRunAt: string | null;
+  totalSearchesToday: number;
+  /** @nullable */
+  activeRunId?: string | null;
+}
+
+export type RunLogStatus = (typeof RunLogStatus)[keyof typeof RunLogStatus];
+
+export const RunLogStatus = {
+  success: "success",
+  failed: "failed",
+  running: "running",
+} as const;
+
+export interface RunLog {
+  id: string;
+  accountId: string;
+  accountName: string;
+  timestamp: string;
+  searchesDone: number;
+  pointsEarned: number;
+  status: RunLogStatus;
+  /** @nullable */
+  errorMessage?: string | null;
+}

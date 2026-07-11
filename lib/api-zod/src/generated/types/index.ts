@@ -6,4 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./botStatus";
+export * from "./deleteResult";
+export * from "./deskAccount";
+export * from "./deskAccountInput";
+export * from "./deskAccountStatus";
 export * from "./healthStatus";
+export * from "./runInput";
+export * from "./runLog";
+export * from "./runLogStatus";
+export * from "./runResult";

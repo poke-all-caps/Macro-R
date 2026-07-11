@@ -14,3 +14,83 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Returns all saved Microsoft Reward accounts
+ * @summary List all accounts
+ */
+export const ListAccountsResponseItem = zod.object({
+  id: zod.string(),
+  email: zod.string(),
+  name: zod.string(),
+  status: zod.enum(["idle", "running", "done", "failed"]),
+  totalPoints: zod.number(),
+  todayPoints: zod.number(),
+  lastRun: zod.string().nullable(),
+  searchesCompleted: zod.number().optional(),
+});
+export const ListAccountsResponse = zod.array(ListAccountsResponseItem);
+
+/**
+ * @summary Add a new account
+ */
+export const AddAccountBody = zod.object({
+  email: zod.string(),
+  name: zod.string(),
+});
+
+/**
+ * @summary Delete an account
+ */
+export const DeleteAccountParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const DeleteAccountResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
+ * Starts the Bing search automation for all active accounts
+ * @summary Trigger automation run
+ */
+export const RunNowBody = zod.object({
+  accountIds: zod
+    .array(zod.string())
+    .optional()
+    .describe("Specific account IDs to run (omit to run all)"),
+});
+
+export const RunNowResponse = zod.object({
+  started: zod.boolean(),
+  message: zod.string(),
+  runId: zod.string().optional(),
+});
+
+/**
+ * Returns current bot running state and last run info
+ * @summary Get bot status
+ */
+export const GetBotStatusResponse = zod.object({
+  isRunning: zod.boolean(),
+  currentAccount: zod.string().nullable(),
+  lastRunAt: zod.string().nullable(),
+  totalSearchesToday: zod.number(),
+  activeRunId: zod.string().nullish(),
+});
+
+/**
+ * Returns the last 50 run log entries across all accounts
+ * @summary Get recent run logs
+ */
+export const GetRunLogsResponseItem = zod.object({
+  id: zod.string(),
+  accountId: zod.string(),
+  accountName: zod.string(),
+  timestamp: zod.string(),
+  searchesDone: zod.number(),
+  pointsEarned: zod.number(),
+  status: zod.enum(["success", "failed", "running"]),
+  errorMessage: zod.string().nullish(),
+});
+export const GetRunLogsResponse = zod.array(GetRunLogsResponseItem);

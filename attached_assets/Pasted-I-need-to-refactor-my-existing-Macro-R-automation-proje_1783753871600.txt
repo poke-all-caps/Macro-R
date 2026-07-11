@@ -1,0 +1,33 @@
+I need to refactor my existing "Macro R" automation project. Currently, it is structured as a React Native mobile app with a backend engine. I want to completely pivot this into a Node.js local Desktop Application following the "QuestPilot Stealth Strategy" architecture. Do not use Electron.
+
+Please provide the code and folder structure to achieve the following:
+
+1. ARCHITECTURE & FOLDER RESTRUCTURING
+- Move all existing React Native/Expo code into an `archive-mobile/` folder so it is safely backed up.
+- Create a new project structure:
+  - `src/core/`: For my Playwright/Patchright automation tasks and business logic.
+  - `scripts/desk/`: For the local Express API server and Chromium UI window launcher.
+  - `data/`: For local file storage (e.g., `accounts.json`).
+  - `ui/`: For the Vite + React frontend application.
+
+2. THE "REWARDS DESK" COMMAND CENTER (scripts/desk/app-window.js)
+- Write a Node.js script that spins up a local Express server on port 3000.
+- Implement a simple security middleware checking for an `x-msrb-token` header to prevent unauthorized access.
+- Include a function that uses the native `child_process` to launch the host machine's Chromium/Chrome browser using the `--app=http://localhost:3000` flag. This will wrap the web UI so it looks like a native desktop window.
+
+3. THE USER INTERFACE (ui/ - Vite + React SPA)
+- The UI must be a Single Page Application (SPA) built with React (Web) to allow me to port over my React Native logic easily.
+- Assume I am porting logic from a React Native app. Structure the components using standard `<div>`, `<span>`, and `<button>` tags instead of React Native `<View>`, `<Text>`, and `<TouchableOpacity>`.
+- The UI must have a dark-mode theme with cyan/blue accents (use standard CSS or Tailwind).
+- Implement a Sidebar layout (left side) with navigation items like "Home", "Accounts", and "Console".
+- Implement a Main Content area with a "Run Now" button, a "Bot Status" indicator, and a grid mapping over account emails.
+- The React frontend should use `useEffect` and `fetch()` to call the local Express server endpoints (e.g., `/api/run`, `/api/status`) and pass the `x-msrb-token`.
+
+4. DATA STORAGE (scripts/account-storage.js)
+- Write a module that replaces my old mobile AsyncStorage logic. 
+- It must read and write user accounts and session data to `data/accounts.json` on the local file system using Node's `fs` module.
+
+5. AUTOMATION INTEGRATION
+- Create dummy endpoints in the Express server (`POST /api/run-now`, `GET /api/accounts`) that act as the entry point for my React UI to trigger the Patchright/Playwright automation engine.
+
+Please give me the code file by file, starting with the Express server, then the Chromium launcher, and finally the base React App components.

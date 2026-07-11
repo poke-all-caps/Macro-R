@@ -6,10 +6,12 @@ import adminRouter from "./admin";
 import inviteRouter from "./invite";
 import configRouter from "./config";
 import upgradesRouter from "./upgrades";
+import deskRouter from "./desk";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(deskRouter);
 
 // The proxy forwards /validate-key, /validate-admin, /sync-cookies to the
 // Render production server — useful only in the Replit dev environment so
