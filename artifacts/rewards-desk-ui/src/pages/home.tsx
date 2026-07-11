@@ -1,10 +1,11 @@
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
 import {
   CheckCircle2, PlayCircle, AlertCircle,
-  Play, Download, Settings2, MoreVertical,
+  Play, Download, Settings2, MoreVertical, Plus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
+import { Link } from 'wouter';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -36,10 +37,11 @@ function AccountCard({
   }[status];
 
   return (
-    <div className="bg-[hsl(220,32%,14%)] rounded-2xl p-4 flex flex-col gap-4">
+    <div className="bg-[hsl(220,32%,16%)] rounded-2xl p-6 flex flex-col gap-5 border border-border/30 hover:border-border/60 transition-colors">
+      {/* Header row */}
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg shrink-0">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-xl shrink-0 shadow-md">
             {initial}
           </div>
           <div className="min-w-0">
@@ -47,11 +49,12 @@ function AccountCard({
             <p className="text-[13px] text-muted-foreground truncate">{account.email}</p>
           </div>
         </div>
-        <button className="text-muted-foreground hover:text-foreground shrink-0 ml-2 mt-0.5">
+        <button className="text-muted-foreground hover:text-foreground shrink-0 ml-2 mt-0.5 p-1 rounded-md hover:bg-white/5 transition-colors">
           <MoreVertical className="w-4 h-4" />
         </button>
       </div>
 
+      {/* Status */}
       <div className="text-[14px]">
         {status === 'idle' ? (
           <div className="flex items-center gap-2">
@@ -66,23 +69,31 @@ function AccountCard({
             )}
           </div>
         ) : (
-          <span className="text-muted-foreground">Status - {statusLabel}</span>
+          <span className="text-muted-foreground">Status — {statusLabel}</span>
         )}
       </div>
 
-      <div className="flex gap-2">
+      {/* Action buttons */}
+      <div className="flex gap-2 mt-auto">
         <button
           onClick={() => onRun(account.id)}
           disabled={globalRunning}
-          className="flex-1 flex items-center justify-center h-10 rounded-xl bg-[hsl(220,28%,19%)] hover:bg-[hsl(220,28%,23%)] disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-white transition-colors"
+          title="Run"
+          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-[hsl(220,28%,22%)] hover:bg-primary/20 hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-white transition-colors border border-transparent hover:border-primary/30"
         >
-          <Play className="w-[18px] h-[18px]" />
+          <Play className="w-5 h-5" />
         </button>
-        <button className="flex-1 flex items-center justify-center h-10 rounded-xl bg-[hsl(220,28%,19%)] hover:bg-[hsl(220,28%,23%)] text-muted-foreground hover:text-white transition-colors">
-          <Download className="w-[18px] h-[18px]" />
+        <button
+          title="Export"
+          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-[hsl(220,28%,22%)] hover:bg-white/10 text-muted-foreground hover:text-white transition-colors border border-transparent hover:border-border"
+        >
+          <Download className="w-5 h-5" />
         </button>
-        <button className="flex-1 flex items-center justify-center h-10 rounded-xl bg-[hsl(220,28%,19%)] hover:bg-[hsl(220,28%,23%)] text-muted-foreground hover:text-white transition-colors">
-          <Settings2 className="w-[18px] h-[18px]" />
+        <button
+          title="Settings"
+          className="flex-1 flex items-center justify-center h-11 rounded-xl bg-[hsl(220,28%,22%)] hover:bg-white/10 text-muted-foreground hover:text-white transition-colors border border-transparent hover:border-border"
+        >
+          <Settings2 className="w-5 h-5" />
         </button>
       </div>
     </div>
@@ -105,13 +116,24 @@ export default function Home() {
   };
 
   return (
-    <div className="p-6 space-y-5 min-h-full">
+    <div className="max-w-7xl mx-auto px-8 py-6 space-y-6 min-h-full">
 
       {/* ── Page header ──────────────────────────────────────────────────── */}
-      <h1 className="text-xl font-bold text-white">Accounts</h1>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Accounts</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage and run your automation targets</p>
+        </div>
+        <Link href="/accounts">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors">
+            <Plus className="w-4 h-4" />
+            Add Account
+          </button>
+        </Link>
+      </div>
 
-      {/* ── Instance Status (full width) ─────────────────────────────────── */}
-      <div className="bg-[hsl(220,35%,11%)] border border-border rounded-xl p-5">
+      {/* ── Instance Status ───────────────────────────────────────────────── */}
+      <div className="bg-[hsl(220,35%,13%)] border border-border/50 rounded-xl p-5">
         <p className="text-sm font-semibold text-white mb-5">Instance Status</p>
         <div className="flex items-center">
 
@@ -148,20 +170,26 @@ export default function Home() {
 
       {/* ── Account grid ─────────────────────────────────────────────────── */}
       <div>
-        <h2 className="text-sm font-semibold text-white mb-3">Accounts</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">Targets</h2>
 
         {accountsLoading ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array(4).fill(0).map((_, i) => (
-              <div key={i} className="h-40 rounded-xl bg-white/5 border border-border animate-pulse" />
+              <div key={i} className="h-48 rounded-xl bg-white/5 border border-border animate-pulse" />
             ))}
           </div>
         ) : accounts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-48 border border-dashed border-border rounded-xl text-muted-foreground text-sm">
-            No accounts yet — add one from the Accounts page.
+          <div className="flex flex-col items-center justify-center h-48 border border-dashed border-border rounded-xl text-muted-foreground text-sm gap-3">
+            <p>No accounts yet.</p>
+            <Link href="/accounts">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors">
+                <Plus className="w-3.5 h-3.5" />
+                Add your first account
+              </button>
+            </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {accounts.map(account => (
               <AccountCard
                 key={account.id}

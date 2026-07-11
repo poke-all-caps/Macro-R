@@ -129,7 +129,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 min-w-0 overflow-y-auto">
+        <main className="flex-1 min-w-0 overflow-y-auto bg-[hsl(220,28%,12%)]">
           {children}
         </main>
       </div>
