@@ -44,17 +44,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <span className="font-semibold text-sm text-white">Macro Rewards</span>
         </div>
 
-        {/* Search */}
-        <div className="flex-1 max-w-sm mx-4">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search instances..."
-              className="w-full h-8 pl-8 pr-3 rounded-md bg-[hsl(220,35%,13%)] border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-0 transition-colors"
-            />
-          </div>
-        </div>
 
         {/* Right side */}
         <div className="flex items-center gap-3 ml-auto">
@@ -113,10 +102,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
             )}
           </div>
 
-          {/* Settings gear */}
-          <button className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
-            <Settings className="w-4 h-4" />
-          </button>
         </div>
       </header>
 
