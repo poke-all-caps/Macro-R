@@ -63,7 +63,10 @@ function writeJson(filePath, data) {
   ensureDataDir();
   const tmp = filePath + ".tmp";
   fs.writeFileSync(tmp, JSON.stringify(data, null, 2), "utf8");
-  fs.renameSync(tmp, filePath);
+  // fs.renameSync fails on Windows when antivirus or another handle has the
+  // target file open (EPERM). Copy-then-delete is safe on all platforms.
+  fs.copyFileSync(tmp, filePath);
+  try { fs.unlinkSync(tmp); } catch { /* ignore cleanup failure */ }
 }
 
 // ─── Accounts ────────────────────────────────────────────────────────────────

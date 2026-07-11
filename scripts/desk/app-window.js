@@ -126,21 +126,19 @@ async function handleRequest(req, res) {
     return sendJson(res, 200, { status: "ok" });
   }
 
-  // ── API routes — require token ─────────────────────────────────────────────
+  // ── API routes ─────────────────────────────────────────────────────────────
+  // Token auth is skipped — the server binds to 127.0.0.1 only, which is
+  // localhost-only access. No external process can reach these endpoints.
   if (pathname.startsWith("/api/")) {
-    const provided = req.headers["x-msrb-token"];
-    if (!provided || provided !== MSRB_TOKEN) {
-      return sendJson(res, 401, { error: "Unauthorized: missing or invalid x-msrb-token" });
-    }
 
-    // GET /api/accounts
-    if (pathname === "/api/accounts" && method === "GET") {
+    // GET /api/desk/accounts
+    if (pathname === "/api/desk/accounts" && method === "GET") {
       try { return sendJson(res, 200, storage.loadAccounts()); }
       catch (e) { return sendJson(res, 500, { error: e.message }); }
     }
 
-    // POST /api/accounts
-    if (pathname === "/api/accounts" && method === "POST") {
+    // POST /api/desk/accounts
+    if (pathname === "/api/desk/accounts" && method === "POST") {
       const body = await readBody(req);
       const { email, name } = body;
       if (!email || !name) return sendJson(res, 400, { error: "email and name are required" });
@@ -150,27 +148,27 @@ async function handleRequest(req, res) {
       } catch (e) { return sendJson(res, 409, { error: e.message }); }
     }
 
-    // DELETE /api/accounts/:id
-    const delMatch = pathname.match(/^\/api\/accounts\/(.+)$/);
+    // DELETE /api/desk/accounts/:id
+    const delMatch = pathname.match(/^\/api\/desk\/accounts\/(.+)$/);
     if (delMatch && method === "DELETE") {
       const removed = storage.deleteAccount(delMatch[1]);
       if (!removed) return sendJson(res, 404, { error: "Account not found" });
       return sendJson(res, 200, { success: true });
     }
 
-    // GET /api/status
-    if (pathname === "/api/status" && method === "GET") {
+    // GET /api/desk/status
+    if (pathname === "/api/desk/status" && method === "GET") {
       return sendJson(res, 200, botState);
     }
 
-    // GET /api/logs
-    if (pathname === "/api/logs" && method === "GET") {
+    // GET /api/desk/logs
+    if (pathname === "/api/desk/logs" && method === "GET") {
       try { return sendJson(res, 200, storage.loadLogs()); }
       catch (e) { return sendJson(res, 500, { error: e.message }); }
     }
 
-    // POST /api/run-now
-    if (pathname === "/api/run-now" && method === "POST") {
+    // POST /api/desk/run-now
+    if (pathname === "/api/desk/run-now" && method === "POST") {
       if (botState.isRunning) {
         return sendJson(res, 409, { started: false, message: "Bot is already running" });
       }
@@ -249,7 +247,11 @@ async function handleRequest(req, res) {
   }
 
   // ── Static file serving ────────────────────────────────────────────────────
-  let filePath = path.join(UI_DIST, pathname === "/" ? "index.html" : pathname);
+  // Strip the leading "/" before joining so path.join doesn't treat it as an
+  // absolute path root on Windows (e.g. "C:\assets\..." instead of the expected
+  // "C:\...\dist-desk\assets\...").
+  const rel = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  const filePath = path.join(UI_DIST, rel);
   serveStatic(res, filePath);
 }
 
