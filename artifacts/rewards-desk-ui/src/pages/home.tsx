@@ -37,29 +37,37 @@ function AccountCard({
   const fresh   = sessionFresh(account.lastRun);
   const status  = account.status ?? 'idle';
 
-  return (
-    <div className="bg-[hsl(220,35%,13%)] border border-border rounded-xl p-4 flex flex-col gap-3">
+  const statusLabel = {
+    idle:    null,
+    running: <span className="text-blue-400  font-medium">Running</span>,
+    done:    <span className="text-green-400 font-medium">Done</span>,
+    failed:  <span className="text-red-400   font-medium">Failed</span>,
+  }[status];
 
-      {/* Header row */}
+  return (
+    <div className="bg-[hsl(220,32%,14%)] rounded-2xl p-4 flex flex-col gap-4">
+
+      {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3 min-w-0">
-          <div className={cn('w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-base shrink-0', avatarColor(account.name ?? ''))}>
+          {/* Always solid blue avatar, matching mobile */}
+          <div className="w-11 h-11 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg shrink-0">
             {initial}
           </div>
           <div className="min-w-0">
-            <p className="font-semibold text-sm text-white truncate">{account.name}</p>
-            <p className="text-xs text-muted-foreground truncate">{account.email}</p>
+            <p className="font-semibold text-[15px] text-white leading-snug truncate">{account.name}</p>
+            <p className="text-[13px] text-muted-foreground truncate">{account.email}</p>
           </div>
         </div>
-        <button className="text-muted-foreground hover:text-foreground shrink-0 ml-2">
+        <button className="text-muted-foreground hover:text-foreground shrink-0 ml-2 mt-0.5">
           <MoreVertical className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Status line */}
-      <div className="flex items-center gap-2 text-sm">
-        {status === 'idle' && (
-          <>
+      {/* Status */}
+      <div className="text-[14px]">
+        {status === 'idle' ? (
+          <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Idle</span>
             {fresh && (
               <>
@@ -69,58 +77,28 @@ function AccountCard({
                 </span>
               </>
             )}
-          </>
-        )}
-        {status === 'running' && (
-          <span className="text-sm text-muted-foreground">
-            Status - <span className="text-blue-400 font-medium">Running</span>
-          </span>
-        )}
-        {status === 'done' && (
-          <span className="text-sm text-muted-foreground">
-            Status - <span className="text-green-400 font-medium">Done</span>
-          </span>
-        )}
-        {status === 'failed' && (
-          <span className="text-sm text-muted-foreground">
-            Status - <span className="text-red-400 font-medium">Failed</span>
-          </span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground">Status - {statusLabel}</span>
         )}
       </div>
 
-      {/* Action buttons */}
-      {status === 'idle' ? (
-        /* Idle: large blue play + settings */
-        <div className="flex gap-2">
-          <button
-            onClick={() => onRun(account.id)}
-            disabled={globalRunning}
-            className="flex-1 flex items-center justify-center gap-2 h-9 rounded-md bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground text-sm font-medium transition-colors"
-          >
-            <Play className="w-4 h-4 fill-current" />
-          </button>
-          <button className="flex-1 flex items-center justify-center gap-2 h-9 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium transition-colors">
-            <Settings2 className="w-4 h-4" />
-          </button>
-        </div>
-      ) : (
-        /* Running / Done / Failed: smaller icon trio */
-        <div className="flex gap-2">
-          <button
-            onClick={() => onRun(account.id)}
-            disabled={globalRunning}
-            className="flex-1 flex items-center justify-center h-9 rounded-md bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground transition-colors border border-border"
-          >
-            <Play className="w-4 h-4" />
-          </button>
-          <button className="flex-1 flex items-center justify-center h-9 rounded-md bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors border border-border">
-            <Download className="w-4 h-4" />
-          </button>
-          <button className="flex-1 flex items-center justify-center h-9 rounded-md bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors border border-border">
-            <Settings2 className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      {/* Three equal icon buttons — always the same trio */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => onRun(account.id)}
+          disabled={globalRunning}
+          className="flex-1 flex items-center justify-center h-10 rounded-xl bg-[hsl(220,28%,19%)] hover:bg-[hsl(220,28%,23%)] disabled:opacity-40 disabled:cursor-not-allowed text-muted-foreground hover:text-white transition-colors"
+        >
+          <Play className="w-[18px] h-[18px]" />
+        </button>
+        <button className="flex-1 flex items-center justify-center h-10 rounded-xl bg-[hsl(220,28%,19%)] hover:bg-[hsl(220,28%,23%)] text-muted-foreground hover:text-white transition-colors">
+          <Download className="w-[18px] h-[18px]" />
+        </button>
+        <button className="flex-1 flex items-center justify-center h-10 rounded-xl bg-[hsl(220,28%,19%)] hover:bg-[hsl(220,28%,23%)] text-muted-foreground hover:text-white transition-colors">
+          <Settings2 className="w-[18px] h-[18px]" />
+        </button>
+      </div>
     </div>
   );
 }
