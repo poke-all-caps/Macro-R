@@ -16,7 +16,9 @@ cd /d "%~dp0..\.."
 
 echo.
 echo [build] Installing dependencies...
-call pnpm install --frozen-lockfile
+REM --no-frozen-lockfile lets pnpm add missing Windows-native binaries
+REM (e.g. @rollup/rollup-win32-x64-msvc) that weren't in the Linux lockfile.
+call pnpm install --no-frozen-lockfile
 if %errorlevel% neq 0 (
   echo [build] pnpm install failed. Make sure pnpm is installed:
   echo         npm install -g pnpm
