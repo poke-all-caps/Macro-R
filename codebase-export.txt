@@ -1,5 +1,5 @@
-# Macro Rewards — source export 2026-07-11
-# 134 files
+# Macro Rewards — full source export 2026-07-11
+# 103 files
 
 ================================================================
 FILE: ./artifacts/api-server/src/adminSession.ts
@@ -3196,6 +3196,226 @@ export default function AdminPanelScreen() {
   if (!isOwnerMode) return <Redirect href="/" />;
   return <AdminPanel />;
 }
+
+
+================================================================
+FILE: ./artifacts/mobile/app.config.ts
+================================================================
+/*
+import { ExpoConfig, ConfigContext } from "expo/config";
+
+const IS_OWNER = process.env.EXPO_PUBLIC_OWNER_MODE === "true";
+
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  name: "Macro R",
+  slug: "mobile",
+  version: "1.4.03",
+  orientation: "portrait",
+  icon: "./assets/images/iconn.png",
+  scheme: "mobile",
+  userInterfaceStyle: "automatic",
+  newArchEnabled: true,
+  splash: {
+    image: "./assets/images/splash-icon.png",
+    resizeMode: "contain",
+    backgroundColor: "#0f172a",
+  },
+  ios: {
+    supportsTablet: false,
+    bundleIdentifier: "com.msrewards.automation",
+  },
+  android: {
+    package: "com.msrewards.automation",
+    permissions: [
+      "android.permission.SCHEDULE_EXACT_ALARM",
+      "android.permission.USE_EXACT_ALARM",
+      "android.permission.RECEIVE_BOOT_COMPLETED",
+      "android.permission.VIBRATE",
+      "android.permission.WAKE_LOCK",
+      "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+      "android.permission.USE_FULL_SCREEN_INTENT",
+      "android.permission.SYSTEM_ALERT_WINDOW",
+      "android.permission.CAMERA",
+      "android.permission.READ_MEDIA_IMAGES",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+    ],
+  },
+  web: {
+    favicon: "./assets/images/icon.png",
+  },
+  plugins: [
+    [
+      "expo-router",
+      {
+        origin: "https://replit.com/",
+      },
+    ],
+    "expo-font",
+    "expo-web-browser",
+    [
+      "expo-notifications",
+      {
+        icon: "./assets/images/notification-icon.png",
+        color: "#3B82F6",
+        sounds: [],
+      },
+    ],
+    "expo-task-manager",
+    "./plugins/withBackgroundActions",
+    "expo-updates",
+    [
+      "expo-camera",
+      {
+        cameraPermission:
+          "Allow Macro R to access your camera to scan QR codes.",
+      },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "Allow Macro R to access your photos to scan QR codes from images.",
+        cameraPermission:
+          "Allow Macro R to access your camera to scan QR codes.",
+      },
+    ],
+  ],
+  updates: {
+    url: "https://u.expo.dev/e44f3f61-0e90-468d-9a3d-378d6aaf7c45",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
+  },
+  experiments: {
+    typedRoutes: true,
+    reactCompiler: true,
+  },
+  extra: {
+    ownerMode: IS_OWNER,
+    // apiUrl is read by the app via Constants.expoConfig.extra.apiUrl.
+    // Embedding it here (instead of relying on process.env) means EAS Update
+    // re-evaluates this file when publishing an OTA update and packages the
+    // correct URL into the update manifest — surviving every OTA push.
+    apiUrl:
+      process.env.EXPO_PUBLIC_API_URL ||
+      "https://macro-r-631x.onrender.com/api",
+    eas: {
+      projectId: "e44f3f61-0e90-468d-9a3d-378d6aaf7c45",
+    },
+  },
+  owner: "meoow123",
+});
+*/
+import { ExpoConfig, ConfigContext } from "expo/config";
+
+const IS_OWNER = process.env.EXPO_PUBLIC_OWNER_MODE === "true";
+
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  name: "Macro R",
+  // Updated Slug
+  slug: "rewards-macro",
+  version: "1.4.03",
+  orientation: "portrait",
+  icon: "./assets/images/iconn.png",
+  scheme: "mobile",
+  userInterfaceStyle: "automatic",
+  newArchEnabled: true,
+  splash: {
+    image: "./assets/images/splash-icon.png",
+    resizeMode: "contain",
+    backgroundColor: "#0f172a",
+  },
+  ios: {
+    supportsTablet: false,
+    bundleIdentifier: "com.msrewards.automation",
+  },
+  android: {
+    package: "com.msrewards.automation",
+    versionCode: 1,
+    permissions: [
+      "android.permission.SCHEDULE_EXACT_ALARM",
+      "android.permission.USE_EXACT_ALARM",
+      "android.permission.RECEIVE_BOOT_COMPLETED",
+      "android.permission.VIBRATE",
+      "android.permission.WAKE_LOCK",
+      "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+      "android.permission.USE_FULL_SCREEN_INTENT",
+      "android.permission.SYSTEM_ALERT_WINDOW",
+      "android.permission.CAMERA",
+      "android.permission.READ_MEDIA_IMAGES",
+      "android.permission.READ_EXTERNAL_STORAGE",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
+    ],
+  },
+  web: {
+    favicon: "./assets/images/icon.png",
+  },
+  plugins: [
+    [
+      "expo-router",
+      {
+        origin: "https://replit.com/",
+      },
+    ],
+    "expo-font",
+    "expo-web-browser",
+    [
+      "expo-notifications",
+      {
+        icon: "./assets/images/notification-icon.png",
+        color: "#3B82F6",
+        sounds: [],
+      },
+    ],
+    "expo-task-manager",
+    "./plugins/withBackgroundActions",
+    "expo-updates",
+    [
+      "expo-camera",
+      {
+        cameraPermission:
+          "Allow Macro R to access your camera to scan QR codes.",
+      },
+    ],
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "Allow Macro R to access your photos to scan QR codes from images.",
+        cameraPermission:
+          "Allow Macro R to access your camera to scan QR codes.",
+      },
+    ],
+  ],
+  updates: {
+    // Updated URL ID
+    url: "https://u.expo.dev/2bd28ff8-467e-4f50-ac24-480e85cdda44",
+  },
+  runtimeVersion: {
+    policy: "appVersion",
+  },
+  experiments: {
+    typedRoutes: true,
+    reactCompiler: true,
+  },
+  extra: {
+    ownerMode: IS_OWNER,
+    apiUrl:
+      process.env.EXPO_PUBLIC_API_URL ||
+      "https://macro-r-631x.onrender.com/api",
+    eas: {
+      // Updated Project ID
+      projectId: "2bd28ff8-467e-4f50-ac24-480e85cdda44",
+    },
+  },
+  // Updated Owner
+  owner: "macro-r11",
+});
 
 
 ================================================================
@@ -9053,6 +9273,17 @@ const styles = StyleSheet.create({
   submitBtn: { borderRadius: 12, paddingVertical: 14, alignItems: "center" },
   submitBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" },
 });
+
+
+================================================================
+FILE: ./artifacts/mobile/babel.config.js
+================================================================
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [["babel-preset-expo", { unstable_transformImportMeta: true }]],
+  };
+};
 
 
 ================================================================
@@ -18971,6 +19202,1468 @@ export { DEFAULT_OVERNIGHT_SLOTS };
 
 
 ================================================================
+FILE: ./artifacts/mobile/eas.json
+================================================================
+{
+  "cli": {
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "gradleCommand": ":app:assembleDebug",
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://macro-r-631x.onrender.com/api",
+        "EXPO_PUBLIC_OWNER_MODE": "false"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://macro-r-631x.onrender.com/api"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
+
+
+================================================================
+FILE: ./artifacts/mobile/expo-env.d.ts
+================================================================
+/// <reference types="expo/types" />
+
+// NOTE: This file should not be edited and should be in your git ignore
+
+================================================================
+FILE: ./artifacts/mobile/.gitignore
+================================================================
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+ios/
+android/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+.vercel
+
+.env
+
+
+================================================================
+FILE: ./artifacts/mobile/metro.config.js
+================================================================
+const { getDefaultConfig } = require("expo/metro-config");
+
+module.exports = getDefaultConfig(__dirname);
+
+
+================================================================
+FILE: ./artifacts/mobile/package.json
+================================================================
+{
+  "name": "@workspace/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "EXPO_PUBLIC_OWNER_MODE=false EXPO_PACKAGER_PROXY_URL=https://$REPLIT_EXPO_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_REPL_ID=$REPL_ID REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN pnpm exec expo start --localhost --port $PORT",
+    "build": "node scripts/build.js",
+    "serve": "node server/serve.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "update": "EXPO_PUBLIC_API_URL=https://macro-r-631x.onrender.com/api eas update --branch preview --message \"${UPDATE_MESSAGE:-Update}\""
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@expo-google-fonts/inter": "^0.4.0",
+    "@expo/cli": "54.0.23",
+    "@expo/config-plugins": "54.0.4",
+    "@expo/ngrok": "^4.1.0",
+    "@expo/vector-icons": "^15.0.3",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@stardazed/streams-text-encoding": "^1.0.2",
+    "@tanstack/react-query": "^5.90.21",
+    "@types/react": "~19.1.10",
+    "@types/react-dom": "~19.1.7",
+    "@ungap/structured-clone": "^1.3.0",
+    "babel-plugin-react-compiler": "^19.0.0-beta-e993439-20250117",
+    "babel-preset-expo": "~54.0.10",
+    "expo": "~54.0.27",
+    "expo-blur": "~15.0.8",
+    "expo-constants": "~18.0.11",
+    "expo-font": "~14.0.10",
+    "expo-glass-effect": "~0.1.4",
+    "expo-haptics": "~15.0.8",
+    "expo-image": "~3.0.11",
+    "expo-image-picker": "~17.0.10",
+    "expo-linear-gradient": "~15.0.8",
+    "expo-linking": "~8.0.10",
+    "expo-location": "~19.0.8",
+    "expo-router": "~6.0.17",
+    "expo-splash-screen": "~31.0.12",
+    "expo-status-bar": "~3.0.9",
+    "expo-symbols": "~1.0.8",
+    "expo-system-ui": "~6.0.9",
+    "expo-web-browser": "~15.0.10",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-keyboard-controller": "1.18.5",
+    "react-native-reanimated": "~4.1.1",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-svg": "15.12.1",
+    "react-native-web": "^0.21.0",
+    "react-native-worklets": "0.5.1",
+    "typescript": "~5.9.2",
+    "zod": "^3.25.76",
+    "zod-validation-error": "^3.4.0"
+  },
+  "dependencies": {
+    "@react-native-cookies/cookies": "^6.2.1",
+    "expo-application": "~7.0.8",
+    "expo-background-fetch": "^14.0.9",
+    "expo-camera": "~17.0.10",
+    "expo-clipboard": "~8.0.8",
+    "expo-crypto": "~15.0.8",
+    "expo-dev-client": "~6.0.20",
+    "expo-file-system": "~19.0.21",
+    "expo-image-manipulator": "^14.0.8",
+    "expo-notifications": "^0.32.16",
+    "expo-task-manager": "~14.0.9",
+    "expo-updates": "^29.0.16",
+    "lucide-react-native": "^0.577.0",
+    "react-native-background-actions": "^4.0.1",
+    "react-native-qrcode-svg": "^6.3.21",
+    "react-native-webview": "13.15.0"
+  }
+}
+
+
+================================================================
+FILE: ./artifacts/mobile/plugins/withBackgroundActions.js
+================================================================
+const { withAndroidManifest } = require('@expo/config-plugins');
+
+/**
+ * Patches the AndroidManifest so RNBackgroundActionsTask:
+ *  - declares android:foregroundServiceType="dataSync" (required on Android 14+)
+ *  - sets android:stopWithTask="false" so the foreground service (and its
+ *    persistent notification) survives the user swiping the app from recents
+ *  - sets android:exported="false" for security
+ */
+module.exports = function withBackgroundActions(config) {
+  return withAndroidManifest(config, (config) => {
+    const application = config.modResults.manifest.application?.[0];
+    if (!application) return config;
+
+    if (!application.service) application.service = [];
+
+    const FULL_NAME = 'com.asterinet.react.bgactions.RNBackgroundActionsTask';
+    const SHORT_NAME = '.RNBackgroundActionsTask';
+
+    const existing = application.service.find(
+      (s) =>
+        s.$?.['android:name'] === FULL_NAME ||
+        s.$?.['android:name'] === SHORT_NAME
+    );
+
+    if (existing) {
+      existing.$['android:foregroundServiceType'] = 'dataSync';
+      existing.$['android:stopWithTask'] = 'false';
+      existing.$['android:exported'] = 'false';
+    } else {
+      application.service.push({
+        $: {
+          'android:name': FULL_NAME,
+          'android:foregroundServiceType': 'dataSync',
+          'android:stopWithTask': 'false',
+          'android:exported': 'false',
+        },
+      });
+    }
+
+    return config;
+  });
+};
+
+
+================================================================
+FILE: ./artifacts/mobile/scripts/build.js
+================================================================
+const fs = require("fs");
+const path = require("path");
+const { spawn } = require("child_process");
+const { Readable } = require("stream");
+const { pipeline } = require("stream/promises");
+
+let metroProcess = null;
+
+const projectRoot = path.resolve(__dirname, "..");
+
+function findWorkspaceRoot(startDir) {
+  let dir = startDir;
+  while (dir !== path.dirname(dir)) {
+    if (fs.existsSync(path.join(dir, "pnpm-workspace.yaml"))) {
+      return dir;
+    }
+    dir = path.dirname(dir);
+  }
+  throw new Error("Could not find workspace root (no pnpm-workspace.yaml found)");
+}
+
+const workspaceRoot = findWorkspaceRoot(projectRoot);
+const basePath = (process.env.BASE_PATH || "/").replace(/\/+$/, "");
+
+function exitWithError(message) {
+  console.error(message);
+  if (metroProcess) {
+    metroProcess.kill();
+  }
+  process.exit(1);
+}
+
+function setupSignalHandlers() {
+  const cleanup = () => {
+    if (metroProcess) {
+      console.log("Cleaning up Metro process...");
+      metroProcess.kill();
+    }
+    process.exit(0);
+  };
+
+  process.on("SIGINT", cleanup);
+  process.on("SIGTERM", cleanup);
+  process.on("SIGHUP", cleanup);
+}
+
+function stripProtocol(domain) {
+  let urlString = domain.trim();
+
+  if (!/^https?:\/\//i.test(urlString)) {
+    urlString = `https://${urlString}`;
+  }
+
+  return new URL(urlString).host;
+}
+
+function getDeploymentDomain() {
+  if (process.env.REPLIT_INTERNAL_APP_DOMAIN) {
+    return stripProtocol(process.env.REPLIT_INTERNAL_APP_DOMAIN);
+  }
+
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return stripProtocol(process.env.REPLIT_DEV_DOMAIN);
+  }
+
+  if (process.env.EXPO_PUBLIC_DOMAIN) {
+    return stripProtocol(process.env.EXPO_PUBLIC_DOMAIN);
+  }
+
+  console.error(
+    "ERROR: No deployment domain found. Set REPLIT_INTERNAL_APP_DOMAIN, REPLIT_DEV_DOMAIN, or EXPO_PUBLIC_DOMAIN",
+  );
+  process.exit(1);
+}
+
+function prepareDirectories(timestamp) {
+  console.log("Preparing build directories...");
+
+  const staticBuild = path.join(projectRoot, "static-build");
+  if (fs.existsSync(staticBuild)) {
+    fs.rmSync(staticBuild, { recursive: true });
+  }
+
+  const dirs = [
+    path.join(staticBuild, timestamp, "_expo", "static", "js", "ios"),
+    path.join(staticBuild, timestamp, "_expo", "static", "js", "android"),
+    path.join(staticBuild, "ios"),
+    path.join(staticBuild, "android"),
+  ];
+
+  for (const dir of dirs) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  console.log("Build:", timestamp);
+}
+
+function clearMetroCache() {
+  console.log("Clearing Metro cache...");
+
+  const cacheDirs = [
+    path.join(projectRoot, ".metro-cache"),
+    path.join(projectRoot, "node_modules/.cache/metro"),
+  ];
+
+  for (const dir of cacheDirs) {
+    if (fs.existsSync(dir)) {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  console.log("Cache cleared");
+}
+
+async function checkMetroHealth() {
+  try {
+    const response = await fetch("http://localhost:8081/status", {
+      signal: AbortSignal.timeout(5000),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+function getExpoPublicReplId() {
+  return process.env.REPL_ID || process.env.EXPO_PUBLIC_REPL_ID;
+}
+
+async function startMetro(expoPublicDomain, expoPublicReplId) {
+  const isRunning = await checkMetroHealth();
+  if (isRunning) {
+    console.log("Metro already running");
+    return;
+  }
+
+  console.log("Starting Metro...");
+  console.log(`Setting EXPO_PUBLIC_DOMAIN=${expoPublicDomain}`);
+  const env = {
+    ...process.env,
+    EXPO_PUBLIC_DOMAIN: expoPublicDomain,
+    EXPO_PUBLIC_REPL_ID: expoPublicReplId,
+  };
+
+  if (expoPublicReplId) {
+    console.log(`Setting EXPO_PUBLIC_REPL_ID=${expoPublicReplId}`);
+  }
+
+  metroProcess = spawn(
+    "pnpm",
+    [
+      "exec",
+      "expo",
+      "start",
+      "--no-dev",
+      "--minify",
+      "--localhost",
+    ],
+    {
+      stdio: ["ignore", "pipe", "pipe"],
+      detached: false,
+      cwd: projectRoot,
+      env,
+    },
+  );
+
+  if (metroProcess.stdout) {
+    metroProcess.stdout.on("data", (data) => {
+      const output = data.toString().trim();
+      if (output) console.log(`[Metro] ${output}`);
+    });
+  }
+  if (metroProcess.stderr) {
+    metroProcess.stderr.on("data", (data) => {
+      const output = data.toString().trim();
+      if (output) console.error(`[Metro Error] ${output}`);
+    });
+  }
+
+  for (let i = 0; i < 60; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const healthy = await checkMetroHealth();
+    if (healthy) {
+      console.log("Metro ready");
+      return;
+    }
+  }
+
+  console.error("Metro timeout");
+  process.exit(1);
+}
+
+async function downloadFile(url, outputPath) {
+  const controller = new AbortController();
+  const fiveMinMS = 5 * 60 * 1_000;
+  const timeoutId = setTimeout(() => controller.abort(), fiveMinMS);
+
+  try {
+    console.log(`Downloading: ${url}`);
+    const response = await fetch(url, { signal: controller.signal });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const file = fs.createWriteStream(outputPath);
+    await pipeline(Readable.fromWeb(response.body), file);
+
+    const fileSize = fs.statSync(outputPath).size;
+
+    if (fileSize === 0) {
+      fs.unlinkSync(outputPath);
+      throw new Error("Downloaded file is empty");
+    }
+  } catch (error) {
+    if (fs.existsSync(outputPath)) {
+      fs.unlinkSync(outputPath);
+    }
+
+    if (error.name === "AbortError") {
+      throw new Error(`Download timeout after 5m: ${url}`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function downloadBundle(platform, timestamp) {
+  const entryPath = path.resolve(projectRoot, "node_modules", "expo-router", "entry");
+  const bundlePath = path.relative(workspaceRoot, entryPath);
+  const url = new URL(`http://localhost:8081/${bundlePath}.bundle`);
+  url.searchParams.set("platform", platform);
+  url.searchParams.set("dev", "false");
+  url.searchParams.set("hot", "false");
+  url.searchParams.set("lazy", "false");
+  url.searchParams.set("minify", "true");
+
+  const output = path.join(
+    "static-build",
+    timestamp,
+    "_expo",
+    "static",
+    "js",
+    platform,
+    "bundle.js",
+  );
+
+  console.log(`Fetching ${platform} bundle...`);
+  await downloadFile(url.toString(), output);
+  console.log(`${platform} bundle ready`);
+}
+
+async function downloadManifest(platform) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 300_000);
+
+  try {
+    console.log(`Fetching ${platform} manifest...`);
+    const response = await fetch("http://localhost:8081/manifest", {
+      headers: { "expo-platform": platform },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const manifest = await response.json();
+    console.log(`${platform} manifest ready`);
+    return manifest;
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error(
+        `Manifest download timeout after 5m for platform: ${platform}`,
+      );
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function downloadBundlesAndManifests(timestamp) {
+  console.log("Downloading bundles and manifests...");
+  console.log("This may take several minutes for production builds...");
+
+  try {
+    // Bundles are sequential — Metro can't handle both platforms simultaneously
+    // without stalling. Manifests are cheap and run in parallel after.
+    await downloadBundle("ios", timestamp);
+    await downloadBundle("android", timestamp);
+
+    const [iosManifest, androidManifest] = await Promise.all([
+      downloadManifest("ios"),
+      downloadManifest("android"),
+    ]);
+
+    console.log("All downloads completed successfully");
+    return { ios: iosManifest, android: androidManifest };
+  } catch (error) {
+    exitWithError(`Download failed: ${error.message}`);
+  }
+}
+
+function extractAssets(timestamp) {
+  const staticBuild = path.join(projectRoot, "static-build");
+  const bundles = {
+    ios: fs.readFileSync(
+      path.join(staticBuild, timestamp, "_expo", "static", "js", "ios", "bundle.js"),
+      "utf-8",
+    ),
+    android: fs.readFileSync(
+      path.join(staticBuild, timestamp, "_expo", "static", "js", "android", "bundle.js"),
+      "utf-8",
+    ),
+  };
+
+  const assetsMap = new Map();
+  const assetPattern =
+    /httpServerLocation:"([^"]+)"[^}]*hash:"([^"]+)"[^}]*name:"([^"]+)"[^}]*type:"([^"]+)"/g;
+
+  const extractFromBundle = (bundle, platform) => {
+    for (const match of bundle.matchAll(assetPattern)) {
+      const originalPath = match[1];
+      const filename = match[3] + "." + match[4];
+
+      const tempUrl = new URL(`http://localhost:8081${originalPath}`);
+      const unstablePath = tempUrl.searchParams.get("unstable_path");
+
+      if (!unstablePath) {
+        throw new Error(`Asset missing unstable_path: ${originalPath}`);
+      }
+
+      const decodedPath = decodeURIComponent(unstablePath);
+      const key = path.posix.join(decodedPath, filename);
+
+      if (!assetsMap.has(key)) {
+        const asset = {
+          url: path.posix.join("/", decodedPath, filename),
+          originalPath: originalPath,
+          filename: filename,
+          relativePath: decodedPath,
+          hash: match[2],
+          platforms: new Set(),
+        };
+
+        assetsMap.set(key, asset);
+      }
+      assetsMap.get(key).platforms.add(platform);
+    }
+  };
+
+  extractFromBundle(bundles.ios, "ios");
+  extractFromBundle(bundles.android, "android");
+
+  return Array.from(assetsMap.values());
+}
+
+async function downloadAssets(assets, timestamp) {
+  if (assets.length === 0) {
+    return 0;
+  }
+
+  console.log("Copying assets...");
+  let successCount = 0;
+  const failures = [];
+
+  const downloadPromises = assets.map(async (asset) => {
+    const tempUrl = new URL(`http://localhost:8081${asset.originalPath}`);
+    const unstablePath = tempUrl.searchParams.get("unstable_path");
+
+    if (!unstablePath) {
+      throw new Error(`Asset missing unstable_path: ${asset.originalPath}`);
+    }
+
+    const decodedPath = decodeURIComponent(unstablePath);
+
+    const outputDir = path.join(
+      projectRoot,
+      "static-build",
+      timestamp,
+      "_expo",
+      "static",
+      "js",
+      asset.relativePath,
+    );
+    fs.mkdirSync(outputDir, { recursive: true });
+    const output = path.join(outputDir, asset.filename);
+
+    try {
+      const candidates = [
+        path.join(projectRoot, decodedPath, asset.filename),
+        path.join(workspaceRoot, decodedPath, asset.filename),
+      ];
+      const found = candidates.find((p) => fs.existsSync(p));
+      if (!found) {
+        throw new Error(`Asset not found on disk: ${asset.filename}`);
+      }
+      fs.copyFileSync(found, output);
+      successCount++;
+    } catch (error) {
+      failures.push({
+        filename: asset.filename,
+        error: error.message,
+        url: asset.originalPath,
+      });
+    }
+  });
+
+  await Promise.all(downloadPromises);
+
+  if (failures.length > 0) {
+    const errorMsg =
+      `Failed to download ${failures.length} asset(s):\n` +
+      failures
+        .map((f) => `  - ${f.filename}: ${f.error} (${f.url})`)
+        .join("\n");
+    exitWithError(errorMsg);
+  }
+
+  console.log(`Copied ${successCount} assets`);
+  return successCount;
+}
+
+function updateBundleUrls(timestamp, baseUrl) {
+  const updateForPlatform = (platform) => {
+    const bundlePath = path.join(
+      projectRoot,
+      "static-build",
+      timestamp,
+      "_expo",
+      "static",
+      "js",
+      platform,
+      "bundle.js",
+    );
+    let bundle = fs.readFileSync(bundlePath, "utf-8");
+
+    bundle = bundle.replace(
+      /httpServerLocation:"(\/[^"]+)"/g,
+      (_match, capturedPath) => {
+        const tempUrl = new URL(`http://localhost:8081${capturedPath}`);
+        const unstablePath = tempUrl.searchParams.get("unstable_path");
+
+        if (!unstablePath) {
+          throw new Error(
+            `Asset missing unstable_path in bundle: ${capturedPath}`,
+          );
+        }
+
+        const decodedPath = decodeURIComponent(unstablePath);
+        return `httpServerLocation:"${baseUrl}${basePath}/${timestamp}/_expo/static/js/${decodedPath}"`;
+      },
+    );
+
+    fs.writeFileSync(bundlePath, bundle);
+  };
+
+  updateForPlatform("ios");
+  updateForPlatform("android");
+  console.log("Updated bundle URLs");
+}
+
+function updateManifests(manifests, timestamp, baseUrl, assetsByHash) {
+  const updateForPlatform = (platform, manifest) => {
+    if (!manifest.launchAsset || !manifest.extra) {
+      exitWithError(`Malformed manifest for ${platform}`);
+    }
+
+    manifest.launchAsset.url = `${baseUrl}${basePath}/${timestamp}/_expo/static/js/${platform}/bundle.js`;
+    manifest.launchAsset.key = `bundle-${timestamp}`;
+    manifest.createdAt = new Date(
+      Number(timestamp.split("-")[0]),
+    ).toISOString();
+    manifest.extra.expoClient.hostUri =
+      baseUrl.replace("https://", "") + "/" + platform;
+    manifest.extra.expoGo.debuggerHost =
+      baseUrl.replace("https://", "") + "/" + platform;
+    manifest.extra.expoGo.packagerOpts.dev = false;
+
+    if (manifest.assets && manifest.assets.length > 0) {
+      manifest.assets.forEach((asset) => {
+        if (!asset.url) return;
+
+        const hash = asset.hash;
+        if (!hash) return;
+
+        const assetInfo = assetsByHash.get(hash);
+        if (!assetInfo) return;
+
+        asset.url = `${baseUrl}${basePath}/${timestamp}/_expo/static/js/${assetInfo.relativePath}/${assetInfo.filename}`;
+      });
+    }
+
+    fs.writeFileSync(
+      path.join(projectRoot, "static-build", platform, "manifest.json"),
+      JSON.stringify(manifest, null, 2),
+    );
+  };
+
+  updateForPlatform("ios", manifests.ios);
+  updateForPlatform("android", manifests.android);
+  console.log("Manifests updated");
+}
+
+async function main() {
+  console.log("Building static Expo Go deployment...");
+
+  setupSignalHandlers();
+
+  const domain = getDeploymentDomain();
+  const expoPublicReplId = getExpoPublicReplId();
+  const baseUrl = `https://${domain}`;
+  const timestamp = `${Date.now()}-${process.pid}`;
+
+  prepareDirectories(timestamp);
+  clearMetroCache();
+
+  await startMetro(domain, expoPublicReplId);
+
+  const downloadTimeout = 600000;
+  const downloadPromise = downloadBundlesAndManifests(timestamp);
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(
+        new Error(
+          `Overall download timeout after ${downloadTimeout / 1000} seconds. ` +
+            "Metro may be struggling to generate bundles. Check Metro logs above.",
+        ),
+      );
+    }, downloadTimeout);
+  });
+
+  const manifests = await Promise.race([downloadPromise, timeoutPromise]);
+
+  console.log("Processing assets...");
+  const assets = extractAssets(timestamp);
+  console.log("Found", assets.length, "unique asset(s)");
+
+  const assetsByHash = new Map();
+  for (const asset of assets) {
+    assetsByHash.set(asset.hash, {
+      relativePath: asset.relativePath,
+      filename: asset.filename,
+    });
+  }
+
+  const assetCount = await downloadAssets(assets, timestamp);
+
+  if (assetCount > 0) {
+    updateBundleUrls(timestamp, baseUrl);
+  }
+
+  console.log("Updating manifests and creating landing page...");
+  updateManifests(manifests, timestamp, baseUrl, assetsByHash);
+
+  console.log("Build complete! Deploy to:", baseUrl);
+
+  if (metroProcess) {
+    metroProcess.kill();
+  }
+  process.exit(0);
+}
+
+main().catch((error) => {
+  console.error("Build failed:", error.message);
+  if (metroProcess) {
+    metroProcess.kill();
+  }
+  process.exit(1);
+});
+
+
+================================================================
+FILE: ./artifacts/mobile/server/serve.js
+================================================================
+/**
+ * Standalone production server for Expo static builds.
+ *
+ * Serves the output of build.js (static-build/) with two special routes:
+ * - GET / or /manifest with expo-platform header → platform manifest JSON
+ * - GET / without expo-platform → landing page HTML
+ * Everything else falls through to static file serving from ./static-build/.
+ *
+ * Zero external dependencies — uses only Node.js built-ins (http, fs, path).
+ */
+
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+
+const STATIC_ROOT = path.resolve(__dirname, "..", "static-build");
+const TEMPLATE_PATH = path.resolve(__dirname, "templates", "landing-page.html");
+const basePath = (process.env.BASE_PATH || "/").replace(/\/+$/, "");
+
+const MIME_TYPES = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".otf": "font/otf",
+  ".map": "application/json",
+};
+
+function getAppName() {
+  try {
+    const appJsonPath = path.resolve(__dirname, "..", "app.json");
+    const appJson = JSON.parse(fs.readFileSync(appJsonPath, "utf-8"));
+    return appJson.expo?.name || "App Landing Page";
+  } catch {
+    return "App Landing Page";
+  }
+}
+
+function serveManifest(platform, res) {
+  const manifestPath = path.join(STATIC_ROOT, platform, "manifest.json");
+
+  if (!fs.existsSync(manifestPath)) {
+    res.writeHead(404, { "content-type": "application/json" });
+    res.end(
+      JSON.stringify({ error: `Manifest not found for platform: ${platform}` }),
+    );
+    return;
+  }
+
+  const manifest = fs.readFileSync(manifestPath, "utf-8");
+  res.writeHead(200, {
+    "content-type": "application/json",
+    "expo-protocol-version": "1",
+    "expo-sfv-version": "0",
+  });
+  res.end(manifest);
+}
+
+function serveLandingPage(req, res, landingPageTemplate, appName) {
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  const protocol = forwardedProto || "https";
+  const host = req.headers["x-forwarded-host"] || req.headers["host"];
+  const baseUrl = `${protocol}://${host}`;
+  const expsUrl = `${host}`;
+
+  const html = landingPageTemplate
+    .replace(/BASE_URL_PLACEHOLDER/g, baseUrl)
+    .replace(/EXPS_URL_PLACEHOLDER/g, expsUrl)
+    .replace(/APP_NAME_PLACEHOLDER/g, appName);
+
+  res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+  res.end(html);
+}
+
+function serveStaticFile(urlPath, res) {
+  const safePath = path.normalize(urlPath).replace(/^(\.\.(\/|\\|$))+/, "");
+  const filePath = path.join(STATIC_ROOT, safePath);
+
+  if (!filePath.startsWith(STATIC_ROOT)) {
+    res.writeHead(403);
+    res.end("Forbidden");
+    return;
+  }
+
+  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+    res.writeHead(404);
+    res.end("Not Found");
+    return;
+  }
+
+  const ext = path.extname(filePath).toLowerCase();
+  const contentType = MIME_TYPES[ext] || "application/octet-stream";
+  const content = fs.readFileSync(filePath);
+  res.writeHead(200, { "content-type": contentType });
+  res.end(content);
+}
+
+const landingPageTemplate = fs.readFileSync(TEMPLATE_PATH, "utf-8");
+const appName = getAppName();
+
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url || "/", `http://${req.headers.host}`);
+  let pathname = url.pathname;
+
+  if (basePath && pathname.startsWith(basePath)) {
+    pathname = pathname.slice(basePath.length) || "/";
+  }
+
+  if (pathname === "/status" || pathname === "/healthz") {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify({ status: "ok" }));
+    return;
+  }
+
+  if (pathname === "/" || pathname === "/manifest") {
+    const platform = req.headers["expo-platform"];
+    if (platform === "ios" || platform === "android") {
+      return serveManifest(platform, res);
+    }
+
+    if (pathname === "/") {
+      return serveLandingPage(req, res, landingPageTemplate, appName);
+    }
+  }
+
+  serveStaticFile(pathname, res);
+});
+
+const port = parseInt(process.env.PORT || "3000", 10);
+server.listen(port, "0.0.0.0", () => {
+  console.log(`Serving static Expo build on port ${port}`);
+});
+
+
+================================================================
+FILE: ./artifacts/mobile/server/templates/landing-page.html
+================================================================
+<!doctype html>
+<html>
+  <head>
+    <title>APP_NAME_PLACEHOLDER</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='180' height='180' rx='36' fill='%23FF3C00'/%3E%3C/svg%3E" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        margin: 0;
+        padding: 32px 20px;
+        text-align: center;
+        background: #fff;
+        color: #222;
+        line-height: 1.5;
+        min-height: 100vh;
+      }
+      .wrapper {
+        max-width: 480px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 26px;
+        font-weight: 600;
+        margin: 0;
+        color: #111;
+      }
+      .subtitle {
+        font-size: 15px;
+        color: #666;
+        margin-top: 8px;
+        margin-bottom: 32px;
+      }
+      .loading {
+        display: none;
+        margin: 60px 0;
+      }
+      .spinner {
+        border: 2px solid #ddd;
+        border-top-color: #333;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        animation: spin 0.8s linear infinite;
+        margin: 20px auto;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .loading-text {
+        font-size: 16px;
+        color: #444;
+      }
+      .content {
+        display: block;
+      }
+
+      .steps-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .step {
+        padding: 24px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        text-align: center;
+        background: #fafafa;
+      }
+      .step-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .step-number {
+        width: 28px;
+        height: 28px;
+        border: 1px solid #999;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+        flex-shrink: 0;
+        color: #555;
+      }
+      .step-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+        color: #222;
+      }
+      .step-description {
+        font-size: 14px;
+        margin-bottom: 16px;
+        color: #666;
+      }
+
+      .store-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .store-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 500;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #333;
+        background: #fff;
+        transition: all 0.15s;
+      }
+      .store-button:hover {
+        background: #f5f5f5;
+        border-color: #999;
+      }
+      .store-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 0;
+        font-size: 13px;
+        font-weight: 400;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        color: #666;
+        background: none;
+        border: none;
+        transition: color 0.15s;
+      }
+      .store-link:hover {
+        color: #333;
+      }
+      .store-link .store-icon {
+        width: 14px;
+        height: 14px;
+      }
+      .store-icon {
+        width: 18px;
+        height: 18px;
+      }
+
+      .qr-section {
+        background: #333;
+        color: #fff;
+        border-color: #333;
+      }
+      .qr-section .step-number {
+        border-color: rgba(255, 255, 255, 0.5);
+        color: #fff;
+      }
+      .qr-section .step-title {
+        color: #fff;
+      }
+      .qr-section .step-description {
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .qr-code {
+        width: 180px;
+        height: 180px;
+        margin: 0 auto 16px;
+        background: #fff;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .qr-code canvas {
+        width: 100%;
+        height: 100%;
+      }
+      .open-button {
+        display: inline-block;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        text-decoration: none;
+        color: #333;
+        background: #fff;
+        transition: opacity 0.15s;
+      }
+      .open-button:hover {
+        opacity: 0.9;
+      }
+
+      /* Desktop styles */
+      @media (min-width: 768px) {
+        body {
+          padding: 48px 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .wrapper {
+          max-width: 720px;
+        }
+        h1 {
+          font-size: 32px;
+          margin-bottom: 10px;
+        }
+        .subtitle {
+          font-size: 16px;
+          margin-bottom: 40px;
+        }
+        .steps-container {
+          flex-direction: row;
+          gap: 20px;
+          align-items: stretch;
+        }
+        .step {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          padding: 28px;
+        }
+        .step-description {
+          flex-grow: 1;
+        }
+        .store-buttons {
+          flex-direction: column;
+          gap: 10px;
+        }
+        .qr-code {
+          width: 200px;
+          height: 200px;
+        }
+      }
+
+      /* Large desktop */
+      @media (min-width: 1024px) {
+        .wrapper {
+          max-width: 800px;
+        }
+        h1 {
+          font-size: 36px;
+        }
+        .steps-container {
+          gap: 28px;
+        }
+        .step {
+          padding: 32px;
+        }
+      }
+
+      /* Dark mode */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #0d0d0d;
+          color: #e0e0e0;
+        }
+        h1 {
+          color: #f5f5f5;
+        }
+        .subtitle {
+          color: #999;
+        }
+        .spinner {
+          border-color: #444;
+          border-top-color: #ccc;
+        }
+        .loading-text {
+          color: #aaa;
+        }
+        .step {
+          border-color: #333;
+          background: #1a1a1a;
+        }
+        .step-number {
+          border-color: #666;
+          color: #bbb;
+        }
+        .step-title {
+          color: #f0f0f0;
+        }
+        .step-description {
+          color: #888;
+        }
+        .store-button {
+          border-color: #444;
+          color: #e0e0e0;
+          background: #222;
+        }
+        .store-button:hover {
+          background: #2a2a2a;
+          border-color: #666;
+        }
+        .store-link {
+          color: #888;
+        }
+        .store-link:hover {
+          color: #ccc;
+        }
+        .qr-section {
+          background: #111;
+          border-color: #333;
+        }
+        .qr-section .step-number {
+          border-color: rgba(255, 255, 255, 0.4);
+        }
+        .qr-section .step-description {
+          color: rgba(255, 255, 255, 0.6);
+        }
+        .open-button {
+          background: #f0f0f0;
+          color: #111;
+        }
+        .open-button:hover {
+          background: #e0e0e0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Opening in Expo Go...</div>
+      </div>
+
+      <div class="content" id="content">
+        <h1>APP_NAME_PLACEHOLDER</h1>
+        <p class="subtitle">Preview this app on your phone</p>
+
+        <div class="steps-container">
+          <div class="step">
+            <div class="step-header">
+              <div class="step-number">1</div>
+              <h2 class="step-title">Download Expo Go</h2>
+            </div>
+            <p class="step-description">
+              Expo Go is a free app to test mobile apps
+            </p>
+            <div class="store-buttons" id="store-buttons">
+              <a
+                id="app-store-btn"
+                href="https://apps.apple.com/app/id982107779"
+                class="store-button"
+                target="_blank"
+              >
+                <svg class="store-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+                  />
+                </svg>
+                App Store
+              </a>
+              <a
+                id="play-store-btn"
+                href="https://play.google.com/store/apps/details?id=host.exp.exponent"
+                class="store-button"
+                target="_blank"
+              >
+                <svg class="store-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"
+                  />
+                </svg>
+                Google Play
+              </a>
+            </div>
+          </div>
+
+          <div class="step qr-section">
+            <div class="step-header">
+              <div class="step-number">2</div>
+              <h2 class="step-title">Scan QR Code</h2>
+            </div>
+            <p class="step-description">Use your phone's camera or Expo Go</p>
+            <div class="qr-code" id="qr-code"></div>
+            <a href="exps://EXPS_URL_PLACEHOLDER" class="open-button"
+              >Open in Expo Go</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+    <script>
+      (function () {
+        const ua = navigator.userAgent;
+        const loadingEl = document.getElementById("loading");
+        const contentEl = document.getElementById("content");
+
+        const isAndroid = /Android/i.test(ua);
+        const isIOS =
+          /iPhone|iPad|iPod/i.test(ua) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+        const deepLink = "exps://EXPS_URL_PLACEHOLDER";
+
+        // Adjust store buttons based on platform
+        const appStoreBtn = document.getElementById("app-store-btn");
+        const playStoreBtn = document.getElementById("play-store-btn");
+        const storeButtonsContainer = document.getElementById("store-buttons");
+
+        if (isIOS) {
+          playStoreBtn.className = "store-link";
+          storeButtonsContainer.appendChild(playStoreBtn);
+        } else if (isAndroid) {
+          appStoreBtn.className = "store-link";
+          storeButtonsContainer.insertBefore(playStoreBtn, appStoreBtn);
+        }
+
+        const qrCode = new QRCodeStyling({
+          width: 400,
+          height: 400,
+          data: deepLink,
+          dotsOptions: {
+            color: "#333333",
+            type: "rounded",
+          },
+          backgroundOptions: {
+            color: "#ffffff",
+          },
+          cornersSquareOptions: {
+            type: "extra-rounded",
+          },
+          cornersDotOptions: {
+            type: "dot",
+          },
+          qrOptions: {
+            errorCorrectionLevel: "H",
+          },
+        });
+
+        qrCode.append(document.getElementById("qr-code"));
+
+        if (isAndroid || isIOS) {
+          loadingEl.style.display = "block";
+          contentEl.style.display = "none";
+          window.location.href = deepLink;
+          setTimeout(function () {
+            loadingEl.style.display = "none";
+            contentEl.style.display = "block";
+          }, 500);
+        }
+      })();
+    </script>
+  </body>
+</html>
+
+
+================================================================
+FILE: ./artifacts/mobile/tsconfig.json
+================================================================
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "strict": true,
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ],
+  "references": [
+    {
+      "path": "../../lib/api-client-react"
+    }
+  ]
+}
+
+
+================================================================
 FILE: ./artifacts/mobile/utils/apiUrl.ts
 ================================================================
 import Constants from "expo-constants";
@@ -20518,125 +22211,6 @@ export function formatTimeRemaining(expiresAt: string, compact = false): string 
 
 
 ================================================================
-FILE: ./lib/api-client-react/dist/custom-fetch.d.ts
-================================================================
-export type CustomFetchOptions = RequestInit & {
-    responseType?: "json" | "text" | "blob" | "auto";
-};
-export type ErrorType<T = unknown> = ApiError<T>;
-export type BodyType<T> = T;
-export declare class ApiError<T = unknown> extends Error {
-    readonly name = "ApiError";
-    readonly status: number;
-    readonly statusText: string;
-    readonly data: T | null;
-    readonly headers: Headers;
-    readonly response: Response;
-    readonly method: string;
-    readonly url: string;
-    constructor(response: Response, data: T | null, requestInfo: {
-        method: string;
-        url: string;
-    });
-}
-export declare class ResponseParseError extends Error {
-    readonly name = "ResponseParseError";
-    readonly status: number;
-    readonly statusText: string;
-    readonly headers: Headers;
-    readonly response: Response;
-    readonly method: string;
-    readonly url: string;
-    readonly rawBody: string;
-    readonly cause: unknown;
-    constructor(response: Response, rawBody: string, cause: unknown, requestInfo: {
-        method: string;
-        url: string;
-    });
-}
-export declare function customFetch<T = unknown>(input: RequestInfo | URL, options?: CustomFetchOptions): Promise<T>;
-//# sourceMappingURL=custom-fetch.d.ts.map
-
-================================================================
-FILE: ./lib/api-client-react/dist/custom-fetch.d.ts.map
-================================================================
-{"version":3,"file":"custom-fetch.d.ts","sourceRoot":"","sources":["../src/custom-fetch.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,kBAAkB,GAAG,WAAW,GAAG;IAC7C,YAAY,CAAC,EAAE,MAAM,GAAG,MAAM,GAAG,MAAM,GAAG,MAAM,CAAC;CAClD,CAAC;AAEF,MAAM,MAAM,SAAS,CAAC,CAAC,GAAG,OAAO,IAAI,QAAQ,CAAC,CAAC,CAAC,CAAC;AAEjD,MAAM,MAAM,QAAQ,CAAC,CAAC,IAAI,CAAC,CAAC;AAwH5B,qBAAa,QAAQ,CAAC,CAAC,GAAG,OAAO,CAAE,SAAQ,KAAK;IAC9C,QAAQ,CAAC,IAAI,cAAc;IAC3B,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAC;IACxB,QAAQ,CAAC,UAAU,EAAE,MAAM,CAAC;IAC5B,QAAQ,CAAC,IAAI,EAAE,CAAC,GAAG,IAAI,CAAC;IACxB,QAAQ,CAAC,OAAO,EAAE,OAAO,CAAC;IAC1B,QAAQ,CAAC,QAAQ,EAAE,QAAQ,CAAC;IAC5B,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAC;IACxB,QAAQ,CAAC,GAAG,EAAE,MAAM,CAAC;gBAGnB,QAAQ,EAAE,QAAQ,EAClB,IAAI,EAAE,CAAC,GAAG,IAAI,EACd,WAAW,EAAE;QAAE,MAAM,EAAE,MAAM,CAAC;QAAC,GAAG,EAAE,MAAM,CAAA;KAAE;CAa/C;AAED,qBAAa,kBAAmB,SAAQ,KAAK;IAC3C,QAAQ,CAAC,IAAI,wBAAwB;IACrC,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAC;IACxB,QAAQ,CAAC,UAAU,EAAE,MAAM,CAAC;IAC5B,QAAQ,CAAC,OAAO,EAAE,OAAO,CAAC;IAC1B,QAAQ,CAAC,QAAQ,EAAE,QAAQ,CAAC;IAC5B,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAC;IACxB,QAAQ,CAAC,GAAG,EAAE,MAAM,CAAC;IACrB,QAAQ,CAAC,OAAO,EAAE,MAAM,CAAC;IACzB,QAAQ,CAAC,KAAK,EAAE,OAAO,CAAC;gBAGtB,QAAQ,EAAE,QAAQ,EAClB,OAAO,EAAE,MAAM,EACf,KAAK,EAAE,OAAO,EACd,WAAW,EAAE;QAAE,MAAM,EAAE,MAAM,CAAC;QAAC,GAAG,EAAE,MAAM,CAAA;KAAE;CAiB/C;AA2FD,wBAAsB,WAAW,CAAC,CAAC,GAAG,OAAO,EAC3C,KAAK,EAAE,WAAW,GAAG,GAAG,EACxB,OAAO,GAAE,kBAAuB,GAC/B,OAAO,CAAC,CAAC,CAAC,CAiCZ"}
-
-================================================================
-FILE: ./lib/api-client-react/dist/generated/api.d.ts
-================================================================
-import type { QueryKey, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
-import type { HealthStatus } from "./api.schemas";
-import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
-type AwaitedInput<T> = PromiseLike<T> | T;
-type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-/**
- * Returns server health status
- * @summary Health check
- */
-export declare const getHealthCheckUrl: () => string;
-export declare const healthCheck: (options?: RequestInit) => Promise<HealthStatus>;
-export declare const getHealthCheckQueryKey: () => readonly ["/api/healthz"];
-export declare const getHealthCheckQueryOptions: <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(options?: {
-    query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
-    request?: SecondParameter<typeof customFetch>;
-}) => UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData> & {
-    queryKey: QueryKey;
-};
-export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>;
-export type HealthCheckQueryError = ErrorType<unknown>;
-/**
- * @summary Health check
- */
-export declare function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(options?: {
-    query?: UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>;
-    request?: SecondParameter<typeof customFetch>;
-}): UseQueryResult<TData, TError> & {
-    queryKey: QueryKey;
-};
-export {};
-//# sourceMappingURL=api.d.ts.map
-
-================================================================
-FILE: ./lib/api-client-react/dist/generated/api.d.ts.map
-================================================================
-{"version":3,"file":"api.d.ts","sourceRoot":"","sources":["../../src/generated/api.ts"],"names":[],"mappings":"AAQA,OAAO,KAAK,EAEV,QAAQ,EACR,eAAe,EACf,cAAc,EACf,MAAM,uBAAuB,CAAC;AAE/B,OAAO,KAAK,EAAE,YAAY,EAAE,MAAM,eAAe,CAAC;AAElD,OAAO,EAAE,WAAW,EAAE,MAAM,iBAAiB,CAAC;AAC9C,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,iBAAiB,CAAC;AAEjD,KAAK,YAAY,CAAC,CAAC,IAAI,WAAW,CAAC,CAAC,CAAC,GAAG,CAAC,CAAC;AAE1C,KAAK,OAAO,CAAC,CAAC,IAAI,CAAC,SAAS,YAAY,CAAC,MAAM,CAAC,CAAC,GAAG,CAAC,GAAG,KAAK,CAAC;AAE9D,KAAK,eAAe,CAAC,CAAC,SAAS,CAAC,GAAG,IAAI,EAAE,KAAK,KAAK,OAAO,IAAI,UAAU,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC;AAE/E;;;GAGG;AACH,eAAO,MAAM,iBAAiB,cAE7B,CAAC;AAEF,eAAO,MAAM,WAAW,GACtB,UAAU,WAAW,KACpB,OAAO,CAAC,YAAY,CAKtB,CAAC;AAEF,eAAO,MAAM,sBAAsB,iCAElC,CAAC;AAEF,eAAO,MAAM,0BAA0B,GACrC,KAAK,GAAG,OAAO,CAAC,UAAU,CAAC,OAAO,WAAW,CAAC,CAAC,EAC/C,MAAM,GAAG,SAAS,CAAC,OAAO,CAAC,EAC3B,UAAU;IACV,KAAK,CAAC,EAAE,eAAe,CACrB,OAAO,CAAC,UAAU,CAAC,OAAO,WAAW,CAAC,CAAC,EACvC,MAAM,EACN,KAAK,CACN,CAAC;IACF,OAAO,CAAC,EAAE,eAAe,CAAC,OAAO,WAAW,CAAC,CAAC;CAC/C,KASkD,eAAe,CAC9D,OAAO,CAAC,UAAU,CAAC,OAAO,WAAW,CAAC,CAAC,EACvC,MAAM,EACN,KAAK,CACN,GAAG;IAAE,QAAQ,EAAE,QAAQ,CAAA;CACzB,CAAC;AAEF,MAAM,MAAM,sBAAsB,GAAG,WAAW,CAC9C,OAAO,CAAC,UAAU,CAAC,OAAO,WAAW,CAAC,CAAC,CACxC,CAAC;AACF,MAAM,MAAM,qBAAqB,GAAG,SAAS,CAAC,OAAO,CAAC,CAAC;AAEvD;;GAEG;AAEH,wBAAgB,cAAc,CAC5B,KAAK,GAAG,OAAO,CAAC,UAAU,CAAC,OAAO,WAAW,CAAC,CAAC,EAC/C,MAAM,GAAG,SAAS,CAAC,OAAO,CAAC,EAC3B,OAAO,CAAC,EAAE;IACV,KAAK,CAAC,EAAE,eAAe,CACrB,OAAO,CAAC,UAAU,CAAC,OAAO,WAAW,CAAC,CAAC,EACvC,MAAM,EACN,KAAK,CACN,CAAC;IACF,OAAO,CAAC,EAAE,eAAe,CAAC,OAAO,WAAW,CAAC,CAAC;CAC/C,GAAG,cAAc,CAAC,KAAK,EAAE,MAAM,CAAC,GAAG;IAAE,QAAQ,EAAE,QAAQ,CAAA;CAAE,CAQzD"}
-
-================================================================
-FILE: ./lib/api-client-react/dist/generated/api.schemas.d.ts
-================================================================
-/**
- * Generated by orval v8.5.3 🍺
- * Do not edit manually.
- * Api
- * API specification
- * OpenAPI spec version: 0.1.0
- */
-export interface HealthStatus {
-    status: string;
-}
-//# sourceMappingURL=api.schemas.d.ts.map
-
-================================================================
-FILE: ./lib/api-client-react/dist/generated/api.schemas.d.ts.map
-================================================================
-{"version":3,"file":"api.schemas.d.ts","sourceRoot":"","sources":["../../src/generated/api.schemas.ts"],"names":[],"mappings":"AAAA;;;;;;GAMG;AACH,MAAM,WAAW,YAAY;IAC3B,MAAM,EAAE,MAAM,CAAC;CAChB"}
-
-================================================================
-FILE: ./lib/api-client-react/dist/index.d.ts
-================================================================
-export * from "./generated/api";
-export * from "./generated/api.schemas";
-//# sourceMappingURL=index.d.ts.map
-
-================================================================
-FILE: ./lib/api-client-react/dist/index.d.ts.map
-================================================================
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"AAAA,cAAc,iBAAiB,CAAC;AAChC,cAAc,yBAAyB,CAAC"}
-
-================================================================
 FILE: ./lib/api-client-react/package.json
 ================================================================
 {
@@ -21126,110 +22700,6 @@ FILE: ./lib/api-client-react/tsconfig.tsbuildinfo
 {"fileNames":["../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es5.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.dom.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.core.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.collection.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.generator.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.iterable.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.promise.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.proxy.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.reflect.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.symbol.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.array.include.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.arraybuffer.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.date.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.object.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.asyncgenerator.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.asynciterable.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.promise.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.regexp.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.array.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.object.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.symbol.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.bigint.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.date.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.promise.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.sharedmemory.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.symbol.wellknown.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.number.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.promise.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.weakref.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.array.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.error.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.object.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.regexp.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.decorators.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.decorators.legacy.d.ts","./src/custom-fetch.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/subscribable.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/focusManager.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/removable.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/hydration-BlEVG2Lp.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/infiniteQueryObserver.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/notifyManager.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/onlineManager.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/queriesObserver.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/timeoutManager.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/streamedQuery.d.ts","../../node_modules/.pnpm/@tanstack+query-core@5.90.20/node_modules/@tanstack/query-core/build/modern/index.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/types.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useQueries.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/queryOptions.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useQuery.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/usePrefetchQuery.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/usePrefetchInfiniteQuery.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/infiniteQueryOptions.d.ts","../../node_modules/.pnpm/@types+react@19.2.14/node_modules/@types/react/global.d.ts","../../node_modules/.pnpm/csstype@3.2.3/node_modules/csstype/index.d.ts","../../node_modules/.pnpm/@types+react@19.2.14/node_modules/@types/react/index.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.d.ts","../../node_modules/.pnpm/@types+react@19.2.14/node_modules/@types/react/jsx-runtime.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/HydrationBoundary.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useIsFetching.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useMutationState.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useMutation.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/mutationOptions.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.d.ts","../../node_modules/.pnpm/@tanstack+react-query@5.90.21_react@19.1.0/node_modules/@tanstack/react-query/build/modern/index.d.ts","./src/generated/api.schemas.ts","./src/generated/api.ts","./src/index.ts"],"fileIdsList":[[59,94,95],[95,96],[60],[60,62],[60,61,62,63,64,65,66,67,68,69],[60,62,63],[70,83],[83],[83,85],[70,71,72,73,74,75,76,77,78,79,80,83,84,85,86,87,88,89,90,91,92,93],[70,71],[70],[70,71,80],[70,71,73],[81,82]],"fileInfos":[{"version":"c430d44666289dae81f30fa7b2edebf186ecc91a2d4c71266ea6ae76388792e1","affectsGlobalScope":true,"impliedFormat":1},{"version":"45b7ab580deca34ae9729e97c13cfd999df04416a79116c3bfb483804f85ded4","impliedFormat":1},{"version":"3facaf05f0c5fc569c5649dd359892c98a85557e3e0c847964caeb67076f4d75","impliedFormat":1},{"version":"e44bb8bbac7f10ecc786703fe0a6a4b952189f908707980ba8f3c8975a760962","impliedFormat":1},{"version":"5e1c4c362065a6b95ff952c0eab010f04dcd2c3494e813b493ecfd4fcb9fc0d8","impliedFormat":1},{"version":"68d73b4a11549f9c0b7d352d10e91e5dca8faa3322bfb77b661839c42b1ddec7","impliedFormat":1},{"version":"5efce4fc3c29ea84e8928f97adec086e3dc876365e0982cc8479a07954a3efd4","impliedFormat":1},{"version":"feecb1be483ed332fad555aff858affd90a48ab19ba7272ee084704eb7167569","impliedFormat":1},{"version":"ee7bad0c15b58988daa84371e0b89d313b762ab83cb5b31b8a2d1162e8eb41c2","impliedFormat":1},{"version":"080941d9f9ff9307f7e27a83bcd888b7c8270716c39af943532438932ec1d0b9","affectsGlobalScope":true,"impliedFormat":1},{"version":"c57796738e7f83dbc4b8e65132f11a377649c00dd3eee333f672b8f0a6bea671","affectsGlobalScope":true,"impliedFormat":1},{"version":"dc2df20b1bcdc8c2d34af4926e2c3ab15ffe1160a63e58b7e09833f616efff44","affectsGlobalScope":true,"impliedFormat":1},{"version":"515d0b7b9bea2e31ea4ec968e9edd2c39d3eebf4a2d5cbd04e88639819ae3b71","affectsGlobalScope":true,"impliedFormat":1},{"version":"0559b1f683ac7505ae451f9a96ce4c3c92bdc71411651ca6ddb0e88baaaad6a3","affectsGlobalScope":true,"impliedFormat":1},{"version":"0dc1e7ceda9b8b9b455c3a2d67b0412feab00bd2f66656cd8850e8831b08b537","affectsGlobalScope":true,"impliedFormat":1},{"version":"ce691fb9e5c64efb9547083e4a34091bcbe5bdb41027e310ebba8f7d96a98671","affectsGlobalScope":true,"impliedFormat":1},{"version":"8d697a2a929a5fcb38b7a65594020fcef05ec1630804a33748829c5ff53640d0","affectsGlobalScope":true,"impliedFormat":1},{"version":"4ff2a353abf8a80ee399af572debb8faab2d33ad38c4b4474cff7f26e7653b8d","affectsGlobalScope":true,"impliedFormat":1},{"version":"fb0f136d372979348d59b3f5020b4cdb81b5504192b1cacff5d1fbba29378aa1","affectsGlobalScope":true,"impliedFormat":1},{"version":"d15bea3d62cbbdb9797079416b8ac375ae99162a7fba5de2c6c505446486ac0a","affectsGlobalScope":true,"impliedFormat":1},{"version":"68d18b664c9d32a7336a70235958b8997ebc1c3b8505f4f1ae2b7e7753b87618","affectsGlobalScope":true,"impliedFormat":1},{"version":"eb3d66c8327153d8fa7dd03f9c58d351107fe824c79e9b56b462935176cdf12a","affectsGlobalScope":true,"impliedFormat":1},{"version":"38f0219c9e23c915ef9790ab1d680440d95419ad264816fa15009a8851e79119","affectsGlobalScope":true,"impliedFormat":1},{"version":"69ab18c3b76cd9b1be3d188eaf8bba06112ebbe2f47f6c322b5105a6fbc45a2e","affectsGlobalScope":true,"impliedFormat":1},{"version":"a680117f487a4d2f30ea46f1b4b7f58bef1480456e18ba53ee85c2746eeca012","affectsGlobalScope":true,"impliedFormat":1},{"version":"2f11ff796926e0832f9ae148008138ad583bd181899ab7dd768a2666700b1893","affectsGlobalScope":true,"impliedFormat":1},{"version":"4de680d5bb41c17f7f68e0419412ca23c98d5749dcaaea1896172f06435891fc","affectsGlobalScope":true,"impliedFormat":1},{"version":"954296b30da6d508a104a3a0b5d96b76495c709785c1d11610908e63481ee667","affectsGlobalScope":true,"impliedFormat":1},{"version":"ac9538681b19688c8eae65811b329d3744af679e0bdfa5d842d0e32524c73e1c","affectsGlobalScope":true,"impliedFormat":1},{"version":"0a969edff4bd52585473d24995c5ef223f6652d6ef46193309b3921d65dd4376","affectsGlobalScope":true,"impliedFormat":1},{"version":"9e9fbd7030c440b33d021da145d3232984c8bb7916f277e8ffd3dc2e3eae2bdb","affectsGlobalScope":true,"impliedFormat":1},{"version":"811ec78f7fefcabbda4bfa93b3eb67d9ae166ef95f9bff989d964061cbf81a0c","affectsGlobalScope":true,"impliedFormat":1},{"version":"717937616a17072082152a2ef351cb51f98802fb4b2fdabd32399843875974ca","affectsGlobalScope":true,"impliedFormat":1},{"version":"d7e7d9b7b50e5f22c915b525acc5a49a7a6584cf8f62d0569e557c5cfc4b2ac2","affectsGlobalScope":true,"impliedFormat":1},{"version":"71c37f4c9543f31dfced6c7840e068c5a5aacb7b89111a4364b1d5276b852557","affectsGlobalScope":true,"impliedFormat":1},{"version":"576711e016cf4f1804676043e6a0a5414252560eb57de9faceee34d79798c850","affectsGlobalScope":true,"impliedFormat":1},{"version":"89c1b1281ba7b8a96efc676b11b264de7a8374c5ea1e6617f11880a13fc56dc6","affectsGlobalScope":true,"impliedFormat":1},{"version":"74f7fa2d027d5b33eb0471c8e82a6c87216223181ec31247c357a3e8e2fddc5b","affectsGlobalScope":true,"impliedFormat":1},{"version":"d6d7ae4d1f1f3772e2a3cde568ed08991a8ae34a080ff1151af28b7f798e22ca","affectsGlobalScope":true,"impliedFormat":1},{"version":"063600664504610fe3e99b717a1223f8b1900087fab0b4cad1496a114744f8df","affectsGlobalScope":true,"impliedFormat":1},{"version":"934019d7e3c81950f9a8426d093458b65d5aff2c7c1511233c0fd5b941e608ab","affectsGlobalScope":true,"impliedFormat":1},{"version":"52ada8e0b6e0482b728070b7639ee42e83a9b1c22d205992756fe020fd9f4a47","affectsGlobalScope":true,"impliedFormat":1},{"version":"3bdefe1bfd4d6dee0e26f928f93ccc128f1b64d5d501ff4a8cf3c6371200e5e6","affectsGlobalScope":true,"impliedFormat":1},{"version":"59fb2c069260b4ba00b5643b907ef5d5341b167e7d1dbf58dfd895658bda2867","affectsGlobalScope":true,"impliedFormat":1},{"version":"639e512c0dfc3fad96a84caad71b8834d66329a1f28dc95e3946c9b58176c73a","affectsGlobalScope":true,"impliedFormat":1},{"version":"368af93f74c9c932edd84c58883e736c9e3d53cec1fe24c0b0ff451f529ceab1","affectsGlobalScope":true,"impliedFormat":1},{"version":"af3dd424cf267428f30ccfc376f47a2c0114546b55c44d8c0f1d57d841e28d74","affectsGlobalScope":true,"impliedFormat":1},{"version":"995c005ab91a498455ea8dfb63aa9f83fa2ea793c3d8aa344be4a1678d06d399","affectsGlobalScope":true,"impliedFormat":1},{"version":"959d36cddf5e7d572a65045b876f2956c973a586da58e5d26cde519184fd9b8a","affectsGlobalScope":true,"impliedFormat":1},{"version":"965f36eae237dd74e6cca203a43e9ca801ce38824ead814728a2807b1910117d","affectsGlobalScope":true,"impliedFormat":1},{"version":"3925a6c820dcb1a06506c90b1577db1fdbf7705d65b62b99dce4be75c637e26b","affectsGlobalScope":true,"impliedFormat":1},{"version":"0a3d63ef2b853447ec4f749d3f368ce642264246e02911fcb1590d8c161b8005","affectsGlobalScope":true,"impliedFormat":1},{"version":"8cdf8847677ac7d20486e54dd3fcf09eda95812ac8ace44b4418da1bbbab6eb8","affectsGlobalScope":true,"impliedFormat":1},{"version":"8444af78980e3b20b49324f4a16ba35024fef3ee069a0eb67616ea6ca821c47a","affectsGlobalScope":true,"impliedFormat":1},{"version":"3287d9d085fbd618c3971944b65b4be57859f5415f495b33a6adc994edd2f004","affectsGlobalScope":true,"impliedFormat":1},{"version":"b4b67b1a91182421f5df999988c690f14d813b9850b40acd06ed44691f6727ad","affectsGlobalScope":true,"impliedFormat":1},{"version":"8e7f8264d0fb4c5339605a15daadb037bf238c10b654bb3eee14208f860a32ea","affectsGlobalScope":true,"impliedFormat":1},{"version":"782dec38049b92d4e85c1585fbea5474a219c6984a35b004963b00beb1aab538","affectsGlobalScope":true,"impliedFormat":1},{"version":"3ddd6d88450b135d9c17e8f9a5195285db5e5767e5973ec375318d6ab3ab2c67","signature":"bdb3ebfc2cd6d232f929226c4f6970099cfcb341cac895c15a4c3ca7a5133ab7"},{"version":"50cf7a23fc93928995caec8d7956206990f82113beeb6b3242dae8124edc3ca0","impliedFormat":99},{"version":"352031ac2e53031b69a09355e09ad7d95361edf32cc827cfe2417d80247a5a50","impliedFormat":99},{"version":"9971931daaf18158fc38266e838d56eb5d9d1f13360b1181bb4735a05f534c03","impliedFormat":99},{"version":"06d635a90365afe107c7e2daaa9851f5d3f062d78ebe4524b1b23b122469a1e2","impliedFormat":99},{"version":"aa103fbc4677b71d3deda20d37088cc2f39c3db8c2566ddf516b56ce7532d00a","impliedFormat":99},{"version":"0c5b705d31420477189618154d1b6a9bb62a34fa6055f56ade1a316f6adb6b3a","impliedFormat":99},{"version":"853b8bdb5da8c8e5d31e4d715a8057d8e96059d6774b13545c3616ed216b890c","impliedFormat":99},{"version":"430f4fa4e99e5e0a7ca2bbdde84abc8536bdfde4fd0de26009db508b8f571bb5","impliedFormat":99},{"version":"fe3c64bf61fcfec9b9861725c6d92de03f33748a01d982760ccfa798d777cf9d","impliedFormat":99},{"version":"1120a39f36c968298e2ca1d8cb1405389f9696f6b49e13b335626a94c16930bb","impliedFormat":99},{"version":"0a049adb920f3b42e1933c037052bcbc5e78b4704ad080bf078353c7f8ed6225","impliedFormat":99},{"version":"af9753433dec6dc41a2d3141804113a4d34f09fb19eb9eea063bd8800aa28db6","impliedFormat":99},{"version":"832f2fd6cf5eeaac22e2bdb0e3d7e2498cd8dd4058b853cd6b42033f126680ee","impliedFormat":99},{"version":"22fe66950a6308b2c6a0e11ed74930e90ba9d8a5fd2910666565007678875c13","impliedFormat":99},{"version":"084c09a35a9611e1777c02343c11ab8b1be48eb4895bbe6da90222979940b4a6","impliedFormat":99},{"version":"4b3049a2c849f0217ff4def308637931661461c329e4cf36aeb31db34c4c0c64","impliedFormat":99},{"version":"6245aa515481727f994d1cf7adfc71e36b5fc48216a92d7e932274cee3268000","impliedFormat":99},{"version":"3550708c55e4b79c5c13870f994461bcec97208e1d6758395a178913bbf05de3","impliedFormat":99},{"version":"660ce583eaa09bb39eef5ad7af9d1b5f027a9d1fbf9f76bf5b9dc9ef1be2830e","impliedFormat":99},{"version":"b7d9ca4e3248f643fa86ff11872623fdc8ed2c6009836bec0e38b163b6faed0c","impliedFormat":99},{"version":"904a01fef87360fa2fd0c2e934af92995b669565fe0bfb546ed0ff23769999cb","impliedFormat":99},{"version":"7e29f41b158de217f94cb9676bf9cbd0cd9b5a46e1985141ed36e075c52bf6ad","affectsGlobalScope":true,"impliedFormat":1},{"version":"ac51dd7d31333793807a6abaa5ae168512b6131bd41d9c5b98477fc3b7800f9f","impliedFormat":1},{"version":"dc0a7f107690ee5cd8afc8dbf05c4df78085471ce16bdd9881642ec738bc81fe","impliedFormat":1},{"version":"d4f7a7a5f66b9bc6fbfd53fa08dcf8007ff752064df816da05edfa35abd2c97c","impliedFormat":99},{"version":"42c169fb8c2d42f4f668c624a9a11e719d5d07dacbebb63cbcf7ef365b0a75b3","impliedFormat":1},{"version":"1f38ecf63dead74c85180bf18376dc6bc152522ef3aedf7b588cadbbd5877506","impliedFormat":99},{"version":"82fb33c00b1300c19591105fc25ccf78acba220f58d162b120fe3f4292a5605f","impliedFormat":99},{"version":"facde2bec0f59cf92f4635ece51b2c3fa2d0a3bbb67458d24af61e7e6b8f003c","impliedFormat":99},{"version":"4669194e4ca5f7c160833bbb198f25681e629418a6326aba08cf0891821bfe8f","impliedFormat":99},{"version":"db185b403e30e91c5b90f3f2cfa062832d764c9d7df3ad7f5db7e17596344fe8","impliedFormat":99},{"version":"669b62a7169354658d4ae1e043ad8203728655492a8f70a940a11ca5ed4d5029","impliedFormat":99},{"version":"a95cd11c5c8bc03eab4011f8e339a48f9a87293e90c0bf3e9003d7a6f833f557","impliedFormat":99},{"version":"e9bc0db0144701fab1e98c4d595a293c7c840d209b389144142f0adbc36b5ec2","impliedFormat":99},{"version":"9d884b885c4b2d89286685406b45911dcaab03e08e948850e3e41e29af69561c","impliedFormat":99},{"version":"a52ae133825c10e00d9b695aecc789b6636e774d4097ff810acfd19e83969a4e","signature":"603231d6a3774e0af579a29e678e4c7b07d00a581c293601194bee4f931b1af3"},{"version":"9d7cf1d5de5bdaac99b9587f788e2c506a5617a99a0447d0f5649fc34635f194","signature":"3b6459554c0d8e9415835f630bd13c8951654b8614c307291395d677b8dd4a8c"},"37d7c2029b6c60cb67881ed40c4ac75008babdc1dab21999cf14a56b2e263c67"],"root":[59,[95,97]],"options":{"alwaysStrict":true,"composite":true,"declarationMap":true,"emitDeclarationOnly":true,"module":99,"noEmitOnError":true,"noFallthroughCasesInSwitch":true,"noImplicitAny":true,"noImplicitOverride":false,"noImplicitReturns":true,"noImplicitThis":true,"noUnusedLocals":false,"outDir":"./dist","rootDir":"./src","skipLibCheck":true,"strictBindCallApply":true,"strictFunctionTypes":false,"strictNullChecks":true,"strictPropertyInitialization":true,"target":9,"useUnknownInCatchVariables":true},"referencedMap":[[96,1],[97,2],[61,3],[63,4],[70,5],[64,6],[66,3],[67,6],[69,6],[87,7],[93,8],[84,7],[86,9],[94,10],[80,11],[91,11],[73,11],[71,12],[92,13],[88,12],[90,11],[89,12],[79,12],[78,11],[72,11],[74,14],[76,11],[77,11],[75,11],[83,15],[85,8]],"latestChangedDtsFile":"./dist/index.d.ts","version":"5.9.3"}
 
 ================================================================
-FILE: ./lib/api-spec/node_modules/.bin/orval
-================================================================
-#!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
-
-case `uname` in
-    *CYGWIN*|*MINGW*|*MSYS*)
-        if command -v cygpath > /dev/null 2>&1; then
-            basedir=`cygpath -w "$basedir"`
-        fi
-    ;;
-esac
-
-if [ -z "$NODE_PATH" ]; then
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/orval@8.5.3_prettier@3.8.1_typescript@5.9.3/node_modules/orval/dist/bin/node_modules:/home/runner/workspace/node_modules/.pnpm/orval@8.5.3_prettier@3.8.1_typescript@5.9.3/node_modules/orval/dist/node_modules:/home/runner/workspace/node_modules/.pnpm/orval@8.5.3_prettier@3.8.1_typescript@5.9.3/node_modules/orval/node_modules:/home/runner/workspace/node_modules/.pnpm/orval@8.5.3_prettier@3.8.1_typescript@5.9.3/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules"
-else
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/orval@8.5.3_prettier@3.8.1_typescript@5.9.3/node_modules/orval/dist/bin/node_modules:/home/runner/workspace/node_modules/.pnpm/orval@8.5.3_prettier@3.8.1_typescript@5.9.3/node_modules/orval/dist/node_modules:/home/runner/workspace/node_modules/.pnpm/orval@8.5.3_prettier@3.8.1_typescript@5.9.3/node_modules/orval/node_modules:/home/runner/workspace/node_modules/.pnpm/orval@8.5.3_prettier@3.8.1_typescript@5.9.3/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules:$NODE_PATH"
-fi
-if [ -x "$basedir/node" ]; then
-  exec "$basedir/node"  "$basedir/../orval/dist/bin/orval.mjs" "$@"
-else
-  exec node  "$basedir/../orval/dist/bin/orval.mjs" "$@"
-fi
-
-
-================================================================
-FILE: ./lib/api-spec/node_modules/.bin/prettier
-================================================================
-#!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
-
-case `uname` in
-    *CYGWIN*|*MINGW*|*MSYS*)
-        if command -v cygpath > /dev/null 2>&1; then
-            basedir=`cygpath -w "$basedir"`
-        fi
-    ;;
-esac
-
-if [ -z "$NODE_PATH" ]; then
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/prettier@3.8.1/node_modules/prettier/bin/node_modules:/home/runner/workspace/node_modules/.pnpm/prettier@3.8.1/node_modules/prettier/node_modules:/home/runner/workspace/node_modules/.pnpm/prettier@3.8.1/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules"
-else
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/prettier@3.8.1/node_modules/prettier/bin/node_modules:/home/runner/workspace/node_modules/.pnpm/prettier@3.8.1/node_modules/prettier/node_modules:/home/runner/workspace/node_modules/.pnpm/prettier@3.8.1/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules:$NODE_PATH"
-fi
-if [ -x "$basedir/node" ]; then
-  exec "$basedir/node"  "$basedir/../../../../node_modules/.pnpm/prettier@3.8.1/node_modules/prettier/bin/prettier.cjs" "$@"
-else
-  exec node  "$basedir/../../../../node_modules/.pnpm/prettier@3.8.1/node_modules/prettier/bin/prettier.cjs" "$@"
-fi
-
-
-================================================================
-FILE: ./lib/api-spec/node_modules/.bin/tsc
-================================================================
-#!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
-
-case `uname` in
-    *CYGWIN*|*MINGW*|*MSYS*)
-        if command -v cygpath > /dev/null 2>&1; then
-            basedir=`cygpath -w "$basedir"`
-        fi
-    ;;
-esac
-
-if [ -z "$NODE_PATH" ]; then
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/node_modules:/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/node_modules:/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules"
-else
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/node_modules:/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/node_modules:/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules:$NODE_PATH"
-fi
-if [ -x "$basedir/node" ]; then
-  exec "$basedir/node"  "$basedir/../../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/tsc" "$@"
-else
-  exec node  "$basedir/../../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/tsc" "$@"
-fi
-
-
-================================================================
-FILE: ./lib/api-spec/node_modules/.bin/tsserver
-================================================================
-#!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
-
-case `uname` in
-    *CYGWIN*|*MINGW*|*MSYS*)
-        if command -v cygpath > /dev/null 2>&1; then
-            basedir=`cygpath -w "$basedir"`
-        fi
-    ;;
-esac
-
-if [ -z "$NODE_PATH" ]; then
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/node_modules:/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/node_modules:/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules"
-else
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/node_modules:/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/node_modules:/home/runner/workspace/node_modules/.pnpm/typescript@5.9.3/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules:$NODE_PATH"
-fi
-if [ -x "$basedir/node" ]; then
-  exec "$basedir/node"  "$basedir/../../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/tsserver" "$@"
-else
-  exec node  "$basedir/../../../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/tsserver" "$@"
-fi
-
-
-================================================================
 FILE: ./lib/api-spec/openapi.yaml
 ================================================================
 openapi: 3.1.0
@@ -21361,85 +22831,6 @@ FILE: ./lib/api-spec/package.json
 
 
 ================================================================
-FILE: ./lib/api-zod/dist/generated/api.d.ts
-================================================================
-/**
- * Generated by orval v8.5.3 🍺
- * Do not edit manually.
- * Api
- * API specification
- * OpenAPI spec version: 0.1.0
- */
-import * as zod from "zod";
-/**
- * Returns server health status
- * @summary Health check
- */
-export declare const HealthCheckResponse: zod.ZodObject<{
-    status: zod.ZodString;
-}, "strip", zod.ZodTypeAny, {
-    status: string;
-}, {
-    status: string;
-}>;
-//# sourceMappingURL=api.d.ts.map
-
-================================================================
-FILE: ./lib/api-zod/dist/generated/api.d.ts.map
-================================================================
-{"version":3,"file":"api.d.ts","sourceRoot":"","sources":["../../src/generated/api.ts"],"names":[],"mappings":"AAAA;;;;;;GAMG;AACH,OAAO,KAAK,GAAG,MAAM,KAAK,CAAC;AAE3B;;;GAGG;AACH,eAAO,MAAM,mBAAmB;;;;;;EAE9B,CAAC"}
-
-================================================================
-FILE: ./lib/api-zod/dist/generated/types/healthStatus.d.ts
-================================================================
-/**
- * Generated by orval v8.5.3 🍺
- * Do not edit manually.
- * Api
- * API specification
- * OpenAPI spec version: 0.1.0
- */
-export interface HealthStatus {
-    status: string;
-}
-//# sourceMappingURL=healthStatus.d.ts.map
-
-================================================================
-FILE: ./lib/api-zod/dist/generated/types/healthStatus.d.ts.map
-================================================================
-{"version":3,"file":"healthStatus.d.ts","sourceRoot":"","sources":["../../../src/generated/types/healthStatus.ts"],"names":[],"mappings":"AAAA;;;;;;GAMG;AAEH,MAAM,WAAW,YAAY;IAC3B,MAAM,EAAE,MAAM,CAAC;CAChB"}
-
-================================================================
-FILE: ./lib/api-zod/dist/generated/types/index.d.ts
-================================================================
-/**
- * Generated by orval v8.5.3 🍺
- * Do not edit manually.
- * Api
- * API specification
- * OpenAPI spec version: 0.1.0
- */
-export * from "./healthStatus";
-//# sourceMappingURL=index.d.ts.map
-
-================================================================
-FILE: ./lib/api-zod/dist/generated/types/index.d.ts.map
-================================================================
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/generated/types/index.ts"],"names":[],"mappings":"AAAA;;;;;;GAMG;AAEH,cAAc,gBAAgB,CAAC"}
-
-================================================================
-FILE: ./lib/api-zod/dist/index.d.ts
-================================================================
-export * from "./generated/api";
-export * from "./generated/types";
-//# sourceMappingURL=index.d.ts.map
-
-================================================================
-FILE: ./lib/api-zod/dist/index.d.ts.map
-================================================================
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"AAAA,cAAc,iBAAiB,CAAC;AAChC,cAAc,mBAAmB,CAAC"}
-
-================================================================
 FILE: ./lib/api-zod/package.json
 ================================================================
 {
@@ -21534,1602 +22925,6 @@ FILE: ./lib/api-zod/tsconfig.json
 FILE: ./lib/api-zod/tsconfig.tsbuildinfo
 ================================================================
 {"fileNames":["../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es5.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.core.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.collection.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.generator.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.iterable.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.promise.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.proxy.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.reflect.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.symbol.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.array.include.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2016.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.arraybuffer.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.date.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.object.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.sharedmemory.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2017.typedarrays.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.asyncgenerator.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.asynciterable.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.promise.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2018.regexp.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.array.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.object.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.symbol.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2019.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.bigint.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.date.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.promise.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.sharedmemory.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.symbol.wellknown.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2020.number.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.promise.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.weakref.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2021.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.array.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.error.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.intl.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.object.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.string.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2022.regexp.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.decorators.d.ts","../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.decorators.legacy.d.ts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/typeAliases.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/util.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/index.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/ZodError.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/locales/en.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/errors.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/parseUtil.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/enumUtil.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/errorUtil.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/partialUtil.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/standard-schema.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/external.d.cts","../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/index.d.cts","./src/generated/api.ts","./src/generated/types/healthStatus.ts","./src/generated/types/index.ts","./src/index.ts"],"fileIdsList":[[71],[73],[72,74],[70],[58,59,60],[61,62],[58,59,61,63,64,69],[59,61],[69],[61],[58,59,61,64,65,66,67,68]],"fileInfos":[{"version":"c430d44666289dae81f30fa7b2edebf186ecc91a2d4c71266ea6ae76388792e1","affectsGlobalScope":true,"impliedFormat":1},{"version":"45b7ab580deca34ae9729e97c13cfd999df04416a79116c3bfb483804f85ded4","impliedFormat":1},{"version":"3facaf05f0c5fc569c5649dd359892c98a85557e3e0c847964caeb67076f4d75","impliedFormat":1},{"version":"e44bb8bbac7f10ecc786703fe0a6a4b952189f908707980ba8f3c8975a760962","impliedFormat":1},{"version":"5e1c4c362065a6b95ff952c0eab010f04dcd2c3494e813b493ecfd4fcb9fc0d8","impliedFormat":1},{"version":"68d73b4a11549f9c0b7d352d10e91e5dca8faa3322bfb77b661839c42b1ddec7","impliedFormat":1},{"version":"5efce4fc3c29ea84e8928f97adec086e3dc876365e0982cc8479a07954a3efd4","impliedFormat":1},{"version":"feecb1be483ed332fad555aff858affd90a48ab19ba7272ee084704eb7167569","impliedFormat":1},{"version":"ee7bad0c15b58988daa84371e0b89d313b762ab83cb5b31b8a2d1162e8eb41c2","impliedFormat":1},{"version":"c57796738e7f83dbc4b8e65132f11a377649c00dd3eee333f672b8f0a6bea671","affectsGlobalScope":true,"impliedFormat":1},{"version":"dc2df20b1bcdc8c2d34af4926e2c3ab15ffe1160a63e58b7e09833f616efff44","affectsGlobalScope":true,"impliedFormat":1},{"version":"515d0b7b9bea2e31ea4ec968e9edd2c39d3eebf4a2d5cbd04e88639819ae3b71","affectsGlobalScope":true,"impliedFormat":1},{"version":"0559b1f683ac7505ae451f9a96ce4c3c92bdc71411651ca6ddb0e88baaaad6a3","affectsGlobalScope":true,"impliedFormat":1},{"version":"0dc1e7ceda9b8b9b455c3a2d67b0412feab00bd2f66656cd8850e8831b08b537","affectsGlobalScope":true,"impliedFormat":1},{"version":"ce691fb9e5c64efb9547083e4a34091bcbe5bdb41027e310ebba8f7d96a98671","affectsGlobalScope":true,"impliedFormat":1},{"version":"8d697a2a929a5fcb38b7a65594020fcef05ec1630804a33748829c5ff53640d0","affectsGlobalScope":true,"impliedFormat":1},{"version":"4ff2a353abf8a80ee399af572debb8faab2d33ad38c4b4474cff7f26e7653b8d","affectsGlobalScope":true,"impliedFormat":1},{"version":"fb0f136d372979348d59b3f5020b4cdb81b5504192b1cacff5d1fbba29378aa1","affectsGlobalScope":true,"impliedFormat":1},{"version":"d15bea3d62cbbdb9797079416b8ac375ae99162a7fba5de2c6c505446486ac0a","affectsGlobalScope":true,"impliedFormat":1},{"version":"68d18b664c9d32a7336a70235958b8997ebc1c3b8505f4f1ae2b7e7753b87618","affectsGlobalScope":true,"impliedFormat":1},{"version":"eb3d66c8327153d8fa7dd03f9c58d351107fe824c79e9b56b462935176cdf12a","affectsGlobalScope":true,"impliedFormat":1},{"version":"38f0219c9e23c915ef9790ab1d680440d95419ad264816fa15009a8851e79119","affectsGlobalScope":true,"impliedFormat":1},{"version":"69ab18c3b76cd9b1be3d188eaf8bba06112ebbe2f47f6c322b5105a6fbc45a2e","affectsGlobalScope":true,"impliedFormat":1},{"version":"a680117f487a4d2f30ea46f1b4b7f58bef1480456e18ba53ee85c2746eeca012","affectsGlobalScope":true,"impliedFormat":1},{"version":"2f11ff796926e0832f9ae148008138ad583bd181899ab7dd768a2666700b1893","affectsGlobalScope":true,"impliedFormat":1},{"version":"4de680d5bb41c17f7f68e0419412ca23c98d5749dcaaea1896172f06435891fc","affectsGlobalScope":true,"impliedFormat":1},{"version":"954296b30da6d508a104a3a0b5d96b76495c709785c1d11610908e63481ee667","affectsGlobalScope":true,"impliedFormat":1},{"version":"ac9538681b19688c8eae65811b329d3744af679e0bdfa5d842d0e32524c73e1c","affectsGlobalScope":true,"impliedFormat":1},{"version":"0a969edff4bd52585473d24995c5ef223f6652d6ef46193309b3921d65dd4376","affectsGlobalScope":true,"impliedFormat":1},{"version":"9e9fbd7030c440b33d021da145d3232984c8bb7916f277e8ffd3dc2e3eae2bdb","affectsGlobalScope":true,"impliedFormat":1},{"version":"811ec78f7fefcabbda4bfa93b3eb67d9ae166ef95f9bff989d964061cbf81a0c","affectsGlobalScope":true,"impliedFormat":1},{"version":"717937616a17072082152a2ef351cb51f98802fb4b2fdabd32399843875974ca","affectsGlobalScope":true,"impliedFormat":1},{"version":"d7e7d9b7b50e5f22c915b525acc5a49a7a6584cf8f62d0569e557c5cfc4b2ac2","affectsGlobalScope":true,"impliedFormat":1},{"version":"71c37f4c9543f31dfced6c7840e068c5a5aacb7b89111a4364b1d5276b852557","affectsGlobalScope":true,"impliedFormat":1},{"version":"576711e016cf4f1804676043e6a0a5414252560eb57de9faceee34d79798c850","affectsGlobalScope":true,"impliedFormat":1},{"version":"89c1b1281ba7b8a96efc676b11b264de7a8374c5ea1e6617f11880a13fc56dc6","affectsGlobalScope":true,"impliedFormat":1},{"version":"74f7fa2d027d5b33eb0471c8e82a6c87216223181ec31247c357a3e8e2fddc5b","affectsGlobalScope":true,"impliedFormat":1},{"version":"d6d7ae4d1f1f3772e2a3cde568ed08991a8ae34a080ff1151af28b7f798e22ca","affectsGlobalScope":true,"impliedFormat":1},{"version":"063600664504610fe3e99b717a1223f8b1900087fab0b4cad1496a114744f8df","affectsGlobalScope":true,"impliedFormat":1},{"version":"934019d7e3c81950f9a8426d093458b65d5aff2c7c1511233c0fd5b941e608ab","affectsGlobalScope":true,"impliedFormat":1},{"version":"52ada8e0b6e0482b728070b7639ee42e83a9b1c22d205992756fe020fd9f4a47","affectsGlobalScope":true,"impliedFormat":1},{"version":"3bdefe1bfd4d6dee0e26f928f93ccc128f1b64d5d501ff4a8cf3c6371200e5e6","affectsGlobalScope":true,"impliedFormat":1},{"version":"59fb2c069260b4ba00b5643b907ef5d5341b167e7d1dbf58dfd895658bda2867","affectsGlobalScope":true,"impliedFormat":1},{"version":"639e512c0dfc3fad96a84caad71b8834d66329a1f28dc95e3946c9b58176c73a","affectsGlobalScope":true,"impliedFormat":1},{"version":"368af93f74c9c932edd84c58883e736c9e3d53cec1fe24c0b0ff451f529ceab1","affectsGlobalScope":true,"impliedFormat":1},{"version":"af3dd424cf267428f30ccfc376f47a2c0114546b55c44d8c0f1d57d841e28d74","affectsGlobalScope":true,"impliedFormat":1},{"version":"995c005ab91a498455ea8dfb63aa9f83fa2ea793c3d8aa344be4a1678d06d399","affectsGlobalScope":true,"impliedFormat":1},{"version":"959d36cddf5e7d572a65045b876f2956c973a586da58e5d26cde519184fd9b8a","affectsGlobalScope":true,"impliedFormat":1},{"version":"965f36eae237dd74e6cca203a43e9ca801ce38824ead814728a2807b1910117d","affectsGlobalScope":true,"impliedFormat":1},{"version":"3925a6c820dcb1a06506c90b1577db1fdbf7705d65b62b99dce4be75c637e26b","affectsGlobalScope":true,"impliedFormat":1},{"version":"0a3d63ef2b853447ec4f749d3f368ce642264246e02911fcb1590d8c161b8005","affectsGlobalScope":true,"impliedFormat":1},{"version":"8cdf8847677ac7d20486e54dd3fcf09eda95812ac8ace44b4418da1bbbab6eb8","affectsGlobalScope":true,"impliedFormat":1},{"version":"8444af78980e3b20b49324f4a16ba35024fef3ee069a0eb67616ea6ca821c47a","affectsGlobalScope":true,"impliedFormat":1},{"version":"3287d9d085fbd618c3971944b65b4be57859f5415f495b33a6adc994edd2f004","affectsGlobalScope":true,"impliedFormat":1},{"version":"b4b67b1a91182421f5df999988c690f14d813b9850b40acd06ed44691f6727ad","affectsGlobalScope":true,"impliedFormat":1},{"version":"8e7f8264d0fb4c5339605a15daadb037bf238c10b654bb3eee14208f860a32ea","affectsGlobalScope":true,"impliedFormat":1},{"version":"782dec38049b92d4e85c1585fbea5474a219c6984a35b004963b00beb1aab538","affectsGlobalScope":true,"impliedFormat":1},{"version":"d3cfde44f8089768ebb08098c96d01ca260b88bccf238d55eee93f1c620ff5a5","impliedFormat":1},{"version":"293eadad9dead44c6fd1db6de552663c33f215c55a1bfa2802a1bceed88ff0ec","impliedFormat":1},{"version":"833e92c058d033cde3f29a6c7603f517001d1ddd8020bc94d2067a3bc69b2a8e","impliedFormat":1},{"version":"08b2fae7b0f553ad9f79faec864b179fc58bc172e295a70943e8585dd85f600c","impliedFormat":1},{"version":"f12edf1672a94c578eca32216839604f1e1c16b40a1896198deabf99c882b340","impliedFormat":1},{"version":"e3498cf5e428e6c6b9e97bd88736f26d6cf147dedbfa5a8ad3ed8e05e059af8a","impliedFormat":1},{"version":"dba3f34531fd9b1b6e072928b6f885aa4d28dd6789cbd0e93563d43f4b62da53","impliedFormat":1},{"version":"f672c876c1a04a223cf2023b3d91e8a52bb1544c576b81bf64a8fec82be9969c","impliedFormat":1},{"version":"e4b03ddcf8563b1c0aee782a185286ed85a255ce8a30df8453aade2188bbc904","impliedFormat":1},{"version":"2329d90062487e1eaca87b5e06abcbbeeecf80a82f65f949fd332cfcf824b87b","impliedFormat":1},{"version":"25b3f581e12ede11e5739f57a86e8668fbc0124f6649506def306cad2c59d262","impliedFormat":1},{"version":"4fdb529707247a1a917a4626bfb6a293d52cd8ee57ccf03830ec91d39d606d6d","impliedFormat":1},{"version":"a9ebb67d6bbead6044b43714b50dcb77b8f7541ffe803046fdec1714c1eba206","impliedFormat":1},{"version":"5780b706cece027f0d4444fbb4e1af62dc51e19da7c3d3719f67b22b033859b9","impliedFormat":1},{"version":"4696b75da77dd165611a2028629bf55e23b00318b4fcde83d7cd54bc75b8c8ea","signature":"945fa1d85b3b41852cdc63da1877978ea05c6dc009edef70c2cec9423779e65d"},{"version":"ca592aaa48679661e10b65327a0f9f6c6dd42ecb8172a2efe1c8231d56009f4f","signature":"603231d6a3774e0af579a29e678e4c7b07d00a581c293601194bee4f931b1af3"},{"version":"7cbe6a236b9ffe48267955aa52bda2bf776a8cda224da13d63a7ba372651b845","signature":"2788ccf4acb1ffe5908b399d1fba3a21a5b259847e900f238064dff52d999326"},"effb7d33b5df99004c9b1a840944516ca3ad65cbcd3ae2fcc717c505814ce039"],"root":[[72,75]],"options":{"alwaysStrict":true,"composite":true,"declarationMap":true,"emitDeclarationOnly":true,"module":99,"noEmitOnError":true,"noFallthroughCasesInSwitch":true,"noImplicitAny":true,"noImplicitOverride":false,"noImplicitReturns":true,"noImplicitThis":true,"noUnusedLocals":false,"outDir":"./dist","rootDir":"./src","skipLibCheck":true,"strictBindCallApply":true,"strictFunctionTypes":false,"strictNullChecks":true,"strictPropertyInitialization":true,"target":9,"useUnknownInCatchVariables":true},"referencedMap":[[72,1],[74,2],[75,3],[71,4],[61,5],[63,6],[70,7],[64,8],[67,9],[60,4],[62,10],[69,11]],"latestChangedDtsFile":"./dist/index.d.ts","version":"5.9.3"}
-
-================================================================
-FILE: ./lib/db/dist/index.d.ts
-================================================================
-import * as schema from "./schema";
-export declare const pool: import("pg").Pool;
-export declare const db: import("drizzle-orm/node-postgres").NodePgDatabase<typeof schema> & {
-    $client: import("pg").Pool;
-};
-export * from "./schema";
-export { initSchema } from "./migrate";
-//# sourceMappingURL=index.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/index.d.ts.map
-================================================================
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"AAEA,OAAO,KAAK,MAAM,MAAM,UAAU,CAAC;AAUnC,eAAO,MAAM,IAAI,mBAKf,CAAC;AAMH,eAAO,MAAM,EAAE;;CAA4B,CAAC;AAE5C,cAAc,UAAU,CAAC;AACzB,OAAO,EAAE,UAAU,EAAE,MAAM,WAAW,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/migrate.d.ts
-================================================================
-/**
- * Creates all tables if they don't already exist.
- * Safe to run on every startup — uses CREATE TABLE IF NOT EXISTS.
- * No drizzle-kit CLI required at runtime.
- */
-export declare function initSchema(): Promise<void>;
-//# sourceMappingURL=migrate.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/migrate.d.ts.map
-================================================================
-{"version":3,"file":"migrate.d.ts","sourceRoot":"","sources":["../src/migrate.ts"],"names":[],"mappings":"AAEA;;;;GAIG;AACH,wBAAsB,UAAU,IAAI,OAAO,CAAC,IAAI,CAAC,CAsMhD"}
-
-================================================================
-FILE: ./lib/db/dist/schema/deletedAccounts.d.ts
-================================================================
-export declare const deletedAccountsTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "deleted_accounts";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "deleted_accounts";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        licenseKeyId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "license_key_id";
-            tableName: "deleted_accounts";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        licenseKey: import("drizzle-orm/pg-core").PgColumn<{
-            name: "license_key";
-            tableName: "deleted_accounts";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        accountEmail: import("drizzle-orm/pg-core").PgColumn<{
-            name: "account_email";
-            tableName: "deleted_accounts";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        accountName: import("drizzle-orm/pg-core").PgColumn<{
-            name: "account_name";
-            tableName: "deleted_accounts";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        cookies: import("drizzle-orm/pg-core").PgColumn<{
-            name: "cookies";
-            tableName: "deleted_accounts";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        deviceId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "device_id";
-            tableName: "deleted_accounts";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        deletedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "deleted_at";
-            tableName: "deleted_accounts";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        originalCreatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "original_created_at";
-            tableName: "deleted_accounts";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-//# sourceMappingURL=deletedAccounts.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/deletedAccounts.d.ts.map
-================================================================
-{"version":3,"file":"deletedAccounts.d.ts","sourceRoot":"","sources":["../../src/schema/deletedAccounts.ts"],"names":[],"mappings":"AAEA,eAAO,MAAM,oBAAoB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAU/B,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/schema/deviceCookies.d.ts
-================================================================
-export declare const deviceCookiesTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "device_cookies";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "device_cookies";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        licenseKeyId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "license_key_id";
-            tableName: "device_cookies";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        deviceId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "device_id";
-            tableName: "device_cookies";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        accountEmail: import("drizzle-orm/pg-core").PgColumn<{
-            name: "account_email";
-            tableName: "device_cookies";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        accountName: import("drizzle-orm/pg-core").PgColumn<{
-            name: "account_name";
-            tableName: "device_cookies";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        cookies: import("drizzle-orm/pg-core").PgColumn<{
-            name: "cookies";
-            tableName: "device_cookies";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "updated_at";
-            tableName: "device_cookies";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-//# sourceMappingURL=deviceCookies.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/deviceCookies.d.ts.map
-================================================================
-{"version":3,"file":"deviceCookies.d.ts","sourceRoot":"","sources":["../../src/schema/deviceCookies.ts"],"names":[],"mappings":"AAGA,eAAO,MAAM,kBAAkB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAU7B,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/schema/featureConfig.d.ts
-================================================================
-import { z } from "zod/v4";
-export declare const featureConfigTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "feature_config";
-    schema: undefined;
-    columns: {
-        keyType: import("drizzle-orm/pg-core").PgColumn<{
-            name: "key_type";
-            tableName: "feature_config";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        maxAccounts: import("drizzle-orm/pg-core").PgColumn<{
-            name: "max_accounts";
-            tableName: "feature_config";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        maxSearches: import("drizzle-orm/pg-core").PgColumn<{
-            name: "max_searches";
-            tableName: "feature_config";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        minDelaySeconds: import("drizzle-orm/pg-core").PgColumn<{
-            name: "min_delay_seconds";
-            tableName: "feature_config";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        backgroundEnabled: import("drizzle-orm/pg-core").PgColumn<{
-            name: "background_enabled";
-            tableName: "feature_config";
-            dataType: "boolean";
-            columnType: "PgBoolean";
-            data: boolean;
-            driverParam: boolean;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        customQueriesEnabled: import("drizzle-orm/pg-core").PgColumn<{
-            name: "custom_queries_enabled";
-            tableName: "feature_config";
-            dataType: "boolean";
-            columnType: "PgBoolean";
-            data: boolean;
-            driverParam: boolean;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        dailySetEnabled: import("drizzle-orm/pg-core").PgColumn<{
-            name: "daily_set_enabled";
-            tableName: "feature_config";
-            dataType: "boolean";
-            columnType: "PgBoolean";
-            data: boolean;
-            driverParam: boolean;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        pcSearchEnabled: import("drizzle-orm/pg-core").PgColumn<{
-            name: "pc_search_enabled";
-            tableName: "feature_config";
-            dataType: "boolean";
-            columnType: "PgBoolean";
-            data: boolean;
-            driverParam: boolean;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export declare const insertFeatureConfigSchema: import("drizzle-zod").BuildSchema<"insert", {
-    keyType: import("drizzle-orm/pg-core").PgColumn<{
-        name: "key_type";
-        tableName: "feature_config";
-        dataType: "string";
-        columnType: "PgText";
-        data: string;
-        driverParam: string;
-        notNull: true;
-        hasDefault: false;
-        isPrimaryKey: true;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: [string, ...string[]];
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-    maxAccounts: import("drizzle-orm/pg-core").PgColumn<{
-        name: "max_accounts";
-        tableName: "feature_config";
-        dataType: "number";
-        columnType: "PgInteger";
-        data: number;
-        driverParam: string | number;
-        notNull: true;
-        hasDefault: true;
-        isPrimaryKey: false;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: undefined;
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-    maxSearches: import("drizzle-orm/pg-core").PgColumn<{
-        name: "max_searches";
-        tableName: "feature_config";
-        dataType: "number";
-        columnType: "PgInteger";
-        data: number;
-        driverParam: string | number;
-        notNull: true;
-        hasDefault: true;
-        isPrimaryKey: false;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: undefined;
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-    minDelaySeconds: import("drizzle-orm/pg-core").PgColumn<{
-        name: "min_delay_seconds";
-        tableName: "feature_config";
-        dataType: "number";
-        columnType: "PgInteger";
-        data: number;
-        driverParam: string | number;
-        notNull: true;
-        hasDefault: true;
-        isPrimaryKey: false;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: undefined;
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-    backgroundEnabled: import("drizzle-orm/pg-core").PgColumn<{
-        name: "background_enabled";
-        tableName: "feature_config";
-        dataType: "boolean";
-        columnType: "PgBoolean";
-        data: boolean;
-        driverParam: boolean;
-        notNull: true;
-        hasDefault: true;
-        isPrimaryKey: false;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: undefined;
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-    customQueriesEnabled: import("drizzle-orm/pg-core").PgColumn<{
-        name: "custom_queries_enabled";
-        tableName: "feature_config";
-        dataType: "boolean";
-        columnType: "PgBoolean";
-        data: boolean;
-        driverParam: boolean;
-        notNull: true;
-        hasDefault: true;
-        isPrimaryKey: false;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: undefined;
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-    dailySetEnabled: import("drizzle-orm/pg-core").PgColumn<{
-        name: "daily_set_enabled";
-        tableName: "feature_config";
-        dataType: "boolean";
-        columnType: "PgBoolean";
-        data: boolean;
-        driverParam: boolean;
-        notNull: true;
-        hasDefault: true;
-        isPrimaryKey: false;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: undefined;
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-    pcSearchEnabled: import("drizzle-orm/pg-core").PgColumn<{
-        name: "pc_search_enabled";
-        tableName: "feature_config";
-        dataType: "boolean";
-        columnType: "PgBoolean";
-        data: boolean;
-        driverParam: boolean;
-        notNull: true;
-        hasDefault: true;
-        isPrimaryKey: false;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: undefined;
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-}, undefined, undefined>;
-export type InsertFeatureConfig = z.infer<typeof insertFeatureConfigSchema>;
-export type FeatureConfig = typeof featureConfigTable.$inferSelect;
-//# sourceMappingURL=featureConfig.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/featureConfig.d.ts.map
-================================================================
-{"version":3,"file":"featureConfig.d.ts","sourceRoot":"","sources":["../../src/schema/featureConfig.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,CAAC,EAAE,MAAM,QAAQ,CAAC;AAE3B,eAAO,MAAM,kBAAkB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAS7B,CAAC;AAEH,eAAO,MAAM,yBAAyB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;wBAAyC,CAAC;AAChF,MAAM,MAAM,mBAAmB,GAAG,CAAC,CAAC,KAAK,CAAC,OAAO,yBAAyB,CAAC,CAAC;AAC5E,MAAM,MAAM,aAAa,GAAG,OAAO,kBAAkB,CAAC,YAAY,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/schema/globalConfig.d.ts
-================================================================
-import { z } from "zod/v4";
-export declare const globalConfigTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "global_config";
-    schema: undefined;
-    columns: {
-        key: import("drizzle-orm/pg-core").PgColumn<{
-            name: "key";
-            tableName: "global_config";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        value: import("drizzle-orm/pg-core").PgColumn<{
-            name: "value";
-            tableName: "global_config";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export declare const insertGlobalConfigSchema: import("drizzle-zod").BuildSchema<"insert", {
-    key: import("drizzle-orm/pg-core").PgColumn<{
-        name: "key";
-        tableName: "global_config";
-        dataType: "string";
-        columnType: "PgText";
-        data: string;
-        driverParam: string;
-        notNull: true;
-        hasDefault: false;
-        isPrimaryKey: true;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: [string, ...string[]];
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-    value: import("drizzle-orm/pg-core").PgColumn<{
-        name: "value";
-        tableName: "global_config";
-        dataType: "string";
-        columnType: "PgText";
-        data: string;
-        driverParam: string;
-        notNull: true;
-        hasDefault: false;
-        isPrimaryKey: false;
-        isAutoincrement: false;
-        hasRuntimeDefault: false;
-        enumValues: [string, ...string[]];
-        baseColumn: never;
-        identity: undefined;
-        generated: undefined;
-    }, {}, {}>;
-}, undefined, undefined>;
-export type InsertGlobalConfig = z.infer<typeof insertGlobalConfigSchema>;
-export type GlobalConfig = typeof globalConfigTable.$inferSelect;
-//# sourceMappingURL=globalConfig.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/globalConfig.d.ts.map
-================================================================
-{"version":3,"file":"globalConfig.d.ts","sourceRoot":"","sources":["../../src/schema/globalConfig.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,CAAC,EAAE,MAAM,QAAQ,CAAC;AAI3B,eAAO,MAAM,iBAAiB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAG5B,CAAC;AAEH,eAAO,MAAM,wBAAwB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;wBAAwC,CAAC;AAC9E,MAAM,MAAM,kBAAkB,GAAG,CAAC,CAAC,KAAK,CAAC,OAAO,wBAAwB,CAAC,CAAC;AAC1E,MAAM,MAAM,YAAY,GAAG,OAAO,iBAAiB,CAAC,YAAY,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/schema/index.d.ts
-================================================================
-export * from "./licenseKeys";
-export * from "./featureConfig";
-export * from "./deviceCookies";
-export * from "./deletedAccounts";
-export * from "./inviteCodes";
-export * from "./kycSubmissions";
-export * from "./globalConfig";
-export * from "./upgradeRequests";
-//# sourceMappingURL=index.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/index.d.ts.map
-================================================================
-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../src/schema/index.ts"],"names":[],"mappings":"AAmBA,cAAc,eAAe,CAAC;AAC9B,cAAc,iBAAiB,CAAC;AAChC,cAAc,iBAAiB,CAAC;AAChC,cAAc,mBAAmB,CAAC;AAClC,cAAc,eAAe,CAAC;AAC9B,cAAc,kBAAkB,CAAC;AACjC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,mBAAmB,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/schema/inviteCodes.d.ts
-================================================================
-export declare const inviteCodesTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "invite_codes";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "invite_codes";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        code: import("drizzle-orm/pg-core").PgColumn<{
-            name: "code";
-            tableName: "invite_codes";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        status: import("drizzle-orm/pg-core").PgColumn<{
-            name: "status";
-            tableName: "invite_codes";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        licenseKeyId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "license_key_id";
-            tableName: "invite_codes";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "invite_codes";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "updated_at";
-            tableName: "invite_codes";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export type InviteCode = typeof inviteCodesTable.$inferSelect;
-//# sourceMappingURL=inviteCodes.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/inviteCodes.d.ts.map
-================================================================
-{"version":3,"file":"inviteCodes.d.ts","sourceRoot":"","sources":["../../src/schema/inviteCodes.ts"],"names":[],"mappings":"AAEA,eAAO,MAAM,gBAAgB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAS3B,CAAC;AAEH,MAAM,MAAM,UAAU,GAAG,OAAO,gBAAgB,CAAC,YAAY,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/schema/kycSubmissions.d.ts
-================================================================
-export declare const kycSubmissionsTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "kyc_submissions";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        inviteCode: import("drizzle-orm/pg-core").PgColumn<{
-            name: "invite_code";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        email: import("drizzle-orm/pg-core").PgColumn<{
-            name: "email";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        fullName: import("drizzle-orm/pg-core").PgColumn<{
-            name: "full_name";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        fatherName: import("drizzle-orm/pg-core").PgColumn<{
-            name: "father_name";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        motherName: import("drizzle-orm/pg-core").PgColumn<{
-            name: "mother_name";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        grandfatherName: import("drizzle-orm/pg-core").PgColumn<{
-            name: "grandfather_name";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        idFront: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id_front";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        idBack: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id_back";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        kycStatus: import("drizzle-orm/pg-core").PgColumn<{
-            name: "kyc_status";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        adminNote: import("drizzle-orm/pg-core").PgColumn<{
-            name: "admin_note";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        licenseKeyId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "license_key_id";
-            tableName: "kyc_submissions";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        reviewEmailSentAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "review_email_sent_at";
-            tableName: "kyc_submissions";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        approvalEmailSentAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "approval_email_sent_at";
-            tableName: "kyc_submissions";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "kyc_submissions";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "updated_at";
-            tableName: "kyc_submissions";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export type KycSubmission = typeof kycSubmissionsTable.$inferSelect;
-//# sourceMappingURL=kycSubmissions.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/kycSubmissions.d.ts.map
-================================================================
-{"version":3,"file":"kycSubmissions.d.ts","sourceRoot":"","sources":["../../src/schema/kycSubmissions.ts"],"names":[],"mappings":"AAEA,eAAO,MAAM,mBAAmB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAiB9B,CAAC;AAEH,MAAM,MAAM,aAAa,GAAG,OAAO,mBAAmB,CAAC,YAAY,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/schema/licenseKeys.d.ts
-================================================================
-import { z } from "zod/v4";
-export declare const licenseKeysTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "license_keys";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "license_keys";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        key: import("drizzle-orm/pg-core").PgColumn<{
-            name: "key";
-            tableName: "license_keys";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        label: import("drizzle-orm/pg-core").PgColumn<{
-            name: "label";
-            tableName: "license_keys";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        keyType: import("drizzle-orm/pg-core").PgColumn<{
-            name: "key_type";
-            tableName: "license_keys";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        maxAccounts: import("drizzle-orm/pg-core").PgColumn<{
-            name: "max_accounts";
-            tableName: "license_keys";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        customMaxAccounts: import("drizzle-orm/pg-core").PgColumn<{
-            name: "custom_max_accounts";
-            tableName: "license_keys";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        customMinDelaySeconds: import("drizzle-orm/pg-core").PgColumn<{
-            name: "custom_min_delay_seconds";
-            tableName: "license_keys";
-            dataType: "number";
-            columnType: "PgInteger";
-            data: number;
-            driverParam: string | number;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        pin: import("drizzle-orm/pg-core").PgColumn<{
-            name: "pin";
-            tableName: "license_keys";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        isActive: import("drizzle-orm/pg-core").PgColumn<{
-            name: "is_active";
-            tableName: "license_keys";
-            dataType: "boolean";
-            columnType: "PgBoolean";
-            data: boolean;
-            driverParam: boolean;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        boundDeviceId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "bound_device_id";
-            tableName: "license_keys";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        canInvite: import("drizzle-orm/pg-core").PgColumn<{
-            name: "can_invite";
-            tableName: "license_keys";
-            dataType: "boolean";
-            columnType: "PgBoolean";
-            data: boolean;
-            driverParam: boolean;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        expiresAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "expires_at";
-            tableName: "license_keys";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "license_keys";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "updated_at";
-            tableName: "license_keys";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export declare const insertLicenseKeySchema: z.ZodObject<{
-    key: z.ZodString;
-    label: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    keyType: z.ZodOptional<z.ZodString>;
-    maxAccounts: z.ZodOptional<z.ZodInt>;
-    customMaxAccounts: z.ZodOptional<z.ZodNullable<z.ZodInt>>;
-    customMinDelaySeconds: z.ZodOptional<z.ZodNullable<z.ZodInt>>;
-    pin: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    isActive: z.ZodOptional<z.ZodBoolean>;
-    boundDeviceId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    canInvite: z.ZodOptional<z.ZodBoolean>;
-    expiresAt: z.ZodDate;
-}, {
-    out: {};
-    in: {};
-}>;
-export type InsertLicenseKey = z.infer<typeof insertLicenseKeySchema>;
-export type LicenseKey = typeof licenseKeysTable.$inferSelect;
-//# sourceMappingURL=licenseKeys.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/licenseKeys.d.ts.map
-================================================================
-{"version":3,"file":"licenseKeys.d.ts","sourceRoot":"","sources":["../../src/schema/licenseKeys.ts"],"names":[],"mappings":"AAEA,OAAO,EAAE,CAAC,EAAE,MAAM,QAAQ,CAAC;AAE3B,eAAO,MAAM,gBAAgB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAe3B,CAAC;AAEH,eAAO,MAAM,sBAAsB;;;;;;;;;;;;;;;EAIjC,CAAC;AACH,MAAM,MAAM,gBAAgB,GAAG,CAAC,CAAC,KAAK,CAAC,OAAO,sBAAsB,CAAC,CAAC;AACtE,MAAM,MAAM,UAAU,GAAG,OAAO,gBAAgB,CAAC,YAAY,CAAC"}
-
-================================================================
-FILE: ./lib/db/dist/schema/upgradeRequests.d.ts
-================================================================
-export declare const upgradeRequestsTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
-    name: "upgrade_requests";
-    schema: undefined;
-    columns: {
-        id: import("drizzle-orm/pg-core").PgColumn<{
-            name: "id";
-            tableName: "upgrade_requests";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: true;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        licenseKeyId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "license_key_id";
-            tableName: "upgrade_requests";
-            dataType: "string";
-            columnType: "PgUUID";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        requestedTier: import("drizzle-orm/pg-core").PgColumn<{
-            name: "requested_tier";
-            tableName: "upgrade_requests";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        transactionId: import("drizzle-orm/pg-core").PgColumn<{
-            name: "transaction_id";
-            tableName: "upgrade_requests";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        receiptLink: import("drizzle-orm/pg-core").PgColumn<{
-            name: "receipt_link";
-            tableName: "upgrade_requests";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        status: import("drizzle-orm/pg-core").PgColumn<{
-            name: "status";
-            tableName: "upgrade_requests";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        adminNote: import("drizzle-orm/pg-core").PgColumn<{
-            name: "admin_note";
-            tableName: "upgrade_requests";
-            dataType: "string";
-            columnType: "PgText";
-            data: string;
-            driverParam: string;
-            notNull: false;
-            hasDefault: false;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: [string, ...string[]];
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        createdAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "created_at";
-            tableName: "upgrade_requests";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-        updatedAt: import("drizzle-orm/pg-core").PgColumn<{
-            name: "updated_at";
-            tableName: "upgrade_requests";
-            dataType: "date";
-            columnType: "PgTimestamp";
-            data: Date;
-            driverParam: string;
-            notNull: true;
-            hasDefault: true;
-            isPrimaryKey: false;
-            isAutoincrement: false;
-            hasRuntimeDefault: false;
-            enumValues: undefined;
-            baseColumn: never;
-            identity: undefined;
-            generated: undefined;
-        }, {}, {}>;
-    };
-    dialect: "pg";
-}>;
-export type UpgradeRequest = typeof upgradeRequestsTable.$inferSelect;
-//# sourceMappingURL=upgradeRequests.d.ts.map
-
-================================================================
-FILE: ./lib/db/dist/schema/upgradeRequests.d.ts.map
-================================================================
-{"version":3,"file":"upgradeRequests.d.ts","sourceRoot":"","sources":["../../src/schema/upgradeRequests.ts"],"names":[],"mappings":"AAKA,eAAO,MAAM,oBAAoB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAU/B,CAAC;AAEH,MAAM,MAAM,cAAc,GAAG,OAAO,oBAAoB,CAAC,YAAY,CAAC"}
 
 ================================================================
 FILE: ./lib/db/drizzle/0000_outgoing_randall.sql
@@ -23478,32 +23273,6 @@ FILE: ./lib/db/drizzle/meta/_journal.json
     }
   ]
 }
-
-================================================================
-FILE: ./lib/db/node_modules/.bin/drizzle-kit
-================================================================
-#!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
-
-case `uname` in
-    *CYGWIN*|*MINGW*|*MSYS*)
-        if command -v cygpath > /dev/null 2>&1; then
-            basedir=`cygpath -w "$basedir"`
-        fi
-    ;;
-esac
-
-if [ -z "$NODE_PATH" ]; then
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/drizzle-kit@0.31.9/node_modules/drizzle-kit/node_modules:/home/runner/workspace/node_modules/.pnpm/drizzle-kit@0.31.9/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules"
-else
-  export NODE_PATH="/home/runner/workspace/node_modules/.pnpm/drizzle-kit@0.31.9/node_modules/drizzle-kit/node_modules:/home/runner/workspace/node_modules/.pnpm/drizzle-kit@0.31.9/node_modules:/home/runner/workspace/node_modules/.pnpm/node_modules:$NODE_PATH"
-fi
-if [ -x "$basedir/node" ]; then
-  exec "$basedir/node"  "$basedir/../drizzle-kit/bin.cjs" "$@"
-else
-  exec node  "$basedir/../drizzle-kit/bin.cjs" "$@"
-fi
-
 
 ================================================================
 FILE: ./lib/db/package.json
