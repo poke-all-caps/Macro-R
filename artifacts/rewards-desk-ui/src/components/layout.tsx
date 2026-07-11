@@ -1,11 +1,10 @@
 import { Link, useLocation } from "wouter";
 import {
-  Users, Settings, Search, Bell,
-  LayoutGrid, List, FileText, Cog, Key, Plus,
+  Users, Settings, Bell,
+  LayoutGrid, List, FileText, Cog, Key, Plus, Play, Square,
 } from "lucide-react";
 import { useBotStatus, useAccounts } from "@/hooks/use-desk";
 import { useLicense, TIER_META } from "@/hooks/use-license";
-import { useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/",         label: "Accounts",      icon: Users },
@@ -18,10 +17,9 @@ const NAV_ITEMS = [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
-  const { status } = useBotStatus();
+  const { status, runNow } = useBotStatus();
   const { accounts } = useAccounts();
   const { licenseData } = useLicense();
-  const [searchQuery, setSearchQuery] = useState("");
 
   const tier     = licenseData?.keyType ?? 'basic';
   const tierMeta = TIER_META[tier] ?? TIER_META.basic;
@@ -43,17 +41,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <img src="/rewards-desk-ui/macro-rewards-logo.png" alt="Macro Rewards" className="h-9 w-auto" />
         </div>
 
-        {/* Search bar — centered */}
+        {/* Global Command Hub — centered */}
         <div className="flex-1 flex justify-center">
-          <div className="relative w-full max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search accounts…"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-4 rounded-full bg-[hsl(220,30%,16%)] border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:bg-[hsl(220,30%,18%)] transition-colors"
-            />
+          <div className="flex items-center bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
+            <button
+              onClick={() => status && runNow.mutate({ data: { accountIds: accounts.map(a => a.id) } })}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all group"
+            >
+              <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400 group-hover:text-emerald-300" />
+              Start All
+            </button>
+
+            <div className="w-[1px] h-4 bg-slate-600 mx-1" />
+
+            <button
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all group"
+            >
+              <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400 group-hover:text-rose-300" />
+              Stop All
+            </button>
           </div>
         </div>
 
