@@ -88,21 +88,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Sidebar */}
         <aside className="w-40 shrink-0 bg-[hsl(220,38%,9%)] border-r border-border flex flex-col z-10">
-          <nav className="flex-1 p-2 pt-3 space-y-0.5">
+          <nav className="flex-1 px-2 pt-2 flex flex-col gap-0.5">
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-              // treat all unimplemented routes as inactive, but still highlight exact match
               const isActive = href === "/" ? location === "/" : location.startsWith(href);
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors ${
                     isActive
-                      ? "bg-primary/15 text-white font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      ? "bg-[hsl(217,70%,30%)] text-white"
+                      : "text-[hsl(215,20%,55%)] hover:text-white hover:bg-white/5"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-primary" : ""}`} />
+                  <Icon className="w-[15px] h-[15px] shrink-0" />
                   <span>{label}</span>
                 </Link>
               );
