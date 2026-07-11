@@ -159,29 +159,37 @@ export default function Home() {
 
         {/* Instance Status */}
         <div className="bg-[hsl(220,35%,11%)] border border-border rounded-xl p-5">
-          <p className="text-sm font-semibold text-white mb-4">Instance Status</p>
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3">
+          <p className="text-sm font-semibold text-white mb-5">Instance Status</p>
+          <div className="flex items-center">
+
+            <div className="flex flex-1 items-center gap-3">
               <CheckCircle2 className="w-7 h-7 text-green-400 shrink-0" />
               <div>
-                <p className="text-2xl font-bold text-white leading-none">{done}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Done</p>
+                <p className="text-3xl font-bold text-white leading-none">{done}</p>
+                <p className="text-xs text-muted-foreground mt-1">Done</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+
+            <div className="w-px self-stretch bg-border mx-2" />
+
+            <div className="flex flex-1 items-center gap-3 px-4">
               <PlayCircle className="w-7 h-7 text-blue-400 shrink-0" />
               <div>
-                <p className="text-2xl font-bold text-white leading-none">{running}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Running</p>
+                <p className="text-3xl font-bold text-white leading-none">{running}</p>
+                <p className="text-xs text-muted-foreground mt-1">Running</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+
+            <div className="w-px self-stretch bg-border mx-2" />
+
+            <div className="flex flex-1 items-center gap-3 px-4">
               <AlertCircle className="w-7 h-7 text-red-400 shrink-0" />
               <div>
-                <p className="text-2xl font-bold text-white leading-none">{failed}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Failed</p>
+                <p className="text-3xl font-bold text-white leading-none">{failed}</p>
+                <p className="text-xs text-muted-foreground mt-1">Failed</p>
               </div>
             </div>
+
           </div>
         </div>
 
