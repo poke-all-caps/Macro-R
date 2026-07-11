@@ -129,9 +129,9 @@ export default function Home() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-white">Accounts</h1>
         <div className="flex items-center gap-4">
-          {/* Stop / Run All */}
+          {/* Run All / Stop */}
           {isRunning ? (
-            <button className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors">
               <Square className="w-3.5 h-3.5 fill-current" />
               Stop
             </button>
@@ -139,10 +139,10 @@ export default function Home() {
             <button
               onClick={handleRunAll}
               disabled={runNow.isPending || accountsLoading}
-              className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground text-sm font-semibold transition-colors"
             >
-              <Square className="w-3.5 h-3.5 fill-current" />
-              Stop
+              <Play className="w-3.5 h-3.5 fill-current" />
+              Run All
             </button>
           )}
 
