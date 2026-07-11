@@ -110,7 +110,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Sidebar */}
         <aside className="w-52 shrink-0 bg-[hsl(220,38%,9%)] border-r border-border flex flex-col z-10">
-          <nav className="flex-1 px-2 pt-4 flex flex-col gap-2.5">
+          <nav className="flex-1 px-2 pt-8 flex flex-col gap-2.5">
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
               const isActive = href === "/" ? location === "/" : location.startsWith(href);
               return (
