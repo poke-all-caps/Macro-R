@@ -2,7 +2,7 @@
  * app-window.js — Rewards Desk Command Center
  * --------------------------------------------
  * Spins up a local Express server on port 3000, serves the Vite-built React
- * UI from ui/dist/, and optionally launches a Chromium/Chrome window in
+ * UI from dist-desk/, and optionally launches a Chromium/Chrome window in
  * "app mode" so the UI looks like a native desktop window (no address bar).
  *
  * Usage:
@@ -13,8 +13,10 @@
  *   MSRB_TOKEN    Override the security token (auto-generated if not set)
  *   NO_WINDOW     Set to "1" to skip launching the browser window
  *
- * Build the UI first:
- *   cd ui && npm run build
+ * Build the UI first (run from the project root):
+ *   pnpm run build:desk
+ *   -- or on Windows without pnpm globally:
+ *   scripts\desk\build.bat
  */
 
 const express = require("express");
@@ -37,8 +39,9 @@ const MSRB_TOKEN =
 
 const OPEN_WINDOW = process.env.NO_WINDOW !== "1";
 
-// Resolve the compiled UI from ui/dist (relative to workspace root)
-const UI_DIST = path.resolve(__dirname, "../../ui/dist");
+// Resolve the compiled UI from dist-desk/ at the project root.
+// Build it first with: pnpm run build:desk  (or scripts\desk\build.bat on Windows)
+const UI_DIST = path.resolve(__dirname, "../../dist-desk");
 
 // ─── App ─────────────────────────────────────────────────────────────────────
 
