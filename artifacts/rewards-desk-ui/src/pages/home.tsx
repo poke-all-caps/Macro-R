@@ -15,7 +15,7 @@ function sessionFresh(lastRun?: string | null): boolean {
   return Date.now() - new Date(lastRun).getTime() < 24 * 60 * 60 * 1000;
 }
 
-// ─── YouTube-style account row card ──────────────────────────────────────────
+// ─── Vertical grid card ───────────────────────────────────────────────────────
 
 function AccountCard({
   account,
@@ -26,73 +26,77 @@ function AccountCard({
   onRun: (id: string) => void;
   globalRunning: boolean;
 }) {
-  const initial = (account.name?.[0] ?? account.email?.[0] ?? 'U').toUpperCase();
-  const fresh   = sessionFresh(account.lastRun);
-  const status  = account.status ?? 'idle';
+  const initial   = (account.name?.[0] ?? account.email?.[0] ?? 'U').toUpperCase();
+  const fresh     = sessionFresh(account.lastRun);
+  const status    = account.status ?? 'idle';
   const isRunning = status === 'running';
 
   const statusConfig = {
-    idle:    { label: fresh ? 'Idle · Session active' : 'Idle', color: 'text-muted-foreground' },
-    running: { label: 'Running…',                               color: 'text-blue-400' },
-    done:    { label: 'Done',                                    color: 'text-green-400' },
-    failed:  { label: 'Failed',                                  color: 'text-red-400' },
-  }[status] ?? { label: 'Unknown', color: 'text-muted-foreground' };
+    idle:    { label: fresh ? 'Session active' : 'Idle', color: 'text-muted-foreground', dot: 'bg-slate-500' },
+    running: { label: 'Running…',                        color: 'text-blue-400',          dot: 'bg-blue-400' },
+    done:    { label: 'Done',                             color: 'text-green-400',         dot: 'bg-green-400' },
+    failed:  { label: 'Failed',                           color: 'text-red-400',           dot: 'bg-red-400' },
+  }[status] ?? { label: 'Unknown', color: 'text-muted-foreground', dot: 'bg-slate-500' };
 
   return (
-    <div className="group flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors cursor-default">
+    <div className="flex flex-col bg-slate-800 rounded-xl p-5 gap-4 hover:bg-slate-700/80 transition-colors">
 
-      {/* Avatar */}
-      <div className="relative shrink-0">
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-xl shadow-md select-none">
-          {initial}
+      {/* ── Top: Avatar + name + status ── */}
+      <div className="flex items-center gap-3">
+        <div className="relative shrink-0">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-xl shadow-md select-none">
+            {initial}
+          </div>
+          <span className={cn(
+            'absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-slate-800',
+            statusConfig.dot,
+            isRunning && 'animate-pulse'
+          )} />
         </div>
-        {isRunning && (
-          <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-blue-400 border-2 border-[hsl(220,28%,12%)] animate-pulse" />
-        )}
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold text-[15px] text-white leading-snug truncate">{account.name}</p>
+          <p className={cn('text-xs font-medium mt-0.5', statusConfig.color)}>{statusConfig.label}</p>
+        </div>
+        <button className="text-muted-foreground hover:text-white p-1 rounded-md hover:bg-white/5 transition-colors shrink-0">
+          <MoreVertical className="w-4 h-4" />
+        </button>
       </div>
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-[15px] text-white leading-snug truncate">{account.name}</p>
+      {/* ── Middle: Email + stats ── */}
+      <div className="space-y-1.5">
         <p className="text-sm text-muted-foreground truncate">{account.email}</p>
-        <p className={cn('text-xs mt-0.5', statusConfig.color)}>{statusConfig.label}</p>
+        <div className="flex items-center gap-3 text-xs font-mono">
+          {account.totalPoints > 0 ? (
+            <span className="text-amber-400 font-semibold">{account.totalPoints.toLocaleString()} pts</span>
+          ) : (
+            <span className="text-muted-foreground">0 pts</span>
+          )}
+          <span className="text-slate-600">·</span>
+          <span className="text-muted-foreground">{account.searchesCompleted ?? 0} searches</span>
+        </div>
       </div>
 
-      {/* Stats — always visible, subtle */}
-      <div className="hidden sm:flex flex-col items-end text-xs font-mono text-muted-foreground shrink-0 mr-2">
-        {account.totalPoints > 0 && (
-          <span className="text-amber-400">{account.totalPoints.toLocaleString()} pts</span>
-        )}
-        <span>{account.searchesCompleted ?? 0} searches</span>
-      </div>
-
-      {/* Action buttons — reveal on hover */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+      {/* ── Bottom: Action buttons ── */}
+      <div className="flex gap-2 mt-auto pt-1 border-t border-slate-700/50">
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
           title="Run"
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-700/60 text-slate-300 hover:bg-blue-600/25 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 flex items-center justify-center h-9 rounded-lg bg-slate-700/60 text-slate-300 hover:bg-blue-600/25 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-600/40 hover:border-blue-500/30"
         >
           {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         </button>
         <button
           title="Export"
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-700/60 text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors"
+          className="flex-1 flex items-center justify-center h-9 rounded-lg bg-slate-700/60 text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
         >
           <Download className="w-4 h-4" />
         </button>
         <button
           title="Settings"
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-700/60 text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors"
+          className="flex-1 flex items-center justify-center h-9 rounded-lg bg-slate-700/60 text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
         >
           <Settings2 className="w-4 h-4" />
-        </button>
-        <button
-          title="More"
-          className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
-        >
-          <MoreVertical className="w-4 h-4" />
         </button>
       </div>
     </div>
