@@ -68,9 +68,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </button>
           </Link>
 
-          {/* Bell */}
-          <button className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
+          {/* Bell + Notifications */}
+          <button className="flex items-center gap-1.5 h-9 px-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
             <Bell className="w-4 h-4" />
+            <span className="text-sm">Notifications</span>
           </button>
 
           {/* System status dot */}
@@ -97,6 +98,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 {accounts.length}<span className="opacity-50">/{licenseData.maxAccounts}</span>
               </span>
             )}
+          </div>
+
+          {/* Profile avatar */}
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-sm shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all select-none">
+            M
           </div>
 
         </div>
