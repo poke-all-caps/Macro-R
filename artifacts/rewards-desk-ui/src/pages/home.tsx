@@ -142,7 +142,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-6 space-y-5 min-h-full">
+    <div className="px-6 py-6 space-y-5 min-h-full">
 
       {/* ── Page title ───────────────────────────────────────────────────── */}
       <div>
@@ -160,7 +160,7 @@ export default function Home() {
               'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
               filter === key
                 ? 'bg-white text-black border-white'
-                : 'bg-[hsl(220,30%,17%)] text-slate-300 border-slate-600/50 hover:bg-[hsl(220,30%,22%)] hover:text-white'
+                : 'bg-[hsl(220,30%,17%)] text-slate-300 border-transparent hover:bg-[hsl(220,30%,22%)] hover:text-white'
             )}
           >
             {label}
