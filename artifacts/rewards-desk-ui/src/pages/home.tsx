@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useBotStatus, useAccounts, useRunLogs } from '@/hooks/use-desk';
+import { useBotStatus, useAccounts } from '@/hooks/use-desk';
 import {
   CheckCircle2, PlayCircle, AlertCircle, Minus, Plus,
   Users, Square, Play, Download, Settings2, MoreVertical,
@@ -108,11 +108,9 @@ function AccountCard({
 export default function Home() {
   const { status, runNow } = useBotStatus();
   const { accounts, isLoading: accountsLoading } = useAccounts();
-  const { logs, isLoading: logsLoading } = useRunLogs();
 
   const [searchCount, setSearchCount] = useState(30);
   const [delay, setDelay]             = useState(5);
-  const [activeTab, setActiveTab]     = useState<'live' | 'queue' | 'editor'>('live');
 
   const isRunning = status?.isRunning ?? false;
   const done      = accounts.filter(a => a.status === 'done').length;
@@ -245,7 +243,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Bottom split: account grid + logs panel ───────────────────────── */}
+      {/* ── Account grid ─────────────────────────────────────────────────── */}
       <div className="flex gap-4 min-h-0">
 
         {/* Account cards — 2 × N grid */}
@@ -276,70 +274,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Live Logs panel */}
-        <div className="w-80 shrink-0 flex flex-col">
-          {/* Tabs */}
-          <div className="flex border-b border-border mb-0">
-            {(['live', 'queue', 'editor'] as const).map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  'px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors',
-                  activeTab === tab
-                    ? 'border-primary text-white'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                )}
-              >
-                {tab === 'live' ? 'Live Logs' : tab === 'queue' ? 'Query Queue' : 'Task Editor'}
-              </button>
-            ))}
-          </div>
-
-          {/* Log table */}
-          <div className="flex-1 bg-[hsl(220,35%,11%)] border border-border rounded-b-xl overflow-hidden flex flex-col">
-            {/* Table header */}
-            <div className="grid grid-cols-3 px-3 py-2 border-b border-border bg-[hsl(220,35%,13%)]">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Status</span>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Time stamp</span>
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Result</span>
-            </div>
-
-            {/* Rows */}
-            <div className="overflow-y-auto flex-1 custom-scrollbar">
-              {logsLoading ? (
-                <div className="p-4 text-center text-muted-foreground text-xs">Loading…</div>
-              ) : logs.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground text-xs">No logs yet.</div>
-              ) : (
-                logs.slice().reverse().map((log) => {
-                  const ts = new Date(log.timestamp);
-                  const timeStr = `${ts.getFullYear()}-${String(ts.getMonth()+1).padStart(2,'0')}-${String(ts.getDate()).padStart(2,'0')} ${ts.toTimeString().slice(0,8)}`;
-                  const isRunningRow = log.status === 'running';
-                  return (
-                    <div
-                      key={log.id}
-                      className={cn(
-                        'grid grid-cols-3 px-3 py-2 text-xs border-b border-border/50',
-                        isRunningRow ? 'bg-blue-500/8 text-blue-300' : 'text-muted-foreground'
-                      )}
-                    >
-                      <span className={cn('font-medium capitalize', isRunningRow ? 'text-blue-400' : 'text-foreground')}>
-                        {isRunningRow ? 'Running' : 'Query'}
-                      </span>
-                      <span className="font-mono text-[10px] truncate">{timeStr}</span>
-                      <span className="truncate">
-                        {log.errorMessage
-                          ? `Error: ${log.errorMessage.slice(0, 20)}…`
-                          : `Result [from : ${(log.accountName ?? '').slice(0, 8)}…]`}
-                      </span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
