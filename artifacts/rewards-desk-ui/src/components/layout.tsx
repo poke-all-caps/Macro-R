@@ -1,63 +1,120 @@
 import { Link, useLocation } from "wouter";
-import { Activity, Terminal, Users } from "lucide-react";
+import {
+  Users, Settings, Terminal, Search, Bell,
+  LayoutGrid, List, FileText, Cog,
+  ChevronDown, Activity,
+} from "lucide-react";
+import { useBotStatus, useAccounts } from "@/hooks/use-desk";
+
+const NAV_ITEMS = [
+  { href: "/",         label: "Accounts",      icon: Users },
+  { href: "/config",   label: "Global Config", icon: Cog },
+  { href: "/instances",label: "Instances",     icon: LayoutGrid },
+  { href: "/queries",  label: "Queries",       icon: List },
+  { href: "/console",  label: "Logs",          icon: FileText },
+  { href: "/settings", label: "Settings",      icon: Settings },
+];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const { status } = useBotStatus();
+  const { accounts } = useAccounts();
 
-  const navItems = [
-    { href: "/", label: "Home", icon: Activity },
-    { href: "/accounts", label: "Accounts", icon: Users },
-    { href: "/console", label: "Console", icon: Terminal },
-  ];
+  const isRunning = status?.isRunning ?? false;
+  const activeCount = accounts.filter(a => a.status === "running").length;
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-border/50 glass-panel flex flex-col z-10 relative">
-        <div className="p-6 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded bg-primary/10 border border-primary/30 flex items-center justify-center glow-cyan">
-              <Terminal className="w-4 h-4 text-primary" />
-            </div>
-            <div>
-              <h1 className="font-mono font-bold text-sm tracking-widest text-primary text-shadow-cyan">REWARDS_DESK</h1>
-              <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">v2.4.1 // ONLINE</p>
-            </div>
+    <div className="flex flex-col h-screen bg-background text-foreground font-sans overflow-hidden">
+
+      {/* ── Top Navbar ─────────────────────────────────────────────────────── */}
+      <header className="flex items-center h-12 px-4 border-b border-border shrink-0 bg-[hsl(220,38%,9%)] z-20">
+        {/* Logo */}
+        <div className="flex items-center gap-2 w-40 shrink-0">
+          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
+            <span className="text-primary-foreground font-bold text-sm">M</span>
+          </div>
+          <span className="font-semibold text-sm text-white">Macro Rewards</span>
+        </div>
+
+        {/* Search */}
+        <div className="flex-1 max-w-sm mx-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search instances..."
+              className="w-full h-8 pl-8 pr-3 rounded-md bg-[hsl(220,35%,13%)] border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-0 transition-colors"
+            />
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
-          {navItems.map((item) => {
-            const isActive = location === item.href;
-            return (
-              <Link key={item.href} href={item.href} className={`flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200 font-mono text-sm uppercase tracking-wider group relative overflow-hidden ${isActive ? "bg-primary/10 text-primary border border-primary/30" : "text-muted-foreground hover:bg-white/5 hover:text-foreground border border-transparent"}`}>
-                {isActive && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary glow-cyan" />
-                )}
-                <item.icon className={`w-4 h-4 ${isActive ? "text-primary" : "group-hover:text-foreground"}`} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        {/* Right side */}
+        <div className="flex items-center gap-3 ml-auto">
+          {/* Bell */}
+          <button className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors relative">
+            <Bell className="w-4 h-4" />
+          </button>
 
-        <div className="p-4 border-t border-border/50">
-          <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            SYSTEM SECURE
+          {/* System status */}
+          <div className="flex flex-col items-start px-3 py-1 rounded-md bg-[hsl(220,35%,13%)] border border-border text-xs">
+            <span className="text-muted-foreground leading-none mb-0.5">System Status</span>
+            <div className="flex items-center gap-1.5">
+              <div className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-green-400 animate-pulse' : 'bg-green-400'}`} />
+              <span className="text-green-400 font-medium">
+                Active ({accounts.length} {accounts.length === 1 ? 'Instance' : 'Instances'})
+              </span>
+            </div>
           </div>
-        </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 relative overflow-hidden flex flex-col">
-        {/* Subtle grid background effect */}
-        <div className="absolute inset-0 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDQwIEwgNDAgNDAgTCA0MCAwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wMykiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-50 z-0" />
-        
-        <div className="relative z-10 flex-1 flex flex-col w-full h-full overflow-y-auto">
+          {/* User */}
+          <button className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[hsl(220,35%,13%)] border border-border hover:bg-white/5 transition-colors">
+            <div className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">U</div>
+            <div className="flex flex-col items-start text-left">
+              <span className="text-xs font-medium text-white leading-none">User</span>
+              <span className="text-[10px] text-muted-foreground leading-none mt-0.5">user@outlook.com</span>
+            </div>
+            <ChevronDown className="w-3 h-3 text-muted-foreground ml-1" />
+          </button>
+
+          {/* Settings gear */}
+          <button className="w-8 h-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* ── Body (sidebar + main) ──────────────────────────────────────────── */}
+      <div className="flex flex-1 min-h-0">
+
+        {/* Sidebar */}
+        <aside className="w-40 shrink-0 bg-[hsl(220,38%,9%)] border-r border-border flex flex-col z-10">
+          <nav className="flex-1 p-2 pt-3 space-y-0.5">
+            {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              // treat all unimplemented routes as inactive, but still highlight exact match
+              const isActive = href === "/" ? location === "/" : location.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm transition-colors ${
+                    isActive
+                      ? "bg-primary/15 text-white font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-primary" : ""}`} />
+                  <span>{label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* Main content */}
+        <main className="flex-1 min-w-0 overflow-y-auto">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

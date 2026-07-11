@@ -1,373 +1,359 @@
-import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Activity, Power, Coins, Search, Zap, LayoutList, LayoutGrid,
-  Play, Square, CheckSquare, Minus, Plus,
-} from 'lucide-react';
-import { StatusChip } from '@/components/status-chip';
-import { AccountCard } from '@/components/account-card';
-import { AccountGridTile } from '@/components/account-grid-tile';
-import { StatsBar } from '@/components/stats-bar';
 import { useState } from 'react';
+import { useBotStatus, useAccounts, useRunLogs } from '@/hooks/use-desk';
+import {
+  CheckCircle2, PlayCircle, AlertCircle, Minus, Plus,
+  Users, Square, Play, Download, Settings2, MoreVertical,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { DeskAccount } from '@workspace/api-client-react';
 
-type ViewMode = 'list' | 'grid';
+// ─── Tiny helpers ────────────────────────────────────────────────────────────
 
-export default function Home() {
-  const { status, isLoading: isStatusLoading, runNow } = useBotStatus();
-  const { accounts, isLoading: isAccountsLoading } = useAccounts();
+function avatarColor(name: string) {
+  const colors = [
+    'bg-indigo-500', 'bg-violet-500', 'bg-blue-500',
+    'bg-teal-500',   'bg-rose-500',   'bg-amber-500',
+  ];
+  return colors[(name.charCodeAt(0) || 0) % colors.length];
+}
 
-  const [viewMode, setViewMode]           = useState<ViewMode>('list');
-  const [searchCount, setSearchCount]     = useState(30);
-  const [searchDelay, setSearchDelay]     = useState(5);
+function sessionFresh(lastRun?: string | null): boolean {
+  if (!lastRun) return false;
+  return Date.now() - new Date(lastRun).getTime() < 24 * 60 * 60 * 1000;
+}
 
-  const isRunning = status?.isRunning ?? false;
+// ─── Account card (matching the screenshot style) ────────────────────────────
 
-  const totalPoints   = accounts.reduce((s, a) => s + a.todayPoints, 0);
-  const totalSearches = accounts.reduce((s, a) => s + (a.searchesCompleted ?? 0), 0);
-
-  const handleRunAll = () => {
-    if (isRunning) return;
-    runNow.mutate({ data: {} });
-  };
-
-  const handleRunAccount = (id: string) => {
-    if (isRunning) return;
-    runNow.mutate({ data: { accountIds: [id] } });
-  };
-
-  const handleStop = () => {
-    // Stop is fire-and-forget — the server's simulated run will finish naturally.
-    // In a production setup you'd call a /desk/stop endpoint here.
-    // For now just show the visual feedback (status polling handles the rest).
-  };
-
-  // ── Stepper helpers ──────────────────────────────────────────────────────────
-  const decSearch = () => setSearchCount((v) => Math.max(1, v - 1));
-  const incSearch = () => setSearchCount((v) => Math.min(50, v + 1));
-  const decDelay  = () => setSearchDelay((v) => Math.max(1, v - 1));
-  const incDelay  = () => setSearchDelay((v) => Math.min(30, v + 1));
+function AccountCard({
+  account,
+  onRun,
+  globalRunning,
+}: {
+  account: DeskAccount;
+  onRun: (id: string) => void;
+  globalRunning: boolean;
+}) {
+  const initial = (account.name?.[0] ?? account.email?.[0] ?? 'U').toUpperCase();
+  const fresh   = sessionFresh(account.lastRun);
+  const status  = account.status ?? 'idle';
 
   return (
-    <div className="p-8 max-w-7xl mx-auto w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="bg-[hsl(220,35%,13%)] border border-border rounded-xl p-4 flex flex-col gap-3">
 
-      {/* ── Page header ────────────────────────────────────────────────────── */}
-      <div className="flex items-end justify-between">
-        <div>
-          <h2 className="text-2xl font-mono font-bold tracking-tight text-white mb-2 uppercase flex items-center gap-3">
-            <Activity className="w-6 h-6 text-primary" />
-            Control Center
-          </h2>
-          <p className="text-muted-foreground font-mono text-sm">
-            System oversight and execution parameters.
-          </p>
-        </div>
-      </div>
-
-      {/* ── Top row: status panel + stats ──────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {/* Main status panel */}
-        <Card className="md:col-span-2 glass-panel border-primary/20 box-shadow-cyan overflow-hidden relative">
-          {isRunning && (
-            <div className="absolute top-0 left-0 right-0 h-1 bg-primary animate-pulse" />
-          )}
-          <div className="p-8 flex flex-col h-full justify-between relative z-10 gap-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-2">
-                  Automaton Status
-                </p>
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    <div className={`w-4 h-4 rounded-full ${isRunning ? 'bg-primary animate-pulse' : 'bg-muted-foreground/50'}`} />
-                    {isRunning && (
-                      <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-75" />
-                    )}
-                  </div>
-                  <h3
-                    className={`text-3xl font-mono font-bold ${
-                      isRunning ? 'text-primary text-shadow-cyan' : 'text-muted-foreground'
-                    }`}
-                  >
-                    {isRunning ? 'EXECUTING' : 'STANDBY'}
-                  </h3>
-                </div>
-              </div>
-
-              {/* Primary action button */}
-              {isRunning ? (
-                <Button
-                  onClick={handleStop}
-                  size="lg"
-                  className="font-mono tracking-widest uppercase bg-destructive/20 text-destructive border border-destructive/50 hover:bg-destructive/30"
-                >
-                  <Square className="mr-2 w-4 h-4" />
-                  Stop
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleRunAll}
-                  disabled={runNow.isPending || isAccountsLoading}
-                  size="lg"
-                  className="font-mono tracking-widest uppercase bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)]"
-                >
-                  {runNow.isPending ? (
-                    <>
-                      <Zap className="mr-2 w-5 h-5 animate-pulse" />
-                      Starting…
-                    </>
-                  ) : (
-                    <>
-                      <Power className="mr-2 w-5 h-5" />
-                      Initiate Sequence
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-
-            {/* Inline settings: search count + delay steppers */}
-            <div className="grid grid-cols-2 gap-4 border border-border/40 rounded-xl p-4 bg-black/20">
-              {/* Search count */}
-              <div className="flex flex-col items-center gap-3">
-                <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">
-                  Search Count
-                </p>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={decSearch}
-                    className="w-9 h-9 rounded-full bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors"
-                    aria-label="Decrease search count"
-                  >
-                    <Minus className="w-4 h-4 text-foreground" />
-                  </button>
-                  <span className="font-mono font-bold text-3xl text-white w-12 text-center">
-                    {searchCount}
-                  </span>
-                  <button
-                    onClick={incSearch}
-                    className="w-9 h-9 rounded-full bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors"
-                    aria-label="Increase search count"
-                  >
-                    <Plus className="w-4 h-4 text-foreground" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="relative flex flex-col items-center gap-3">
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-border/50" />
-                <p className="text-[11px] font-mono text-muted-foreground uppercase tracking-widest">
-                  Delay (sec)
-                </p>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={decDelay}
-                    className="w-9 h-9 rounded-full bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors"
-                    aria-label="Decrease delay"
-                  >
-                    <Minus className="w-4 h-4 text-foreground" />
-                  </button>
-                  <span className="font-mono font-bold text-3xl text-white w-16 text-center">
-                    {searchDelay}s
-                  </span>
-                  <button
-                    onClick={incDelay}
-                    className="w-9 h-9 rounded-full bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors"
-                    aria-label="Increase delay"
-                  >
-                    <Plus className="w-4 h-4 text-foreground" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Active target / last cycle */}
-            <div className="grid grid-cols-2 gap-4 border-t border-border/50 pt-4">
-              <div>
-                <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-1">
-                  Active Target
-                </p>
-                <p className="font-mono text-sm truncate max-w-[200px]">
-                  {status?.currentAccount || (
-                    <span className="text-muted-foreground opacity-50">NONE</span>
-                  )}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-1">
-                  Last Cycle
-                </p>
-                <p className="font-mono text-sm">
-                  {status?.lastRunAt ? (
-                    new Date(status.lastRunAt).toLocaleTimeString()
-                  ) : (
-                    <span className="text-muted-foreground opacity-50">N/A</span>
-                  )}
-                </p>
-              </div>
-            </div>
+      {/* Header row */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className={cn('w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-base shrink-0', avatarColor(account.name ?? ''))}>
+            {initial}
           </div>
-        </Card>
-
-        {/* Global stats column */}
-        <div className="space-y-6">
-          <Card className="glass-panel p-6 flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-2">
-              <Coins className="w-5 h-5 text-yellow-500" />
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                Yield Today
-              </p>
-            </div>
-            <p className="text-4xl font-mono font-bold text-white tracking-tight">
-              {isAccountsLoading ? '--' : totalPoints.toLocaleString()}
-            </p>
-          </Card>
-
-          <Card className="glass-panel p-6 flex flex-col justify-center">
-            <div className="flex items-center gap-3 mb-2">
-              <Search className="w-5 h-5 text-green-500" />
-              <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                Queries Executed
-              </p>
-            </div>
-            <p className="text-4xl font-mono font-bold text-white tracking-tight">
-              {isStatusLoading ? '--' : (status?.totalSearchesToday ?? totalSearches).toLocaleString()}
-            </p>
-          </Card>
+          <div className="min-w-0">
+            <p className="font-semibold text-sm text-white truncate">{account.name}</p>
+            <p className="text-xs text-muted-foreground truncate">{account.email}</p>
+          </div>
         </div>
+        <button className="text-muted-foreground hover:text-foreground shrink-0 ml-2">
+          <MoreVertical className="w-4 h-4" />
+        </button>
       </div>
 
-      {/* ── Target Array ────────────────────────────────────────────────────── */}
-      <div>
-        {/* Section header with stats bar + view toggle */}
-        <div className="flex items-center justify-between mb-3 gap-4">
-          <h3 className="text-lg font-mono font-bold tracking-tight text-white uppercase shrink-0">
-            Target Array
-          </h3>
-
-          {/* Stats bar (shown when there are accounts) */}
-          {accounts.length > 0 && !isAccountsLoading && (
-            <div className="flex-1 max-w-sm">
-              <StatsBar accounts={accounts} />
-            </div>
-          )}
-
-          {/* View toggle + per-account run-all */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Run All / Stop toggle */}
-            {accounts.length > 0 && (
-              isRunning ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleStop}
-                  className="font-mono text-xs uppercase tracking-wider text-destructive border-destructive/40 hover:bg-destructive/10"
-                >
-                  <Square className="w-3.5 h-3.5 mr-1.5" />
-                  Stop All
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  onClick={handleRunAll}
-                  disabled={runNow.isPending}
-                  className="font-mono text-xs uppercase tracking-wider bg-primary hover:bg-primary/90 text-primary-foreground"
-                >
-                  <Play className="w-3.5 h-3.5 mr-1.5" />
-                  Run All
-                </Button>
-              )
+      {/* Status line */}
+      <div className="flex items-center gap-2 text-sm">
+        {status === 'idle' && (
+          <>
+            <span className="text-muted-foreground">Idle</span>
+            {fresh && (
+              <>
+                <span className="text-muted-foreground">·</span>
+                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/15 text-green-400 border border-green-500/25">
+                  Session active
+                </span>
+              </>
             )}
+          </>
+        )}
+        {status === 'running' && (
+          <span className="text-sm text-muted-foreground">
+            Status - <span className="text-blue-400 font-medium">Running</span>
+          </span>
+        )}
+        {status === 'done' && (
+          <span className="text-sm text-muted-foreground">
+            Status - <span className="text-green-400 font-medium">Done</span>
+          </span>
+        )}
+        {status === 'failed' && (
+          <span className="text-sm text-muted-foreground">
+            Status - <span className="text-red-400 font-medium">Failed</span>
+          </span>
+        )}
+      </div>
 
-            {/* View mode toggle */}
-            <div className="flex items-center border border-border/50 rounded-lg overflow-hidden bg-black/30">
-              <button
-                onClick={() => setViewMode('list')}
-                className={cn(
-                  'flex items-center justify-center w-9 h-8 transition-colors',
-                  viewMode === 'list'
-                    ? 'bg-primary/20 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                )}
-                title="List view"
-              >
-                <LayoutList className="w-4 h-4" />
-              </button>
-              <div className="w-px h-4 bg-border/50" />
-              <button
-                onClick={() => setViewMode('grid')}
-                className={cn(
-                  'flex items-center justify-center w-9 h-8 transition-colors',
-                  viewMode === 'grid'
-                    ? 'bg-primary/20 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                )}
-                title="Grid view"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
+      {/* Action buttons */}
+      {status === 'idle' ? (
+        /* Idle: large blue play + settings */
+        <div className="flex gap-2">
+          <button
+            onClick={() => onRun(account.id)}
+            disabled={globalRunning}
+            className="flex-1 flex items-center justify-center gap-2 h-9 rounded-md bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground text-sm font-medium transition-colors"
+          >
+            <Play className="w-4 h-4 fill-current" />
+          </button>
+          <button className="flex-1 flex items-center justify-center gap-2 h-9 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium transition-colors">
+            <Settings2 className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        /* Running / Done / Failed: smaller icon trio */
+        <div className="flex gap-2">
+          <button
+            onClick={() => onRun(account.id)}
+            disabled={globalRunning}
+            className="flex-1 flex items-center justify-center h-9 rounded-md bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground transition-colors border border-border"
+          >
+            <Play className="w-4 h-4" />
+          </button>
+          <button className="flex-1 flex items-center justify-center h-9 rounded-md bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors border border-border">
+            <Download className="w-4 h-4" />
+          </button>
+          <button className="flex-1 flex items-center justify-center h-9 rounded-md bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors border border-border">
+            <Settings2 className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
+export default function Home() {
+  const { status, runNow } = useBotStatus();
+  const { accounts, isLoading: accountsLoading } = useAccounts();
+  const { logs, isLoading: logsLoading } = useRunLogs();
+
+  const [searchCount, setSearchCount] = useState(30);
+  const [delay, setDelay]             = useState(5);
+  const [activeTab, setActiveTab]     = useState<'live' | 'queue' | 'editor'>('live');
+
+  const isRunning = status?.isRunning ?? false;
+  const done      = accounts.filter(a => a.status === 'done').length;
+  const running   = accounts.filter(a => a.status === 'running').length;
+  const failed    = accounts.filter(a => a.status === 'failed').length;
+
+  const handleRunAll = () => { if (!isRunning) runNow.mutate({ data: {} }); };
+  const handleRunOne = (id: string) => { if (!isRunning) runNow.mutate({ data: { accountIds: [id] } }); };
+
+  return (
+    <div className="p-6 space-y-5 min-h-full">
+
+      {/* ── Page header ──────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-white">Accounts</h1>
+        <div className="flex items-center gap-4">
+          {/* Stop / Run All */}
+          {isRunning ? (
+            <button className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors">
+              <Square className="w-3.5 h-3.5 fill-current" />
+              Stop
+            </button>
+          ) : (
+            <button
+              onClick={handleRunAll}
+              disabled={runNow.isPending || accountsLoading}
+              className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+              Stop
+            </button>
+          )}
+
+          {/* Badge */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Users className="w-4 h-4" />
+            <span>{accounts.length} Accounts Connected</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Two info panels ──────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-4">
+
+        {/* Instance Status */}
+        <div className="bg-[hsl(220,35%,11%)] border border-border rounded-xl p-5">
+          <p className="text-sm font-semibold text-white mb-4">Instance Status</p>
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-7 h-7 text-green-400 shrink-0" />
+              <div>
+                <p className="text-2xl font-bold text-white leading-none">{done}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Done</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <PlayCircle className="w-7 h-7 text-blue-400 shrink-0" />
+              <div>
+                <p className="text-2xl font-bold text-white leading-none">{running}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Running</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-7 h-7 text-red-400 shrink-0" />
+              <div>
+                <p className="text-2xl font-bold text-white leading-none">{failed}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Failed</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Account list / grid */}
-        {isAccountsLoading ? (
-          viewMode === 'list' ? (
-            <div className="space-y-2">
-              {Array(3).fill(0).map((_, i) => (
-                <div key={i} className="h-28 rounded-xl bg-white/5 border border-border/40 animate-pulse" />
+        {/* Global Execution Parameters */}
+        <div className="bg-[hsl(220,35%,11%)] border border-border rounded-xl p-5">
+          <p className="text-sm font-semibold text-white mb-4">Global Execution Parameters</p>
+          <div className="flex items-end gap-5">
+            {/* Search Count */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">Search Count</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSearchCount(v => Math.max(1, v - 1))}
+                  className="w-7 h-7 flex items-center justify-center rounded bg-white/8 hover:bg-white/15 text-foreground border border-border transition-colors"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="w-10 text-center font-semibold text-white text-sm">{searchCount}</span>
+                <button
+                  onClick={() => setSearchCount(v => Math.min(50, v + 1))}
+                  className="w-7 h-7 flex items-center justify-center rounded bg-white/8 hover:bg-white/15 text-foreground border border-border transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+
+            {/* Delay */}
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs text-muted-foreground">Delay</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setDelay(v => Math.max(1, v - 1))}
+                  className="w-7 h-7 flex items-center justify-center rounded bg-white/8 hover:bg-white/15 text-foreground border border-border transition-colors"
+                >
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="w-10 text-center font-semibold text-white text-sm">{delay}s</span>
+                <button
+                  onClick={() => setDelay(v => Math.max(1, v + 1))}
+                  className="w-7 h-7 flex items-center justify-center rounded bg-white/8 hover:bg-white/15 text-foreground border border-border transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+
+            {/* Apply Config */}
+            <button className="ml-auto px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium transition-colors shrink-0">
+              Apply Config
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Bottom split: account grid + logs panel ───────────────────────── */}
+      <div className="flex gap-4 min-h-0">
+
+        {/* Account cards — 2 × N grid */}
+        <div className="flex-1 min-w-0">
+          <h2 className="text-sm font-semibold text-white mb-3">Accounts</h2>
+
+          {accountsLoading ? (
+            <div className="grid grid-cols-2 gap-3">
+              {Array(4).fill(0).map((_, i) => (
+                <div key={i} className="h-40 rounded-xl bg-white/5 border border-border animate-pulse" />
               ))}
+            </div>
+          ) : accounts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 border border-dashed border-border rounded-xl text-muted-foreground text-sm">
+              No accounts yet — add one from the Accounts page.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {Array(4).fill(0).map((_, i) => (
-                <div key={i} className="h-52 rounded-xl bg-white/5 border border-border/40 animate-pulse" />
+            <div className="grid grid-cols-2 gap-3">
+              {accounts.map(account => (
+                <AccountCard
+                  key={account.id}
+                  account={account}
+                  onRun={handleRunOne}
+                  globalRunning={isRunning}
+                />
               ))}
             </div>
-          )
-        ) : accounts.length === 0 ? (
-          <div className="py-16 text-center border border-dashed border-border/50 rounded-xl">
-            <p className="text-muted-foreground font-mono text-sm">No targets configured.</p>
-            <p className="text-muted-foreground/50 font-mono text-xs mt-1">
-              Add an account from the Target Directory.
-            </p>
-          </div>
-        ) : viewMode === 'list' ? (
-          <div className="space-y-2">
-            {accounts.map((account, i) => (
-              <div
-                key={account.id}
-                className="animate-in fade-in slide-in-from-bottom-1"
-                style={{ animationDelay: `${i * 60}ms`, animationFillMode: 'both' }}
+          )}
+        </div>
+
+        {/* Live Logs panel */}
+        <div className="w-80 shrink-0 flex flex-col">
+          {/* Tabs */}
+          <div className="flex border-b border-border mb-0">
+            {(['live', 'queue', 'editor'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  'px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors',
+                  activeTab === tab
+                    ? 'border-primary text-white'
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                )}
               >
-                <AccountCard
-                  account={account}
-                  onRun={handleRunAccount}
-                  isRunningGlobal={isRunning}
-                />
-              </div>
+                {tab === 'live' ? 'Live Logs' : tab === 'queue' ? 'Query Queue' : 'Task Editor'}
+              </button>
             ))}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {accounts.map((account, i) => (
-              <div
-                key={account.id}
-                className="animate-in fade-in slide-in-from-bottom-2"
-                style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
-              >
-                <AccountGridTile
-                  account={account}
-                  onRun={handleRunAccount}
-                  isRunningGlobal={isRunning}
-                />
-              </div>
-            ))}
+
+          {/* Log table */}
+          <div className="flex-1 bg-[hsl(220,35%,11%)] border border-border rounded-b-xl overflow-hidden flex flex-col">
+            {/* Table header */}
+            <div className="grid grid-cols-3 px-3 py-2 border-b border-border bg-[hsl(220,35%,13%)]">
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Status</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Time stamp</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Result</span>
+            </div>
+
+            {/* Rows */}
+            <div className="overflow-y-auto flex-1 custom-scrollbar">
+              {logsLoading ? (
+                <div className="p-4 text-center text-muted-foreground text-xs">Loading…</div>
+              ) : logs.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-xs">No logs yet.</div>
+              ) : (
+                logs.slice().reverse().map((log) => {
+                  const ts = new Date(log.timestamp);
+                  const timeStr = `${ts.getFullYear()}-${String(ts.getMonth()+1).padStart(2,'0')}-${String(ts.getDate()).padStart(2,'0')} ${ts.toTimeString().slice(0,8)}`;
+                  const isRunningRow = log.status === 'running';
+                  return (
+                    <div
+                      key={log.id}
+                      className={cn(
+                        'grid grid-cols-3 px-3 py-2 text-xs border-b border-border/50',
+                        isRunningRow ? 'bg-blue-500/8 text-blue-300' : 'text-muted-foreground'
+                      )}
+                    >
+                      <span className={cn('font-medium capitalize', isRunningRow ? 'text-blue-400' : 'text-foreground')}>
+                        {isRunningRow ? 'Running' : 'Query'}
+                      </span>
+                      <span className="font-mono text-[10px] truncate">{timeStr}</span>
+                      <span className="truncate">
+                        {log.errorMessage
+                          ? `Error: ${log.errorMessage.slice(0, 20)}…`
+                          : `Result [from : ${(log.accountName ?? '').slice(0, 8)}…]`}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
