@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import * as Updates from "expo-updates";
-import { CheckSquare, ChevronRight, Clock, Crown, Download, Key, Moon, Search, Shield, X } from "lucide-react-native";
+import { CheckSquare, ChevronRight, Clock, Crown, Download, FlaskConical, Key, Moon, Search, Shield, Trash2, X } from "lucide-react-native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -46,7 +46,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
   const { licenseData, featureConfig, removeLicense, isOwnerMode, adminPanelVisible, revalidate, error: licenseError } = useLicense();
-  const { accounts } = useAccounts();
+  const { accounts, addAccount, updateAccount, removeAccount } = useAccounts();
   const { showAlert, AlertComponent } = useCustomAlert();
 
   const [searchCountText, setSearchCountText] = useState(
@@ -441,6 +441,121 @@ export default function SettingsScreen() {
             </Text>
           </Pressable>
         </Section>
+
+        {/* ── DEVELOPER ─────────────────────────────────────── */}
+        {isOwnerMode && (
+          <Section title="DEVELOPER" colors={colors}>
+            <View style={[styles.card, { backgroundColor: colors.surface }]}>
+              <Pressable
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  const demoNames = [
+                    "Alex Johnson",
+                    "Sam Rivera",
+                    "Jordan Lee",
+                    "Casey Morgan",
+                    "Taylor Smith",
+                  ];
+                  const picked = demoNames[Math.floor(Math.random() * demoNames.length)];
+                  const suffix = Math.floor(Math.random() * 9000 + 1000);
+                  const newId = Date.now().toString() + Math.random().toString(36).slice(2);
+                  // addAccount omits totalPoints/todayPoints/searchesCompleted — patch them right after
+                  addAccount({
+                    name: picked,
+                    email: `demo.${suffix}@example.com`,
+                    avatarUrl: undefined,
+                    lastRun: new Date(Date.now() - Math.random() * 86400000 * 3).toISOString(),
+                    searchCount: 30,
+                    dailySetEnabled: true,
+                    enabled: true,
+                    cookies: {},
+                  });
+                  // updateAccount runs after the setAccounts batch — patch in fake stats
+                  setTimeout(() => {
+                    // find the just-added demo account by matching the unique email suffix
+                    const emailTarget = `demo.${suffix}@example.com`;
+                    const target = accounts.find((a) => a.email === emailTarget);
+                    if (target) {
+                      updateAccount(target.id, {
+                        totalPoints: Math.floor(Math.random() * 40000 + 5000),
+                        todayPoints: Math.floor(Math.random() * 150 + 10),
+                        searchesCompleted: Math.floor(Math.random() * 30),
+                      });
+                    }
+                  }, 100);
+                  showAlert("Demo Account Added", "A demo account has been added to the Home tab so you can preview the UI with populated data.", [{ text: "Got it" }]);
+                }}
+                style={({ pressed }) => [styles.settingRow, { opacity: pressed ? 0.7 : 1 }]}
+              >
+                <View style={styles.settingLabel}>
+                  <View style={[styles.iconBg, { backgroundColor: "#F0FDF4" }]}>
+                    <FlaskConical size={16} color="#16a34a" />
+                  </View>
+                  <View style={styles.labelText}>
+                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                      Add Demo Account
+                    </Text>
+                    <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                      Inject a fake account to preview the UI
+                    </Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: "#16a34a18", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
+                  <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#16a34a" }}>DEV</Text>
+                </View>
+              </Pressable>
+
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+              <Pressable
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  const demoAccounts = accounts.filter((a) => a.email.startsWith("demo.") && a.email.endsWith("@example.com"));
+                  if (demoAccounts.length === 0) {
+                    showAlert("No Demo Accounts", "There are no demo accounts to remove.", [{ text: "OK" }]);
+                    return;
+                  }
+                  showAlert(
+                    "Remove Demo Accounts",
+                    `Remove ${demoAccounts.length} demo account${demoAccounts.length > 1 ? "s" : ""}?`,
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Remove",
+                        style: "destructive",
+                        onPress: () => {
+                          demoAccounts.forEach((a) => removeAccount(a.id));
+                        },
+                      },
+                    ]
+                  );
+                }}
+                style={({ pressed }) => [styles.settingRow, { opacity: pressed ? 0.7 : 1 }]}
+              >
+                <View style={styles.settingLabel}>
+                  <View style={[styles.iconBg, { backgroundColor: "#FFF1F2" }]}>
+                    <Trash2 size={16} color="#e11d48" />
+                  </View>
+                  <View style={styles.labelText}>
+                    <Text style={[styles.settingTitle, { color: colors.text }]}>
+                      Clear Demo Accounts
+                    </Text>
+                    <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>
+                      Remove all injected demo accounts
+                    </Text>
+                  </View>
+                </View>
+                {accounts.filter((a) => a.email.startsWith("demo.") && a.email.endsWith("@example.com")).length > 0 && (
+                  <View style={{ backgroundColor: "#e11d4818", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 4 }}>
+                    <Text style={{ fontSize: 11, fontFamily: "Inter_600SemiBold", color: "#e11d48" }}>
+                      {accounts.filter((a) => a.email.startsWith("demo.") && a.email.endsWith("@example.com")).length}
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+            </View>
+          </Section>
+        )}
 
         <View style={{ height: insets.bottom + 40 }} />
       </ScrollView>

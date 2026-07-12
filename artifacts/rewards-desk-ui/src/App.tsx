@@ -9,6 +9,7 @@ import { Layout } from '@/components/layout';
 import Home from '@/pages/home';
 import Accounts from '@/pages/accounts';
 import Console from '@/pages/console';
+import Settings from '@/pages/settings';
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/accounts" component={Accounts} />
       <Route path="/console" component={Console} />
+      <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );

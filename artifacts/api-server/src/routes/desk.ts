@@ -8,7 +8,7 @@ import {
   GetBotStatusResponse,
   GetRunLogsResponseItem,
 } from "@workspace/api-zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const router = Router();
 
@@ -257,6 +257,44 @@ router.get("/desk/status", (_req, res): void => {
 // GET /desk/logs
 router.get("/desk/logs", (_req, res): void => {
   res.json(runLogs.slice(0, 50));
+});
+
+// POST /desk/seed-demo — add a batch of demo accounts for dev/preview purposes
+router.post("/desk/seed-demo", (_req, res): void => {
+  const demoAccounts = [
+    { name: "Demo User A", email: "demo.a@outlook.com" },
+    { name: "Demo User B", email: "demo.b@hotmail.com" },
+    { name: "Demo User C", email: "demo.c@live.com" },
+    { name: "Demo User D", email: "demo.d@msn.com" },
+  ];
+
+  let added = 0;
+  for (const d of demoAccounts) {
+    const alreadyExists = accounts.some(a => a.email === d.email);
+    if (!alreadyExists) {
+      accounts.push({
+        id: randomUUID(),
+        email: d.email,
+        name: d.name,
+        status: "idle",
+        totalPoints: Math.floor(Math.random() * 20000) + 1000,
+        todayPoints: Math.floor(Math.random() * 500),
+        lastRun: null,
+        searchesCompleted: Math.floor(Math.random() * 50),
+      });
+      added++;
+    }
+  }
+
+  res.json({ added, total: accounts.length });
+});
+
+// DELETE /desk/seed-demo — remove all demo accounts
+router.delete("/desk/seed-demo", (_req, res): void => {
+  const before = accounts.length;
+  const demoEmails = ["demo.a@outlook.com", "demo.b@hotmail.com", "demo.c@live.com", "demo.d@msn.com"];
+  accounts.splice(0, accounts.length, ...accounts.filter(a => !demoEmails.includes(a.email)));
+  res.json({ removed: before - accounts.length, total: accounts.length });
 });
 
 export default router;
