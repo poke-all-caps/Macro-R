@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import {
-  Users, Settings,
-  LayoutGrid, List, FileText, Cog, Key,
+  Users, Settings, Bell,
+  LayoutGrid, List, FileText, Cog, Key, Plus,
 } from "lucide-react";
 import { useBotStatus, useAccounts } from "@/hooks/use-desk";
 import { useLicense, TIER_META } from "@/hooks/use-license";
@@ -47,6 +47,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Right side actions */}
         <div className="flex items-center gap-2 shrink-0">
 
+          {/* Add Account */}
+          <Link href="/accounts">
+            <button className="flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors">
+              <Plus className="w-4 h-4" />
+              <span>Add Account</span>
+            </button>
+          </Link>
+
+          {/* Bell + Notifications */}
+          <button className="flex items-center gap-1.5 h-9 px-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
+            <Bell className="w-4 h-4" />
+            <span className="text-sm">Notifications</span>
+          </button>
+
           {/* System status dot */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(220,35%,13%)] border border-border text-xs">
             <div className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-green-400 animate-pulse' : 'bg-green-400'}`} />
@@ -73,6 +87,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             )}
           </div>
 
+          {/* Profile avatar */}
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-sm shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all select-none">
+            M
+          </div>
 
         </div>
       </header>
