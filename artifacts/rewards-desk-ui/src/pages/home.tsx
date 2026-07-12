@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, Download, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
+import { Play, Download, Settings2, AlertCircle, Loader2 } from 'lucide-react';
+import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
 
@@ -96,12 +97,14 @@ function AccountCard({
           <Download className="w-4 h-4" />
           <span>Download</span>
         </button>
-        <button
-          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Re-Sync</span>
-        </button>
+        <Link href="/accounts" className="flex-1">
+          <button
+            className="w-full flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
+          >
+            <Settings2 className="w-4 h-4" />
+            <span>Settings</span>
+          </button>
+        </Link>
       </div>
     </div>
   );
