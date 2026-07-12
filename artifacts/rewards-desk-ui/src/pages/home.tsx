@@ -138,7 +138,6 @@ export default function Home() {
     { key: 'running', label: `Running (${counts.running})` },
     { key: 'done',    label: `Done (${counts.done})` },
     { key: 'failed',  label: `Failed (${counts.failed})` },
-    { key: 'idle',    label: `Idle (${counts.idle})` },
   ];
 
   return (
