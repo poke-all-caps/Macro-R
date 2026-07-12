@@ -85,8 +85,7 @@ function AccountCard({
         <Link href="/accounts">
           <button
             title="Settings"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full text-white transition-colors shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-[hsl(220,38%,9%)] border border-slate-700 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition-colors shadow-sm"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
