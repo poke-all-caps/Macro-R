@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, Download, Settings2, AlertCircle, Loader2, Square } from 'lucide-react';
+import { Play, AlertCircle, Loader2, Square, RefreshCw } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
@@ -79,30 +79,35 @@ function AccountCard({
         </div>
       </div>
 
-      {/* ── Bottom: Action buttons ── */}
-      <div className="flex justify-end gap-3 pt-3 border-t border-slate-700/50">
-        <button
-          onClick={() => onRun(account.id)}
-          disabled={isRunning || globalRunning}
-          title={isRunning ? 'Running…' : 'Play'}
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-blue-600/30 hover:text-blue-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-        </button>
-        <button
-          title="Download"
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors"
-        >
-          <Download className="w-4 h-4" />
-        </button>
+      {/* ── Footer: action buttons ── */}
+      <div className="flex items-center gap-2 pt-3 border-t border-slate-700/50">
+        {/* Circular re-sync / settings shortcut */}
         <Link href="/accounts">
           <button
             title="Settings"
-            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors"
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-400 text-white transition-colors shadow-sm"
           >
-            <Settings2 className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4" />
           </button>
         </Link>
+
+        {/* Search pill buttons */}
+        <button
+          onClick={() => onRun(account.id)}
+          disabled={isRunning || globalRunning}
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+        >
+          {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
+          <span>{isRunning ? 'Running…' : 'Search'}</span>
+        </button>
+
+        <button
+          disabled={globalRunning}
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+        >
+          <Play className="w-3.5 h-3.5 fill-white" />
+          <span>Search</span>
+        </button>
       </div>
     </div>
   );
