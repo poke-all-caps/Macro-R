@@ -31,12 +31,28 @@ export function useAccounts() {
     }
   });
 
+  const updateAccount = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: { name?: string; email?: string; resync?: boolean } }) => {
+      const res = await fetch(`/api/desk/accounts/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
+    },
+  });
+
   return {
     accounts: query.data || [],
     isLoading: query.isLoading,
     error: query.error,
     addAccount,
     deleteAccount,
+    updateAccount,
   };
 }
 

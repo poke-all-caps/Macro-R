@@ -137,6 +137,33 @@ router.post("/desk/accounts", (req, res): void => {
   res.status(201).json(account);
 });
 
+// PATCH /desk/accounts/:id
+router.patch("/desk/accounts/:id", (req, res): void => {
+  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const idx = accounts.findIndex((a) => a.id === raw);
+  if (idx === -1) {
+    res.status(404).json({ error: "Account not found" });
+    return;
+  }
+  const body = z.object({
+    name:  z.string().min(1).optional(),
+    email: z.string().email().optional(),
+    resync: z.boolean().optional(),
+  }).safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ error: body.error.message });
+    return;
+  }
+  if (body.data.name)  accounts[idx].name  = body.data.name;
+  if (body.data.email) accounts[idx].email = body.data.email;
+  if (body.data.resync) {
+    accounts[idx].status = "idle";
+    accounts[idx].searchesCompleted = 0;
+    accounts[idx].todayPoints = 0;
+  }
+  res.json(accounts[idx]);
+});
+
 // DELETE /desk/accounts/:id
 router.delete("/desk/accounts/:id", (req, res): void => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
