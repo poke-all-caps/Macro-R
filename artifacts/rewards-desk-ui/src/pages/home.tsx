@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, AlertCircle, Loader2, Square, RefreshCw } from 'lucide-react';
+import { Play, AlertCircle, Loader2, Square, Power } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
@@ -87,7 +87,7 @@ function AccountCard({
             title="Settings"
             className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-[hsl(220,38%,9%)] border border-slate-700 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition-colors shadow-sm"
           >
-            <RefreshCw className="w-4 h-4" />
+            <Power className="w-4 h-4" />
           </button>
         </Link>
 
