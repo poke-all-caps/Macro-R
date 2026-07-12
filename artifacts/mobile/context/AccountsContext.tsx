@@ -59,6 +59,7 @@ interface AccountsContextType {
   addAccount: (
     account: Omit<Account, "id" | "status" | "totalPoints" | "todayPoints" | "searchesCompleted">
   ) => void;
+  addDemoAccount: (account: Omit<Account, "id" | "status">) => void;
   updateAccount: (id: string, updates: Partial<Account>) => void;
   removeAccount: (id: string) => void;
   addLog: (log: Omit<RunLog, "id">) => void;
@@ -293,6 +294,22 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
     [saveAccounts, syncCookiesToServer]
   );
 
+  const addDemoAccount = useCallback(
+    (account: Omit<Account, "id" | "status">) => {
+      const newAccount: Account = {
+        ...account,
+        id: Date.now().toString() + Math.random().toString(36).slice(2),
+        status: "idle",
+      };
+      setAccounts((prev) => {
+        const updated = [...prev, newAccount];
+        saveAccounts(updated);
+        return updated;
+      });
+    },
+    [saveAccounts]
+  );
+
   const updateAccount = useCallback(
     (id: string, updates: Partial<Account>) => {
       setAccounts((prev) => {
@@ -418,6 +435,7 @@ export function AccountsProvider({ children }: { children: React.ReactNode }) {
         logs,
         isRunning,
         addAccount,
+        addDemoAccount,
         updateAccount,
         removeAccount,
         addLog,

@@ -46,7 +46,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, updateSettings } = useSettings();
   const { licenseData, featureConfig, removeLicense, isOwnerMode, adminPanelVisible, revalidate, error: licenseError } = useLicense();
-  const { accounts, addAccount, updateAccount, removeAccount } = useAccounts();
+  const { accounts, addDemoAccount, removeAccount } = useAccounts();
   const { showAlert, AlertComponent } = useCustomAlert();
 
   const [searchCountText, setSearchCountText] = useState(
@@ -458,9 +458,7 @@ export default function SettingsScreen() {
                   ];
                   const picked = demoNames[Math.floor(Math.random() * demoNames.length)];
                   const suffix = Math.floor(Math.random() * 9000 + 1000);
-                  const newId = Date.now().toString() + Math.random().toString(36).slice(2);
-                  // addAccount omits totalPoints/todayPoints/searchesCompleted — patch them right after
-                  addAccount({
+                  addDemoAccount({
                     name: picked,
                     email: `demo.${suffix}@example.com`,
                     avatarUrl: undefined,
@@ -469,20 +467,10 @@ export default function SettingsScreen() {
                     dailySetEnabled: true,
                     enabled: true,
                     cookies: {},
+                    totalPoints: Math.floor(Math.random() * 40000 + 5000),
+                    todayPoints: Math.floor(Math.random() * 150 + 10),
+                    searchesCompleted: Math.floor(Math.random() * 30),
                   });
-                  // updateAccount runs after the setAccounts batch — patch in fake stats
-                  setTimeout(() => {
-                    // find the just-added demo account by matching the unique email suffix
-                    const emailTarget = `demo.${suffix}@example.com`;
-                    const target = accounts.find((a) => a.email === emailTarget);
-                    if (target) {
-                      updateAccount(target.id, {
-                        totalPoints: Math.floor(Math.random() * 40000 + 5000),
-                        todayPoints: Math.floor(Math.random() * 150 + 10),
-                        searchesCompleted: Math.floor(Math.random() * 30),
-                      });
-                    }
-                  }, 100);
                   showAlert("Demo Account Added", "A demo account has been added to the Home tab so you can preview the UI with populated data.", [{ text: "Got it" }]);
                 }}
                 style={({ pressed }) => [styles.settingRow, { opacity: pressed ? 0.7 : 1 }]}
