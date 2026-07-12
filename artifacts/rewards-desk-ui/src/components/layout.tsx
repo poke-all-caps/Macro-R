@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import {
   Users, Settings, Bell,
-  LayoutGrid, List, FileText, Cog, Key, Plus, Play, Square,
+  LayoutGrid, List, FileText, Cog, Key, Plus,
 } from "lucide-react";
 import { useBotStatus, useAccounts } from "@/hooks/use-desk";
 import { useLicense, TIER_META } from "@/hooks/use-license";
@@ -41,27 +41,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <img src="/rewards-desk-ui/macro-rewards-logo.png" alt="Macro Rewards" className="h-9 w-auto" />
         </div>
 
-        {/* Global Command Hub — centered */}
-        <div className="flex-1 flex justify-center">
-          <div className="flex items-center bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
-            <button
-              onClick={() => status && runNow.mutate({ data: { accountIds: accounts.map(a => a.id) } })}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all group"
-            >
-              <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400 group-hover:text-emerald-300" />
-              Start All
-            </button>
-
-            <div className="w-[1px] h-4 bg-slate-600 mx-1" />
-
-            <button
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all group"
-            >
-              <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400 group-hover:text-rose-300" />
-              Stop All
-            </button>
-          </div>
-        </div>
+        {/* Spacer */}
+        <div className="flex-1" />
 
         {/* Right side actions */}
         <div className="flex items-center gap-2 shrink-0">

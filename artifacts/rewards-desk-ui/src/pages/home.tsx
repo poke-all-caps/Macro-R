@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, Download, Settings2, AlertCircle, Loader2 } from 'lucide-react';
+import { Play, Download, Settings2, AlertCircle, Loader2, Square } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
@@ -79,30 +79,28 @@ function AccountCard({
         </div>
       </div>
 
-      {/* ── Bottom: Action buttons ── */}
-      <div className="flex gap-2 pt-3 border-t border-slate-700/50">
+      {/* ── Bottom: Action buttons (compact, right-aligned) ── */}
+      <div className="flex justify-end gap-2 pt-3 border-t border-slate-700/50">
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
-          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-blue-600/25 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-600/40 hover:border-blue-500/30"
+          title={isRunning ? 'Running…' : 'Play'}
+          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/60 text-slate-300 hover:bg-blue-600/25 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-600/40 hover:border-blue-500/30"
         >
-          {isRunning
-            ? <Loader2 className="w-4 h-4 animate-spin" />
-            : <Play className="w-4 h-4" />}
-          <span>{isRunning ? 'Running' : 'Play'}</span>
+          {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         </button>
         <button
-          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
+          title="Download"
+          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/60 text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
         >
           <Download className="w-4 h-4" />
-          <span>Download</span>
         </button>
-        <Link href="/accounts" className="flex-1">
+        <Link href="/accounts">
           <button
-            className="w-full flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
+            title="Settings"
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/60 text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
           >
             <Settings2 className="w-4 h-4" />
-            <span>Settings</span>
           </button>
         </Link>
       </div>
@@ -146,10 +144,29 @@ export default function Home() {
   return (
     <div className="px-6 py-6 space-y-5 min-h-full">
 
-      {/* ── Page title ───────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Accounts</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage and run your automation targets</p>
+      {/* ── Page title + command pill ────────────────────────────────────── */}
+      <div className="flex items-center gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Accounts</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage and run your automation targets</p>
+        </div>
+        <div className="flex items-center bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
+          <button
+            onClick={() => runNow.mutate({ data: { accountIds: accounts.map(a => a.id) } })}
+            disabled={isRunning}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-50 transition-all group"
+          >
+            <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
+            Start All
+          </button>
+          <div className="w-[1px] h-4 bg-slate-600 mx-1" />
+          <button
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all group"
+          >
+            <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
+            Stop All
+          </button>
+        </div>
       </div>
 
       {/* ── Filter pills ─────────────────────────────────────────────────── */}
@@ -183,7 +200,7 @@ export default function Home() {
           <p>{accounts.length === 0 ? 'No accounts yet — add one above.' : `No ${filter} accounts.`}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(account => (
             <AccountCard
               key={account.id}
