@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, AlertCircle, Loader2, Settings2 } from 'lucide-react';
+import { Play, AlertCircle, Loader2, Square, Power } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
 
-type Filter = 'all' | 'running' | 'done' | 'failed';
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+type Filter = 'all' | 'running' | 'done' | 'failed' | 'idle';
 
 function sessionFresh(lastRun?: string | null): boolean {
   if (!lastRun) return false;
   return Date.now() - new Date(lastRun).getTime() < 24 * 60 * 60 * 1000;
 }
+
+// ─── Card ─────────────────────────────────────────────────────────────────────
 
 function AccountCard({
   account,
@@ -28,62 +32,80 @@ function AccountCard({
 
   const statusConfig = {
     idle:    { label: fresh ? 'Session Active' : 'Idle', color: 'text-muted-foreground', dot: 'bg-slate-500' },
-    running: { label: 'Running…',                        color: 'text-blue-400',          dot: 'bg-blue-400 animate-pulse' },
+    running: { label: 'Running…',                        color: 'text-blue-400',          dot: 'bg-blue-400' },
     done:    { label: 'Done',                             color: 'text-green-400',         dot: 'bg-green-400' },
     failed:  { label: 'Failed',                           color: 'text-red-400',           dot: 'bg-red-400' },
   }[status] ?? { label: 'Unknown', color: 'text-muted-foreground', dot: 'bg-slate-500' };
 
   return (
-    <div className="flex flex-col bg-slate-800/80 border border-slate-700/50 rounded-xl p-4 gap-3 hover:border-slate-600/70 hover:bg-slate-800 transition-colors">
+    <div className="flex flex-col bg-slate-800/80 border border-slate-700/50 rounded-xl p-5 gap-4 hover:border-slate-600/70 hover:bg-slate-800 transition-colors">
 
-      {/* Avatar + info */}
-      <div className="flex items-center gap-3">
+      {/* ── Top: Avatar + info ── */}
+      <div className="flex items-center gap-4">
+        {/* Avatar */}
         <div className="relative shrink-0">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-xl shadow-md select-none">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-2xl shadow-md select-none">
             {initial}
           </div>
-          <span className={cn('absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-slate-800', statusConfig.dot)} />
+          <span className={cn(
+            'absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full border-2 border-slate-800',
+            statusConfig.dot,
+            isRunning && 'animate-pulse'
+          )} />
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-semibold text-sm text-white truncate">{account.name}</p>
-            <span className={cn('text-xs font-semibold shrink-0', statusConfig.color)}>{statusConfig.label}</span>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-semibold text-[15px] text-white leading-snug truncate">
+              {account.name}
+            </p>
+            <span className={cn('text-xs font-semibold', statusConfig.color)}>
+              {statusConfig.label}
+            </span>
           </div>
-          <p className="text-xs text-muted-foreground truncate">{account.email}</p>
-          <div className="flex items-center gap-1.5 text-xs font-mono mt-0.5">
-            <span className="text-amber-400 font-semibold">{account.totalPoints.toLocaleString()} pts</span>
+          <p className="text-sm text-muted-foreground truncate">
+            {account.email}
+          </p>
+          <div className="flex items-center gap-2 text-xs font-mono">
+            {account.totalPoints > 0 ? (
+              <span className="text-amber-400 font-semibold">{account.totalPoints.toLocaleString()} pts</span>
+            ) : (
+              <span className="text-muted-foreground">0 pts</span>
+            )}
             <span className="text-slate-600">·</span>
             <span className="text-muted-foreground">{account.searchesCompleted ?? 0} searches</span>
           </div>
         </div>
       </div>
 
-      {/* Footer buttons */}
-      <div className="flex items-center gap-2 pt-2 border-t border-slate-700/50">
-        {/* Circular settings shortcut */}
+      {/* ── Footer: action buttons ── */}
+      <div className="flex items-center gap-2 pt-3 border-t border-slate-700/50">
+        {/* Circular re-sync / settings shortcut */}
         <Link href="/accounts">
           <button
             title="Settings"
-            className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center bg-emerald-500 hover:bg-emerald-400 text-white transition-colors shadow-sm"
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-[hsl(220,38%,9%)] border border-slate-700 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition-colors shadow-sm"
           >
-            <Settings2 className="w-4 h-4" />
+            <Power className="w-4 h-4" />
           </button>
         </Link>
 
-        {/* Search pill 1 — triggers run */}
+        {/* Search pill buttons */}
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
+          style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
         >
           {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
           <span>{isRunning ? 'Running…' : 'Search'}</span>
         </button>
 
-        {/* Search pill 2 */}
         <button
           disabled={globalRunning}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
+          style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
         >
           <Play className="w-3.5 h-3.5 fill-white" />
           <span>Search</span>
@@ -92,6 +114,8 @@ function AccountCard({
     </div>
   );
 }
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const { status, runNow } = useBotStatus();
@@ -105,9 +129,13 @@ export default function Home() {
     running: accounts.filter(a => a.status === 'running').length,
     done:    accounts.filter(a => a.status === 'done').length,
     failed:  accounts.filter(a => a.status === 'failed').length,
+    idle:    accounts.filter(a => !a.status || a.status === 'idle').length,
   };
 
-  const filtered = filter === 'all' ? accounts : accounts.filter(a => a.status === filter);
+  const filtered = filter === 'all' ? accounts : accounts.filter(a => {
+    if (filter === 'idle') return !a.status || a.status === 'idle';
+    return a.status === filter;
+  });
 
   const handleRunOne = (id: string) => {
     if (!isRunning) runNow.mutate({ data: { accountIds: [id] } });
@@ -123,40 +151,61 @@ export default function Home() {
   return (
     <div className="px-6 py-6 space-y-5 min-h-full">
 
+      {/* ── Page title ───────────────────────────────────────────────────── */}
       <div>
         <h1 className="text-2xl font-bold text-white">Accounts</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage and run your automation targets</p>
       </div>
 
-      {/* Filter pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {PILLS.map(({ key, label }) => (
+      {/* ── Filter pills + command pill ───────────────────────────────────── */}
+      <div className="flex items-center justify-between w-full gap-4">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          {PILLS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              className={cn(
+                'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
+                filter === key
+                  ? 'bg-white text-black border-white'
+                  : 'bg-[hsl(220,30%,17%)] text-slate-300 border-transparent hover:bg-[hsl(220,30%,22%)] hover:text-white'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center shrink-0 bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
           <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={cn(
-              'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
-              filter === key
-                ? 'bg-white text-black border-white'
-                : 'bg-[hsl(220,30%,17%)] text-slate-300 border-transparent hover:bg-[hsl(220,30%,22%)] hover:text-white'
-            )}
+            onClick={() => runNow.mutate({ data: { accountIds: accounts.map(a => a.id) } })}
+            disabled={isRunning}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-50 transition-all"
           >
-            {label}
+            <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
+            Start All
           </button>
-        ))}
+          <div className="w-[1px] h-4 bg-slate-600 mx-1" />
+          <button
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
+          >
+            <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
+            Stop All
+          </button>
+        </div>
       </div>
 
-      {/* Account grid */}
+      {/* ── Account grid ─────────────────────────────────────────────────── */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array(4).fill(0).map((_, i) => (
-            <div key={i} className="h-40 rounded-xl bg-white/5 animate-pulse" />
+            <div key={i} className="h-44 rounded-xl bg-white/5 animate-pulse" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-48 text-muted-foreground text-sm gap-3">
           <AlertCircle className="w-10 h-10 opacity-20" />
-          <p>{accounts.length === 0 ? 'No accounts yet.' : `No ${filter} accounts.`}</p>
+          <p>{accounts.length === 0 ? 'No accounts yet — add one above.' : `No ${filter} accounts.`}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
