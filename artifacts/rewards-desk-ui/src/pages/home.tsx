@@ -1,20 +1,16 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, Download, Settings2, AlertCircle, Loader2 } from 'lucide-react';
+import { Play, AlertCircle, Loader2, Settings2 } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-type Filter = 'all' | 'running' | 'done' | 'failed' | 'idle';
+type Filter = 'all' | 'running' | 'done' | 'failed';
 
 function sessionFresh(lastRun?: string | null): boolean {
   if (!lastRun) return false;
   return Date.now() - new Date(lastRun).getTime() < 24 * 60 * 60 * 1000;
 }
-
-// ─── Card ─────────────────────────────────────────────────────────────────────
 
 function AccountCard({
   account,
@@ -32,85 +28,70 @@ function AccountCard({
 
   const statusConfig = {
     idle:    { label: fresh ? 'Session Active' : 'Idle', color: 'text-muted-foreground', dot: 'bg-slate-500' },
-    running: { label: 'Running…',                        color: 'text-blue-400',          dot: 'bg-blue-400' },
+    running: { label: 'Running…',                        color: 'text-blue-400',          dot: 'bg-blue-400 animate-pulse' },
     done:    { label: 'Done',                             color: 'text-green-400',         dot: 'bg-green-400' },
     failed:  { label: 'Failed',                           color: 'text-red-400',           dot: 'bg-red-400' },
   }[status] ?? { label: 'Unknown', color: 'text-muted-foreground', dot: 'bg-slate-500' };
 
   return (
-    <div className="flex flex-col bg-slate-800/80 border border-slate-700/50 rounded-xl p-5 gap-4 hover:border-slate-600/70 hover:bg-slate-800 transition-colors">
+    <div className="flex flex-col bg-slate-800/80 border border-slate-700/50 rounded-xl p-4 gap-3 hover:border-slate-600/70 hover:bg-slate-800 transition-colors">
 
-      {/* ── Top: Avatar + info ── */}
-      <div className="flex items-center gap-4">
-        {/* Avatar */}
+      {/* Avatar + info */}
+      <div className="flex items-center gap-3">
         <div className="relative shrink-0">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-2xl shadow-md select-none">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-xl shadow-md select-none">
             {initial}
           </div>
-          <span className={cn(
-            'absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full border-2 border-slate-800',
-            statusConfig.dot,
-            isRunning && 'animate-pulse'
-          )} />
+          <span className={cn('absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-slate-800', statusConfig.dot)} />
         </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0 space-y-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-semibold text-[15px] text-white leading-snug truncate">
-              {account.name}
-            </p>
-            <span className={cn('text-xs font-semibold', statusConfig.color)}>
-              {statusConfig.label}
-            </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-sm text-white truncate">{account.name}</p>
+            <span className={cn('text-xs font-semibold shrink-0', statusConfig.color)}>{statusConfig.label}</span>
           </div>
-          <p className="text-sm text-muted-foreground truncate">
-            {account.email}
-          </p>
-          <div className="flex items-center gap-2 text-xs font-mono">
-            {account.totalPoints > 0 ? (
-              <span className="text-amber-400 font-semibold">{account.totalPoints.toLocaleString()} pts</span>
-            ) : (
-              <span className="text-muted-foreground">0 pts</span>
-            )}
+          <p className="text-xs text-muted-foreground truncate">{account.email}</p>
+          <div className="flex items-center gap-1.5 text-xs font-mono mt-0.5">
+            <span className="text-amber-400 font-semibold">{account.totalPoints.toLocaleString()} pts</span>
             <span className="text-slate-600">·</span>
             <span className="text-muted-foreground">{account.searchesCompleted ?? 0} searches</span>
           </div>
         </div>
       </div>
 
-      {/* ── Bottom: Action buttons ── */}
-      <div className="flex gap-2 pt-3 border-t border-slate-700/50">
+      {/* Footer buttons */}
+      <div className="flex items-center gap-2 pt-2 border-t border-slate-700/50">
+        {/* Circular settings shortcut */}
+        <Link href="/accounts">
+          <button
+            title="Settings"
+            className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center bg-emerald-500 hover:bg-emerald-400 text-white transition-colors shadow-sm"
+          >
+            <Settings2 className="w-4 h-4" />
+          </button>
+        </Link>
+
+        {/* Search pill 1 — triggers run */}
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
-          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-blue-600/25 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-600/40 hover:border-blue-500/30"
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
-          {isRunning
-            ? <Loader2 className="w-4 h-4 animate-spin" />
-            : <Play className="w-4 h-4" />}
-          <span>{isRunning ? 'Running' : 'Play'}</span>
+          {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
+          <span>{isRunning ? 'Running…' : 'Search'}</span>
         </button>
+
+        {/* Search pill 2 */}
         <button
-          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
+          disabled={globalRunning}
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
-          <Download className="w-4 h-4" />
-          <span>Download</span>
+          <Play className="w-3.5 h-3.5 fill-white" />
+          <span>Search</span>
         </button>
-        <Link href="/accounts" className="flex-1">
-          <button
-            className="w-full flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
-          >
-            <Settings2 className="w-4 h-4" />
-            <span>Settings</span>
-          </button>
-        </Link>
       </div>
     </div>
   );
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const { status, runNow } = useBotStatus();
@@ -124,13 +105,9 @@ export default function Home() {
     running: accounts.filter(a => a.status === 'running').length,
     done:    accounts.filter(a => a.status === 'done').length,
     failed:  accounts.filter(a => a.status === 'failed').length,
-    idle:    accounts.filter(a => !a.status || a.status === 'idle').length,
   };
 
-  const filtered = filter === 'all' ? accounts : accounts.filter(a => {
-    if (filter === 'idle') return !a.status || a.status === 'idle';
-    return a.status === filter;
-  });
+  const filtered = filter === 'all' ? accounts : accounts.filter(a => a.status === filter);
 
   const handleRunOne = (id: string) => {
     if (!isRunning) runNow.mutate({ data: { accountIds: [id] } });
@@ -146,13 +123,12 @@ export default function Home() {
   return (
     <div className="px-6 py-6 space-y-5 min-h-full">
 
-      {/* ── Page title ───────────────────────────────────────────────────── */}
       <div>
         <h1 className="text-2xl font-bold text-white">Accounts</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage and run your automation targets</p>
       </div>
 
-      {/* ── Filter pills ─────────────────────────────────────────────────── */}
+      {/* Filter pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {PILLS.map(({ key, label }) => (
           <button
@@ -170,20 +146,20 @@ export default function Home() {
         ))}
       </div>
 
-      {/* ── Account grid ─────────────────────────────────────────────────── */}
+      {/* Account grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array(4).fill(0).map((_, i) => (
-            <div key={i} className="h-44 rounded-xl bg-white/5 animate-pulse" />
+            <div key={i} className="h-40 rounded-xl bg-white/5 animate-pulse" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-48 text-muted-foreground text-sm gap-3">
           <AlertCircle className="w-10 h-10 opacity-20" />
-          <p>{accounts.length === 0 ? 'No accounts yet — add one above.' : `No ${filter} accounts.`}</p>
+          <p>{accounts.length === 0 ? 'No accounts yet.' : `No ${filter} accounts.`}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(account => (
             <AccountCard
               key={account.id}

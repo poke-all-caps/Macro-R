@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import {
-  Users, Settings, Bell,
-  LayoutGrid, List, FileText, Cog, Key, Plus, Play, Square,
+  Users, Settings,
+  LayoutGrid, List, FileText, Cog, Key,
 } from "lucide-react";
 import { useBotStatus, useAccounts } from "@/hooks/use-desk";
 import { useLicense, TIER_META } from "@/hooks/use-license";
@@ -17,16 +17,13 @@ const NAV_ITEMS = [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
-  const { status, runNow } = useBotStatus();
+  const { status } = useBotStatus();
   const { accounts } = useAccounts();
   const { licenseData } = useLicense();
 
   const tier     = licenseData?.keyType ?? 'basic';
   const tierMeta = TIER_META[tier] ?? TIER_META.basic;
   const keyShort = licenseData ? `${licenseData.key.slice(0, 9)}…` : '—';
-  const expiry   = licenseData
-    ? new Date(licenseData.expiresAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-    : null;
 
   const isRunning = status?.isRunning ?? false;
 
@@ -36,51 +33,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* ── Top Navbar ─────────────────────────────────────────────────────── */}
       <header className="flex items-center h-14 px-4 border-b border-border shrink-0 bg-[hsl(220,38%,9%)] z-20 gap-4">
 
-        {/* Logo — aligns with sidebar width */}
         <div className="flex items-center w-52 shrink-0">
           <img src="/rewards-desk-ui/macro-rewards-logo.png" alt="Macro Rewards" className="h-9 w-auto" />
         </div>
 
-        {/* Global Command Hub — centered */}
-        <div className="flex-1 flex justify-center">
-          <div className="flex items-center bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
-            <button
-              onClick={() => status && runNow.mutate({ data: { accountIds: accounts.map(a => a.id) } })}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all group"
-            >
-              <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400 group-hover:text-emerald-300" />
-              Start All
-            </button>
+        <div className="flex-1" />
 
-            <div className="w-[1px] h-4 bg-slate-600 mx-1" />
-
-            <button
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all group"
-            >
-              <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400 group-hover:text-rose-300" />
-              Stop All
-            </button>
-          </div>
-        </div>
-
-        {/* Right side actions */}
         <div className="flex items-center gap-2 shrink-0">
 
-          {/* Add Account */}
-          <Link href="/accounts">
-            <button className="flex items-center gap-1.5 h-9 px-3.5 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors">
-              <Plus className="w-4 h-4" />
-              <span>Add Account</span>
-            </button>
-          </Link>
-
-          {/* Bell + Notifications */}
-          <button className="flex items-center gap-1.5 h-9 px-3 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors">
-            <Bell className="w-4 h-4" />
-            <span className="text-sm">Notifications</span>
-          </button>
-
-          {/* System status dot */}
+          {/* System status */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[hsl(220,35%,13%)] border border-border text-xs">
             <div className={`w-1.5 h-1.5 rounded-full ${isRunning ? 'bg-green-400 animate-pulse' : 'bg-green-400'}`} />
             <span className="text-green-400 font-medium">{accounts.length} active</span>
@@ -88,8 +49,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           {/* License badge */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(220,35%,13%)] border border-border min-w-0">
-            <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
-              style={{ background: tierMeta.bg }}>
+            <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0" style={{ background: tierMeta.bg }}>
               <Key className="w-3 h-3" style={{ color: tierMeta.color }} />
             </div>
             <span className="text-[11px] font-mono font-medium text-white leading-none">{keyShort}</span>
@@ -114,10 +74,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* ── Body (sidebar + main) ──────────────────────────────────────────── */}
+      {/* ── Body ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-1 min-h-0">
 
-        {/* Sidebar */}
         <aside className="w-52 shrink-0 bg-[hsl(220,38%,9%)] border-r border-border flex flex-col z-10">
           <nav className="flex-1 px-2 pt-3 flex flex-col gap-0.5">
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
@@ -140,7 +99,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </nav>
         </aside>
 
-        {/* Main content */}
         <main className="flex-1 min-w-0 overflow-y-auto bg-[hsl(220,28%,12%)]">
           {children}
         </main>
