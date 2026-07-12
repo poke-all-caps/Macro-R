@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, Download, Settings2, AlertCircle, Loader2, Square } from 'lucide-react';
+import { Play, Download, Settings2, AlertCircle, Loader2 } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
@@ -80,27 +80,29 @@ function AccountCard({
       </div>
 
       {/* ── Bottom: Action buttons ── */}
-      <div className="flex justify-end gap-3 pt-3 border-t border-slate-700/50">
+      <div className="flex gap-2 pt-3 border-t border-slate-700/50">
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
-          title={isRunning ? 'Running…' : 'Play'}
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-blue-600/30 hover:text-blue-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-blue-600/25 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-600/40 hover:border-blue-500/30"
         >
-          {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+          {isRunning
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : <Play className="w-4 h-4" />}
+          <span>{isRunning ? 'Running' : 'Play'}</span>
         </button>
         <button
-          title="Download"
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
         >
           <Download className="w-4 h-4" />
+          <span>Download</span>
         </button>
-        <Link href="/accounts">
+        <Link href="/accounts" className="flex-1">
           <button
-            title="Settings"
-            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors"
+            className="w-full flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-700/60 text-slate-300 text-sm font-medium hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
           >
             <Settings2 className="w-4 h-4" />
+            <span>Settings</span>
           </button>
         </Link>
       </div>
@@ -150,42 +152,22 @@ export default function Home() {
         <p className="text-sm text-muted-foreground mt-1">Manage and run your automation targets</p>
       </div>
 
-      {/* ── Filter pills + command pill ───────────────────────────────────── */}
-      <div className="flex items-center justify-between w-full gap-4">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {PILLS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              className={cn(
-                'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
-                filter === key
-                  ? 'bg-white text-black border-white'
-                  : 'bg-[hsl(220,30%,17%)] text-slate-300 border-transparent hover:bg-[hsl(220,30%,22%)] hover:text-white'
-              )}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex items-center shrink-0 bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
+      {/* ── Filter pills ─────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {PILLS.map(({ key, label }) => (
           <button
-            onClick={() => runNow.mutate({ data: { accountIds: accounts.map(a => a.id) } })}
-            disabled={isRunning}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-50 transition-all"
+            key={key}
+            onClick={() => setFilter(key)}
+            className={cn(
+              'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
+              filter === key
+                ? 'bg-white text-black border-white'
+                : 'bg-[hsl(220,30%,17%)] text-slate-300 border-transparent hover:bg-[hsl(220,30%,22%)] hover:text-white'
+            )}
           >
-            <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
-            Start All
+            {label}
           </button>
-          <div className="w-[1px] h-4 bg-slate-600 mx-1" />
-          <button
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
-          >
-            <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
-            Stop All
-          </button>
-        </div>
+        ))}
       </div>
 
       {/* ── Account grid ─────────────────────────────────────────────────── */}
@@ -201,7 +183,7 @@ export default function Home() {
           <p>{accounts.length === 0 ? 'No accounts yet — add one above.' : `No ${filter} accounts.`}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map(account => (
             <AccountCard
               key={account.id}
