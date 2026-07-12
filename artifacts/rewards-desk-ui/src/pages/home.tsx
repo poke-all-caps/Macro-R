@@ -79,26 +79,26 @@ function AccountCard({
         </div>
       </div>
 
-      {/* ── Bottom: Action buttons (compact, right-aligned) ── */}
-      <div className="flex justify-end gap-2 pt-3 border-t border-slate-700/50">
+      {/* ── Bottom: Action buttons ── */}
+      <div className="flex justify-end gap-3 pt-3 border-t border-slate-700/50">
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
           title={isRunning ? 'Running…' : 'Play'}
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/60 text-slate-300 hover:bg-blue-600/25 hover:text-blue-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-600/40 hover:border-blue-500/30"
+          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-blue-600/30 hover:text-blue-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         </button>
         <button
           title="Download"
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/60 text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
+          className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors"
         >
           <Download className="w-4 h-4" />
         </button>
         <Link href="/accounts">
           <button
             title="Settings"
-            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/60 text-slate-300 hover:bg-slate-600/60 hover:text-white transition-colors border border-slate-600/40"
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors"
           >
             <Settings2 className="w-4 h-4" />
           </button>
@@ -144,47 +144,48 @@ export default function Home() {
   return (
     <div className="px-6 py-6 space-y-5 min-h-full">
 
-      {/* ── Page title + command pill ────────────────────────────────────── */}
-      <div className="flex items-center gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Accounts</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage and run your automation targets</p>
+      {/* ── Page title ───────────────────────────────────────────────────── */}
+      <div>
+        <h1 className="text-2xl font-bold text-white">Accounts</h1>
+        <p className="text-sm text-muted-foreground mt-1">Manage and run your automation targets</p>
+      </div>
+
+      {/* ── Filter pills + command pill ───────────────────────────────────── */}
+      <div className="flex items-center justify-between w-full gap-4">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          {PILLS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              className={cn(
+                'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
+                filter === key
+                  ? 'bg-white text-black border-white'
+                  : 'bg-[hsl(220,30%,17%)] text-slate-300 border-transparent hover:bg-[hsl(220,30%,22%)] hover:text-white'
+              )}
+            >
+              {label}
+            </button>
+          ))}
         </div>
-        <div className="flex items-center bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
+
+        <div className="flex items-center shrink-0 bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
           <button
             onClick={() => runNow.mutate({ data: { accountIds: accounts.map(a => a.id) } })}
             disabled={isRunning}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-50 transition-all group"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-50 transition-all"
           >
             <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
             Start All
           </button>
           <div className="w-[1px] h-4 bg-slate-600 mx-1" />
           <button
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all group"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
           >
             <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
             Stop All
           </button>
         </div>
-      </div>
-
-      {/* ── Filter pills ─────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {PILLS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setFilter(key)}
-            className={cn(
-              'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
-              filter === key
-                ? 'bg-white text-black border-white'
-                : 'bg-[hsl(220,30%,17%)] text-slate-300 border-transparent hover:bg-[hsl(220,30%,22%)] hover:text-white'
-            )}
-          >
-            {label}
-          </button>
-        ))}
       </div>
 
       {/* ── Account grid ─────────────────────────────────────────────────── */}
