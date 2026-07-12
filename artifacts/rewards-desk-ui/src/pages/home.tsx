@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, AlertCircle, Loader2, Settings2, PowerOff, Square } from 'lucide-react';
+import { Play, AlertCircle, Loader2, Settings2, Pause, Square } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
@@ -80,27 +80,27 @@ function AccountCard({
       </div>
 
       {/* ── Footer: action buttons ── */}
-      <div className="flex items-center justify-end gap-2 border-t border-slate-700/60 pt-4 mt-2">
+      <div className="flex items-center justify-center gap-6 w-full border-t border-slate-700/60 pt-4 mt-2">
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
           title="Run"
-          className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-md px-3 py-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         </button>
 
         <button
-          title="Disable"
-          className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-rose-400 border border-slate-700 rounded-md px-3 py-1.5 transition-colors"
+          title="Pause / Disable"
+          className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-amber-400 transition-colors"
         >
-          <PowerOff className="w-4 h-4" />
+          <Pause className="w-4 h-4" />
         </button>
 
         <Link href="/accounts">
           <button
             title="Settings"
-            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-md px-3 py-1.5 transition-colors"
+            className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-colors"
           >
             <Settings2 className="w-4 h-4" />
           </button>
