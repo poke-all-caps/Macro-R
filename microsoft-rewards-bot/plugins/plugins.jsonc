@@ -1,0 +1,74 @@
+{
+    // ═══════════════════════════════════════════════════════════════
+    // Plugin Configuration
+    // ═══════════════════════════════════════════════════════════════
+    // This file controls which plugins are loaded by the bot.
+    // Plugins extend the bot's functionality by adding tasks and selectors.
+    // Loading rules:
+    // - Only entries present in this file are eligible to load when the file exists
+    // - Higher priority loads first
+    // - Same priority falls back to alphabetical order
+
+    // ───────────────────────────────────────────────────────────────
+    // Core Plugin (Official)
+    // ───────────────────────────────────────────────────────────────
+    // The official plugin that adds premium features:
+    // - All Daily Set quests
+    // - Daily Streak tracking
+    // - Point claiming
+    // - Redeem Goal configuration
+    // - App Rewards (Read to Earn, Daily Check-In)
+    // - Dashboard info extraction
+    // - Double search point bonuses
+    //
+    // Requires a valid license. Without license, the plugin will not load.
+    // The public bot works fine without this plugin.
+
+    "core": {
+        "enabled": true,
+        "priority": 100
+        // The released Core plugin validates licenses against the official
+        // Turso license database. Nothing is required here for normal users.
+        // Override these values only for a custom backend/database.
+        //
+        // "config": {
+        //   "licenseApiUrl": "https://example.com/api/licenses/validate",
+        //   "tursoDatabaseUrl": "libsql://example.turso.io",
+        //   "tursoAuthToken": "<database token>",
+        //   "licensePublicKey": "<optional response verification public key>"
+        // }
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    // Install plugins from the cloud marketplace
+    // ───────────────────────────────────────────────────────────────
+    // Browse them in Rewards Desk → Plugins → Marketplace (or run
+    // `npm run marketplace:list`). Add an entry with "source": "marketplace"
+    // and the bot downloads, verifies, and sandboxes it on the next start:
+    //
+    // "cool-plugin": {
+    //   "enabled": true,
+    //   "source": "marketplace",
+    //   "version": "1.2.0"
+    // }
+
+    // ───────────────────────────────────────────────────────────────
+    // Add your own plugins here!
+    // ───────────────────────────────────────────────────────────────
+    // Example:
+    //
+    // "my-custom-plugin": {
+    //   "enabled": true,
+    //   "priority": 50,
+    //   "config": {
+    //     "customOption": "value"
+    //   }
+    // }
+    //
+    // Plugin loading order:
+    // - Higher priority loads first
+    // - Same priority = alphabetical order
+    // - Core plugin has priority 100 by default
+
+
+}

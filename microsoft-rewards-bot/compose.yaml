@@ -1,0 +1,45 @@
+services:
+    microsoft-rewards-bot:
+        image: microsoft-rewards-bot
+        container_name: microsoft-rewards-bot
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
+            # Docker Desktop's internal DNS proxy fails to resolve cdn.playwright.dev
+            # (Azure Front Door CNAME chain), which breaks the patchright/Chromium
+            # download during build. Pin it to a known-good edge IP as a workaround.
+            # If this ever breaks again, refresh the IP with:
+            #   nslookup cdn.playwright.dev 1.1.1.1
+            # and override it without editing this file via:
+            #   PLAYWRIGHT_CDN_IP=<new-ip> docker compose build
+            extra_hosts:
+                - "cdn.playwright.dev:${PLAYWRIGHT_CDN_IP:-150.171.109.20}"
+        # Docker Desktop's internal DNS proxy intermittently fails to resolve
+        # outbound domains the bot needs at runtime (edgeupdates.microsoft.com,
+        # webhook endpoints, etc.), not just the build-time CDN above. Point the
+        # running container at public resolvers instead of Docker's own proxy.
+        dns:
+            - 1.1.1.1
+            - 8.8.8.8
+        entrypoint: ["/usr/local/bin/entrypoint.sh"]
+        command: ["node", "dist/index.js"]
+        volumes:
+            - ./src/accounts.json:/usr/src/microsoft-rewards-bot/dist/accounts.json:ro
+            - ./src/config.json:/usr/src/microsoft-rewards-bot/dist/config.json:ro
+            - ./plugins/plugins.jsonc:/usr/src/microsoft-rewards-bot/plugins/plugins.jsonc:ro
+            - ./sessions:/usr/src/microsoft-rewards-bot/sessions
+        environment:
+            TZ: 'America/Toronto'
+            NODE_ENV: 'production'
+            CRON_SCHEDULE: '0 7 * * *'
+            RUN_ON_START: 'true'
+            SKIP_RANDOM_SLEEP: 'true'
+        healthcheck:
+            test: ['CMD', 'sh', '-c', 'pgrep node > /dev/null || exit 1']
+            interval: 60s
+            timeout: 10s
+            retries: 3
+            start_period: 30s
+        security_opt:
+            - no-new-privileges:true

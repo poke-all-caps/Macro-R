@@ -1,0 +1,119 @@
+{
+    "baseURL": "https://rewards.bing.com/dashboard",
+    "sessionPath": "sessions",
+    "headless": false,
+    "runOnZeroPoints": true,
+    "searchOnBingLocalQueries": true,
+    "globalTimeout": "30sec",
+    "debugLogs": false,
+    "workers": {
+        "doDailySet": true,
+        "doSpecialPromotions": true,
+        "doMorePromotions": true,
+        "doAppPromotions": true,
+        "doDesktopSearch": true,
+        "doMobileSearch": true,
+        "doDailyCheckIn": true,
+        "doReadToEarn": true,
+        "doDailyStreak": true,
+        "doDashboardInfo": true,
+        "doPunchCards": true,
+        "doClaimPoints": true,
+        "doApplyCoupons": true
+    },
+    "core": {
+        "doubleSearchPoints": true,
+        "exploreOnBing": false,
+        "appReward": true,
+        "readToEarn": true,
+        "dailyCheckIn": true,
+        "dailyStreak": true,
+        "setGoal": false,
+        "claimPoints": true,
+        "applyCoupons": true,
+        "temporaryPunchcards": false,
+        "collectDashboardInfo": true,
+        "clusters": 1,
+        "streakProtection": false,
+        "dashboardSync": false,
+        "captureDashboardPages": false
+    },
+    "searchSettings": {
+        "scrollRandomResults": true,
+        "clickRandomResults": true,
+        "parallelSearching": true,
+        "queryEngines": ["google", "wikipedia", "wikirandom", "reddit", "hackernews", "local"],
+        "searchResultVisitTime": "10sec",
+        "searchDelay": {
+            "min": "30sec",
+            "max": "1min"
+        },
+        "readDelay": {
+            "min": "30sec",
+            "max": "1min"
+        },
+        "accountDelay": {
+            "min": "40sec",
+            "max": "4min"
+        },
+        "shuffleAccounts": true,
+        "delayMultiplier": 1
+    },
+    "scheduler": {
+        "enabled": false,
+        "runOnStartup": true,
+        "timezone": "Europe/Paris",
+        "startTime": "08:00",
+        "randomDelay": {
+            "min": "0min",
+            "max": "30min"
+        }
+    },
+    "proxy": {
+        "queryEngine": true
+    },
+    "webhook": {
+        "discord": {
+            "enabled": false,
+            "url": ""
+        },
+        "ntfy": {
+            "enabled": false,
+            "url": "",
+            "topic": "",
+            "token": "",
+            "title": "Microsoft-Rewards-Bot",
+            "tags": ["bot", "notify"],
+            "priority": 3
+        },
+        "webhookLogFilter": {
+            "enabled": false,
+            "mode": "whitelist",
+            "levels": ["error"],
+            "keywords": ["starting account", "select number", "collected"],
+            "regexPatterns": []
+        }
+    },
+    "consoleLogFilter": {
+        "enabled": false,
+        "mode": "whitelist",
+        "levels": ["error", "warn"],
+        "keywords": ["starting account"],
+        "regexPatterns": []
+    },
+    "analytics": {
+        "enabled": true
+    },
+    "backgroundAgent": {
+        "enabled": false,
+        "allowDashboardAutostart": false,
+        "openConsole": false
+    },
+    "terminal": {
+        "enabled": false
+    },
+    "desk": {
+        "lanAccess": true,
+        "headless": false
+    }
+}
