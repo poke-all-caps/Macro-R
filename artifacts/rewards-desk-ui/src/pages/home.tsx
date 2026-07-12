@@ -85,7 +85,8 @@ function AccountCard({
         <Link href="/accounts">
           <button
             title="Settings"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-400 text-white transition-colors shadow-sm"
+            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full text-white transition-colors shadow-sm"
+            style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -95,7 +96,8 @@ function AccountCard({
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
+          style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
         >
           {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
           <span>{isRunning ? 'Running…' : 'Search'}</span>
@@ -103,7 +105,8 @@ function AccountCard({
 
         <button
           disabled={globalRunning}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
+          style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
         >
           <Play className="w-3.5 h-3.5 fill-white" />
           <span>Search</span>
