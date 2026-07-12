@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
-import { Play, AlertCircle, Loader2, Square, Power } from 'lucide-react';
+import { Play, AlertCircle, Loader2, Settings2, PowerOff, Square } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
@@ -80,36 +80,31 @@ function AccountCard({
       </div>
 
       {/* ── Footer: action buttons ── */}
-      <div className="flex items-center gap-2 pt-3 border-t border-slate-700/50">
-        {/* Circular re-sync / settings shortcut */}
-        <Link href="/accounts">
-          <button
-            title="Settings"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-[hsl(220,38%,9%)] border border-slate-700 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition-colors shadow-sm"
-          >
-            <Power className="w-4 h-4" />
-          </button>
-        </Link>
-
-        {/* Search pill buttons */}
+      <div className="flex items-center justify-end gap-2 border-t border-slate-700/60 pt-4 mt-2">
         <button
           onClick={() => onRun(account.id)}
           disabled={isRunning || globalRunning}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
+          title="Run"
+          className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-md px-3 py-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
-          <span>{isRunning ? 'Running…' : 'Search'}</span>
+          {isRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
         </button>
 
         <button
-          disabled={globalRunning}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
+          title="Disable"
+          className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-rose-400 border border-slate-700 rounded-md px-3 py-1.5 transition-colors"
         >
-          <Play className="w-3.5 h-3.5 fill-white" />
-          <span>Search</span>
+          <PowerOff className="w-4 h-4" />
         </button>
+
+        <Link href="/accounts">
+          <button
+            title="Settings"
+            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-md px-3 py-1.5 transition-colors"
+          >
+            <Settings2 className="w-4 h-4" />
+          </button>
+        </Link>
       </div>
     </div>
   );
