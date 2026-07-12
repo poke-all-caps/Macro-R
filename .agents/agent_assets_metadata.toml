@@ -36,3 +36,9 @@ id = "egYVYAmxkbrTB5wNhTV3O"
 uri = "file://codebase-export.txt"
 type = "text"
 title = "Macro Rewards — Full Source Export (103 files)"
+
+[[outputs]]
+id = "WBbcwzfeB0ebY6U6ug2bf"
+uri = "file://account-system-full-codebase.txt"
+type = "text"
+title = "Account System — Full Codebase & Logic"
