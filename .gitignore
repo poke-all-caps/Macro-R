@@ -41,6 +41,9 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# Runtime data (accounts, logs — local only, never committed)
+data/
+
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
