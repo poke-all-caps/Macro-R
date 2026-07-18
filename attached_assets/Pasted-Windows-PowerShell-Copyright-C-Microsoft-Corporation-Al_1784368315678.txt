@@ -1,0 +1,899 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\Avinash Poudel\Documents\Macro-R> git stash
+No local changes to save
+PS C:\Users\Avinash Poudel\Documents\Macro-R> git pull
+remote: Enumerating objects: 163, done.
+remote: Counting objects: 100% (163/163), done.
+remote: Compressing objects: 100% (102/102), done.
+remote: Total 138 (delta 35), reused 138 (delta 35), pack-reused 0 (from 0)
+Receiving objects: 100% (138/138), 506.19 KiB | 954.00 KiB/s, done.
+Resolving deltas: 100% (35/35), completed with 17 local objects.
+From https://github.com/poke-all-caps/Macro-R
+   d4cd4b1..46ea257  master     -> origin/master
+Enumerating objects: 939, done.
+Counting objects: 100% (900/900), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (546/546), done.
+Writing objects: 100% (900/900), done.
+Total 900 (delta 419), reused 812 (delta 344), pack-reused 0 (from 0)
+Updating d4cd4b1..46ea257
+Fast-forward
+ .agents/agent_assets_metadata.toml                 |    12 +
+ artifacts/api-server/package.json                  |     1 +
+ artifacts/api-server/src/lib/agent-client.ts       |   261 +
+ artifacts/api-server/src/lib/desk-storage.ts       |   148 +
+ artifacts/api-server/src/routes/desk.ts            |   419 +-
+ .../src/components/account-card.tsx                |     4 +-
+ .../src/components/account-grid-tile.tsx           |     2 +-
+ artifacts/rewards-desk-ui/src/hooks/use-desk.ts    |    43 +-
+ artifacts/rewards-desk-ui/src/pages/home.tsx       |     8 +-
+ ...to-intregrate-the-automation-_1784365305255.txt |   144 +
+ automation-codebase-dump.txt                       |  6767 +++++
+ automation/AutomationUtils.ts                      |   464 +
+ automation/BrowserManager.ts                       |   377 +
+ automation/BrowserViewport.ts                      |     6 +
+ automation/CorePromoBanner.ts                      |   119 +
+ automation/DashboardSelectors.ts                   |   150 +
+ automation/FingerprintManager.ts                   |   186 +
+ automation/MagicCursor.ts                          |   358 +
+ automation/PageController.ts                       |  1911 ++
+ automation/RewardsSidePanelController.ts           |   225 +
+ automation/auth/AuthErrors.ts                      |    26 +
+ automation/auth/AuthManager.ts                     |  1377 +
+ automation/auth/strategies/AuthUtils.ts            |    74 +
+ automation/auth/strategies/CodeStrategy.ts         |   148 +
+ automation/auth/strategies/EmailStrategy.ts        |    86 +
+ automation/auth/strategies/MobileStrategy.ts       |   293 +
+ automation/auth/strategies/PasswordlessStrategy.ts |   112 +
+ automation/auth/strategies/RecoveryStrategy.ts     |   203 +
+ automation/auth/strategies/TotpStrategy.ts         |   148 +
+ automation/dashboard/DashboardActions.ts           |    50 +
+ automation/dashboard/DashboardActionsFactory.ts    |    18 +
+ .../dashboard/legacy/LegacyDashboardActions.ts     |   127 +
+ automation/dashboard/next/NextDashboardActions.ts  |   155 +
+ codebase-dump.txt                                  | 25436 +++++++++++++++++++
+ pnpm-lock.yaml                                     |   414 +-
+ pnpm-workspace.yaml                                |     1 +
+ scripts/account-storage.js                         |    44 +
+ src/accounts.enc.json                              |     8 +
+ src/accounts.example.json                          |    44 +
+ src/automation/AutomationUtils.ts                  |   464 +
+ src/automation/BrowserManager.ts                   |   377 +
+ src/automation/BrowserViewport.ts                  |     6 +
+ src/automation/CorePromoBanner.ts                  |   119 +
+ src/automation/DashboardSelectors.ts               |   150 +
+ src/automation/FingerprintManager.ts               |   186 +
+ src/automation/MagicCursor.ts                      |   358 +
+ src/automation/PageController.ts                   |  1911 ++
+ src/automation/RewardsSidePanelController.ts       |   225 +
+ src/automation/auth/AuthErrors.ts                  |    26 +
+ src/automation/auth/AuthManager.ts                 |  1377 +
+ src/automation/auth/strategies/AuthUtils.ts        |    74 +
+ src/automation/auth/strategies/CodeStrategy.ts     |   148 +
+ src/automation/auth/strategies/EmailStrategy.ts    |    86 +
+ src/automation/auth/strategies/MobileStrategy.ts   |   293 +
+ .../auth/strategies/PasswordlessStrategy.ts        |   112 +
+ src/automation/auth/strategies/RecoveryStrategy.ts |   203 +
+ src/automation/auth/strategies/TotpStrategy.ts     |   148 +
+ src/automation/dashboard/DashboardActions.ts       |    50 +
+ .../dashboard/DashboardActionsFactory.ts           |    18 +
+ .../dashboard/legacy/LegacyDashboardActions.ts     |   127 +
+ .../dashboard/next/NextDashboardActions.ts         |   155 +
+ src/config.example.json                            |   119 +
+ src/config.json                                    |   140 +
+ src/context/ExecutionContext.ts                    |    44 +
+ src/core/ActivityRunner.ts                         |   205 +
+ src/core/AgentRuntime.ts                           |   458 +
+ src/core/InternalPluginAPI.ts                      |   207 +
+ src/core/PluginAPI.ts                              |     9 +
+ src/core/PluginManager.ts                          |  1373 +
+ src/core/QueryProvider.ts                          |   566 +
+ src/core/SafetyAdvisory.ts                         |   190 +
+ src/core/Scheduler.ts                              |   152 +
+ src/core/SearchOrchestrator.ts                     |   586 +
+ src/core/TaskBase.ts                               |   465 +
+ src/core/bing-search-activity-queries.json         |   673 +
+ src/core/queries.json                              |   582 +
+ src/core/search-queries.json                       |   116 +
+ src/core/tasks/api/FindClippy.ts                   |    64 +
+ src/core/tasks/api/Quiz.ts                         |   143 +
+ src/core/tasks/api/UrlReward.ts                    |    64 +
+ src/core/tasks/browser/Search.ts                   |   698 +
+ src/core/tasks/browser/SearchOnBing.ts             |   524 +
+ src/core/tasks/browser/StreakProtectionGate.ts     |    94 +
+ src/crontab.template                               |     7 +
+ src/helpers/AccountSafetyWarning.ts                |   114 +
+ src/helpers/AtomicFile.ts                          |    42 +
+ src/helpers/AvatarFetcher.ts                       |    88 +
+ src/helpers/ConfigLoader.ts                        |   283 +
+ src/helpers/DataManager.ts                         |   143 +
+ src/helpers/Helpers.ts                             |   114 +
+ src/helpers/HiddenDir.ts                           |    24 +
+ src/helpers/HttpClient.ts                          |   112 +
+ src/helpers/PackageMetadata.ts                     |    35 +
+ src/helpers/ProxyUtils.ts                          |    19 +
+ src/helpers/SchemaValidator.ts                     |   229 +
+ src/helpers/StatsRecorder.ts                       |   446 +
+ src/index.ts                                       |  1864 ++
+ src/notifications/AnalyticsService.ts              |   225 +
+ src/notifications/DiscordWebhook.ts                |   197 +
+ src/notifications/ErrorReport.ts                   |    74 +
+ src/notifications/LogService.ts                    |   240 +
+ src/notifications/NtfyWebhook.ts                   |    67 +
+ src/package.json                                   |    23 +
+ src/plugin-api.ts                                  |   236 +
+ src/types/Account.ts                               |    43 +
+ src/types/AppDashboardData.ts                      |   105 +
+ src/types/AppUserData.ts                           |   225 +
+ src/types/Config.ts                                |   195 +
+ src/types/Dashboard.ts                             |    21 +
+ src/types/DashboardData.ts                         |   826 +
+ src/types/OAuth.ts                                 |     9 +
+ src/types/Points.ts                                |    20 +
+ src/types/QuizData.ts                              |    50 +
+ src/types/Search.ts                                |   116 +
+ src/types/UserAgentUtil.ts                         |    62 +
+ src/types/XboxDashboardData.ts                     |    43 +
+ 116 files changed, 60540 insertions(+), 211 deletions(-)
+ create mode 100644 artifacts/api-server/src/lib/agent-client.ts
+ create mode 100644 artifacts/api-server/src/lib/desk-storage.ts
+ create mode 100644 attached_assets/Pasted-look-all-the-files-needed-to-intregrate-the-automation-_1784365305255.txt
+ create mode 100644 automation-codebase-dump.txt
+ create mode 100644 automation/AutomationUtils.ts
+ create mode 100644 automation/BrowserManager.ts
+ create mode 100644 automation/BrowserViewport.ts
+ create mode 100644 automation/CorePromoBanner.ts
+ create mode 100644 automation/DashboardSelectors.ts
+ create mode 100644 automation/FingerprintManager.ts
+ create mode 100644 automation/MagicCursor.ts
+ create mode 100644 automation/PageController.ts
+ create mode 100644 automation/RewardsSidePanelController.ts
+ create mode 100644 automation/auth/AuthErrors.ts
+ create mode 100644 automation/auth/AuthManager.ts
+ create mode 100644 automation/auth/strategies/AuthUtils.ts
+ create mode 100644 automation/auth/strategies/CodeStrategy.ts
+ create mode 100644 automation/auth/strategies/EmailStrategy.ts
+ create mode 100644 automation/auth/strategies/MobileStrategy.ts
+ create mode 100644 automation/auth/strategies/PasswordlessStrategy.ts
+ create mode 100644 automation/auth/strategies/RecoveryStrategy.ts
+ create mode 100644 automation/auth/strategies/TotpStrategy.ts
+ create mode 100644 automation/dashboard/DashboardActions.ts
+ create mode 100644 automation/dashboard/DashboardActionsFactory.ts
+ create mode 100644 automation/dashboard/legacy/LegacyDashboardActions.ts
+ create mode 100644 automation/dashboard/next/NextDashboardActions.ts
+ create mode 100644 codebase-dump.txt
+ create mode 100644 scripts/account-storage.js
+ create mode 100644 src/accounts.enc.json
+ create mode 100644 src/accounts.example.json
+ create mode 100644 src/automation/AutomationUtils.ts
+ create mode 100644 src/automation/BrowserManager.ts
+ create mode 100644 src/automation/BrowserViewport.ts
+ create mode 100644 src/automation/CorePromoBanner.ts
+ create mode 100644 src/automation/DashboardSelectors.ts
+ create mode 100644 src/automation/FingerprintManager.ts
+ create mode 100644 src/automation/MagicCursor.ts
+ create mode 100644 src/automation/PageController.ts
+ create mode 100644 src/automation/RewardsSidePanelController.ts
+ create mode 100644 src/automation/auth/AuthErrors.ts
+ create mode 100644 src/automation/auth/AuthManager.ts
+ create mode 100644 src/automation/auth/strategies/AuthUtils.ts
+ create mode 100644 src/automation/auth/strategies/CodeStrategy.ts
+ create mode 100644 src/automation/auth/strategies/EmailStrategy.ts
+ create mode 100644 src/automation/auth/strategies/MobileStrategy.ts
+ create mode 100644 src/automation/auth/strategies/PasswordlessStrategy.ts
+ create mode 100644 src/automation/auth/strategies/RecoveryStrategy.ts
+ create mode 100644 src/automation/auth/strategies/TotpStrategy.ts
+ create mode 100644 src/automation/dashboard/DashboardActions.ts
+ create mode 100644 src/automation/dashboard/DashboardActionsFactory.ts
+ create mode 100644 src/automation/dashboard/legacy/LegacyDashboardActions.ts
+ create mode 100644 src/automation/dashboard/next/NextDashboardActions.ts
+ create mode 100644 src/config.example.json
+ create mode 100644 src/config.json
+ create mode 100644 src/context/ExecutionContext.ts
+ create mode 100644 src/core/ActivityRunner.ts
+ create mode 100644 src/core/AgentRuntime.ts
+ create mode 100644 src/core/InternalPluginAPI.ts
+ create mode 100644 src/core/PluginAPI.ts
+ create mode 100644 src/core/PluginManager.ts
+ create mode 100644 src/core/QueryProvider.ts
+ create mode 100644 src/core/SafetyAdvisory.ts
+ create mode 100644 src/core/Scheduler.ts
+ create mode 100644 src/core/SearchOrchestrator.ts
+ create mode 100644 src/core/TaskBase.ts
+ create mode 100644 src/core/bing-search-activity-queries.json
+ create mode 100644 src/core/queries.json
+ create mode 100644 src/core/search-queries.json
+ create mode 100644 src/core/tasks/api/FindClippy.ts
+ create mode 100644 src/core/tasks/api/Quiz.ts
+ create mode 100644 src/core/tasks/api/UrlReward.ts
+ create mode 100644 src/core/tasks/browser/Search.ts
+ create mode 100644 src/core/tasks/browser/SearchOnBing.ts
+ create mode 100644 src/core/tasks/browser/StreakProtectionGate.ts
+ create mode 100644 src/crontab.template
+ create mode 100644 src/helpers/AccountSafetyWarning.ts
+ create mode 100644 src/helpers/AtomicFile.ts
+ create mode 100644 src/helpers/AvatarFetcher.ts
+ create mode 100644 src/helpers/ConfigLoader.ts
+ create mode 100644 src/helpers/DataManager.ts
+ create mode 100644 src/helpers/Helpers.ts
+ create mode 100644 src/helpers/HiddenDir.ts
+ create mode 100644 src/helpers/HttpClient.ts
+ create mode 100644 src/helpers/PackageMetadata.ts
+ create mode 100644 src/helpers/ProxyUtils.ts
+ create mode 100644 src/helpers/SchemaValidator.ts
+ create mode 100644 src/helpers/StatsRecorder.ts
+ create mode 100644 src/index.ts
+ create mode 100644 src/notifications/AnalyticsService.ts
+ create mode 100644 src/notifications/DiscordWebhook.ts
+ create mode 100644 src/notifications/ErrorReport.ts
+ create mode 100644 src/notifications/LogService.ts
+ create mode 100644 src/notifications/NtfyWebhook.ts
+ create mode 100644 src/package.json
+ create mode 100644 src/plugin-api.ts
+ create mode 100644 src/types/Account.ts
+ create mode 100644 src/types/AppDashboardData.ts
+ create mode 100644 src/types/AppUserData.ts
+ create mode 100644 src/types/Config.ts
+ create mode 100644 src/types/Dashboard.ts
+ create mode 100644 src/types/DashboardData.ts
+ create mode 100644 src/types/OAuth.ts
+ create mode 100644 src/types/Points.ts
+ create mode 100644 src/types/QuizData.ts
+ create mode 100644 src/types/Search.ts
+ create mode 100644 src/types/UserAgentUtil.ts
+ create mode 100644 src/types/XboxDashboardData.ts
+PS C:\Users\Avinash Poudel\Documents\Macro-R> cd ui && npm run build
+At line:1 char:7
++ cd ui && npm run build
++       ~~
+The token '&&' is not a valid statement separator in this version.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : InvalidEndOfLine
+
+PS C:\Users\Avinash Poudel\Documents\Macro-R> scripts\desk\build.bat
+
+[build] Installing dependencies...
+Scope: all 11 workspace projects
+Lockfile is up to date, resolution step is skipped
+Packages: +555 -424
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++----------------------------------------------------
+ WARN  Request took 13879ms: https://registry.npmjs.org/pnpm
+
+   ╭──────────────────────────────────────────╮
+   │                                          │
+   │   Update available! 10.26.1 → 11.14.0.   │
+   │   Changelog: https://pnpm.io/v/11.14.0   │
+   │     To update, run: pnpm add -g pnpm     │
+   │                                          │
+   ╰──────────────────────────────────────────╯
+
+Progress: resolved 555, reused 493, downloaded 41, added 468, done
+
+devDependencies:
+- prettier 3.9.5
++ prettier 3.8.1
+
+. preinstall$ sh -c 'if [ "$EAS_BUILD" = "1" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config…
+└─ Done in 629ms
+Done in 44s using pnpm v10.26.1
+
+[build] Building Rewards Desk UI...
+
+> workspace@0.0.0 build:desk C:\Users\Avinash Poudel\Documents\Macro-R
+> pnpm --filter @workspace/rewards-desk-ui run build:desk
+
+
+> @workspace/rewards-desk-ui@0.0.0 build:desk C:\Users\Avinash Poudel\Documents\Macro-R\artifacts\rewards-desk-ui
+> vite build --config vite.config.desk.ts
+
+C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\rollup@4.59.0\node_modules\rollup\dist\native.js:115
+                throw new Error(
+                      ^
+
+Error: Cannot find module @rollup/rollup-win32-x64-msvc. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
+    at requireWithFriendlyError (C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\rollup@4.59.0\node_modules\rollup\dist\native.js:115:9)
+    at Object.<anonymous> (C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\rollup@4.59.0\node_modules\rollup\dist\native.js:124:76)
+    at Module._compile (node:internal/modules/cjs/loader:1830:14)
+    at Object..js (node:internal/modules/cjs/loader:1961:10)
+    at Module.load (node:internal/modules/cjs/loader:1553:32)
+    at Module._load (node:internal/modules/cjs/loader:1355:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:326:3)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:231:7)
+    at ModuleJob.run (node:internal/modules/esm/module_job:437:25) {
+  [cause]: Error: Cannot find module '@rollup/rollup-win32-x64-msvc'
+  Require stack:
+  - C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\rollup@4.59.0\node_modules\rollup\dist\native.js
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1476:15)
+      at wrapResolveFilename (node:internal/modules/cjs/loader:1049:27)
+      at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1073:10)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1094:12)
+      at Module._load (node:internal/modules/cjs/loader:1262:25)
+      at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+      at Module.require (node:internal/modules/cjs/loader:1576:12)
+      at require (node:internal/modules/helpers:153:16)
+      at requireWithFriendlyError (C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\rollup@4.59.0\node_modules\rollup\dist\native.js:97:10)
+      at Object.<anonymous> (C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\rollup@4.59.0\node_modules\rollup\dist\native.js:124:76) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [
+      'C:\\Users\\Avinash Poudel\\Documents\\Macro-R\\node_modules\\.pnpm\\rollup@4.59.0\\node_modules\\rollup\\dist\\native.js'
+    ]
+  }
+}
+
+Node.js v24.15.0
+C:\Users\Avinash Poudel\Documents\Macro-R\artifacts\rewards-desk-ui:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/rewards-desk-ui@0.0.0 build:desk: `vite build --config vite.config.desk.ts`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.
+[build] Build failed. See errors above.
+PS C:\Users\Avinash Poudel\Documents\Macro-R> # From the root of Macro-R
+PS C:\Users\Avinash Poudel\Documents\Macro-R> Remove-Item -Recurse -Force node_modules
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\arNavigationRegistrationWithoutTransientUserActivation.md: Could not find a part of the path
+'arNavigationRegistrationWithoutTransientUserActivation.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (arNavigationReg...erActivation.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\CoepCorpNotSameOriginAfterDefaultedToSameOriginByCoep.md: Could not find a part of the path
+'CoepCorpNotSameOriginAfterDefaultedToSameOriginByCoep.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (CoepCorpNotSame...OriginByCoep.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\federatedAuthUserInfoRequestInvalidAccountsResponse.md: Could not find a part of the path
+'federatedAuthUserInfoRequestInvalidAccountsResponse.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (federatedAuthUs...untsResponse.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\federatedAuthUserInfoRequestInvalidConfigOrWellKnown.md: Could not find a part of the path
+'federatedAuthUserInfoRequestInvalidConfigOrWellKnown.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (federatedAuthUs...gOrWellKnown.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\federatedAuthUserInfoRequestNoAccountSharingPermission.md: Could not find a part of the path
+'federatedAuthUserInfoRequestNoAccountSharingPermission.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (federatedAuthUs...ngPermission.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\federatedAuthUserInfoRequestNoReturningUserFromFetchedAccounts.md: Could not find a part of the path
+'federatedAuthUserInfoRequestNoReturningUserFromFetchedAccounts.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (federatedAuthUs...chedAccounts.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\federatedAuthUserInfoRequestNotPotentiallyTrustworthy.md: Could not find a part of the path
+'federatedAuthUserInfoRequestNotPotentiallyTrustworthy.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (federatedAuthUs...yTrustworthy.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\genericFormInputAssignedAutocompleteValueToIdOrNameAttributeError.md: Could not find a part of the path
+'genericFormInputAssignedAutocompleteValueToIdOrNameAttributeError.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (genericFormInpu...tributeError.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\genericFormInputHasWrongButWellIntendedAutocompleteValueError.md: Could not find a part of the path
+'genericFormInputHasWrongButWellIntendedAutocompleteValueError.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (genericFormInpu...teValueError.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\selectElementAccessibilityInteractiveContentAttributesSelectDescendant.md: Could not find a part of the path
+'selectElementAccessibilityInteractiveContentAttributesSelectDescendant.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (selectElementAc...ctDescendant.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\selectElementAccessibilityInteractiveContentLegendChild.md: Could not find a part of the path
+'selectElementAccessibilityInteractiveContentLegendChild.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (selectElementAc...tLegendChild.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\selectElementAccessibilityInteractiveContentOptionChild.md: Could not find a part of the path
+'selectElementAccessibilityInteractiveContentOptionChild.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (selectElementAc...tOptionChild.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\selectElementAccessibilityNonPhrasingContentOptionChild.md: Could not find a part of the path
+'selectElementAccessibilityNonPhrasingContentOptionChild.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (selectElementAc...tOptionChild.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\sharedDictionaryUseErrorUnexpectedContentDictionaryHeader.md: Could not find a part of the path
+'sharedDictionaryUseErrorUnexpectedContentDictionaryHeader.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (sharedDictionar...ionaryHeader.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\sharedDictionaryWriteErrorNonStringInMatchDestList.md: Could not find a part of the path
+'sharedDictionaryWriteErrorNonStringInMatchDestList.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (sharedDictionar...atchDestList.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\sriSignatureInputHeaderInvalidDerivedComponentParameter.md: Could not find a part of the path
+'sriSignatureInputHeaderInvalidDerivedComponentParameter.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (sriSignatureInp...entParameter.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions\sriSignatureInputHeaderInvalidHeaderComponentParameter.md: Could not find a part of the path
+'sriSignatureInputHeaderInvalidHeaderComponentParameter.md'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (sriSignatureInp...entParameter.md:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\d
+ist\third-party\front_end\models\issues_manager\descriptions: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (descriptions:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\dist\third-party\front_end\models\issues_manager:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (issues_manager:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\dist\third-party\front_end\models: The directory
+is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (models:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\dist\third-party\front_end: The directory is not
+empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (front_end:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\dist\third-party: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (third-party:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend\dist: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (dist:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native\debugger-frontend:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (debugger-frontend:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules\@react-native: The directory is
+not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (@react-native:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5\node_modules: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (node_modules:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native+debugger-frontend@0.81.5: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (@react-native+debugger-frontend@0.81.5:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\javaPackage\java\com\reactnativecommunity\asyncstorage\AsyncStoragePackage.java: Could not find a part of the path
+'AsyncStoragePackage.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AsyncStoragePackage.java:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\javaPackage\java\com\reactnativecommunity\asyncstorage: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (asyncstorage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\javaPackage\java\com\reactnativecommunity: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (reactnativecommunity:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\javaPackage\java\com: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (com:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\javaPackage\java: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (java:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\javaPackage: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (javaPackage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\kotlinPackage\java\com\reactnativecommunity\asyncstorage\AsyncStoragePackage.kt: Could not find a part of the path
+'AsyncStoragePackage.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AsyncStoragePackage.kt:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\kotlinPackage\java\com\reactnativecommunity\asyncstorage: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (asyncstorage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\kotlinPackage\java\com\reactnativecommunity: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (reactnativecommunity:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\kotlinPackage\java\com: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (com:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\kotlinPackage\java: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (java:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\kotlinPackage: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (kotlinPackage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage\next\ArgumentHelpers.kt: Could not find a part of the path 'ArgumentHelpers.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ArgumentHelpers.kt:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage\next\StorageSupplier.kt: Could not find a part of the path 'StorageSupplier.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (StorageSupplier.kt:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage\next: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (next:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage\AsyncLocalStorageUtil.java: Could not find a part of the path
+'AsyncLocalStorageUtil.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AsyncLocalStorageUtil.java:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage\AsyncStorageErrorUtil.java: Could not find a part of the path
+'AsyncStorageErrorUtil.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AsyncStorageErrorUtil.java:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage\AsyncStorageExpoMigration.java: Could not find a part of the path
+'AsyncStorageExpoMigration.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AsyncStorageExpoMigration.java:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage\AsyncStorageModule.java: Could not find a part of the path 'AsyncStorageModule.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AsyncStorageModule.java:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage\ReactDatabaseSupplier.java: Could not find a part of the path
+'ReactDatabaseSupplier.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactDatabaseSupplier.java:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity\asyncstorage: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (asyncstorage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com\reactnativecommunity: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (reactnativecommunity:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java\com: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (com:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\main\java: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (java:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-native-async-storage\async-storage\android\src\main:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (main:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\oldarch\java\com\reactnativecommunity\asyncstorage\NativeAsyncStorageModuleSpec.java: Could not find a part of the path
+'NativeAsyncStorageModuleSpec.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (NativeAsyncStorageModuleSpec.java:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\oldarch\java\com\reactnativecommunity\asyncstorage: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (asyncstorage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\oldarch\java\com\reactnativecommunity: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (reactnativecommunity:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\oldarch\java\com: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (com:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\oldarch\java: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (java:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\oldarch: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (oldarch:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\test\java\com\reactnativecommunity\asyncstorage\next\ArgumentHelpersTest.kt: Could not find a part of the path 'ArgumentHelpersTest.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ArgumentHelpersTest.kt:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\test\java\com\reactnativecommunity\asyncstorage\next: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (next:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\test\java\com\reactnativecommunity\asyncstorage: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (asyncstorage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\test\java\com\reactnativecommunity: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (reactnativecommunity:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\test\java\com: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (com:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\android\src\test\java: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (java:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-native-async-storage\async-storage\android\src\test:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (test:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-native-async-storage\async-storage\android\src: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (src:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-native-async-storage\async-storage\android: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (android:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\macos\RNCAsyncStorage.xcodeproj\xcshareddata\xcschemes\RNCAsyncStorage-macOS.xcscheme: Could not find a part of the path
+'RNCAsyncStorage-macOS.xcscheme'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNCAsyncStorage-macOS.xcscheme:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\macos\RNCAsyncStorage.xcodeproj\xcshareddata\xcschemes: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (xcschemes:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\macos\RNCAsyncStorage.xcodeproj\xcshareddata: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (xcshareddata:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-nati
+ve-async-storage\async-storage\macos\RNCAsyncStorage.xcodeproj: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNCAsyncStorage.xcodeproj:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-native-async-storage\async-storage\macos: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (macos:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-native-async-storage\async-storage: The directory is
+not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (async-storage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules\@react-native-async-storage: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (@react-native-async-storage:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a\node_modules: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (node_modules:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\@react-native-async-storage_088e8303e028f6e6ca5c16cc3d46621a: The directory is not
+empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (@react-native-a...a5c16cc3d46621a:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
