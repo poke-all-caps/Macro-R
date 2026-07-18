@@ -1,0 +1,47 @@
++ ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Remove-Item], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.RemoveItemCommand
+
+PS C:\Users\Avinash Poudel\Documents\Macro-R> pnpm install
+Scope: all 11 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+. preinstall$ sh -c 'if [ "$EAS_BUILD" = "1" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) …
+└─ Done in 135ms
+Done in 1.5s using pnpm v10.26.1
+PS C:\Users\Avinash Poudel\Documents\Macro-R> cmd /c "rd /s /q node_modules"
+PS C:\Users\Avinash Poudel\Documents\Macro-R> git pull
+remote: Enumerating objects: 14, done.
+remote: Counting objects: 100% (14/14), done.
+remote: Compressing objects: 100% (4/4), done.
+remote: Total 12 (delta 8), reused 12 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (12/12), 11.08 KiB | 105.00 KiB/s, done.
+From https://github.com/poke-all-caps/Macro-R
+   46ea257..c2423ec  master     -> origin/master
+Updating 46ea257..c2423ec
+Fast-forward
+ ...ht-C-Microsoft-Corporation-Al_1784368218355.txt |  334 ++++
+ ...ht-C-Microsoft-Corporation-Al_1784368315678.txt |  899 ++++++++++
+ ...m-C-Users-Avinash-Poudel-Docu_1784368554846.txt | 1778 ++++++++++++++++++++
+ 3 files changed, 3011 insertions(+)
+ create mode 100644 attached_assets/Pasted-Windows-PowerShell-Copyright-C-Microsoft-Corporation-Al_1784368218355.txt
+ create mode 100644 attached_assets/Pasted-Windows-PowerShell-Copyright-C-Microsoft-Corporation-Al_1784368315678.txt
+ create mode 100644 attached_assets/Pasted-ove-Item-Cannot-remove-item-C-Users-Avinash-Poudel-Docu_1784368554846.txt
+PS C:\Users\Avinash Poudel\Documents\Macro-R> git pull
+remote: Enumerating objects: 12, done.
+remote: Counting objects: 100% (12/12), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 8 (delta 5), reused 8 (delta 5), pack-reused 0 (from 0)
+Unpacking objects: 100% (8/8), 3.07 KiB | 33.00 KiB/s, done.
+From https://github.com/poke-all-caps/Macro-R
+   c2423ec..001ecb8  master     -> origin/master
+Updating c2423ec..001ecb8
+Fast-forward
+ ...10-0-26200-8655-c-Microsoft-C_1784369357357.txt | 111 +++++++++++++++++++++
+ pnpm-lock.yaml                                     |  94 +++++++++++------
+ pnpm-workspace.yaml                                |   4 -
+ 3 files changed, 174 insertions(+), 35 deletions(-)
+ create mode 100644 attached_assets/Pasted-Microsoft-Windows-Version-10-0-26200-8655-c-Microsoft-C_1784369357357.txt
+PS C:\Users\Avinash Poudel\Documents\Macro-R> pnpm add @rollup/rollup-win32-x64-msvc
+ ERR_PNPM_ADDING_TO_ROOT  Running this command will add the dependency to the workspace root, which might not be what you want - if you really meant it, make it explicit by running this command again with the -w flag (or --workspace-root). If you don't want to see this warning anymore, you may set the ignore-workspace-root-check setting to true.
+PS C:\Users\Avinash Poudel\Documents\Macro-R>
