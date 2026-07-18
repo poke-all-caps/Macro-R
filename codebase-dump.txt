@@ -1,323 +1,37 @@
-╔══════════════════════════════════════════════════════════════════════════╗
-║         MACRO REWARDS — FULL CODEBASE DUMP                             ║
-╚══════════════════════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════════════════╗
+║            MACRO REWARDS — FULL ANNOTATED CODEBASE DUMP                    ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  THREE MAIN PIECES:                                                          ║
+║                                                                              ║
+║  [MOBILE APP]      artifacts/mobile/          Expo React Native Android app  ║
+║                    → The app users install on their phones                   ║
+║                    → Handles accounts, searches, notifications, license      ║
+║                                                                              ║
+║  [DESKTOP UI]      artifacts/rewards-desk-ui/ React + Vite web dashboard     ║
+║                    → Runs locally on the PC as a browser-based control panel ║
+║                    → Shows accounts, run logs, stats, settings               ║
+║                                                                              ║
+║  [API SERVER]      artifacts/api-server/      Express 5 backend              ║
+║                    → Shared backend for BOTH mobile and desktop              ║
+║                    → License keys, admin panel, desk routes, DB access       ║
+║                                                                              ║
+║  [SHARED LIBS]     lib/                       TypeScript packages            ║
+║                    lib/db/        → Drizzle ORM + Postgres schema            ║
+║                    lib/api-spec/  → OpenAPI spec (source of truth)           ║
+║                    lib/api-client-react/ → Generated React Query hooks       ║
+║                    lib/api-zod/   → Generated Zod validators                 ║
+║                                                                              ║
+║  [SCRIPTS]         scripts/desk/  → Electron-style desktop launcher scripts  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
 
-Generated: Sat Jul 18 06:19:53 AM UTC 2026
+Generated: Sat Jul 18 06:23:15 AM UTC 2026
 
-┌──────────────────────────────────────────────────────────────────────────┐
-│  FILE STRUCTURE                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
-  account-system-full-codebase.txt
-  agent_assets_metadata.toml
-    MEMORY.md
-    phase3-upgrade-system.md
-    zero-trust-systems.md
-  app.json
-    build.ts
-    package.json
-      artifact.toml
-      adminSession.ts
-      app.ts
-      email.ts
-      index.ts
-        .gitkeep
-        .gitkeep
-        admin.ts
-        config.ts
-        desk.ts
-        health.ts
-        index.ts
-        invite.ts
-        keys.ts
-        proxy.ts
-        upgrades.ts
-    tsconfig.json
-        [id].tsx
-      add-account.tsx
-      admin-panel.tsx
-    app.config.ts
-      cookie-browser.tsx
-      daily-set-settings.tsx
-      _layout.tsx
-      login-webview.tsx
-      +not-found.tsx
-      overnight.tsx
-      search-runner.tsx
-        index.tsx
-        _layout.tsx
-        logs.tsx
-        queries.tsx
-        settings.tsx
-      upgrade.tsx
-        iconn.png
-        icon.png
-        macro-rewards-logo.png
-        notification-icon.png
-        splash-icon.png
-    babel.config.js
-      AccountCard.tsx
-      AccountGridTile.tsx
-      AdminPanel.tsx
-      CustomAlert.tsx
-      EmptyState.tsx
-      ErrorBoundary.tsx
-      ErrorFallback.tsx
-      KeyboardAwareScrollViewCompat.tsx
-      LicenseGate.tsx
-      LogItem.tsx
-      StatsBar.tsx
-      colors.ts
-      defaultQueries.ts
-      AccountsContext.tsx
-      KycContext.tsx
-      LicenseContext.tsx
-      QueriesContext.tsx
-      SettingsContext.tsx
-    eas.json
-    expo-env.d.ts
-    .gitignore
-    metro.config.js
-    package.json
-      withBackgroundActions.js
-      artifact.toml
-      build.js
-      serve.js
-        landing-page.html
-    tsconfig.json
-      apiUrl.ts
-      backgroundSearch.ts
-      bingSearch.ts
-      cookieBrowserStore.ts
-      featureFlags.ts
-      keepAlive.ts
-      notifications.ts
-      time.ts
-    components.json
-    index.html
-    mockupPreviewPlugin.ts
-    package.json
-      artifact.toml
-      App.tsx
-          accordion.tsx
-          alert-dialog.tsx
-          alert.tsx
-          aspect-ratio.tsx
-          avatar.tsx
-          badge.tsx
-          breadcrumb.tsx
-          button-group.tsx
-          button.tsx
-          calendar.tsx
-          card.tsx
-          carousel.tsx
-          chart.tsx
-          checkbox.tsx
-          collapsible.tsx
-          command.tsx
-          context-menu.tsx
-          dialog.tsx
-          drawer.tsx
-          dropdown-menu.tsx
-          empty.tsx
-          field.tsx
-          form.tsx
-          hover-card.tsx
-          input-group.tsx
-          input-otp.tsx
-          input.tsx
-          item.tsx
-          kbd.tsx
-          label.tsx
-          menubar.tsx
-          navigation-menu.tsx
-          pagination.tsx
-          popover.tsx
-          progress.tsx
-          radio-group.tsx
-          resizable.tsx
-          scroll-area.tsx
-          select.tsx
-          separator.tsx
-          sheet.tsx
-          sidebar.tsx
-          skeleton.tsx
-          slider.tsx
-          sonner.tsx
-          spinner.tsx
-          switch.tsx
-          table.tsx
-          tabs.tsx
-          textarea.tsx
-          toaster.tsx
-          toast.tsx
-          toggle-group.tsx
-          toggle.tsx
-          tooltip.tsx
-        mockup-components.ts
-        use-mobile.tsx
-        use-toast.ts
-      index.css
-        utils.ts
-      main.tsx
-    tsconfig.json
-    vite.config.ts
-    components.json
-    index.html
-    package.json
-      favicon.svg
-      macro-rewards-logo.png
-      robots.txt
-      artifact.toml
-      App.tsx
-        account-card.tsx
-        account-grid-tile.tsx
-        layout.tsx
-        stats-bar.tsx
-        status-chip.tsx
-          accordion.tsx
-          alert-dialog.tsx
-          alert.tsx
-          aspect-ratio.tsx
-          avatar.tsx
-          badge.tsx
-          breadcrumb.tsx
-          button-group.tsx
-          button.tsx
-          calendar.tsx
-          card.tsx
-          carousel.tsx
-          chart.tsx
-          checkbox.tsx
-          collapsible.tsx
-          command.tsx
-          context-menu.tsx
-          dialog.tsx
-          drawer.tsx
-          dropdown-menu.tsx
-          empty.tsx
-          field.tsx
-          form.tsx
-          hover-card.tsx
-          input-group.tsx
-          input-otp.tsx
-          input.tsx
-          item.tsx
-          kbd.tsx
-          label.tsx
-          menubar.tsx
-          navigation-menu.tsx
-          pagination.tsx
-          popover.tsx
-          progress.tsx
-          radio-group.tsx
-          resizable.tsx
-          scroll-area.tsx
-          select.tsx
-          separator.tsx
-          sheet.tsx
-          sidebar.tsx
-          skeleton.tsx
-          slider.tsx
-          sonner.tsx
-          spinner.tsx
-          switch.tsx
-          table.tsx
-          tabs.tsx
-          textarea.tsx
-          toaster.tsx
-          toast.tsx
-          toggle-group.tsx
-          toggle.tsx
-          tooltip.tsx
-        use-desk.ts
-        use-license.ts
-        use-mobile.tsx
-        use-toast.ts
-      index.css
-        utils.ts
-      main.tsx
-        accounts.tsx
-        console.tsx
-        home.tsx
-        not-found.tsx
-        settings.tsx
-    tsconfig.json
-    vite.config.desk.ts
-    vite.config.ts
-  codebase-dump.txt
-    user-settings.json
-      semgrep_rules.json
-    semgrep_rules.json
-  accounts.json
-  .gitignore
-  huge security update initial.md
-    package.json
-      custom-fetch.ts
-        api.schemas.ts
-        api.ts
-      index.ts
-    tsconfig.json
-    tsconfig.tsbuildinfo
-    openapi.yaml
-    orval.config.ts
-    package.json
-    package.json
-        api.ts
-          botStatus.ts
-          deleteResult.ts
-          deskAccountInput.ts
-          deskAccountStatus.ts
-          deskAccount.ts
-          healthStatus.ts
-          index.ts
-          runInput.ts
-          runLogStatus.ts
-          runLog.ts
-          runResult.ts
-      index.ts
-    tsconfig.json
-    tsconfig.tsbuildinfo
-      0000_outgoing_randall.sql
-      0001_sudden_wonder_man.sql
-    drizzle.config.ts
-        0000_snapshot.json
-        0001_snapshot.json
-        _journal.json
-    package.json
-      index.ts
-      migrate.ts
-        deletedAccounts.ts
-        deviceCookies.ts
-        featureConfig.ts
-        globalConfig.ts
-        index.ts
-        inviteCodes.ts
-        kycSubmissions.ts
-        licenseKeys.ts
-        upgradeRequests.ts
-    tsconfig.json
-    tsconfig.tsbuildinfo
-  .npmrc
-  package.json
-  pnpm-workspace.yaml
-  README.md
-  .replit
-  .replitignore
-  replit.md
-    account-storage.js
-    app-window.js
-    build.bat
-  package.json
-  post-merge.sh
-    hello.ts
-  tsconfig.json
-    README.md
-  tsconfig.base.json
-  tsconfig.json
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ROOT CONFIG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-
-┌─ package.json
-│
+┌─ [ROOT]       package.json
 │  {
 │    "name": "workspace",
 │    "version": "0.0.0",
@@ -336,11 +50,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      "prettier": "^3.8.1"
 │    }
 │  }
-│
 └─ END: package.json
 
-┌─ pnpm-workspace.yaml
-│
+┌─ [ROOT]       pnpm-workspace.yaml
 │  packages:
 │    - artifacts/*
 │    - lib/*
@@ -462,11 +174,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    rollup>@rollup/rollup-win32-ia32-msvc: '-'
 │    rollup>@rollup/rollup-win32-x64-gnu: '-'
 │    rollup>@rollup/rollup-win32-x64-msvc: '-'
-│
 └─ END: pnpm-workspace.yaml
 
-┌─ tsconfig.json
-│
+┌─ [ROOT]       tsconfig.json
 │  {
 │    "extends": "./tsconfig.base.json",
 │    "compileOnSave": false,
@@ -483,11 +193,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      }
 │    ]
 │  }
-│
 └─ END: tsconfig.json
 
-┌─ tsconfig.base.json
-│
+┌─ [ROOT]       tsconfig.base.json
 │  {
 │    "compilerOptions": {
 │      "isolatedModules": true,
@@ -513,819 +221,1269 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      "customConditions": ["workspace"]
 │    }
 │  }
-│
 └─ END: tsconfig.base.json
 
-┌─ replit.md
-│
-│  # Macro Rewards — MS Rewards Automation
-│  
-│  ## Overview
-│  
-│  pnpm workspace monorepo using TypeScript. Contains **Macro Rewards**, an Android app built with Expo React Native that automates Microsoft Rewards point earning through automated Bing searches and Daily Set completion. Includes a backend API server with a license key system and admin panel.
-│  
-│  ## Stack
-│  
-│  - **Monorepo tool**: pnpm workspaces
-│  - **Node.js version**: 24
-│  - **Package manager**: pnpm
-│  - **TypeScript version**: 5.9
-│  - **API framework**: Express 5
-│  - **Database**: PostgreSQL + Drizzle ORM
-│  - **Validation**: Zod (`zod/v4`), `drizzle-zod`
-│  - **API codegen**: Orval (from OpenAPI spec)
-│  - **Build**: esbuild (CJS bundle)
-│  - **Mobile**: Expo SDK 54 (`~54.0.27`) + Expo Router (file-based routing)
-│  
-│  ## Project Structure
-│  
-│  ```text
-│  artifacts-monorepo/
-│  ├── artifacts/
-│  │   ├── api-server/           # Express 5 API server (license keys, admin panel)
-│  │   │   └── src/
-│  │   │       ├── index.ts      # Entry point (reads PORT env var)
-│  │   │       ├── app.ts        # Express app setup (cors, json, routes at /api)
-│  │   │       └── routes/
-│  │   │           ├── index.ts  # Route aggregator
-│  │   │           ├── health.ts # Health check endpoint
-│  │   │           ├── keys.ts   # License key CRUD + validate-key + cookie sync + feature config
-│  │   │           └── admin.ts  # HTML admin panel for license management
-│  │   └── mobile/               # Expo React Native app
-│  │       ├── app/
-│  │       │   ├── _layout.tsx           # Root layout with all providers + notification handler
-│  │       │   ├── (tabs)/
-│  │       │   │   ├── _layout.tsx       # Tab bar layout (native tabs on iOS, classic on Android)
-│  │       │   │   ├── index.tsx         # Home — accounts list/grid + FABs
-│  │       │   │   ├── logs.tsx          # Run logs history
-│  │       │   │   ├── queries.tsx       # Search queries management
-│  │       │   │   └── settings.tsx      # App settings + schedule + license info + admin button
-│  │       │   ├── account/[id].tsx      # Account detail modal + hidden Panel toggle
-│  │       │   ├── add-account.tsx       # Manual account add form
-│  │       │   ├── admin-panel.tsx       # Admin panel route (guarded by OWNER_MODE)
-│  │       │   ├── login-webview.tsx     # WebView Microsoft login flow
-│  │       │   └── search-runner.tsx     # Foreground search execution screen
-│  │       ├── components/
-│  │       │   ├── AccountCard.tsx       # Account list card with status
-│  │       │   ├── AccountGridTile.tsx   # Account grid tile view
-│  │       │   ├── CustomAlert.tsx       # Custom alert dialog
-│  │       │   ├── EmptyState.tsx        # Empty state placeholder
-│  │       │   ├── ErrorBoundary.tsx     # React error boundary
-│  │       │   ├── ErrorFallback.tsx     # Error fallback UI
-│  │       │   ├── LicenseGate.tsx       # License activation lock screen
-│  │       │   ├── LogItem.tsx           # Run log list item
-│  │       │   └── StatsBar.tsx          # Stats summary bar
-│  │       ├── context/
-│  │       │   ├── AccountsContext.tsx   # Accounts state, run logic, logs
-│  │       │   ├── LicenseContext.tsx    # License validation + caching
-│  │       │   ├── QueriesContext.tsx    # Search queries state
-│  │       │   └── SettingsContext.tsx   # App settings persistence
-│  │       ├── constants/
-│  │       │   └── colors.ts            # Light/dark theme colors
-│  │       └── utils/
-│  │           ├── backgroundSearch.ts  # Background search engine (fetch-based)
-│  │           └── notifications.ts     # Notification scheduling + channels
-│  ├── lib/
-│  │   ├── api-spec/                    # OpenAPI spec + Orval codegen config
-│  │   ├── api-client-react/            # Generated React Query hooks
-│  │   ├── api-zod/                     # Generated Zod schemas from OpenAPI
-│  │   └── db/                          # Drizzle ORM schema + DB connection
-│  │       └── src/schema/
-│  │           └── licenseKeys.ts       # license_keys table schema
-│  ├── scripts/                         # Utility scripts
-│  ├── pnpm-workspace.yaml
-│  ├── tsconfig.base.json
-│  ├── tsconfig.json
-│  └── package.json
-│  ```
-│  
-│  ---
-│  
-│  ## Mobile App — Macro Rewards
-│  
-│  ### App Provider Tree (app/_layout.tsx)
-│  
-│  ```
-│  SafeAreaProvider
-│    → ErrorBoundary
-│      → QueryClientProvider
-│        → GestureHandlerRootView
-│          → KeyboardProvider
-│            → LicenseProvider        ← license validation context
-│              → LicenseGate          ← blocks app if no valid license
-│                → AccountsProvider   ← accounts state + run logic
-│                  → QueriesProvider  ← search queries
-│                    → SettingsProvider
-│                      → RootLayoutNav (Stack navigator)
-│  ```
-│  
-│  ### Features
-│  
-│  #### 1. License Key System
-│  - **LicenseGate** (`components/LicenseGate.tsx`): Full-screen lock screen shown when no valid license is active. Displays a key icon, text input for keys, and an Activate button. Detects admin secret vs regular license key automatically. Supports QR code scanning via camera (`expo-camera`) and gallery image picker (`expo-image-picker`) for license activation.
-│  - **LicenseContext** (`context/LicenseContext.tsx`):
-│    - Validates keys against the API at `EXPO_PUBLIC_API_URL/api/validate-key`
-│    - Also checks admin secret via `EXPO_PUBLIC_API_URL/api/validate-admin`
-│    - If admin secret is entered → `isAdmin=true`, shows AdminPanel instead of regular app
-│    - If regular license key is entered → `isAdmin=false`, shows regular app
-│    - Caches validated license data in AsyncStorage for **24 hours**
-│    - Falls back to cached data when offline (if license hasn't expired)
-│    - Stores: `key`, `maxAccounts`, `expiresAt`, `label`, `keyType`, `validatedAt`
-│    - AsyncStorage keys: `@ms_rewards_license_key`, `@ms_rewards_license_data`, `@ms_rewards_admin_secret`
-│  - **AdminPanel** (`components/AdminPanel.tsx`): Full native admin panel shown when admin secret is entered. Allows creating keys, extending expiry, editing account limits, activating/deactivating, deleting, copying keys to clipboard, and resetting device bindings. Sign out button returns to license entry screen.
-│  - **Device Locking**: Each key is bound to 1 device only. The first device to activate a key gets bound; other devices are rejected with "Key is already in use on another device". Admin can reset device binding from the admin panel. Device ID is Android ID on Android, or a persistent UUID stored in AsyncStorage. Schema column: `bound_device_id` on `license_keys` table.
-│  - **Owner Mode** (`EXPO_PUBLIC_OWNER_MODE` env var): Build-time flag. When `"true"`, the license screen is bypassed entirely — no key needed. Controlled solely by `process.env.EXPO_PUBLIC_OWNER_MODE === "true"` (the old `Constants.expoConfig?.extra?.ownerMode` check was removed because it cached stale values on web). The admin panel is accessible from Settings via a purple "Admin Panel" button, but this button is hidden by default. To show/hide it, go to account #2's edit screen and toggle the "Panel" switch. When `"false"`, everything works normally (license key required). The admin panel uses `EXPO_PUBLIC_ADMIN_SECRET` env var for API auth.
-│  - **Background Work**: Four-layer approach:
-│    1. **Foreground Service** (`react-native-background-actions`): When the search runner starts, it creates an Android foreground service with a persistent notification. This keeps the search process alive when the app is minimized, in recents, or the screen is off. The notification shows live progress (account name + search count). Stops automatically when searches complete or user aborts.
-│    2. **Background Fetch** (`expo-background-fetch`): Registered on app launch, runs periodically (~1 hour) via Android's JobScheduler. Calls `runBackgroundSearches()`.
-│    3. **Notification-triggered** (`utils/notifications.ts`): When overnight notification fires in background, `BACKGROUND-NOTIFICATION-TASK` runs `runBackgroundSearches()`. If that fails, it sets a pending-run flag and opens the app.
-│    3. **Foreground handler** (`_layout.tsx`): When notification fires while app is open, navigates to `/search-runner` for WebView-based full automation (searches + daily set).
-│    - Background searches are fetch-only (no WebView), so daily set is skipped in background mode.
-│    - Lock via `@ms_rewards_bg_running` prevents concurrent runs. Last run timestamp stored in `@ms_rewards_bg_last_run`.
-│    - Android permissions: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_DATA_SYNC`, `WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED`.
-│  - **Account Limit Enforcement**: Enforced in **3 places**:
-│    1. Home screen "+" button (`app/(tabs)/index.tsx`) — shows alert
-│    2. Manual add form (`app/add-account.tsx`) — shows validation error
-│    3. WebView login flow (`app/login-webview.tsx`) — shows Alert and navigates back
-│  - **Settings License Section** (`app/(tabs)/settings.tsx`): Shows truncated key, account limit, expiry date, and "Remove License" button with confirmation dialog
-│  
-│  #### 1b. Remote Config System
-│  - **Feature Config table** (`lib/db/src/schema/featureConfig.ts`): `feature_config` table with per-tier configs (maxAccounts, maxSearches, minDelaySeconds, backgroundEnabled, customQueriesEnabled, dailySetEnabled)
-│  - **API endpoints** (`artifacts/api-server/src/routes/keys.ts`):
-│    - `GET /admin/feature-config` — returns all 4 tier configs
-│    - `PUT /admin/feature-config/:keyType` — updates a tier's config
-│    - `POST /validate-key` — now includes `featureConfig` in response
-│    - Default configs seeded on server startup for basic/premium/unlimited/admin
-│  - **Admin panels**:
-│    - **Web admin** (`routes/admin.ts`) — editable Feature Config cards section with numeric inputs and toggles
-│    - **In-app AdminPanel** (`components/AdminPanel.tsx`) — Keys/Feature Config tab system with `ConfigRow` (numeric input) and `ConfigToggle` (switch) components
-│  - **App enforcement**: `featureConfig` from `LicenseContext` used in index.tsx (account/search limits), settings.tsx (search/delay clamping). `OWNER_FEATURE_CONFIG` gives unlimited defaults for owner mode
-│  - **Caching**: Feature config saved to `@ms_rewards_feature_config` AsyncStorage, loaded from cache when offline
-│  
-│  #### 1c. OTA Updates (EAS Update)
-│  - **expo-updates** installed and configured in `app.json` with `updates.url` pointing to project `bde8726b-e427-47c3-bfef-bac4d4e46de4`
-│  - **Runtime version policy**: `appVersion` — runtime version matches app version
-│  - **Check for Updates button**: Settings page (native only, hidden on web) with green "Check for Updates" button that calls `Updates.checkForUpdateAsync()`, offers download + restart
-│  - **Push command**: `pnpm --filter @workspace/mobile run update "message here"` runs `eas update --branch preview --message`
-│  - **EAS Build profile**: `preview` profile, account `shroud.dev`
-│  
-│  #### 2. Account Management
-│  - **Account data model** (`context/AccountsContext.tsx`):
-│    ```typescript
-│    interface Account {
-│      id: string;           // Generated: timestamp + random string
-│      name: string;
-│      email: string;
-│      avatarUrl?: string;
-│      status: "idle" | "running" | "done" | "failed";
-│      totalPoints: number;
-│      todayPoints: number;
-│      lastRun: string | null;
-│      searchCount: number;
-│      dailySetEnabled: boolean;
-│      cookies: Record<string, string>;  // Microsoft/Bing cookies
-│      searchesCompleted: number;
-│    }
-│    ```
-│  - **Add account (WebView login)** (`app/login-webview.tsx`): Opens Microsoft login in a WebView, captures cookies (including httpOnly via CookieManager), validates `_U` cookie, scrapes profile data (name, email, avatar) via Rewards API
-│  - **Add account (manual)** (`app/add-account.tsx`): Manual name/email entry (no cookies — limited functionality)
-│  - **Account detail** (`app/account/[id].tsx`): View/edit account info, stat cards, recent run history
-│  - **View modes**: List view (AccountCard) or grid view (AccountGridTile), toggled from home screen header
-│  
-│  #### 3. Search Automation
-│  - **Foreground searches** (`app/search-runner.tsx`):
-│    - Executes Bing searches via `fetch()` (no WebView needed for searches)
-│    - Uses mobile User-Agent: `Pixel 7 / Chrome 112` for mobile searches
-│    - Uses desktop User-Agent: `Windows 10 / Edge 120` for PC searches (earns separate points)
-│    - PC searches run after mobile searches when enabled in settings
-│    - Sends `credentials: "omit"` with manual `Cookie` header
-│    - Each search generates a unique `cvid` (random hex)
-│    - Delay between searches: configurable in settings (default 5s in UI)
-│    - Fetches Rewards points before and after to calculate earnings
-│    - Supports Daily Set completion via WebView per account
-│  - **Background searches** (`utils/backgroundSearch.ts`):
-│    - Runs via `expo-task-manager` background task (`BACKGROUND-SEARCH-TASK`)
-│    - Actual delay: **1.5–2.5 seconds** between searches
-│    - Double-trigger prevention: checks `AppState` (skips if foreground) + `BG_RUNNING_KEY` AsyncStorage flag
-│    - Query rotation: pulls from unused pool, rotates to used, recycles when depleted
-│    - Network error detection: stops account on `Network request failed`
-│    - Updates account status and logs directly in AsyncStorage
-│    - Shows completion notification with total searches and points earned
-│    - Directly reads/writes AsyncStorage (doesn't use React contexts)
-│  
-│  #### 4. Notifications & Overnight Mode
-│  - **Notification channel** (`utils/notifications.ts`): Single `macro-rewards` channel (MAX importance, bypassDnd, vibration pattern)
-│  - **Overnight scheduling**: Configurable time slots (default: 22:00, 23:00, 01:00, 02:00)
-│    - Uses `daily` trigger type, with `timeInterval` fallback if daily fails
-│    - Each notification carries `data: { action: "start_run" }`
-│  - **Background notification task** (`BACKGROUND-NOTIFICATION-TASK`):
-│    - On notification received → runs `backgroundSearch.runBackgroundSearches()`
-│    - If background search fails → sets `PENDING_RUN_KEY` flag and tries to open app via deep link
-│  - **Auto-start on cold launch**: Home screen checks for `PENDING_RUN_KEY` on focus, auto-starts run if pending
-│  - **Battery optimization prompt**: One-time prompt to disable battery optimization for reliable notifications
-│  
-│  #### 5. Settings
-│  - **Settings data model** (`context/SettingsContext.tsx`):
-│    ```typescript
-│    interface Settings {
-│      defaultSearchCount: number;  // Default: 30
-│      searchDelay: number;         // Default: 5 (seconds, UI display)
-│      dailySetEnabled: boolean;    // Default: true
-│      pcSearchEnabled: boolean;    // Default: true — run desktop UA searches
-│      pcSearchCount: number;       // Default: 30 — PC searches per account
-│      overnightSlots: OvernightSlot[];  // Default: 22:00, 23:00, 01:00, 02:00
-│      overnightDailySet: boolean;  // Default: false
-│    }
-│    ```
-│  - **AsyncStorage key**: `@ms_rewards_settings_v2`
-│  - **Sections**: SEARCH (count, delay, daily set), SCHEDULE (overnight slots, AM/PM), LICENSE (key info, remove)
-│  
-│  #### 6. Run Logs
-│  - **Log data model**:
-│    ```typescript
-│    interface RunLog {
-│      id: string;
-│      accountId: string;
-│      accountName: string;
-│      timestamp: string;
-│      searchesDone: number;
-│      dailySetDone: boolean;
-│      pointsEarned: number;
-│      status: "success" | "failed";
-│      errorMessage?: string;
-│    }
-│    ```
-│  - **Max logs**: 200 (oldest are dropped)
-│  - **AsyncStorage key**: `@ms_rewards_logs`
-│  
-│  ### Theme
-│  - **Primary**: Blue (#2563EB / #3B82F6)
-│  - **Dark mode**: Fully supported
-│  - **Font**: Inter (300 Light, 400 Regular, 500 Medium, 600 SemiBold, 700 Bold, 800 ExtraBold)
-│  
-│  ### Android Permissions
-│  - `SCHEDULE_EXACT_ALARM` — exact notification scheduling
-│  - `USE_EXACT_ALARM` — exact alarm fallback
-│  - `WAKE_LOCK` — keep device awake during background tasks
-│  - `RECEIVE_BOOT_COMPLETED` — reschedule notifications after reboot
-│  - `POST_NOTIFICATIONS` — Android 13+ notification permission
-│  
-│  ### Build & Deploy (Mobile)
-│  - **EAS account**: `meoow123` (adventurepoke2@gmail.com)
-│  - **Project ID**: `e44f3f61-0e90-468d-9a3d-378d6aaf7c45`
-│  - **Bundle ID**: `com.msrewards.automation`
-│  - **Build command**: `cd artifacts/mobile && eas build --platform android --profile preview --non-interactive`
-│  - **Build profiles**: `development` (debug APK), `preview` (internal APK), `production`
-│  - **Important**: Any native code changes (permissions, expo-task-manager, etc.) require a new EAS build
-│  
-│  ---
-│  
-│  ## Backend — API Server
-│  
-│  ### Setup
-│  - **Entry**: `artifacts/api-server/src/index.ts` → reads `PORT` env var
-│  - **App**: `artifacts/api-server/src/app.ts` → Express 5 with CORS (restricted in production), JSON parsing
-│  - **All routes**: Mounted at `/api` prefix
-│  - **Dependencies**: `@workspace/db` (Drizzle ORM), `@workspace/api-zod` (validation)
-│  
-│  ### License Key API
-│  
-│  #### Public Endpoints
-│  
-│  | Method | Path | Description |
-│  |--------|------|-------------|
-│  | `POST` | `/api/validate-key` | Validate a license key + bind device |
-│  | `POST` | `/api/validate-admin` | Validate admin secret |
-│  | `POST` | `/api/sync-cookies` | Sync account cookies from device (requires bound key + deviceId) |
-│  | `GET` | `/api/healthz` | Health check (`{ status: "ok" }`) |
-│  
-│  **validate-key request body**:
-│  ```json
-│  { "key": "XXXX-XXXX-XXXX-XXXX", "deviceId": "android-device-id" }
-│  ```
-│  
-│  **Response (valid)**:
-│  ```json
-│  {
-│    "valid": true,
-│    "maxAccounts": 5,
-│    "expiresAt": "2027-01-01T00:00:00.000Z",
-│    "label": "Test Key",
-│    "keyType": "basic",
-│    "featureConfig": {
-│      "keyType": "basic",
-│      "maxAccounts": 3,
-│      "maxSearches": 30,
-│      "minDelaySeconds": 5,
-│      "backgroundEnabled": false,
-│      "customQueriesEnabled": false
-│    }
-│  }
-│  ```
-│  
-│  **Response (invalid)**:
-│  ```json
-│  { "valid": false, "error": "Invalid key" }
-│  ```
-│  
-│  **Error cases**: `"Invalid key"`, `"Key has been deactivated"`, `"Key has expired"`, `"Key is required"`, `"Key is already in use on another device"`
-│  
-│  **Device binding**: On first `validate-key` call with a `deviceId`, the key is permanently bound to that device. Subsequent calls from a different device are rejected. Admin can reset via `reset-device` endpoint.
-│  
-│  **validate-admin request body**:
-│  ```json
-│  { "secret": "<admin-secret>" }
-│  ```
-│  Returns `{ "valid": true, "isAdmin": true }` or `{ "valid": false }`.
-│  
-│  #### Admin Endpoints (require `X-Admin-Secret` header)
-│  
-│  | Method | Path | Description |
-│  |--------|------|-------------|
-│  | `GET` | `/api/admin/keys` | List all license keys |
-│  | `POST` | `/api/admin/keys` | Create a new key |
-│  | `PUT` | `/api/admin/keys/:id` | Update a key (label, maxAccounts, expiresAt, isActive) |
-│  | `PUT` | `/api/admin/keys/:id/reset-device` | Reset device binding (clears `bound_device_id`) |
-│  | `DELETE` | `/api/admin/keys/:id` | Delete a key permanently |
-│  | `GET` | `/api/admin/keys/:id/cookies` | Get synced cookies for a license key |
-│  | `GET` | `/api/admin/feature-config` | List all feature configs |
-│  | `PUT` | `/api/admin/feature-config/:keyType` | Update feature config for a key type |
-│  | `GET` | `/api/admin` | HTML admin panel (web-based, login form) |
-│  
-│  **Create key body**:
-│  ```json
-│  {
-│    "label": "User Name",
-│    "maxAccounts": 5,
-│    "expiresAt": "2027-01-01T00:00:00Z"
-│  }
-│  ```
-│  
-│  **Update key body** (all fields optional):
-│  ```json
-│  {
-│    "label": "New Label",
-│    "maxAccounts": 10,
-│    "expiresAt": "2028-01-01T00:00:00Z",
-│    "isActive": false
-│  }
-│  ```
-│  
-│  ### Admin Panel (Two Interfaces)
-│  
-│  #### 1. Web Admin Panel (API Server)
-│  - **URL**: `/api/admin` (login form, session-based auth with 4-hour TTL)
-│  - **Features**: Create keys, view all keys with status badges, extend expiry, edit account limit, activate/deactivate, delete, feature config editing
-│  - **UI**: Dark theme (Slate colors), server-rendered HTML with inline JS
-│  - **Error handling**: All API errors sanitized — raw SQL/database errors never exposed to clients
-│  
-│  #### 2. In-App Admin Panel (Mobile)
-│  - **Component**: `components/AdminPanel.tsx`
-│  - **Route**: `app/admin-panel.tsx` (full-screen modal, guarded by `OWNER_MODE`)
-│  - **Access paths**:
-│    - **Owner mode**: Navigate via shield button in Settings header (only visible when `adminPanelVisible` toggle is on)
-│    - **Admin auth mode**: Shown automatically when admin secret is entered in the license gate (non-owner users)
-│  - **Features**: Same as web panel plus device binding status, reset device, copy key to clipboard, QR code display per key, haptic feedback
-│  - **Auth**: Uses `EXPO_PUBLIC_ADMIN_SECRET` env var in owner mode; uses stored admin secret in admin auth mode
-│  - **Navigation**: Back arrow in owner mode (returns to Settings), Sign Out button in admin auth mode (clears admin secret)
-│  
-│  ### Database Schema
-│  
-│  #### `license_keys` table (`lib/db/src/schema/licenseKeys.ts`)
-│  
-│  | Column | Type | Default | Description |
-│  |--------|------|---------|-------------|
-│  | `id` | UUID | `defaultRandom()` | Primary key |
-│  | `key` | TEXT | — | Unique key string (`XXXX-XXXX-XXXX-XXXX`, uppercase hex) |
-│  | `label` | TEXT | `null` | Optional label for the key |
-│  | `key_type` | TEXT | `"basic"` | Key tier: `basic`, `premium`, `unlimited`, or `admin` |
-│  | `max_accounts` | INTEGER | `3` | Maximum accounts allowed |
-│  | `is_active` | BOOLEAN | `true` | Whether key is currently active |
-│  | `bound_device_id` | TEXT | `null` | Android device ID bound to this key (1 device per key) |
-│  | `expires_at` | TIMESTAMP | — | Expiration date |
-│  | `created_at` | TIMESTAMP | `now()` | Creation timestamp |
-│  | `updated_at` | TIMESTAMP | `now()` | Last update timestamp |
-│  
-│  **Key format**: 4 segments of 4 hex characters, uppercase, separated by dashes. Generated with `crypto.randomBytes(2)` per segment.
-│  
-│  #### `device_cookies` table (`lib/db/src/schema/deviceCookies.ts`)
-│  
-│  | Column | Type | Default | Description |
-│  |--------|------|---------|-------------|
-│  | `id` | UUID | `defaultRandom()` | Primary key |
-│  | `license_key_id` | UUID | — | FK to `license_keys.id` (CASCADE delete) |
-│  | `device_id` | TEXT | — | Device that synced the cookies |
-│  | `account_email` | TEXT | — | Microsoft account email |
-│  | `account_name` | TEXT | `null` | Account display name |
-│  | `cookies` | TEXT | — | JSON-stringified cookies |
-│  | `updated_at` | TIMESTAMP | `now()` | Last sync timestamp |
-│  
-│  Unique constraint on `(license_key_id, account_email)`.
-│  
-│  #### `feature_config` table (`lib/db/src/schema/featureConfig.ts`)
-│  
-│  | Column | Type | Default | Description |
-│  |--------|------|---------|-------------|
-│  | `key_type` | TEXT | — | Primary key, one of: `basic`, `premium`, `unlimited`, `admin` |
-│  | `max_accounts` | INTEGER | `3` | Max accounts allowed for this key type |
-│  | `max_searches` | INTEGER | `30` | Max searches per run |
-│  | `min_delay_seconds` | INTEGER | `5` | Minimum delay between searches |
-│  | `background_enabled` | BOOLEAN | `false` | Whether background/overnight automation is allowed |
-│  | `custom_queries_enabled` | BOOLEAN | `false` | Whether custom query editing is allowed |
-│  | `daily_set_enabled` | BOOLEAN | `true` | Whether Daily Set automation is allowed |
-│  
-│  Default seed values are created on server startup if the table is empty. Admin can update per key type via the admin panel or API.
-│  
-│  ---
-│  
-│  ## Environment Variables
-│  
-│  | Variable | Where | Description |
-│  |----------|-------|-------------|
-│  | `PORT` | API server | Port for the Express server (set by Replit) |
-│  | `DATABASE_URL` | API server | PostgreSQL connection string (set by Replit) |
-│  | `ADMIN_SECRET` | API server | Secret for admin panel access and API auth. **Required** — no default fallback |
-│  | `EXPO_PUBLIC_API_URL` | Mobile app | Base URL of the API server (includes `/api` suffix) |
-│  | `EXPO_PUBLIC_ADMIN_SECRET` | Mobile app | Admin secret used in owner mode for API auth (same value as `ADMIN_SECRET`) |
-│  
-│  ### Current Values
-│  - **ADMIN_SECRET**: Set via Replit Secrets (do not store in code or docs)
-│  - **Production URL**: `https://macro-r-631x.onrender.com`
-│  - **Admin Panel (prod)**: `https://macro-r-631x.onrender.com/api/admin` (log in with ADMIN_SECRET)
-│  - **Admin Panel (dev)**: `https://<REPLIT_DEV_DOMAIN>/api/admin` (log in with ADMIN_SECRET)
-│  
-│  ---
-│  
-│  ## AsyncStorage Keys (Mobile)
-│  
-│  | Key | Description |
-│  |-----|-------------|
-│  | `@ms_rewards_accounts` | Array of Account objects |
-│  | `@ms_rewards_logs` | Array of RunLog objects (max 200) |
-│  | `@ms_rewards_settings_v2` | Settings object |
-│  | `@ms_rewards_queries_v2` | Search queries `{ unused: [], used: [] }` |
-│  | `@ms_rewards_license_key` | Stored license key string |
-│  | `@ms_rewards_license_data` | Cached license validation data (JSON) |
-│  | `@ms_rewards_admin_secret` | Stored admin secret (for admin auth mode) |
-│  | `@ms_rewards_device_id` | Persistent device ID (Android ID or fallback UUID) |
-│  | `@ms_rewards_admin_visible` | Whether the admin panel button is visible in owner mode (`"true"`/`"false"`) |
-│  | `@ms_rewards_uploaded_photos` | Uploaded photo history array (max 1000 entries) |
-│  | `@ms_rewards_pending_run` | Flag for pending overnight run |
-│  | `@ms_rewards_bg_running` | Timestamp lock to prevent concurrent background runs (TTL: 10 min) |
-│  | `@ms_rewards_bg_last_run` | Timestamp of last completed background run |
-│  | `@ms_rewards_bg_fetch_enabled` | Whether BackgroundFetch is enabled (`"true"`/`"false"`) |
-│  | `@ms_rewards_battery_opt_prompted` | Battery optimization prompt shown flag |
-│  
-│  ---
-│  
-│  ## Technical Notes
-│  
-│  ### Bing Search Pattern
-│  - All Bing searches use `credentials: "omit"` + manual `Cookie` header (avoids React Native cookie jar issues)
-│  - User-Agent mimics Pixel 7 / Chrome 112 (mobile)
-│  - Each search gets a unique `cvid` parameter (32-char random hex)
-│  - Cookies from `_ls_` prefix are filtered out of the cookie header
-│  - Rewards points fetched from `https://rewards.bing.com/api/getuserinfo`
-│  
-│  ### Background Task Architecture
-│  - `BACKGROUND-NOTIFICATION-TASK`: Triggered by scheduled notifications, runs `runBackgroundSearches()`. If that fails, sets `PENDING_RUN_KEY` flag and tries to open app via deep link (`mobile://start-run`)
-│  - `BACKGROUND-SEARCH-TASK`: Registered with `expo-background-fetch` (minimum interval: 1 hour, `stopOnTerminate: false`, `startOnBoot: true`). Wraps `runBackgroundSearches()`
-│  - Both tasks directly read/write AsyncStorage (no React context access in background)
-│  - **Concurrency lock**: In-memory flag (`inMemoryLock`) + AsyncStorage timestamp (`@ms_rewards_bg_running`) with 10-minute TTL. Double-check after write to detect lock contention
-│  - **Background fetch re-registration**: On app launch, `_layout.tsx` checks `@ms_rewards_bg_fetch_enabled`; if `true`, re-registers the background fetch task
-│  - **Task definition**: Both tasks are defined at module load time (before React renders) in `_layout.tsx` via `registerBackgroundNotificationTask()` and `registerBackgroundSearchTask()`
-│  - **Background search delay**: 1.5–2.5 seconds between searches (shorter than foreground)
-│  
-│  ### Owner Mode Flow
-│  1. Set `EXPO_PUBLIC_OWNER_MODE=true` in Replit Secrets (or `.env` for EAS builds)
-│  2. On build, Metro inlines `process.env.EXPO_PUBLIC_OWNER_MODE` → `OWNER_MODE = true`
-│  3. License screen is bypassed entirely — app loads directly
-│  4. Admin panel button (purple shield) appears in Settings header only when `isOwnerMode && adminPanelVisible`
-│  5. The `adminPanelVisible` toggle is hidden in account #2's edit section (index 1): visible only when `isOwnerMode && accountIndex === 1 && isEditing`
-│  6. `admin-panel.tsx` route guard: redirects to `/` if `!OWNER_MODE`
-│  7. In admin auth mode (non-owner enters admin secret), `LicenseGate` renders `AdminPanel` directly instead of the app
-│  8. **Important:** `Constants.expoConfig?.extra?.ownerMode` was removed from the check because it caches stale values on web. Only `process.env.EXPO_PUBLIC_OWNER_MODE === "true"` is used now.
-│  
-│  ### Admin Panel Auth
-│  The admin panel (`AdminPanel.tsx`) determines the API secret with:
-│  ```typescript
-│  const effectiveSecret = adminSecret || OWNER_ADMIN_SECRET;
-│  ```
-│  - `adminSecret`: Set in context when user enters the admin secret on the license screen
-│  - `OWNER_ADMIN_SECRET`: Falls back to `EXPO_PUBLIC_ADMIN_SECRET` env var (baked into the build)
-│  - This ensures the admin panel works whether the user entered the admin secret directly OR used an admin-type license key
-│  
-│  ### Production Deployment
-│  - **Production URL**: `https://macro-r-631x.onrender.com`
-│  - **Build script** (`build.ts`): Automatically runs `drizzle-kit push` to sync the production DB schema before bundling
-│  - **Health check**: `GET /api/healthz`
-│  - **Mobile APK**: Must set `EXPO_PUBLIC_API_URL=https://macro-r-631x.onrender.com/api` in EAS env before building
-│  
-│  ### Device Compatibility Notes
-│  - **Infinix/HiOS**: Requires Autostart enabled for background tasks
-│  - **Samsung**: May need "Sleeping apps" exception
-│  - **All Android**: Battery optimization should be set to "Unrestricted" for reliable notifications
-│
-└─ END: replit.md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SHARED LIBS — lib/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-┌─ README.md
-│
-│  # Macro Rewards
-│  
-│  Android app that automates Microsoft Rewards point earning through Bing searches and Daily Set completion across multiple accounts.
-│  
-│  **Stack:** Expo SDK 54 · React Native · Express 5 · PostgreSQL (Neon) · Drizzle ORM · pnpm monorepo
-│  
-│  ---
-│  
-│  ## What's in this repo
-│  
-│  | Directory | Purpose |
-│  |---|---|
-│  | `artifacts/api-server` | Express 5 API server — license keys, admin panel, cookie sync |
-│  | `artifacts/mobile` | Expo React Native Android app |
-│  | `lib/db` | Drizzle ORM schema + database connection |
-│  | `lib/api-spec` | OpenAPI spec + Orval codegen config |
-│  
-│  ---
-│  
-│  ## Prerequisites
-│  
-│  - **Node.js 20+** and **pnpm** (`npm i -g pnpm`)
-│  - **Expo account** — [expo.dev](https://expo.dev) (free)
-│  - **EAS CLI** — `npm i -g eas-cli`
-│  - **Neon account** — [neon.tech](https://neon.tech) (free PostgreSQL)
-│  - **Render account** — [render.com](https://render.com) (free tier for the API server)
-│  
-│  ---
-│  
-│  ## Setup: Replit users
-│  
-│  ### 1. Fork the Repl
-│  
-│  Click **Fork** on the Repl to get your own copy. All pnpm dependencies are already installed.
-│  
-│  ### 2. Create a Neon database
-│  
-│  1. Go to [neon.tech](https://neon.tech) → create a free project
-│  2. Copy the **Connection string** (looks like `postgresql://user:pass@host/db?sslmode=require`)
-│  3. In your Repl, open **Secrets** (padlock icon) and add:
-│     - `DATABASE_URL` = your Neon connection string
-│  
-│  ### 3. Set required secrets
-│  
-│  In Replit **Secrets**, add:
-│  
-│  | Secret | Value |
-│  |---|---|
-│  | `DATABASE_URL` | Neon connection string from step 2 |
-│  | `ADMIN_SECRET` | A strong random password you choose (e.g. `openssl rand -hex 32`) |
-│  
-│  ### 4. Push the database schema
-│  
-│  Open the **Shell** tab and run:
-│  
-│  ```bash
-│  cd lib/db && pnpm run push
-│  ```
-│  
-│  This creates the `license_keys`, `feature_config`, and `device_cookies` tables in your Neon database.
-│  
-│  ### 5. Start the API server
-│  
-│  The workflow **API Server** is already configured. Click **Run** or start it from the Workflows panel. You should see:
-│  
-│  ```
-│  Server running on port XXXX
-│  ```
-│  
-│  Visit `https://<your-repl-slug>.replit.app/api/healthz` — it should return `{"status":"ok"}`.
-│  
-│  ### 6. Deploy the API to Render (for production APK builds)
-│  
-│  The Replit dev server is fine for testing, but APK builds need a permanent URL. See the **Render deployment** section below.
-│  
-│  ### 7. Build the Android APK
-│  
-│  See the **EAS Build** section below.
-│  
-│  ---
-│  
-│  ## Setup: GitHub users
-│  
-│  ### 1. Clone and install
-│  
-│  ```bash
-│  git clone https://github.com/your-username/macro-rewards.git
-│  cd macro-rewards
-│  pnpm install
-│  ```
-│  
-│  ### 2. Create a Neon database
-│  
-│  1. Go to [neon.tech](https://neon.tech) → create a free project
-│  2. Copy the **Connection string**
-│  
-│  ### 3. Set environment variables
-│  
-│  Create a `.env` file in the repo root (this is only used locally by the API server):
-│  
-│  ```env
-│  DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
-│  ADMIN_SECRET=your-strong-random-secret
-│  PORT=3001
-│  ```
-│  
-│  ### 4. Push the database schema
-│  
-│  ```bash
-│  cd lib/db && pnpm run push
-│  ```
-│  
-│  ### 5. Run the API server locally
-│  
-│  ```bash
-│  pnpm --filter @workspace/api-server run dev
-│  ```
-│  
-│  The server starts on `http://localhost:3001`. Test it:
-│  
-│  ```bash
-│  curl http://localhost:3001/api/healthz
-│  # {"status":"ok"}
-│  ```
-│  
-│  ### 6. Deploy the API to Render
-│  
-│  See the **Render deployment** section below — you need a public URL to bake into the APK.
-│  
-│  ### 7. Build the Android APK
-│  
-│  See the **EAS Build** section below.
-│  
-│  ---
-│  
-│  ## Render deployment (API server)
-│  
-│  Render hosts the API server so the Android app can reach it from anywhere.
-│  
-│  ### 1. Create a new Web Service on Render
-│  
-│  Go to [render.com](https://render.com) → **New → Web Service** → connect your GitHub repo.
-│  
-│  ### 2. Configure the service
-│  
-│  | Field | Value |
-│  |---|---|
-│  | **Root directory** | *(leave blank — monorepo root)* |
-│  | **Build command** | `pnpm install && pnpm --filter @workspace/api-server run build` |
-│  | **Start command** | `node artifacts/api-server/dist/index.cjs` |
-│  | **Instance type** | Free |
-│  
-│  ### 3. Add environment variables in Render
-│  
-│  In the Render service → **Environment**:
-│  
-│  | Key | Value |
-│  |---|---|
-│  | `DATABASE_URL` | Your Neon connection string |
-│  | `ADMIN_SECRET` | Same strong secret you chose earlier |
-│  
-│  Render automatically sets `PORT` — do not override it.
-│  
-│  ### 4. Deploy
-│  
-│  Click **Deploy**. Once live, test your service URL:
-│  
-│  ```
-│  https://your-service.onrender.com/api/healthz
-│  ```
-│  
-│  ### 5. (Optional) Keep it awake with UptimeRobot
-│  
-│  Render free tier spins down after 15 minutes of inactivity. Set up a free monitor at [uptimerobot.com](https://uptimerobot.com) that pings `https://your-service.onrender.com/api/healthz` every 5 minutes.
-│  
-│  ---
-│  
-│  ## EAS Build (Android APK)
-│  
-│  ### 1. Log in to EAS
-│  
-│  ```bash
-│  cd artifacts/mobile
-│  eas login
-│  ```
-│  
-│  ### 2. Set the API URL in eas.json
-│  
-│  Open `artifacts/mobile/eas.json` and update the `EXPO_PUBLIC_API_URL` in the `preview` and `production` profiles to point to your Render URL:
-│  
-│  ```json
-│  "env": {
-│    "EXPO_PUBLIC_API_URL": "https://your-service.onrender.com/api"
-│  }
-│  ```
-│  
-│  ### 3. Configure your EAS project
-│  
-│  If you're using your own Expo account (not the original), run:
-│  
-│  ```bash
-│  eas init
-│  ```
-│  
-│  This creates a new project under your account and updates `app.json`.
-│  
-│  ### 4. Build the APK
-│  
-│  ```bash
-│  eas build --platform android --profile preview --non-interactive
-│  ```
-│  
-│  The build runs in the cloud. When it finishes, download the `.apk` from the EAS dashboard and install it on your Android device.
-│  
-│  ### 5. Push OTA updates (JS-only changes)
-│  
-│  For changes that don't touch native code (no new permissions or native modules):
-│  
-│  ```bash
-│  pnpm --filter @workspace/mobile run update "your update message"
-│  ```
-│  
-│  The app downloads the update silently on next launch.
-│  
-│  > **Note:** Any change that adds a new native module, permission, or Expo plugin requires a full EAS build.
-│  
-│  ---
-│  
-│  ## Environment variables reference
-│  
-│  ### API server
-│  
-│  | Variable | Required | Description |
-│  |---|---|---|
-│  | `DATABASE_URL` | Yes | Neon PostgreSQL connection string |
-│  | `ADMIN_SECRET` | Yes | Secret for admin panel login and API auth |
-│  | `PORT` | Auto | Set by Render/Replit automatically |
-│  
-│  ### Mobile app (EAS env)
-│  
-│  | Variable | Required | Description |
-│  |---|---|---|
-│  | `EXPO_PUBLIC_API_URL` | Yes | Full API base URL, e.g. `https://your-service.onrender.com/api` |
-│  | `EXPO_PUBLIC_OWNER_MODE` | No | Set to `"true"` to bypass the license gate entirely (owner/dev builds) |
-│  | `EXPO_PUBLIC_ADMIN_SECRET` | No | Same value as `ADMIN_SECRET` — needed for the in-app admin panel in owner mode |
-│  
-│  ---
-│  
-│  ## Admin panel
-│  
-│  The web-based admin panel is at:
-│  
-│  ```
-│  https://your-service.onrender.com/api/admin
-│  ```
-│  
-│  Log in with your `ADMIN_SECRET`. From here you can:
-│  
-│  - Create and manage license keys
-│  - Set per-tier feature limits (max accounts, max searches, delays)
-│  - View device bindings and reset them
-│  - View synced account cookies
-│  
-│  ### Creating your first license key
-│  
-│  1. Open the admin panel
-│  2. Click **Create Key**
-│  3. Set a label, expiry date, account limit, and key type (`basic` / `premium` / `unlimited` / `admin`)
-│  4. Copy the generated `XXXX-XXXX-XXXX-XXXX` key and enter it in the app
-│  
-│  ---
-│  
-│  ## License key types
-│  
-│  | Type | Accounts | Searches | Background | Custom queries |
-│  |---|---|---|---|---|
-│  | `basic` | 2 | 20 | No | No |
-│  | `premium` | 5 | 40 | Yes | Yes |
-│  | `unlimited` | 999 | 999 | Yes | Yes |
-│  | `admin` | 999 | 999 | Yes | Yes |
-│  
-│  Limits can be changed per-tier from the admin panel without rebuilding.
-│  
-│  ---
-│  
-│  ## Local development tips
-│  
-│  - The API server hot-reloads with `pnpm --filter @workspace/api-server run dev`
-│  - Schema changes: edit files in `lib/db/src/schema/`, then run `cd lib/db && pnpm run push`
-│  - The mobile app in Expo Go connects to the API via the dev domain automatically (no extra config needed for local testing)
-│  - `EXPO_PUBLIC_OWNER_MODE=true` in your local `.env` skips the license screen entirely
-│
-└─ END: README.md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    lib/db/ — Postgres + Drizzle ORM schema (used by API SERVER)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-┌─ artifacts/api-server/package.json
-│
+┌─ [SHARED/DB]  lib/db/package.json
+│  {
+│    "name": "@workspace/db",
+│    "version": "0.0.0",
+│    "private": true,
+│    "type": "module",
+│    "exports": {
+│      ".": "./src/index.ts",
+│      "./schema": "./src/schema/index.ts"
+│    },
+│    "scripts": {
+│      "push": "drizzle-kit push --config ./drizzle.config.ts",
+│      "push-force": "drizzle-kit push --force --config ./drizzle.config.ts"
+│    },
+│    "dependencies": {
+│      "drizzle-orm": "catalog:",
+│      "drizzle-zod": "^0.8.3",
+│      "pg": "^8.20.0",
+│      "zod": "catalog:"
+│    },
+│    "devDependencies": {
+│      "@types/node": "catalog:",
+│      "@types/pg": "^8.18.0",
+│      "drizzle-kit": "^0.31.9"
+│    }
+│  }
+└─ END: lib/db/package.json
+
+┌─ [SHARED/DB]  lib/db/tsconfig.json
+│  {
+│    "extends": "../../tsconfig.base.json",
+│    "compilerOptions": {
+│      "composite": true,
+│      "declarationMap": true,
+│      "emitDeclarationOnly": true,
+│      "outDir": "dist",
+│      "rootDir": "src",
+│      "types": ["node"]
+│    },
+│    "include": ["src"]
+│  }
+└─ END: lib/db/tsconfig.json
+
+┌─ [SHARED/DB]  lib/db/drizzle.config.ts
+│  import { defineConfig } from "drizzle-kit";
+│  import path from "path";
+│  
+│  if (!process.env.DATABASE_URL) {
+│    throw new Error("DATABASE_URL, ensure the database is provisioned");
+│  }
+│  
+│  export default defineConfig({
+│    schema: path.join(__dirname, "./src/schema/index.ts"),
+│    dialect: "postgresql",
+│    dbCredentials: {
+│      url: process.env.DATABASE_URL,
+│    },
+│  });
+└─ END: lib/db/drizzle.config.ts
+
+┌─ [SHARED/DB]  lib/db/src/index.ts
+│  import { drizzle } from "drizzle-orm/node-postgres";
+│  import pg from "pg";
+│  import * as schema from "./schema";
+│  
+│  const { Pool } = pg;
+│  
+│  if (!process.env.DATABASE_URL) {
+│    throw new Error(
+│      "DATABASE_URL must be set. Did you forget to provision a database?",
+│    );
+│  }
+│  
+│  export const pool = new Pool({
+│    connectionString: process.env.DATABASE_URL,
+│    connectionTimeoutMillis: 10000,
+│    idleTimeoutMillis: 30000,
+│    max: 10,
+│  });
+│  
+│  pool.on("error", (err) => {
+│    console.error("Unexpected database pool error:", err.message);
+│  });
+│  
+│  export const db = drizzle(pool, { schema });
+│  
+│  export * from "./schema";
+│  export { initSchema } from "./migrate";
+└─ END: lib/db/src/index.ts
+
+┌─ [SHARED/DB]  lib/db/src/migrate.ts
+│  import { pool } from "./index";
+│  
+│  /**
+│   * Creates all tables if they don't already exist.
+│   * Safe to run on every startup — uses CREATE TABLE IF NOT EXISTS.
+│   * No drizzle-kit CLI required at runtime.
+│   */
+│  export async function initSchema(): Promise<void> {
+│    console.log("[db] Connecting to database...");
+│  
+│    let client;
+│    try {
+│      client = await pool.connect();
+│      console.log("[db] Connection established.");
+│    } catch (err) {
+│      console.error("[db] FATAL: Could not connect to database:", err);
+│      throw err;
+│    }
+│  
+│    try {
+│      // ── Verify connectivity ──────────────────────────────────────────────────
+│      const { rows } = await client.query("SELECT NOW() AS now");
+│      console.log(`[db] DB time check OK: ${rows[0]?.now}`);
+│  
+│      // ── Core tables ──────────────────────────────────────────────────────────
+│      console.log("[db] Creating core tables...");
+│      await client.query(`
+│        CREATE TABLE IF NOT EXISTS license_keys (
+│          id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+│          key         TEXT        NOT NULL UNIQUE,
+│          label       TEXT,
+│          key_type    TEXT        NOT NULL DEFAULT 'basic',
+│          max_accounts INTEGER    NOT NULL DEFAULT 3,
+│          is_active   BOOLEAN     NOT NULL DEFAULT TRUE,
+│          bound_device_id TEXT,
+│          expires_at  TIMESTAMP   NOT NULL,
+│          created_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
+│          updated_at  TIMESTAMP   NOT NULL DEFAULT NOW()
+│        );
+│  
+│        CREATE TABLE IF NOT EXISTS feature_config (
+│          key_type               TEXT    PRIMARY KEY,
+│          max_accounts           INTEGER NOT NULL DEFAULT 3,
+│          max_searches           INTEGER NOT NULL DEFAULT 30,
+│          min_delay_seconds      INTEGER NOT NULL DEFAULT 5,
+│          background_enabled     BOOLEAN NOT NULL DEFAULT FALSE,
+│          custom_queries_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+│          daily_set_enabled      BOOLEAN NOT NULL DEFAULT TRUE,
+│          pc_search_enabled      BOOLEAN NOT NULL DEFAULT TRUE
+│        );
+│  
+│        CREATE TABLE IF NOT EXISTS device_cookies (
+│          id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+│          license_key_id   UUID      NOT NULL REFERENCES license_keys(id) ON DELETE CASCADE,
+│          device_id        TEXT      NOT NULL,
+│          account_email    TEXT      NOT NULL,
+│          account_name     TEXT,
+│          cookies          TEXT      NOT NULL,
+│          updated_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+│          CONSTRAINT uq_key_email UNIQUE (license_key_id, account_email)
+│        );
+│      `);
+│      console.log("[db] Core tables OK.");
+│  
+│      // ── Seed feature_config defaults ────────────────────────────────────────
+│      await client.query(`
+│        INSERT INTO feature_config (key_type, max_accounts, max_searches, min_delay_seconds, background_enabled, custom_queries_enabled, daily_set_enabled, pc_search_enabled) VALUES
+│          ('basic',     2,   20,  5, FALSE, FALSE, TRUE,  FALSE),
+│          ('premium',   5,   40,  3, TRUE,  TRUE,  TRUE,  TRUE),
+│          ('unlimited', 999, 999, 3, TRUE,  TRUE,  TRUE,  TRUE),
+│          ('admin',     999, 999, 1, TRUE,  TRUE,  TRUE,  TRUE)
+│        ON CONFLICT (key_type) DO NOTHING;
+│      `);
+│      console.log("[db] feature_config seeded.");
+│  
+│      // ── license_keys column additions (idempotent) ───────────────────────────
+│      console.log("[db] Applying license_keys column migrations...");
+│      await client.query(`
+│        ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_max_accounts INTEGER;
+│        ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_min_delay_seconds INTEGER;
+│        ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS pin TEXT;
+│      `);
+│      console.log("[db] license_keys columns OK.");
+│  
+│      // ── deleted_accounts ──────────────────────────────────────────────────────
+│      console.log("[db] Creating deleted_accounts table...");
+│      await client.query(`
+│        CREATE TABLE IF NOT EXISTS deleted_accounts (
+│          id                  UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+│          license_key_id      UUID      NOT NULL,
+│          license_key         TEXT      NOT NULL,
+│          account_email       TEXT      NOT NULL,
+│          account_name        TEXT,
+│          cookies             TEXT,
+│          device_id           TEXT,
+│          deleted_at          TIMESTAMP NOT NULL DEFAULT NOW(),
+│          original_created_at TIMESTAMP
+│        );
+│      `);
+│      console.log("[db] deleted_accounts OK.");
+│  
+│      // ── Phase 1: invite_codes ─────────────────────────────────────────────────
+│      console.log("[db] Creating invite_codes table...");
+│      await client.query(`
+│        CREATE TABLE IF NOT EXISTS invite_codes (
+│          id         UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+│          code       TEXT      NOT NULL UNIQUE,
+│          status     TEXT      NOT NULL DEFAULT 'unused',
+│          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+│          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+│        );
+│      `);
+│      console.log("[db] invite_codes OK.");
+│  
+│      // ── Phase 1: kyc_submissions ──────────────────────────────────────────────
+│      console.log("[db] Creating kyc_submissions table...");
+│      await client.query(`
+│        CREATE TABLE IF NOT EXISTS kyc_submissions (
+│          id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+│          invite_code      TEXT      NOT NULL UNIQUE,
+│          full_name        TEXT      NOT NULL,
+│          father_name      TEXT      NOT NULL,
+│          mother_name      TEXT      NOT NULL,
+│          grandfather_name TEXT      NOT NULL,
+│          id_front         TEXT      NOT NULL,
+│          id_back          TEXT      NOT NULL,
+│          kyc_status       TEXT      NOT NULL DEFAULT 'pending',
+│          admin_note       TEXT,
+│          created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+│          updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
+│        );
+│      `);
+│      console.log("[db] kyc_submissions OK.");
+│  
+│      // ── Phase 2: kyc_submissions column additions (idempotent) ──────────────
+│      console.log("[db] Applying kyc_submissions column migrations...");
+│      await client.query(`
+│        ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
+│        ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS license_key_id UUID;
+│        ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS review_email_sent_at TIMESTAMP;
+│        ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS approval_email_sent_at TIMESTAMP;
+│      `);
+│      console.log("[db] kyc_submissions columns OK.");
+│  
+│      // ── Phase 3: invite_codes column additions (idempotent) ─────────────────
+│      console.log("[db] Applying invite_codes column migrations...");
+│      await client.query(`
+│        ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS license_key_id UUID;
+│      `);
+│      console.log("[db] invite_codes columns OK.");
+│  
+│      // ── Phase 3: license_keys column additions (idempotent) ─────────────────
+│      console.log("[db] Applying license_keys tier/invite column migrations...");
+│      await client.query(`
+│        ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS can_invite BOOLEAN NOT NULL DEFAULT FALSE;
+│      `);
+│      console.log("[db] license_keys tier/invite columns OK.");
+│  
+│      // ── Phase 3: upgrade_requests ─────────────────────────────────────────────
+│      console.log("[db] Creating upgrade_requests table...");
+│      await client.query(`
+│        CREATE TABLE IF NOT EXISTS upgrade_requests (
+│          id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
+│          license_key_id   UUID      NOT NULL,
+│          requested_tier   TEXT      NOT NULL,
+│          transaction_id   TEXT,
+│          receipt_link     TEXT,
+│          status           TEXT      NOT NULL DEFAULT 'pending',
+│          admin_note       TEXT,
+│          created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
+│          updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
+│        );
+│      `);
+│      console.log("[db] upgrade_requests OK.");
+│  
+│      // ── Phase 3: existing paid/admin keys get canInvite retroactively ────────
+│      await client.query(`
+│        UPDATE license_keys SET can_invite = TRUE
+│        WHERE key_type IN ('basic', 'premium', 'unlimited', 'admin') AND can_invite = FALSE;
+│      `);
+│      console.log("[db] Retroactive can_invite backfill OK.");
+│  
+│      // ── Phase 2: feature_config trial tier ───────────────────────────────────
+│      await client.query(`
+│        INSERT INTO feature_config (key_type, max_accounts, max_searches, min_delay_seconds, background_enabled, custom_queries_enabled, daily_set_enabled, pc_search_enabled) VALUES
+│          ('trial', 3, 20, 5, FALSE, FALSE, TRUE, FALSE)
+│        ON CONFLICT (key_type) DO NOTHING;
+│      `);
+│      console.log("[db] trial tier seeded.");
+│  
+│      // ── Final verification: list all tables ───────────────────────────────────
+│      const { rows: tables } = await client.query(`
+│        SELECT tablename FROM pg_tables
+│        WHERE schemaname = 'public'
+│        ORDER BY tablename;
+│      `);
+│      console.log("[db] Tables in public schema:", tables.map((r: { tablename: string }) => r.tablename).join(", "));
+│      console.log("[db] Schema initialization complete.");
+│  
+│    } catch (err) {
+│      console.error("[db] Schema initialization FAILED:", err);
+│      throw err;
+│    } finally {
+│      client.release();
+│    }
+│  }
+└─ END: lib/db/src/migrate.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/index.ts
+│  // Export your models here. Add one export per file
+│  // export * from "./posts";
+│  //
+│  // Each model/table should ideally be split into different files.
+│  // Each model/table should define a Drizzle table, insert schema, and types:
+│  //
+│  //   import { pgTable, text, serial } from "drizzle-orm/pg-core";
+│  //   import { createInsertSchema } from "drizzle-zod";
+│  //   import { z } from "zod/v4";
+│  //
+│  //   export const postsTable = pgTable("posts", {
+│  //     id: serial("id").primaryKey(),
+│  //     title: text("title").notNull(),
+│  //   });
+│  //
+│  //   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
+│  //   export type InsertPost = z.infer<typeof insertPostSchema>;
+│  //   export type Post = typeof postsTable.$inferSelect;
+│  
+│  export * from "./licenseKeys";
+│  export * from "./featureConfig";
+│  export * from "./deviceCookies";
+│  export * from "./deletedAccounts";
+│  export * from "./inviteCodes";
+│  export * from "./kycSubmissions";
+│  export * from "./globalConfig";
+└─ END: lib/db/src/schema/index.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/licenseKeys.ts
+│  import { pgTable, text, integer, boolean, timestamp, uuid } from "drizzle-orm/pg-core";
+│  import { createInsertSchema } from "drizzle-zod";
+│  import { z } from "zod/v4";
+│  
+│  export const licenseKeysTable = pgTable("license_keys", {
+│    id: uuid("id").defaultRandom().primaryKey(),
+│    key: text("key").notNull().unique(),
+│    label: text("label"),
+│    keyType: text("key_type").notNull().default("basic"),
+│    maxAccounts: integer("max_accounts").notNull().default(3),
+│    customMaxAccounts: integer("custom_max_accounts"),
+│    customMinDelaySeconds: integer("custom_min_delay_seconds"),
+│    pin: text("pin"),
+│    isActive: boolean("is_active").notNull().default(true),
+│    boundDeviceId: text("bound_device_id"),
+│    canInvite: boolean("can_invite").notNull().default(false),
+│    expiresAt: timestamp("expires_at").notNull(),
+│    createdAt: timestamp("created_at").defaultNow().notNull(),
+│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+│  });
+│  
+│  export const insertLicenseKeySchema = createInsertSchema(licenseKeysTable).omit({
+│    id: true,
+│    createdAt: true,
+│    updatedAt: true,
+│  });
+│  export type InsertLicenseKey = z.infer<typeof insertLicenseKeySchema>;
+│  export type LicenseKey = typeof licenseKeysTable.$inferSelect;
+└─ END: lib/db/src/schema/licenseKeys.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/deviceCookies.ts
+│  import { pgTable, text, timestamp, uuid, unique } from "drizzle-orm/pg-core";
+│  import { licenseKeysTable } from "./licenseKeys";
+│  
+│  export const deviceCookiesTable = pgTable("device_cookies", {
+│    id: uuid("id").defaultRandom().primaryKey(),
+│    licenseKeyId: uuid("license_key_id").notNull().references(() => licenseKeysTable.id, { onDelete: "cascade" }),
+│    deviceId: text("device_id").notNull(),
+│    accountEmail: text("account_email").notNull(),
+│    accountName: text("account_name"),
+│    cookies: text("cookies").notNull(),
+│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+│  }, (table) => [
+│    unique("uq_key_email").on(table.licenseKeyId, table.accountEmail),
+│  ]);
+└─ END: lib/db/src/schema/deviceCookies.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/featureConfig.ts
+│  import { pgTable, text, integer, boolean } from "drizzle-orm/pg-core";
+│  import { createInsertSchema } from "drizzle-zod";
+│  import { z } from "zod/v4";
+│  
+│  export const featureConfigTable = pgTable("feature_config", {
+│    keyType: text("key_type").primaryKey(),
+│    maxAccounts: integer("max_accounts").notNull().default(3),
+│    maxSearches: integer("max_searches").notNull().default(30),
+│    minDelaySeconds: integer("min_delay_seconds").notNull().default(5),
+│    backgroundEnabled: boolean("background_enabled").notNull().default(false),
+│    customQueriesEnabled: boolean("custom_queries_enabled").notNull().default(false),
+│    dailySetEnabled: boolean("daily_set_enabled").notNull().default(true),
+│    pcSearchEnabled: boolean("pc_search_enabled").notNull().default(true),
+│  });
+│  
+│  export const insertFeatureConfigSchema = createInsertSchema(featureConfigTable);
+│  export type InsertFeatureConfig = z.infer<typeof insertFeatureConfigSchema>;
+│  export type FeatureConfig = typeof featureConfigTable.$inferSelect;
+└─ END: lib/db/src/schema/featureConfig.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/globalConfig.ts
+│  import { pgTable, text } from "drizzle-orm/pg-core";
+│  import { createInsertSchema } from "drizzle-zod";
+│  import { z } from "zod/v4";
+│  
+│  // Pre-existing key/value settings table. Kept in the schema so `drizzle-kit
+│  // push` doesn't propose dropping it — it predates the tracked schema files.
+│  export const globalConfigTable = pgTable("global_config", {
+│    key: text("key").primaryKey(),
+│    value: text("value").notNull(),
+│  });
+│  
+│  export const insertGlobalConfigSchema = createInsertSchema(globalConfigTable);
+│  export type InsertGlobalConfig = z.infer<typeof insertGlobalConfigSchema>;
+│  export type GlobalConfig = typeof globalConfigTable.$inferSelect;
+└─ END: lib/db/src/schema/globalConfig.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/inviteCodes.ts
+│  import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+│  
+│  export const inviteCodesTable = pgTable("invite_codes", {
+│    id: uuid("id").defaultRandom().primaryKey(),
+│    code: text("code").notNull().unique(),
+│    status: text("status").notNull().default("unused"), // unused | pending | resolved
+│    // Set when this invite code was auto-generated alongside a Basic license key,
+│    // so the admin panel can show "which key handed out this code".
+│    licenseKeyId: uuid("license_key_id"),
+│    createdAt: timestamp("created_at").defaultNow().notNull(),
+│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+│  });
+│  
+│  export type InviteCode = typeof inviteCodesTable.$inferSelect;
+└─ END: lib/db/src/schema/inviteCodes.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/kycSubmissions.ts
+│  import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+│  
+│  export const kycSubmissionsTable = pgTable("kyc_submissions", {
+│    id: uuid("id").defaultRandom().primaryKey(),
+│    inviteCode: text("invite_code").notNull().unique(),
+│    email: text("email").notNull().default(""),
+│    fullName: text("full_name").notNull(),
+│    fatherName: text("father_name").notNull(),
+│    motherName: text("mother_name").notNull(),
+│    grandfatherName: text("grandfather_name").notNull(),
+│    idFront: text("id_front").notNull(),
+│    idBack: text("id_back").notNull(),
+│    kycStatus: text("kyc_status").notNull().default("pending"), // pending | verified | rejected
+│    adminNote: text("admin_note"),
+│    licenseKeyId: uuid("license_key_id"),
+│    reviewEmailSentAt: timestamp("review_email_sent_at"),
+│    approvalEmailSentAt: timestamp("approval_email_sent_at"),
+│    createdAt: timestamp("created_at").defaultNow().notNull(),
+│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+│  });
+│  
+│  export type KycSubmission = typeof kycSubmissionsTable.$inferSelect;
+└─ END: lib/db/src/schema/kycSubmissions.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/upgradeRequests.ts
+│  import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+│  
+│  // A user-submitted request to upgrade their license key to a paid tier.
+│  // requestedTier: "basic" | "premium" | "unlimited"
+│  // status: "pending" | "approved" | "rejected"
+│  export const upgradeRequestsTable = pgTable("upgrade_requests", {
+│    id: uuid("id").defaultRandom().primaryKey(),
+│    licenseKeyId: uuid("license_key_id").notNull(),
+│    requestedTier: text("requested_tier").notNull(),
+│    transactionId: text("transaction_id"),
+│    receiptLink: text("receipt_link"),
+│    status: text("status").notNull().default("pending"),
+│    adminNote: text("admin_note"),
+│    createdAt: timestamp("created_at").defaultNow().notNull(),
+│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+│  });
+│  
+│  export type UpgradeRequest = typeof upgradeRequestsTable.$inferSelect;
+└─ END: lib/db/src/schema/upgradeRequests.ts
+
+┌─ [SHARED/DB]  lib/db/src/schema/deletedAccounts.ts
+│  import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+│  
+│  export const deletedAccountsTable = pgTable("deleted_accounts", {
+│    id: uuid("id").defaultRandom().primaryKey(),
+│    licenseKeyId: uuid("license_key_id").notNull(),
+│    licenseKey: text("license_key").notNull(),
+│    accountEmail: text("account_email").notNull(),
+│    accountName: text("account_name"),
+│    cookies: text("cookies"),
+│    deviceId: text("device_id"),
+│    deletedAt: timestamp("deleted_at").defaultNow().notNull(),
+│    originalCreatedAt: timestamp("original_created_at"),
+│  });
+└─ END: lib/db/src/schema/deletedAccounts.ts
+
+┌─ [SHARED/DB]  lib/db/drizzle/0000_outgoing_randall.sql
+│  CREATE TABLE "license_keys" (
+│  	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+│  	"key" text NOT NULL,
+│  	"label" text,
+│  	"key_type" text DEFAULT 'basic' NOT NULL,
+│  	"max_accounts" integer DEFAULT 3 NOT NULL,
+│  	"is_active" boolean DEFAULT true NOT NULL,
+│  	"bound_device_id" text,
+│  	"expires_at" timestamp NOT NULL,
+│  	"created_at" timestamp DEFAULT now() NOT NULL,
+│  	"updated_at" timestamp DEFAULT now() NOT NULL,
+│  	CONSTRAINT "license_keys_key_unique" UNIQUE("key")
+│  );
+└─ END: lib/db/drizzle/0000_outgoing_randall.sql
+
+┌─ [SHARED/DB]  lib/db/drizzle/0001_sudden_wonder_man.sql
+│  CREATE TABLE "feature_config" (
+│  	"key_type" text PRIMARY KEY NOT NULL,
+│  	"max_accounts" integer DEFAULT 3 NOT NULL,
+│  	"max_searches" integer DEFAULT 30 NOT NULL,
+│  	"min_delay_seconds" integer DEFAULT 5 NOT NULL,
+│  	"background_enabled" boolean DEFAULT false NOT NULL,
+│  	"custom_queries_enabled" boolean DEFAULT false NOT NULL
+│  );
+└─ END: lib/db/drizzle/0001_sudden_wonder_man.sql
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    lib/api-spec/ — OpenAPI spec + codegen config (source of truth for ALL API types)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─ [SHARED/SPEC] lib/api-spec/package.json
+│  {
+│    "name": "@workspace/api-spec",
+│    "version": "0.0.0",
+│    "private": true,
+│    "scripts": {
+│      "codegen": "orval --config ./orval.config.ts"
+│    },
+│    "devDependencies": {
+│      "orval": "^8.5.2"
+│    }
+│  }
+└─ END: lib/api-spec/package.json
+
+┌─ [SHARED/SPEC] lib/api-spec/openapi.yaml
+│  openapi: 3.1.0
+│  info:
+│    # Do not change the title, if the title changes, the import paths will be broken
+│    title: Api
+│    version: 0.1.0
+│    description: API specification
+│  servers:
+│    - url: /api
+│      description: Base API path
+│  tags:
+│    - name: health
+│      description: Health operations
+│    - name: desk
+│      description: Rewards Desk desktop automation
+│  paths:
+│    /healthz:
+│      get:
+│        operationId: healthCheck
+│        tags: [health]
+│        summary: Health check
+│        description: Returns server health status
+│        responses:
+│          "200":
+│            description: Healthy
+│            content:
+│              application/json:
+│                schema:
+│                  $ref: "#/components/schemas/HealthStatus"
+│  
+│    /desk/accounts:
+│      get:
+│        operationId: listAccounts
+│        tags: [desk]
+│        summary: List all accounts
+│        description: Returns all saved Microsoft Reward accounts
+│        responses:
+│          "200":
+│            description: List of accounts
+│            content:
+│              application/json:
+│                schema:
+│                  type: array
+│                  items:
+│                    $ref: "#/components/schemas/DeskAccount"
+│      post:
+│        operationId: addAccount
+│        tags: [desk]
+│        summary: Add a new account
+│        requestBody:
+│          required: true
+│          content:
+│            application/json:
+│              schema:
+│                $ref: "#/components/schemas/DeskAccountInput"
+│        responses:
+│          "201":
+│            description: Account created
+│            content:
+│              application/json:
+│                schema:
+│                  $ref: "#/components/schemas/DeskAccount"
+│  
+│    /desk/accounts/{id}:
+│      delete:
+│        operationId: deleteAccount
+│        tags: [desk]
+│        summary: Delete an account
+│        parameters:
+│          - name: id
+│            in: path
+│            required: true
+│            schema:
+│              type: string
+│        responses:
+│          "200":
+│            description: Deleted
+│            content:
+│              application/json:
+│                schema:
+│                  $ref: "#/components/schemas/DeleteResult"
+│  
+│    /desk/run-now:
+│      post:
+│        operationId: runNow
+│        tags: [desk]
+│        summary: Trigger automation run
+│        description: Starts the Bing search automation for all active accounts
+│        requestBody:
+│          required: true
+│          content:
+│            application/json:
+│              schema:
+│                $ref: "#/components/schemas/RunInput"
+│        responses:
+│          "200":
+│            description: Run started
+│            content:
+│              application/json:
+│                schema:
+│                  $ref: "#/components/schemas/RunResult"
+│  
+│    /desk/status:
+│      get:
+│        operationId: getBotStatus
+│        tags: [desk]
+│        summary: Get bot status
+│        description: Returns current bot running state and last run info
+│        responses:
+│          "200":
+│            description: Bot status
+│            content:
+│              application/json:
+│                schema:
+│                  $ref: "#/components/schemas/BotStatus"
+│  
+│    /desk/logs:
+│      get:
+│        operationId: getRunLogs
+│        tags: [desk]
+│        summary: Get recent run logs
+│        description: Returns the last 50 run log entries across all accounts
+│        responses:
+│          "200":
+│            description: Run logs
+│            content:
+│              application/json:
+│                schema:
+│                  type: array
+│                  items:
+│                    $ref: "#/components/schemas/RunLog"
+│  
+│  components:
+│    schemas:
+│      HealthStatus:
+│        type: object
+│        properties:
+│          status:
+│            type: string
+│        required:
+│          - status
+│  
+│      DeskAccount:
+│        type: object
+│        required: [id, email, name, status, totalPoints, todayPoints, lastRun]
+│        properties:
+│          id:
+│            type: string
+│          email:
+│            type: string
+│          name:
+│            type: string
+│          status:
+│            type: string
+│            enum: [idle, running, done, failed]
+│          totalPoints:
+│            type: integer
+│          todayPoints:
+│            type: integer
+│          lastRun:
+│            type: ["string", "null"]
+│          searchesCompleted:
+│            type: integer
+│  
+│      DeskAccountInput:
+│        type: object
+│        required: [email, name]
+│        properties:
+│          email:
+│            type: string
+│          name:
+│            type: string
+│  
+│      DeleteResult:
+│        type: object
+│        required: [success]
+│        properties:
+│          success:
+│            type: boolean
+│  
+│      RunInput:
+│        type: object
+│        properties:
+│          accountIds:
+│            type: array
+│            items:
+│              type: string
+│            description: Specific account IDs to run (omit to run all)
+│  
+│      RunResult:
+│        type: object
+│        required: [started, message]
+│        properties:
+│          started:
+│            type: boolean
+│          message:
+│            type: string
+│          runId:
+│            type: string
+│  
+│      BotStatus:
+│        type: object
+│        required: [isRunning, currentAccount, lastRunAt, totalSearchesToday]
+│        properties:
+│          isRunning:
+│            type: boolean
+│          currentAccount:
+│            type: ["string", "null"]
+│          lastRunAt:
+│            type: ["string", "null"]
+│          totalSearchesToday:
+│            type: integer
+│          activeRunId:
+│            type: ["string", "null"]
+│  
+│      RunLog:
+│        type: object
+│        required: [id, accountId, accountName, timestamp, searchesDone, pointsEarned, status]
+│        properties:
+│          id:
+│            type: string
+│          accountId:
+│            type: string
+│          accountName:
+│            type: string
+│          timestamp:
+│            type: string
+│          searchesDone:
+│            type: integer
+│          pointsEarned:
+│            type: integer
+│          status:
+│            type: string
+│            enum: [success, failed, running]
+│          errorMessage:
+│            type: ["string", "null"]
+└─ END: lib/api-spec/openapi.yaml
+
+┌─ [SHARED/SPEC] lib/api-spec/orval.config.ts
+│  import { defineConfig, InputTransformerFn } from "orval";
+│  import path from "path";
+│  
+│  const root = path.resolve(__dirname, "..", "..");
+│  const apiClientReactSrc = path.resolve(root, "lib", "api-client-react", "src");
+│  const apiZodSrc = path.resolve(root, "lib", "api-zod", "src");
+│  
+│  // Our exports make assumptions about the title of the API being "Api" (i.e. generated output is `api.ts`).
+│  const titleTransformer: InputTransformerFn = (config) => {
+│    config.info ??= {};
+│    config.info.title = "Api";
+│  
+│    return config;
+│  };
+│  
+│  export default defineConfig({
+│    "api-client-react": {
+│      input: {
+│        target: "./openapi.yaml",
+│        override: {
+│          transformer: titleTransformer,
+│        },
+│      },
+│      output: {
+│        workspace: apiClientReactSrc,
+│        target: "generated",
+│        client: "react-query",
+│        mode: "split",
+│        baseUrl: "/api",
+│        clean: true,
+│        prettier: true,
+│        override: {
+│          fetch: {
+│            includeHttpResponseReturnType: false,
+│          },
+│          mutator: {
+│            path: path.resolve(apiClientReactSrc, "custom-fetch.ts"),
+│            name: "customFetch",
+│          },
+│        },
+│      },
+│    },
+│    zod: {
+│      input: {
+│        target: "./openapi.yaml",
+│        override: {
+│          transformer: titleTransformer,
+│        },
+│      },
+│      output: {
+│        workspace: apiZodSrc,
+│        client: "zod",
+│        target: "generated",
+│        schemas: { path: "generated/types", type: "typescript" },
+│        mode: "split",
+│        clean: true,
+│        prettier: true,
+│        override: {
+│          zod: {
+│            coerce: {
+│              query: ['boolean', 'number', 'string'],
+│              param: ['boolean', 'number', 'string'],
+│            },
+│          },
+│          useDates: true,
+│        },
+│      },
+│    },
+│  });
+└─ END: lib/api-spec/orval.config.ts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    lib/api-client-react/ — Generated React Query hooks (used by DESKTOP UI)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─ [SHARED/CLIENT] lib/api-client-react/package.json
+│  {
+│    "name": "@workspace/api-client-react",
+│    "version": "0.0.0",
+│    "private": true,
+│    "type": "module",
+│    "exports": {
+│      ".": "./src/index.ts"
+│    },
+│    "dependencies": {
+│      "@tanstack/react-query": "catalog:"
+│    },
+│    "peerDependencies": {
+│      "react": ">=18"
+│    }
+│  }
+└─ END: lib/api-client-react/package.json
+
+┌─ [SHARED/CLIENT] lib/api-client-react/tsconfig.json
+│  {
+│    "extends": "../../tsconfig.base.json",
+│    "compilerOptions": {
+│      "composite": true,
+│      "declarationMap": true,
+│      "emitDeclarationOnly": true,
+│      "outDir": "dist",
+│      "rootDir": "src",
+│      "lib": ["dom", "es2022"]
+│    },
+│    "include": ["src"]
+│  }
+└─ END: lib/api-client-react/tsconfig.json
+
+┌─ [SHARED/CLIENT] lib/api-client-react/src/index.ts
+│  export * from "./generated/api";
+│  export * from "./generated/api.schemas";
+└─ END: lib/api-client-react/src/index.ts
+
+┌─ [SHARED/CLIENT] lib/api-client-react/src/custom-fetch.ts
+│  export type CustomFetchOptions = RequestInit & {
+│    responseType?: "json" | "text" | "blob" | "auto";
+│  };
+│  
+│  export type ErrorType<T = unknown> = ApiError<T>;
+│  
+│  export type BodyType<T> = T;
+│  
+│  const NO_BODY_STATUS = new Set([204, 205, 304]);
+│  const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
+│  
+│  function isRequest(input: RequestInfo | URL): input is Request {
+│    return typeof Request !== "undefined" && input instanceof Request;
+│  }
+│  
+│  function resolveMethod(input: RequestInfo | URL, explicitMethod?: string): string {
+│    if (explicitMethod) return explicitMethod.toUpperCase();
+│    if (isRequest(input)) return input.method.toUpperCase();
+│    return "GET";
+│  }
+│  
+│  // Use loose check for URL — some runtimes (e.g. React Native) polyfill URL
+│  // differently, so `instanceof URL` can fail.
+│  function isUrl(input: RequestInfo | URL): input is URL {
+│    return typeof URL !== "undefined" && input instanceof URL;
+│  }
+│  
+│  function resolveUrl(input: RequestInfo | URL): string {
+│    if (typeof input === "string") return input;
+│    if (isUrl(input)) return input.toString();
+│    return input.url;
+│  }
+│  
+│  function mergeHeaders(...sources: Array<HeadersInit | undefined>): Headers {
+│    const headers = new Headers();
+│  
+│    for (const source of sources) {
+│      if (!source) continue;
+│      new Headers(source).forEach((value, key) => {
+│        headers.set(key, value);
+│      });
+│    }
+│  
+│    return headers;
+│  }
+│  
+│  function getMediaType(headers: Headers): string | null {
+│    const value = headers.get("content-type");
+│    return value ? value.split(";", 1)[0].trim().toLowerCase() : null;
+│  }
+│  
+│  function isJsonMediaType(mediaType: string | null): boolean {
+│    return mediaType === "application/json" || Boolean(mediaType?.endsWith("+json"));
+│  }
+│  
+│  function isTextMediaType(mediaType: string | null): boolean {
+│    return Boolean(
+│      mediaType &&
+│        (mediaType.startsWith("text/") ||
+│          mediaType === "application/xml" ||
+│          mediaType === "text/xml" ||
+│          mediaType.endsWith("+xml") ||
+│          mediaType === "application/x-www-form-urlencoded"),
+│    );
+│  }
+│  
+│  // Use strict equality: in browsers, `response.body` is `null` when the
+│  // response genuinely has no content.  In React Native, `response.body` is
+│  // always `undefined` because the ReadableStream API is not implemented —
+│  // even when the response carries a full payload readable via `.text()` or
+│  // `.json()`.  Loose equality (`== null`) matches both `null` and `undefined`,
+│  // which causes every React Native response to be treated as empty.
+│  function hasNoBody(response: Response, method: string): boolean {
+│    if (method === "HEAD") return true;
+│    if (NO_BODY_STATUS.has(response.status)) return true;
+│    if (response.headers.get("content-length") === "0") return true;
+│    if (response.body === null) return true;
+│    return false;
+│  }
+│  
+│  function stripBom(text: string): string {
+│    return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+│  }
+│  
+│  function looksLikeJson(text: string): boolean {
+│    const trimmed = text.trimStart();
+│    return trimmed.startsWith("{") || trimmed.startsWith("[");
+│  }
+│  
+│  function getStringField(value: unknown, key: string): string | undefined {
+│    if (!value || typeof value !== "object") return undefined;
+│  
+│    const candidate = (value as Record<string, unknown>)[key];
+│    if (typeof candidate !== "string") return undefined;
+│  
+│    const trimmed = candidate.trim();
+│    return trimmed === "" ? undefined : trimmed;
+│  }
+│  
+│  function truncate(text: string, maxLength = 300): string {
+│    return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+│  }
+│  
+│  function buildErrorMessage(response: Response, data: unknown): string {
+│    const prefix = `HTTP ${response.status} ${response.statusText}`;
+│  
+│    if (typeof data === "string") {
+│      const text = data.trim();
+│      return text ? `${prefix}: ${truncate(text)}` : prefix;
+│    }
+│  
+│    const title = getStringField(data, "title");
+│    const detail = getStringField(data, "detail");
+│    const message =
+│      getStringField(data, "message") ??
+│      getStringField(data, "error_description") ??
+│      getStringField(data, "error");
+│  
+│    if (title && detail) return `${prefix}: ${title} — ${detail}`;
+│    if (detail) return `${prefix}: ${detail}`;
+│    if (message) return `${prefix}: ${message}`;
+│    if (title) return `${prefix}: ${title}`;
+│  
+│    return prefix;
+│  }
+│  
+│  export class ApiError<T = unknown> extends Error {
+│    readonly name = "ApiError";
+│    readonly status: number;
+│    readonly statusText: string;
+│    readonly data: T | null;
+│    readonly headers: Headers;
+│    readonly response: Response;
+│    readonly method: string;
+│    readonly url: string;
+│  
+│    constructor(
+│      response: Response,
+│      data: T | null,
+│      requestInfo: { method: string; url: string },
+│    ) {
+│      super(buildErrorMessage(response, data));
+│      Object.setPrototypeOf(this, new.target.prototype);
+│  
+│      this.status = response.status;
+│      this.statusText = response.statusText;
+│      this.data = data;
+│      this.headers = response.headers;
+│      this.response = response;
+│      this.method = requestInfo.method;
+│      this.url = response.url || requestInfo.url;
+│    }
+│  }
+│  
+│  export class ResponseParseError extends Error {
+│    readonly name = "ResponseParseError";
+│    readonly status: number;
+│    readonly statusText: string;
+│    readonly headers: Headers;
+│    readonly response: Response;
+│    readonly method: string;
+│    readonly url: string;
+│    readonly rawBody: string;
+│    readonly cause: unknown;
+│  
+│    constructor(
+│      response: Response,
+│      rawBody: string,
+│      cause: unknown,
+│      requestInfo: { method: string; url: string },
+│    ) {
+│      super(
+│        `Failed to parse response from ${requestInfo.method} ${response.url || requestInfo.url} ` +
+│          `(${response.status} ${response.statusText}) as JSON`,
+│      );
+│      Object.setPrototypeOf(this, new.target.prototype);
+│  
+│      this.status = response.status;
+│      this.statusText = response.statusText;
+│      this.headers = response.headers;
+│      this.response = response;
+│      this.method = requestInfo.method;
+│      this.url = response.url || requestInfo.url;
+│      this.rawBody = rawBody;
+│      this.cause = cause;
+│    }
+│  }
+│  
+│  async function parseJsonBody(
+│    response: Response,
+│    requestInfo: { method: string; url: string },
+│  ): Promise<unknown> {
+│    const raw = await response.text();
+│    const normalized = stripBom(raw);
+│  
+│    if (normalized.trim() === "") {
+│      return null;
+│    }
+│  
+│    try {
+│      return JSON.parse(normalized);
+│    } catch (cause) {
+│      throw new ResponseParseError(response, raw, cause, requestInfo);
+│    }
+│  }
+│  
+│  async function parseErrorBody(response: Response, method: string): Promise<unknown> {
+│    if (hasNoBody(response, method)) {
+│      return null;
+│    }
+│  
+│    const mediaType = getMediaType(response.headers);
+│  
+│    // Fall back to text when blob() is unavailable (e.g. some React Native builds).
+│    if (mediaType && !isJsonMediaType(mediaType) && !isTextMediaType(mediaType)) {
+│      return typeof response.blob === "function" ? response.blob() : response.text();
+│    }
+│  
+│    const raw = await response.text();
+│    const normalized = stripBom(raw);
+│    const trimmed = normalized.trim();
+│  
+│    if (trimmed === "") {
+│      return null;
+│    }
+│  
+│    if (isJsonMediaType(mediaType) || looksLikeJson(normalized)) {
+│      try {
+│        return JSON.parse(normalized);
+│      } catch {
+│        return raw;
+│      }
+│    }
+│  
+│    return raw;
+│  }
+│  
+│  function inferResponseType(response: Response): "json" | "text" | "blob" {
+│    const mediaType = getMediaType(response.headers);
+│  
+│    if (isJsonMediaType(mediaType)) return "json";
+│    if (isTextMediaType(mediaType) || mediaType == null) return "text";
+│    return "blob";
+│  }
+│  
+│  async function parseSuccessBody(
+│    response: Response,
+│    responseType: "json" | "text" | "blob" | "auto",
+│    requestInfo: { method: string; url: string },
+│  ): Promise<unknown> {
+│    if (hasNoBody(response, requestInfo.method)) {
+│      return null;
+│    }
+│  
+│    const effectiveType =
+│      responseType === "auto" ? inferResponseType(response) : responseType;
+│  
+│    switch (effectiveType) {
+│      case "json":
+│        return parseJsonBody(response, requestInfo);
+│  
+│      case "text": {
+│        const text = await response.text();
+│        return text === "" ? null : text;
+│      }
+│  
+│      case "blob":
+│        if (typeof response.blob !== "function") {
+│          throw new TypeError(
+│            "Blob responses are not supported in this runtime. " +
+│              "Use responseType \"json\" or \"text\" instead.",
+│          );
+│        }
+│        return response.blob();
+│    }
+│  }
+│  
+│  export async function customFetch<T = unknown>(
+│    input: RequestInfo | URL,
+│    options: CustomFetchOptions = {},
+│  ): Promise<T> {
+│    const { responseType = "auto", headers: headersInit, ...init } = options;
+│  
+│    const method = resolveMethod(input, init.method);
+│  
+│    if (init.body != null && (method === "GET" || method === "HEAD")) {
+│      throw new TypeError(`customFetch: ${method} requests cannot have a body.`);
+│    }
+│  
+│    const headers = mergeHeaders(isRequest(input) ? input.headers : undefined, headersInit);
+│  
+│    if (
+│      typeof init.body === "string" &&
+│      !headers.has("content-type") &&
+│      looksLikeJson(init.body)
+│    ) {
+│      headers.set("content-type", "application/json");
+│    }
+│  
+│    if (responseType === "json" && !headers.has("accept")) {
+│      headers.set("accept", DEFAULT_JSON_ACCEPT);
+│    }
+│  
+│    const requestInfo = { method, url: resolveUrl(input) };
+│  
+│    const response = await fetch(input, { ...init, method, headers });
+│  
+│    if (!response.ok) {
+│      const errorData = await parseErrorBody(response, method);
+│      throw new ApiError(response, errorData, requestInfo);
+│    }
+│  
+│    return (await parseSuccessBody(response, responseType, requestInfo)) as T;
+│  }
+└─ END: lib/api-client-react/src/custom-fetch.ts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    lib/api-zod/ — Generated Zod validators (used by API SERVER for request validation)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─ [SHARED/ZOD] lib/api-zod/package.json
+│  {
+│    "name": "@workspace/api-zod",
+│    "version": "0.0.0",
+│    "private": true,
+│    "type": "module",
+│    "exports": {
+│      ".": "./src/index.ts"
+│    },
+│    "dependencies": {
+│      "zod": "catalog:"
+│    }
+│  }
+└─ END: lib/api-zod/package.json
+
+┌─ [SHARED/ZOD] lib/api-zod/tsconfig.json
+│  {
+│    "extends": "../../tsconfig.base.json",
+│    "compilerOptions": {
+│      "composite": true,
+│      "declarationMap": true,
+│      "emitDeclarationOnly": true,
+│      "outDir": "dist",
+│      "rootDir": "src"
+│    },
+│    "include": ["src"]
+│  }
+└─ END: lib/api-zod/tsconfig.json
+
+┌─ [SHARED/ZOD] lib/api-zod/src/index.ts
+│  export * from "./generated/api";
+│  export * from "./generated/types";
+└─ END: lib/api-zod/src/index.ts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  API SERVER — artifacts/api-server/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Shared Express backend for BOTH the mobile app AND the desktop UI.
+  Mobile calls /api/validate-key, /api/sync-cookies, etc.
+  Desktop UI calls /api/desk/* routes for accounts/status/logs.
+
+┌─ [API SERVER] artifacts/api-server/package.json
 │  {
 │    "name": "@workspace/api-server",
 │    "version": "0.0.0",
@@ -1356,11 +1514,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      "tsx": "catalog:"
 │    }
 │  }
-│
 └─ END: artifacts/api-server/package.json
 
-┌─ artifacts/api-server/tsconfig.json
-│
+┌─ [API SERVER] artifacts/api-server/tsconfig.json
 │  {
 │    "extends": "../../tsconfig.base.json",
 │    "compilerOptions": {
@@ -1378,11 +1534,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      }
 │    ]
 │  }
-│
 └─ END: artifacts/api-server/tsconfig.json
 
-┌─ artifacts/api-server/build.ts
-│
+┌─ [API SERVER] artifacts/api-server/build.ts
 │  import path from "path";
 │  import { fileURLToPath } from "url";
 │  import { build as esbuild } from "esbuild";
@@ -1478,11 +1632,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    console.error(err);
 │    process.exit(1);
 │  });
-│
 └─ END: artifacts/api-server/build.ts
 
-┌─ artifacts/api-server/src/index.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/index.ts
 │  import app from "./app";
 │  import { initSchema } from "@workspace/db";
 │  
@@ -1525,11 +1677,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      console.error("[startup] FATAL: Failed to initialize database schema:", err);
 │      process.exit(1);
 │    });
-│
 └─ END: artifacts/api-server/src/index.ts
 
-┌─ artifacts/api-server/src/app.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/app.ts
 │  import express, { type Express } from "express";
 │  import cors from "cors";
 │  import router from "./routes";
@@ -1546,11 +1696,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  app.use("/api", router);
 │  
 │  export default app;
-│
 └─ END: artifacts/api-server/src/app.ts
 
-┌─ artifacts/api-server/src/adminSession.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/adminSession.ts
 │  import crypto from "crypto";
 │  import { db } from "@workspace/db";
 │  import { licenseKeysTable } from "@workspace/db/schema";
@@ -1624,11 +1772,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  
 │    res.status(401).json({ error: "Unauthorized" });
 │  }
-│
 └─ END: artifacts/api-server/src/adminSession.ts
 
-┌─ artifacts/api-server/src/email.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/email.ts
 │  // ── Email notification stubs ──────────────────────────────────────────────
 │  // These functions define the two automated emails in the KYC → License flow:
 │  //   1. "KYC Under Review"      — fired the moment a user submits KYC info
@@ -1718,11 +1864,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │        `— Macro Rewards`,
 │    });
 │  }
-│
 └─ END: artifacts/api-server/src/email.ts
 
-┌─ artifacts/api-server/src/routes/index.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/routes/index.ts
 │  import { Router, type IRouter } from "express";
 │  import healthRouter from "./health";
 │  import proxyRouter from "./proxy";
@@ -1756,11 +1900,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  router.use(upgradesRouter);
 │  
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/index.ts
 
-┌─ artifacts/api-server/src/routes/health.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/routes/health.ts
 │  import { Router, type IRouter } from "express";
 │  import { HealthCheckResponse } from "@workspace/api-zod";
 │  import { db } from "@workspace/db";
@@ -1781,11 +1923,11 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  });
 │  
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/health.ts
 
-┌─ artifacts/api-server/src/routes/keys.ts
-│
+┌─ [API SERVER — MOBILE]  artifacts/api-server/src/routes/keys.ts
+│  PURPOSE: License key validation, device binding, cookie sync
+│  CALLED BY: Mobile app (LicenseContext, sync-cookies)
 │  import { Router, type IRouter } from "express";
 │  import { db } from "@workspace/db";
 │  import { licenseKeysTable, featureConfigTable, deviceCookiesTable, deletedAccountsTable, inviteCodesTable } from "@workspace/db/schema";
@@ -2550,11 +2692,11 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  });
 │  
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/keys.ts
 
-┌─ artifacts/api-server/src/routes/admin.ts
-│
+┌─ [API SERVER — MOBILE+WEB ADMIN]  artifacts/api-server/src/routes/admin.ts
+│  PURPOSE: HTML admin panel (web-based, session auth)
+│  CALLED BY: Browser at /api/admin — used by owner to manage keys
 │  import { Router, type IRouter } from "express";
 │  import {
 │    createSession,
@@ -3222,11 +3364,11 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  
 │  export { requireAdmin };
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/admin.ts
 
-┌─ artifacts/api-server/src/routes/desk.ts
-│
+┌─ [API SERVER — DESKTOP UI]  artifacts/api-server/src/routes/desk.ts
+│  PURPOSE: Desk-specific routes — accounts CRUD, bot status, run logs
+│  CALLED BY: Desktop UI (rewards-desk-ui) via /api/desk/*
 │  import { Router } from "express";
 │  import { randomBytes, randomUUID } from "crypto";
 │  import {
@@ -3527,11 +3669,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  });
 │  
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/desk.ts
 
-┌─ artifacts/api-server/src/routes/proxy.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/routes/proxy.ts
 │  import { Router, type IRouter, type Request, type Response } from "express";
 │  
 │  const PRODUCTION_API = "https://macro-r-631x.onrender.com/api";
@@ -3600,11 +3740,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  }
 │  
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/proxy.ts
 
-┌─ artifacts/api-server/src/routes/invite.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/routes/invite.ts
 │  import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 │  import { db } from "@workspace/db";
 │  import { inviteCodesTable, kycSubmissionsTable, licenseKeysTable, featureConfigTable } from "@workspace/db/schema";
@@ -4036,11 +4174,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  }
 │  
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/invite.ts
 
-┌─ artifacts/api-server/src/routes/config.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/routes/config.ts
 │  import { Router, type IRouter, type Request, type Response } from "express";
 │  import { db } from "@workspace/db";
 │  import { globalConfigTable } from "@workspace/db/schema";
@@ -4129,11 +4265,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  });
 │  
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/config.ts
 
-┌─ artifacts/api-server/src/routes/upgrades.ts
-│
+┌─ [API SERVER] artifacts/api-server/src/routes/upgrades.ts
 │  import { Router, type IRouter, type Request, type Response } from "express";
 │  import { db } from "@workspace/db";
 │  import { licenseKeysTable, upgradeRequestsTable, featureConfigTable } from "@workspace/db/schema";
@@ -4296,1296 +4430,16 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  });
 │  
 │  export default router;
-│
 └─ END: artifacts/api-server/src/routes/upgrades.ts
 
-┌─ lib/db/package.json
-│
-│  {
-│    "name": "@workspace/db",
-│    "version": "0.0.0",
-│    "private": true,
-│    "type": "module",
-│    "exports": {
-│      ".": "./src/index.ts",
-│      "./schema": "./src/schema/index.ts"
-│    },
-│    "scripts": {
-│      "push": "drizzle-kit push --config ./drizzle.config.ts",
-│      "push-force": "drizzle-kit push --force --config ./drizzle.config.ts"
-│    },
-│    "dependencies": {
-│      "drizzle-orm": "catalog:",
-│      "drizzle-zod": "^0.8.3",
-│      "pg": "^8.20.0",
-│      "zod": "catalog:"
-│    },
-│    "devDependencies": {
-│      "@types/node": "catalog:",
-│      "@types/pg": "^8.18.0",
-│      "drizzle-kit": "^0.31.9"
-│    }
-│  }
-│
-└─ END: lib/db/package.json
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DESKTOP UI — artifacts/rewards-desk-ui/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  React + Vite web app. Opens in a browser on the PC.
+  Shows accounts, run logs, stats, settings.
+  Talks to the API server at /api/desk/*
 
-┌─ lib/db/tsconfig.json
-│
-│  {
-│    "extends": "../../tsconfig.base.json",
-│    "compilerOptions": {
-│      "composite": true,
-│      "declarationMap": true,
-│      "emitDeclarationOnly": true,
-│      "outDir": "dist",
-│      "rootDir": "src",
-│      "types": ["node"]
-│    },
-│    "include": ["src"]
-│  }
-│
-└─ END: lib/db/tsconfig.json
-
-┌─ lib/db/drizzle.config.ts
-│
-│  import { defineConfig } from "drizzle-kit";
-│  import path from "path";
-│  
-│  if (!process.env.DATABASE_URL) {
-│    throw new Error("DATABASE_URL, ensure the database is provisioned");
-│  }
-│  
-│  export default defineConfig({
-│    schema: path.join(__dirname, "./src/schema/index.ts"),
-│    dialect: "postgresql",
-│    dbCredentials: {
-│      url: process.env.DATABASE_URL,
-│    },
-│  });
-│
-└─ END: lib/db/drizzle.config.ts
-
-┌─ lib/db/src/index.ts
-│
-│  import { drizzle } from "drizzle-orm/node-postgres";
-│  import pg from "pg";
-│  import * as schema from "./schema";
-│  
-│  const { Pool } = pg;
-│  
-│  if (!process.env.DATABASE_URL) {
-│    throw new Error(
-│      "DATABASE_URL must be set. Did you forget to provision a database?",
-│    );
-│  }
-│  
-│  export const pool = new Pool({
-│    connectionString: process.env.DATABASE_URL,
-│    connectionTimeoutMillis: 10000,
-│    idleTimeoutMillis: 30000,
-│    max: 10,
-│  });
-│  
-│  pool.on("error", (err) => {
-│    console.error("Unexpected database pool error:", err.message);
-│  });
-│  
-│  export const db = drizzle(pool, { schema });
-│  
-│  export * from "./schema";
-│  export { initSchema } from "./migrate";
-│
-└─ END: lib/db/src/index.ts
-
-┌─ lib/db/src/migrate.ts
-│
-│  import { pool } from "./index";
-│  
-│  /**
-│   * Creates all tables if they don't already exist.
-│   * Safe to run on every startup — uses CREATE TABLE IF NOT EXISTS.
-│   * No drizzle-kit CLI required at runtime.
-│   */
-│  export async function initSchema(): Promise<void> {
-│    console.log("[db] Connecting to database...");
-│  
-│    let client;
-│    try {
-│      client = await pool.connect();
-│      console.log("[db] Connection established.");
-│    } catch (err) {
-│      console.error("[db] FATAL: Could not connect to database:", err);
-│      throw err;
-│    }
-│  
-│    try {
-│      // ── Verify connectivity ──────────────────────────────────────────────────
-│      const { rows } = await client.query("SELECT NOW() AS now");
-│      console.log(`[db] DB time check OK: ${rows[0]?.now}`);
-│  
-│      // ── Core tables ──────────────────────────────────────────────────────────
-│      console.log("[db] Creating core tables...");
-│      await client.query(`
-│        CREATE TABLE IF NOT EXISTS license_keys (
-│          id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-│          key         TEXT        NOT NULL UNIQUE,
-│          label       TEXT,
-│          key_type    TEXT        NOT NULL DEFAULT 'basic',
-│          max_accounts INTEGER    NOT NULL DEFAULT 3,
-│          is_active   BOOLEAN     NOT NULL DEFAULT TRUE,
-│          bound_device_id TEXT,
-│          expires_at  TIMESTAMP   NOT NULL,
-│          created_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
-│          updated_at  TIMESTAMP   NOT NULL DEFAULT NOW()
-│        );
-│  
-│        CREATE TABLE IF NOT EXISTS feature_config (
-│          key_type               TEXT    PRIMARY KEY,
-│          max_accounts           INTEGER NOT NULL DEFAULT 3,
-│          max_searches           INTEGER NOT NULL DEFAULT 30,
-│          min_delay_seconds      INTEGER NOT NULL DEFAULT 5,
-│          background_enabled     BOOLEAN NOT NULL DEFAULT FALSE,
-│          custom_queries_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-│          daily_set_enabled      BOOLEAN NOT NULL DEFAULT TRUE,
-│          pc_search_enabled      BOOLEAN NOT NULL DEFAULT TRUE
-│        );
-│  
-│        CREATE TABLE IF NOT EXISTS device_cookies (
-│          id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
-│          license_key_id   UUID      NOT NULL REFERENCES license_keys(id) ON DELETE CASCADE,
-│          device_id        TEXT      NOT NULL,
-│          account_email    TEXT      NOT NULL,
-│          account_name     TEXT,
-│          cookies          TEXT      NOT NULL,
-│          updated_at       TIMESTAMP NOT NULL DEFAULT NOW(),
-│          CONSTRAINT uq_key_email UNIQUE (license_key_id, account_email)
-│        );
-│      `);
-│      console.log("[db] Core tables OK.");
-│  
-│      // ── Seed feature_config defaults ────────────────────────────────────────
-│      await client.query(`
-│        INSERT INTO feature_config (key_type, max_accounts, max_searches, min_delay_seconds, background_enabled, custom_queries_enabled, daily_set_enabled, pc_search_enabled) VALUES
-│          ('basic',     2,   20,  5, FALSE, FALSE, TRUE,  FALSE),
-│          ('premium',   5,   40,  3, TRUE,  TRUE,  TRUE,  TRUE),
-│          ('unlimited', 999, 999, 3, TRUE,  TRUE,  TRUE,  TRUE),
-│          ('admin',     999, 999, 1, TRUE,  TRUE,  TRUE,  TRUE)
-│        ON CONFLICT (key_type) DO NOTHING;
-│      `);
-│      console.log("[db] feature_config seeded.");
-│  
-│      // ── license_keys column additions (idempotent) ───────────────────────────
-│      console.log("[db] Applying license_keys column migrations...");
-│      await client.query(`
-│        ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_max_accounts INTEGER;
-│        ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS custom_min_delay_seconds INTEGER;
-│        ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS pin TEXT;
-│      `);
-│      console.log("[db] license_keys columns OK.");
-│  
-│      // ── deleted_accounts ──────────────────────────────────────────────────────
-│      console.log("[db] Creating deleted_accounts table...");
-│      await client.query(`
-│        CREATE TABLE IF NOT EXISTS deleted_accounts (
-│          id                  UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
-│          license_key_id      UUID      NOT NULL,
-│          license_key         TEXT      NOT NULL,
-│          account_email       TEXT      NOT NULL,
-│          account_name        TEXT,
-│          cookies             TEXT,
-│          device_id           TEXT,
-│          deleted_at          TIMESTAMP NOT NULL DEFAULT NOW(),
-│          original_created_at TIMESTAMP
-│        );
-│      `);
-│      console.log("[db] deleted_accounts OK.");
-│  
-│      // ── Phase 1: invite_codes ─────────────────────────────────────────────────
-│      console.log("[db] Creating invite_codes table...");
-│      await client.query(`
-│        CREATE TABLE IF NOT EXISTS invite_codes (
-│          id         UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
-│          code       TEXT      NOT NULL UNIQUE,
-│          status     TEXT      NOT NULL DEFAULT 'unused',
-│          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-│          updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-│        );
-│      `);
-│      console.log("[db] invite_codes OK.");
-│  
-│      // ── Phase 1: kyc_submissions ──────────────────────────────────────────────
-│      console.log("[db] Creating kyc_submissions table...");
-│      await client.query(`
-│        CREATE TABLE IF NOT EXISTS kyc_submissions (
-│          id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
-│          invite_code      TEXT      NOT NULL UNIQUE,
-│          full_name        TEXT      NOT NULL,
-│          father_name      TEXT      NOT NULL,
-│          mother_name      TEXT      NOT NULL,
-│          grandfather_name TEXT      NOT NULL,
-│          id_front         TEXT      NOT NULL,
-│          id_back          TEXT      NOT NULL,
-│          kyc_status       TEXT      NOT NULL DEFAULT 'pending',
-│          admin_note       TEXT,
-│          created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
-│          updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
-│        );
-│      `);
-│      console.log("[db] kyc_submissions OK.");
-│  
-│      // ── Phase 2: kyc_submissions column additions (idempotent) ──────────────
-│      console.log("[db] Applying kyc_submissions column migrations...");
-│      await client.query(`
-│        ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
-│        ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS license_key_id UUID;
-│        ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS review_email_sent_at TIMESTAMP;
-│        ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS approval_email_sent_at TIMESTAMP;
-│      `);
-│      console.log("[db] kyc_submissions columns OK.");
-│  
-│      // ── Phase 3: invite_codes column additions (idempotent) ─────────────────
-│      console.log("[db] Applying invite_codes column migrations...");
-│      await client.query(`
-│        ALTER TABLE invite_codes ADD COLUMN IF NOT EXISTS license_key_id UUID;
-│      `);
-│      console.log("[db] invite_codes columns OK.");
-│  
-│      // ── Phase 3: license_keys column additions (idempotent) ─────────────────
-│      console.log("[db] Applying license_keys tier/invite column migrations...");
-│      await client.query(`
-│        ALTER TABLE license_keys ADD COLUMN IF NOT EXISTS can_invite BOOLEAN NOT NULL DEFAULT FALSE;
-│      `);
-│      console.log("[db] license_keys tier/invite columns OK.");
-│  
-│      // ── Phase 3: upgrade_requests ─────────────────────────────────────────────
-│      console.log("[db] Creating upgrade_requests table...");
-│      await client.query(`
-│        CREATE TABLE IF NOT EXISTS upgrade_requests (
-│          id               UUID      PRIMARY KEY DEFAULT gen_random_uuid(),
-│          license_key_id   UUID      NOT NULL,
-│          requested_tier   TEXT      NOT NULL,
-│          transaction_id   TEXT,
-│          receipt_link     TEXT,
-│          status           TEXT      NOT NULL DEFAULT 'pending',
-│          admin_note       TEXT,
-│          created_at       TIMESTAMP NOT NULL DEFAULT NOW(),
-│          updated_at       TIMESTAMP NOT NULL DEFAULT NOW()
-│        );
-│      `);
-│      console.log("[db] upgrade_requests OK.");
-│  
-│      // ── Phase 3: existing paid/admin keys get canInvite retroactively ────────
-│      await client.query(`
-│        UPDATE license_keys SET can_invite = TRUE
-│        WHERE key_type IN ('basic', 'premium', 'unlimited', 'admin') AND can_invite = FALSE;
-│      `);
-│      console.log("[db] Retroactive can_invite backfill OK.");
-│  
-│      // ── Phase 2: feature_config trial tier ───────────────────────────────────
-│      await client.query(`
-│        INSERT INTO feature_config (key_type, max_accounts, max_searches, min_delay_seconds, background_enabled, custom_queries_enabled, daily_set_enabled, pc_search_enabled) VALUES
-│          ('trial', 3, 20, 5, FALSE, FALSE, TRUE, FALSE)
-│        ON CONFLICT (key_type) DO NOTHING;
-│      `);
-│      console.log("[db] trial tier seeded.");
-│  
-│      // ── Final verification: list all tables ───────────────────────────────────
-│      const { rows: tables } = await client.query(`
-│        SELECT tablename FROM pg_tables
-│        WHERE schemaname = 'public'
-│        ORDER BY tablename;
-│      `);
-│      console.log("[db] Tables in public schema:", tables.map((r: { tablename: string }) => r.tablename).join(", "));
-│      console.log("[db] Schema initialization complete.");
-│  
-│    } catch (err) {
-│      console.error("[db] Schema initialization FAILED:", err);
-│      throw err;
-│    } finally {
-│      client.release();
-│    }
-│  }
-│
-└─ END: lib/db/src/migrate.ts
-
-┌─ lib/db/src/schema/index.ts
-│
-│  // Export your models here. Add one export per file
-│  // export * from "./posts";
-│  //
-│  // Each model/table should ideally be split into different files.
-│  // Each model/table should define a Drizzle table, insert schema, and types:
-│  //
-│  //   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-│  //   import { createInsertSchema } from "drizzle-zod";
-│  //   import { z } from "zod/v4";
-│  //
-│  //   export const postsTable = pgTable("posts", {
-│  //     id: serial("id").primaryKey(),
-│  //     title: text("title").notNull(),
-│  //   });
-│  //
-│  //   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-│  //   export type InsertPost = z.infer<typeof insertPostSchema>;
-│  //   export type Post = typeof postsTable.$inferSelect;
-│  
-│  export * from "./licenseKeys";
-│  export * from "./featureConfig";
-│  export * from "./deviceCookies";
-│  export * from "./deletedAccounts";
-│  export * from "./inviteCodes";
-│  export * from "./kycSubmissions";
-│  export * from "./globalConfig";
-│
-└─ END: lib/db/src/schema/index.ts
-
-┌─ lib/db/src/schema/licenseKeys.ts
-│
-│  import { pgTable, text, integer, boolean, timestamp, uuid } from "drizzle-orm/pg-core";
-│  import { createInsertSchema } from "drizzle-zod";
-│  import { z } from "zod/v4";
-│  
-│  export const licenseKeysTable = pgTable("license_keys", {
-│    id: uuid("id").defaultRandom().primaryKey(),
-│    key: text("key").notNull().unique(),
-│    label: text("label"),
-│    keyType: text("key_type").notNull().default("basic"),
-│    maxAccounts: integer("max_accounts").notNull().default(3),
-│    customMaxAccounts: integer("custom_max_accounts"),
-│    customMinDelaySeconds: integer("custom_min_delay_seconds"),
-│    pin: text("pin"),
-│    isActive: boolean("is_active").notNull().default(true),
-│    boundDeviceId: text("bound_device_id"),
-│    canInvite: boolean("can_invite").notNull().default(false),
-│    expiresAt: timestamp("expires_at").notNull(),
-│    createdAt: timestamp("created_at").defaultNow().notNull(),
-│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-│  });
-│  
-│  export const insertLicenseKeySchema = createInsertSchema(licenseKeysTable).omit({
-│    id: true,
-│    createdAt: true,
-│    updatedAt: true,
-│  });
-│  export type InsertLicenseKey = z.infer<typeof insertLicenseKeySchema>;
-│  export type LicenseKey = typeof licenseKeysTable.$inferSelect;
-│
-└─ END: lib/db/src/schema/licenseKeys.ts
-
-┌─ lib/db/src/schema/deviceCookies.ts
-│
-│  import { pgTable, text, timestamp, uuid, unique } from "drizzle-orm/pg-core";
-│  import { licenseKeysTable } from "./licenseKeys";
-│  
-│  export const deviceCookiesTable = pgTable("device_cookies", {
-│    id: uuid("id").defaultRandom().primaryKey(),
-│    licenseKeyId: uuid("license_key_id").notNull().references(() => licenseKeysTable.id, { onDelete: "cascade" }),
-│    deviceId: text("device_id").notNull(),
-│    accountEmail: text("account_email").notNull(),
-│    accountName: text("account_name"),
-│    cookies: text("cookies").notNull(),
-│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-│  }, (table) => [
-│    unique("uq_key_email").on(table.licenseKeyId, table.accountEmail),
-│  ]);
-│
-└─ END: lib/db/src/schema/deviceCookies.ts
-
-┌─ lib/db/src/schema/featureConfig.ts
-│
-│  import { pgTable, text, integer, boolean } from "drizzle-orm/pg-core";
-│  import { createInsertSchema } from "drizzle-zod";
-│  import { z } from "zod/v4";
-│  
-│  export const featureConfigTable = pgTable("feature_config", {
-│    keyType: text("key_type").primaryKey(),
-│    maxAccounts: integer("max_accounts").notNull().default(3),
-│    maxSearches: integer("max_searches").notNull().default(30),
-│    minDelaySeconds: integer("min_delay_seconds").notNull().default(5),
-│    backgroundEnabled: boolean("background_enabled").notNull().default(false),
-│    customQueriesEnabled: boolean("custom_queries_enabled").notNull().default(false),
-│    dailySetEnabled: boolean("daily_set_enabled").notNull().default(true),
-│    pcSearchEnabled: boolean("pc_search_enabled").notNull().default(true),
-│  });
-│  
-│  export const insertFeatureConfigSchema = createInsertSchema(featureConfigTable);
-│  export type InsertFeatureConfig = z.infer<typeof insertFeatureConfigSchema>;
-│  export type FeatureConfig = typeof featureConfigTable.$inferSelect;
-│
-└─ END: lib/db/src/schema/featureConfig.ts
-
-┌─ lib/db/src/schema/globalConfig.ts
-│
-│  import { pgTable, text } from "drizzle-orm/pg-core";
-│  import { createInsertSchema } from "drizzle-zod";
-│  import { z } from "zod/v4";
-│  
-│  // Pre-existing key/value settings table. Kept in the schema so `drizzle-kit
-│  // push` doesn't propose dropping it — it predates the tracked schema files.
-│  export const globalConfigTable = pgTable("global_config", {
-│    key: text("key").primaryKey(),
-│    value: text("value").notNull(),
-│  });
-│  
-│  export const insertGlobalConfigSchema = createInsertSchema(globalConfigTable);
-│  export type InsertGlobalConfig = z.infer<typeof insertGlobalConfigSchema>;
-│  export type GlobalConfig = typeof globalConfigTable.$inferSelect;
-│
-└─ END: lib/db/src/schema/globalConfig.ts
-
-┌─ lib/db/src/schema/inviteCodes.ts
-│
-│  import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-│  
-│  export const inviteCodesTable = pgTable("invite_codes", {
-│    id: uuid("id").defaultRandom().primaryKey(),
-│    code: text("code").notNull().unique(),
-│    status: text("status").notNull().default("unused"), // unused | pending | resolved
-│    // Set when this invite code was auto-generated alongside a Basic license key,
-│    // so the admin panel can show "which key handed out this code".
-│    licenseKeyId: uuid("license_key_id"),
-│    createdAt: timestamp("created_at").defaultNow().notNull(),
-│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-│  });
-│  
-│  export type InviteCode = typeof inviteCodesTable.$inferSelect;
-│
-└─ END: lib/db/src/schema/inviteCodes.ts
-
-┌─ lib/db/src/schema/kycSubmissions.ts
-│
-│  import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-│  
-│  export const kycSubmissionsTable = pgTable("kyc_submissions", {
-│    id: uuid("id").defaultRandom().primaryKey(),
-│    inviteCode: text("invite_code").notNull().unique(),
-│    email: text("email").notNull().default(""),
-│    fullName: text("full_name").notNull(),
-│    fatherName: text("father_name").notNull(),
-│    motherName: text("mother_name").notNull(),
-│    grandfatherName: text("grandfather_name").notNull(),
-│    idFront: text("id_front").notNull(),
-│    idBack: text("id_back").notNull(),
-│    kycStatus: text("kyc_status").notNull().default("pending"), // pending | verified | rejected
-│    adminNote: text("admin_note"),
-│    licenseKeyId: uuid("license_key_id"),
-│    reviewEmailSentAt: timestamp("review_email_sent_at"),
-│    approvalEmailSentAt: timestamp("approval_email_sent_at"),
-│    createdAt: timestamp("created_at").defaultNow().notNull(),
-│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-│  });
-│  
-│  export type KycSubmission = typeof kycSubmissionsTable.$inferSelect;
-│
-└─ END: lib/db/src/schema/kycSubmissions.ts
-
-┌─ lib/db/src/schema/upgradeRequests.ts
-│
-│  import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-│  
-│  // A user-submitted request to upgrade their license key to a paid tier.
-│  // requestedTier: "basic" | "premium" | "unlimited"
-│  // status: "pending" | "approved" | "rejected"
-│  export const upgradeRequestsTable = pgTable("upgrade_requests", {
-│    id: uuid("id").defaultRandom().primaryKey(),
-│    licenseKeyId: uuid("license_key_id").notNull(),
-│    requestedTier: text("requested_tier").notNull(),
-│    transactionId: text("transaction_id"),
-│    receiptLink: text("receipt_link"),
-│    status: text("status").notNull().default("pending"),
-│    adminNote: text("admin_note"),
-│    createdAt: timestamp("created_at").defaultNow().notNull(),
-│    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-│  });
-│  
-│  export type UpgradeRequest = typeof upgradeRequestsTable.$inferSelect;
-│
-└─ END: lib/db/src/schema/upgradeRequests.ts
-
-┌─ lib/db/src/schema/deletedAccounts.ts
-│
-│  import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-│  
-│  export const deletedAccountsTable = pgTable("deleted_accounts", {
-│    id: uuid("id").defaultRandom().primaryKey(),
-│    licenseKeyId: uuid("license_key_id").notNull(),
-│    licenseKey: text("license_key").notNull(),
-│    accountEmail: text("account_email").notNull(),
-│    accountName: text("account_name"),
-│    cookies: text("cookies"),
-│    deviceId: text("device_id"),
-│    deletedAt: timestamp("deleted_at").defaultNow().notNull(),
-│    originalCreatedAt: timestamp("original_created_at"),
-│  });
-│
-└─ END: lib/db/src/schema/deletedAccounts.ts
-
-┌─ lib/db/drizzle/0000_outgoing_randall.sql
-│
-│  CREATE TABLE "license_keys" (
-│  	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-│  	"key" text NOT NULL,
-│  	"label" text,
-│  	"key_type" text DEFAULT 'basic' NOT NULL,
-│  	"max_accounts" integer DEFAULT 3 NOT NULL,
-│  	"is_active" boolean DEFAULT true NOT NULL,
-│  	"bound_device_id" text,
-│  	"expires_at" timestamp NOT NULL,
-│  	"created_at" timestamp DEFAULT now() NOT NULL,
-│  	"updated_at" timestamp DEFAULT now() NOT NULL,
-│  	CONSTRAINT "license_keys_key_unique" UNIQUE("key")
-│  );
-│
-└─ END: lib/db/drizzle/0000_outgoing_randall.sql
-
-┌─ lib/db/drizzle/0001_sudden_wonder_man.sql
-│
-│  CREATE TABLE "feature_config" (
-│  	"key_type" text PRIMARY KEY NOT NULL,
-│  	"max_accounts" integer DEFAULT 3 NOT NULL,
-│  	"max_searches" integer DEFAULT 30 NOT NULL,
-│  	"min_delay_seconds" integer DEFAULT 5 NOT NULL,
-│  	"background_enabled" boolean DEFAULT false NOT NULL,
-│  	"custom_queries_enabled" boolean DEFAULT false NOT NULL
-│  );
-│
-└─ END: lib/db/drizzle/0001_sudden_wonder_man.sql
-
-┌─ lib/api-spec/package.json
-│
-│  {
-│    "name": "@workspace/api-spec",
-│    "version": "0.0.0",
-│    "private": true,
-│    "scripts": {
-│      "codegen": "orval --config ./orval.config.ts"
-│    },
-│    "devDependencies": {
-│      "orval": "^8.5.2"
-│    }
-│  }
-│
-└─ END: lib/api-spec/package.json
-
-┌─ lib/api-spec/openapi.yaml
-│
-│  openapi: 3.1.0
-│  info:
-│    # Do not change the title, if the title changes, the import paths will be broken
-│    title: Api
-│    version: 0.1.0
-│    description: API specification
-│  servers:
-│    - url: /api
-│      description: Base API path
-│  tags:
-│    - name: health
-│      description: Health operations
-│    - name: desk
-│      description: Rewards Desk desktop automation
-│  paths:
-│    /healthz:
-│      get:
-│        operationId: healthCheck
-│        tags: [health]
-│        summary: Health check
-│        description: Returns server health status
-│        responses:
-│          "200":
-│            description: Healthy
-│            content:
-│              application/json:
-│                schema:
-│                  $ref: "#/components/schemas/HealthStatus"
-│  
-│    /desk/accounts:
-│      get:
-│        operationId: listAccounts
-│        tags: [desk]
-│        summary: List all accounts
-│        description: Returns all saved Microsoft Reward accounts
-│        responses:
-│          "200":
-│            description: List of accounts
-│            content:
-│              application/json:
-│                schema:
-│                  type: array
-│                  items:
-│                    $ref: "#/components/schemas/DeskAccount"
-│      post:
-│        operationId: addAccount
-│        tags: [desk]
-│        summary: Add a new account
-│        requestBody:
-│          required: true
-│          content:
-│            application/json:
-│              schema:
-│                $ref: "#/components/schemas/DeskAccountInput"
-│        responses:
-│          "201":
-│            description: Account created
-│            content:
-│              application/json:
-│                schema:
-│                  $ref: "#/components/schemas/DeskAccount"
-│  
-│    /desk/accounts/{id}:
-│      delete:
-│        operationId: deleteAccount
-│        tags: [desk]
-│        summary: Delete an account
-│        parameters:
-│          - name: id
-│            in: path
-│            required: true
-│            schema:
-│              type: string
-│        responses:
-│          "200":
-│            description: Deleted
-│            content:
-│              application/json:
-│                schema:
-│                  $ref: "#/components/schemas/DeleteResult"
-│  
-│    /desk/run-now:
-│      post:
-│        operationId: runNow
-│        tags: [desk]
-│        summary: Trigger automation run
-│        description: Starts the Bing search automation for all active accounts
-│        requestBody:
-│          required: true
-│          content:
-│            application/json:
-│              schema:
-│                $ref: "#/components/schemas/RunInput"
-│        responses:
-│          "200":
-│            description: Run started
-│            content:
-│              application/json:
-│                schema:
-│                  $ref: "#/components/schemas/RunResult"
-│  
-│    /desk/status:
-│      get:
-│        operationId: getBotStatus
-│        tags: [desk]
-│        summary: Get bot status
-│        description: Returns current bot running state and last run info
-│        responses:
-│          "200":
-│            description: Bot status
-│            content:
-│              application/json:
-│                schema:
-│                  $ref: "#/components/schemas/BotStatus"
-│  
-│    /desk/logs:
-│      get:
-│        operationId: getRunLogs
-│        tags: [desk]
-│        summary: Get recent run logs
-│        description: Returns the last 50 run log entries across all accounts
-│        responses:
-│          "200":
-│            description: Run logs
-│            content:
-│              application/json:
-│                schema:
-│                  type: array
-│                  items:
-│                    $ref: "#/components/schemas/RunLog"
-│  
-│  components:
-│    schemas:
-│      HealthStatus:
-│        type: object
-│        properties:
-│          status:
-│            type: string
-│        required:
-│          - status
-│  
-│      DeskAccount:
-│        type: object
-│        required: [id, email, name, status, totalPoints, todayPoints, lastRun]
-│        properties:
-│          id:
-│            type: string
-│          email:
-│            type: string
-│          name:
-│            type: string
-│          status:
-│            type: string
-│            enum: [idle, running, done, failed]
-│          totalPoints:
-│            type: integer
-│          todayPoints:
-│            type: integer
-│          lastRun:
-│            type: ["string", "null"]
-│          searchesCompleted:
-│            type: integer
-│  
-│      DeskAccountInput:
-│        type: object
-│        required: [email, name]
-│        properties:
-│          email:
-│            type: string
-│          name:
-│            type: string
-│  
-│      DeleteResult:
-│        type: object
-│        required: [success]
-│        properties:
-│          success:
-│            type: boolean
-│  
-│      RunInput:
-│        type: object
-│        properties:
-│          accountIds:
-│            type: array
-│            items:
-│              type: string
-│            description: Specific account IDs to run (omit to run all)
-│  
-│      RunResult:
-│        type: object
-│        required: [started, message]
-│        properties:
-│          started:
-│            type: boolean
-│          message:
-│            type: string
-│          runId:
-│            type: string
-│  
-│      BotStatus:
-│        type: object
-│        required: [isRunning, currentAccount, lastRunAt, totalSearchesToday]
-│        properties:
-│          isRunning:
-│            type: boolean
-│          currentAccount:
-│            type: ["string", "null"]
-│          lastRunAt:
-│            type: ["string", "null"]
-│          totalSearchesToday:
-│            type: integer
-│          activeRunId:
-│            type: ["string", "null"]
-│  
-│      RunLog:
-│        type: object
-│        required: [id, accountId, accountName, timestamp, searchesDone, pointsEarned, status]
-│        properties:
-│          id:
-│            type: string
-│          accountId:
-│            type: string
-│          accountName:
-│            type: string
-│          timestamp:
-│            type: string
-│          searchesDone:
-│            type: integer
-│          pointsEarned:
-│            type: integer
-│          status:
-│            type: string
-│            enum: [success, failed, running]
-│          errorMessage:
-│            type: ["string", "null"]
-│
-└─ END: lib/api-spec/openapi.yaml
-
-┌─ lib/api-spec/orval.config.ts
-│
-│  import { defineConfig, InputTransformerFn } from "orval";
-│  import path from "path";
-│  
-│  const root = path.resolve(__dirname, "..", "..");
-│  const apiClientReactSrc = path.resolve(root, "lib", "api-client-react", "src");
-│  const apiZodSrc = path.resolve(root, "lib", "api-zod", "src");
-│  
-│  // Our exports make assumptions about the title of the API being "Api" (i.e. generated output is `api.ts`).
-│  const titleTransformer: InputTransformerFn = (config) => {
-│    config.info ??= {};
-│    config.info.title = "Api";
-│  
-│    return config;
-│  };
-│  
-│  export default defineConfig({
-│    "api-client-react": {
-│      input: {
-│        target: "./openapi.yaml",
-│        override: {
-│          transformer: titleTransformer,
-│        },
-│      },
-│      output: {
-│        workspace: apiClientReactSrc,
-│        target: "generated",
-│        client: "react-query",
-│        mode: "split",
-│        baseUrl: "/api",
-│        clean: true,
-│        prettier: true,
-│        override: {
-│          fetch: {
-│            includeHttpResponseReturnType: false,
-│          },
-│          mutator: {
-│            path: path.resolve(apiClientReactSrc, "custom-fetch.ts"),
-│            name: "customFetch",
-│          },
-│        },
-│      },
-│    },
-│    zod: {
-│      input: {
-│        target: "./openapi.yaml",
-│        override: {
-│          transformer: titleTransformer,
-│        },
-│      },
-│      output: {
-│        workspace: apiZodSrc,
-│        client: "zod",
-│        target: "generated",
-│        schemas: { path: "generated/types", type: "typescript" },
-│        mode: "split",
-│        clean: true,
-│        prettier: true,
-│        override: {
-│          zod: {
-│            coerce: {
-│              query: ['boolean', 'number', 'string'],
-│              param: ['boolean', 'number', 'string'],
-│            },
-│          },
-│          useDates: true,
-│        },
-│      },
-│    },
-│  });
-│
-└─ END: lib/api-spec/orval.config.ts
-
-┌─ lib/api-client-react/package.json
-│
-│  {
-│    "name": "@workspace/api-client-react",
-│    "version": "0.0.0",
-│    "private": true,
-│    "type": "module",
-│    "exports": {
-│      ".": "./src/index.ts"
-│    },
-│    "dependencies": {
-│      "@tanstack/react-query": "catalog:"
-│    },
-│    "peerDependencies": {
-│      "react": ">=18"
-│    }
-│  }
-│
-└─ END: lib/api-client-react/package.json
-
-┌─ lib/api-client-react/tsconfig.json
-│
-│  {
-│    "extends": "../../tsconfig.base.json",
-│    "compilerOptions": {
-│      "composite": true,
-│      "declarationMap": true,
-│      "emitDeclarationOnly": true,
-│      "outDir": "dist",
-│      "rootDir": "src",
-│      "lib": ["dom", "es2022"]
-│    },
-│    "include": ["src"]
-│  }
-│
-└─ END: lib/api-client-react/tsconfig.json
-
-┌─ lib/api-client-react/src/index.ts
-│
-│  export * from "./generated/api";
-│  export * from "./generated/api.schemas";
-│
-└─ END: lib/api-client-react/src/index.ts
-
-┌─ lib/api-client-react/src/custom-fetch.ts
-│
-│  export type CustomFetchOptions = RequestInit & {
-│    responseType?: "json" | "text" | "blob" | "auto";
-│  };
-│  
-│  export type ErrorType<T = unknown> = ApiError<T>;
-│  
-│  export type BodyType<T> = T;
-│  
-│  const NO_BODY_STATUS = new Set([204, 205, 304]);
-│  const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
-│  
-│  function isRequest(input: RequestInfo | URL): input is Request {
-│    return typeof Request !== "undefined" && input instanceof Request;
-│  }
-│  
-│  function resolveMethod(input: RequestInfo | URL, explicitMethod?: string): string {
-│    if (explicitMethod) return explicitMethod.toUpperCase();
-│    if (isRequest(input)) return input.method.toUpperCase();
-│    return "GET";
-│  }
-│  
-│  // Use loose check for URL — some runtimes (e.g. React Native) polyfill URL
-│  // differently, so `instanceof URL` can fail.
-│  function isUrl(input: RequestInfo | URL): input is URL {
-│    return typeof URL !== "undefined" && input instanceof URL;
-│  }
-│  
-│  function resolveUrl(input: RequestInfo | URL): string {
-│    if (typeof input === "string") return input;
-│    if (isUrl(input)) return input.toString();
-│    return input.url;
-│  }
-│  
-│  function mergeHeaders(...sources: Array<HeadersInit | undefined>): Headers {
-│    const headers = new Headers();
-│  
-│    for (const source of sources) {
-│      if (!source) continue;
-│      new Headers(source).forEach((value, key) => {
-│        headers.set(key, value);
-│      });
-│    }
-│  
-│    return headers;
-│  }
-│  
-│  function getMediaType(headers: Headers): string | null {
-│    const value = headers.get("content-type");
-│    return value ? value.split(";", 1)[0].trim().toLowerCase() : null;
-│  }
-│  
-│  function isJsonMediaType(mediaType: string | null): boolean {
-│    return mediaType === "application/json" || Boolean(mediaType?.endsWith("+json"));
-│  }
-│  
-│  function isTextMediaType(mediaType: string | null): boolean {
-│    return Boolean(
-│      mediaType &&
-│        (mediaType.startsWith("text/") ||
-│          mediaType === "application/xml" ||
-│          mediaType === "text/xml" ||
-│          mediaType.endsWith("+xml") ||
-│          mediaType === "application/x-www-form-urlencoded"),
-│    );
-│  }
-│  
-│  // Use strict equality: in browsers, `response.body` is `null` when the
-│  // response genuinely has no content.  In React Native, `response.body` is
-│  // always `undefined` because the ReadableStream API is not implemented —
-│  // even when the response carries a full payload readable via `.text()` or
-│  // `.json()`.  Loose equality (`== null`) matches both `null` and `undefined`,
-│  // which causes every React Native response to be treated as empty.
-│  function hasNoBody(response: Response, method: string): boolean {
-│    if (method === "HEAD") return true;
-│    if (NO_BODY_STATUS.has(response.status)) return true;
-│    if (response.headers.get("content-length") === "0") return true;
-│    if (response.body === null) return true;
-│    return false;
-│  }
-│  
-│  function stripBom(text: string): string {
-│    return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
-│  }
-│  
-│  function looksLikeJson(text: string): boolean {
-│    const trimmed = text.trimStart();
-│    return trimmed.startsWith("{") || trimmed.startsWith("[");
-│  }
-│  
-│  function getStringField(value: unknown, key: string): string | undefined {
-│    if (!value || typeof value !== "object") return undefined;
-│  
-│    const candidate = (value as Record<string, unknown>)[key];
-│    if (typeof candidate !== "string") return undefined;
-│  
-│    const trimmed = candidate.trim();
-│    return trimmed === "" ? undefined : trimmed;
-│  }
-│  
-│  function truncate(text: string, maxLength = 300): string {
-│    return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
-│  }
-│  
-│  function buildErrorMessage(response: Response, data: unknown): string {
-│    const prefix = `HTTP ${response.status} ${response.statusText}`;
-│  
-│    if (typeof data === "string") {
-│      const text = data.trim();
-│      return text ? `${prefix}: ${truncate(text)}` : prefix;
-│    }
-│  
-│    const title = getStringField(data, "title");
-│    const detail = getStringField(data, "detail");
-│    const message =
-│      getStringField(data, "message") ??
-│      getStringField(data, "error_description") ??
-│      getStringField(data, "error");
-│  
-│    if (title && detail) return `${prefix}: ${title} — ${detail}`;
-│    if (detail) return `${prefix}: ${detail}`;
-│    if (message) return `${prefix}: ${message}`;
-│    if (title) return `${prefix}: ${title}`;
-│  
-│    return prefix;
-│  }
-│  
-│  export class ApiError<T = unknown> extends Error {
-│    readonly name = "ApiError";
-│    readonly status: number;
-│    readonly statusText: string;
-│    readonly data: T | null;
-│    readonly headers: Headers;
-│    readonly response: Response;
-│    readonly method: string;
-│    readonly url: string;
-│  
-│    constructor(
-│      response: Response,
-│      data: T | null,
-│      requestInfo: { method: string; url: string },
-│    ) {
-│      super(buildErrorMessage(response, data));
-│      Object.setPrototypeOf(this, new.target.prototype);
-│  
-│      this.status = response.status;
-│      this.statusText = response.statusText;
-│      this.data = data;
-│      this.headers = response.headers;
-│      this.response = response;
-│      this.method = requestInfo.method;
-│      this.url = response.url || requestInfo.url;
-│    }
-│  }
-│  
-│  export class ResponseParseError extends Error {
-│    readonly name = "ResponseParseError";
-│    readonly status: number;
-│    readonly statusText: string;
-│    readonly headers: Headers;
-│    readonly response: Response;
-│    readonly method: string;
-│    readonly url: string;
-│    readonly rawBody: string;
-│    readonly cause: unknown;
-│  
-│    constructor(
-│      response: Response,
-│      rawBody: string,
-│      cause: unknown,
-│      requestInfo: { method: string; url: string },
-│    ) {
-│      super(
-│        `Failed to parse response from ${requestInfo.method} ${response.url || requestInfo.url} ` +
-│          `(${response.status} ${response.statusText}) as JSON`,
-│      );
-│      Object.setPrototypeOf(this, new.target.prototype);
-│  
-│      this.status = response.status;
-│      this.statusText = response.statusText;
-│      this.headers = response.headers;
-│      this.response = response;
-│      this.method = requestInfo.method;
-│      this.url = response.url || requestInfo.url;
-│      this.rawBody = rawBody;
-│      this.cause = cause;
-│    }
-│  }
-│  
-│  async function parseJsonBody(
-│    response: Response,
-│    requestInfo: { method: string; url: string },
-│  ): Promise<unknown> {
-│    const raw = await response.text();
-│    const normalized = stripBom(raw);
-│  
-│    if (normalized.trim() === "") {
-│      return null;
-│    }
-│  
-│    try {
-│      return JSON.parse(normalized);
-│    } catch (cause) {
-│      throw new ResponseParseError(response, raw, cause, requestInfo);
-│    }
-│  }
-│  
-│  async function parseErrorBody(response: Response, method: string): Promise<unknown> {
-│    if (hasNoBody(response, method)) {
-│      return null;
-│    }
-│  
-│    const mediaType = getMediaType(response.headers);
-│  
-│    // Fall back to text when blob() is unavailable (e.g. some React Native builds).
-│    if (mediaType && !isJsonMediaType(mediaType) && !isTextMediaType(mediaType)) {
-│      return typeof response.blob === "function" ? response.blob() : response.text();
-│    }
-│  
-│    const raw = await response.text();
-│    const normalized = stripBom(raw);
-│    const trimmed = normalized.trim();
-│  
-│    if (trimmed === "") {
-│      return null;
-│    }
-│  
-│    if (isJsonMediaType(mediaType) || looksLikeJson(normalized)) {
-│      try {
-│        return JSON.parse(normalized);
-│      } catch {
-│        return raw;
-│      }
-│    }
-│  
-│    return raw;
-│  }
-│  
-│  function inferResponseType(response: Response): "json" | "text" | "blob" {
-│    const mediaType = getMediaType(response.headers);
-│  
-│    if (isJsonMediaType(mediaType)) return "json";
-│    if (isTextMediaType(mediaType) || mediaType == null) return "text";
-│    return "blob";
-│  }
-│  
-│  async function parseSuccessBody(
-│    response: Response,
-│    responseType: "json" | "text" | "blob" | "auto",
-│    requestInfo: { method: string; url: string },
-│  ): Promise<unknown> {
-│    if (hasNoBody(response, requestInfo.method)) {
-│      return null;
-│    }
-│  
-│    const effectiveType =
-│      responseType === "auto" ? inferResponseType(response) : responseType;
-│  
-│    switch (effectiveType) {
-│      case "json":
-│        return parseJsonBody(response, requestInfo);
-│  
-│      case "text": {
-│        const text = await response.text();
-│        return text === "" ? null : text;
-│      }
-│  
-│      case "blob":
-│        if (typeof response.blob !== "function") {
-│          throw new TypeError(
-│            "Blob responses are not supported in this runtime. " +
-│              "Use responseType \"json\" or \"text\" instead.",
-│          );
-│        }
-│        return response.blob();
-│    }
-│  }
-│  
-│  export async function customFetch<T = unknown>(
-│    input: RequestInfo | URL,
-│    options: CustomFetchOptions = {},
-│  ): Promise<T> {
-│    const { responseType = "auto", headers: headersInit, ...init } = options;
-│  
-│    const method = resolveMethod(input, init.method);
-│  
-│    if (init.body != null && (method === "GET" || method === "HEAD")) {
-│      throw new TypeError(`customFetch: ${method} requests cannot have a body.`);
-│    }
-│  
-│    const headers = mergeHeaders(isRequest(input) ? input.headers : undefined, headersInit);
-│  
-│    if (
-│      typeof init.body === "string" &&
-│      !headers.has("content-type") &&
-│      looksLikeJson(init.body)
-│    ) {
-│      headers.set("content-type", "application/json");
-│    }
-│  
-│    if (responseType === "json" && !headers.has("accept")) {
-│      headers.set("accept", DEFAULT_JSON_ACCEPT);
-│    }
-│  
-│    const requestInfo = { method, url: resolveUrl(input) };
-│  
-│    const response = await fetch(input, { ...init, method, headers });
-│  
-│    if (!response.ok) {
-│      const errorData = await parseErrorBody(response, method);
-│      throw new ApiError(response, errorData, requestInfo);
-│    }
-│  
-│    return (await parseSuccessBody(response, responseType, requestInfo)) as T;
-│  }
-│
-└─ END: lib/api-client-react/src/custom-fetch.ts
-
-┌─ lib/api-zod/package.json
-│
-│  {
-│    "name": "@workspace/api-zod",
-│    "version": "0.0.0",
-│    "private": true,
-│    "type": "module",
-│    "exports": {
-│      ".": "./src/index.ts"
-│    },
-│    "dependencies": {
-│      "zod": "catalog:"
-│    }
-│  }
-│
-└─ END: lib/api-zod/package.json
-
-┌─ lib/api-zod/tsconfig.json
-│
-│  {
-│    "extends": "../../tsconfig.base.json",
-│    "compilerOptions": {
-│      "composite": true,
-│      "declarationMap": true,
-│      "emitDeclarationOnly": true,
-│      "outDir": "dist",
-│      "rootDir": "src"
-│    },
-│    "include": ["src"]
-│  }
-│
-└─ END: lib/api-zod/tsconfig.json
-
-┌─ lib/api-zod/src/index.ts
-│
-│  export * from "./generated/api";
-│  export * from "./generated/types";
-│
-└─ END: lib/api-zod/src/index.ts
-
-┌─ artifacts/rewards-desk-ui/package.json
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/package.json
 │  {
 │    "name": "@workspace/rewards-desk-ui",
 │    "version": "0.0.0",
@@ -5664,11 +4518,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      "zod": "catalog:"
 │    }
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/package.json
 
-┌─ artifacts/rewards-desk-ui/tsconfig.json
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/tsconfig.json
 │  {
 │    "extends": "../../tsconfig.base.json",
 │    "include": ["src/**/*"],
@@ -5691,11 +4543,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      }
 │    ]
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/tsconfig.json
 
-┌─ artifacts/rewards-desk-ui/vite.config.ts
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/vite.config.ts
 │  import path from 'path';
 │  import react from '@vitejs/plugin-react';
 │  import tailwindcss from '@tailwindcss/vite';
@@ -5777,11 +4627,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      allowedHosts: true,
 │    },
 │  });
-│
 └─ END: artifacts/rewards-desk-ui/vite.config.ts
 
-┌─ artifacts/rewards-desk-ui/vite.config.desk.ts
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/vite.config.desk.ts
 │  /**
 │   * vite.config.desk.ts
 │   * ───────────────────
@@ -5817,11 +4665,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      emptyOutDir: true,
 │    },
 │  });
-│
 └─ END: artifacts/rewards-desk-ui/vite.config.desk.ts
 
-┌─ artifacts/rewards-desk-ui/index.html
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/index.html
 │  <!DOCTYPE html>
 │  <html lang="en">
 │    <head>
@@ -5846,11 +4692,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      <script type="module" src="/src/main.tsx"></script>
 │    </body>
 │  </html>
-│
 └─ END: artifacts/rewards-desk-ui/index.html
 
-┌─ artifacts/rewards-desk-ui/src/main.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/main.tsx
 │  import { createRoot } from 'react-dom/client';
 │  
 │  import App from './App';
@@ -5858,11 +4702,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  import './index.css';
 │  
 │  createRoot(document.getElementById('root')!).render(<App />);
-│
 └─ END: artifacts/rewards-desk-ui/src/main.tsx
 
-┌─ artifacts/rewards-desk-ui/src/App.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/App.tsx
 │  import { Route, Switch, Router as WouterRouter } from 'wouter';
 │  import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 │  import { Toaster } from '@/components/ui/toaster';
@@ -5910,11 +4752,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  }
 │  
 │  export default App;
-│
 └─ END: artifacts/rewards-desk-ui/src/App.tsx
 
-┌─ artifacts/rewards-desk-ui/src/index.css
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/index.css
 │  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 │  
 │  ::-webkit-scrollbar {
@@ -6092,11 +4932,151 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      background: rgba(255, 255, 255, 0.2);
 │    }
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/index.css
 
-┌─ artifacts/rewards-desk-ui/src/pages/home.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/lib/utils.ts
+│  import { twMerge } from 'tailwind-merge';
+│  
+│  import { clsx, type ClassValue } from 'clsx';
+│  
+│  export function cn(...inputs: ClassValue[]) {
+│    return twMerge(clsx(inputs));
+│  }
+└─ END: artifacts/rewards-desk-ui/src/lib/utils.ts
+
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/hooks/use-desk.ts
+│  import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+│  import {
+│    useListAccounts,
+│    getListAccountsQueryKey,
+│    useAddAccount,
+│    useDeleteAccount,
+│    useRunNow,
+│    useGetBotStatus,
+│    getGetBotStatusQueryKey,
+│    useGetRunLogs,
+│    getGetRunLogsQueryKey
+│  } from '@workspace/api-client-react';
+│  
+│  export function useAccounts() {
+│    const queryClient = useQueryClient();
+│    const query = useListAccounts();
+│  
+│    const addAccount = useAddAccount({
+│      mutation: {
+│        onSuccess: () => {
+│          queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
+│        }
+│      }
+│    });
+│  
+│    const deleteAccount = useDeleteAccount({
+│      mutation: {
+│        onSuccess: () => {
+│          queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
+│        }
+│      }
+│    });
+│  
+│    const updateAccount = useMutation({
+│      mutationFn: async ({ id, data }: { id: string; data: { name?: string; email?: string; resync?: boolean } }) => {
+│        const res = await fetch(`/api/desk/accounts/${id}`, {
+│          method: 'PATCH',
+│          headers: { 'Content-Type': 'application/json' },
+│          body: JSON.stringify(data),
+│        });
+│        if (!res.ok) throw new Error(await res.text());
+│        return res.json();
+│      },
+│      onSuccess: () => {
+│        queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
+│      },
+│    });
+│  
+│    return {
+│      accounts: query.data || [],
+│      isLoading: query.isLoading,
+│      error: query.error,
+│      addAccount,
+│      deleteAccount,
+│      updateAccount,
+│    };
+│  }
+│  
+│  export function useBotStatus() {
+│    const query = useGetBotStatus({
+│      query: {
+│        queryKey: getGetBotStatusQueryKey(),
+│        refetchInterval: 2000,
+│      }
+│    });
+│  
+│    const runNow = useRunNow();
+│  
+│    return {
+│      status: query.data,
+│      isLoading: query.isLoading,
+│      runNow,
+│    };
+│  }
+│  
+│  export function useRunLogs() {
+│    const query = useGetRunLogs({
+│      query: {
+│        queryKey: getGetRunLogsQueryKey(),
+│        refetchInterval: 3000,
+│      }
+│    });
+│  
+│    return {
+│      logs: query.data || [],
+│      isLoading: query.isLoading,
+│    };
+│  }
+└─ END: artifacts/rewards-desk-ui/src/hooks/use-desk.ts
+
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/hooks/use-license.ts
+│  import { useState, useEffect } from 'react';
+│  
+│  export interface LicenseData {
+│    key: string;
+│    keyType: 'trial' | 'basic' | 'premium' | 'unlimited' | 'admin';
+│    maxAccounts: number;
+│    expiresAt: string;
+│    label?: string | null;
+│    canInvite?: boolean;
+│    validatedAt?: string;
+│  }
+│  
+│  const STORAGE_KEY = '@ms_rewards_license_data';
+│  
+│  export function useLicense() {
+│    const [licenseData, setLicenseData] = useState<LicenseData | null>(null);
+│  
+│    useEffect(() => {
+│      try {
+│        const raw = localStorage.getItem(STORAGE_KEY);
+│        if (raw) {
+│          setLicenseData(JSON.parse(raw));
+│        }
+│      } catch {
+│        // localStorage unavailable or bad JSON — leave null
+│      }
+│    }, []);
+│  
+│    return { licenseData };
+│  }
+│  
+│  export const TIER_META: Record<string, { label: string; color: string; bg: string }> = {
+│    trial:     { label: 'Trial',     color: '#94a3b8', bg: 'rgba(148,163,184,0.12)' },
+│    basic:     { label: 'Basic',     color: '#60a5fa', bg: 'rgba(96,165,250,0.12)'  },
+│    premium:   { label: 'Premium',   color: '#a78bfa', bg: 'rgba(167,139,250,0.12)' },
+│    unlimited: { label: 'Unlimited', color: '#34d399', bg: 'rgba(52,211,153,0.12)'  },
+│    admin:     { label: 'Admin',     color: '#fb923c', bg: 'rgba(251,146,60,0.12)'  },
+│  };
+└─ END: artifacts/rewards-desk-ui/src/hooks/use-license.ts
+
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/pages/home.tsx
 │  import { useState } from 'react';
 │  import { useBotStatus, useAccounts } from '@/hooks/use-desk';
 │  import { Play, AlertCircle, Loader2, Square, Power } from 'lucide-react';
@@ -6322,11 +5302,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/pages/home.tsx
 
-┌─ artifacts/rewards-desk-ui/src/pages/accounts.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/pages/accounts.tsx
 │  import { useAccounts } from '@/hooks/use-desk';
 │  import { Card } from '@/components/ui/card';
 │  import { Button } from '@/components/ui/button';
@@ -6578,11 +5556,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/pages/accounts.tsx
 
-┌─ artifacts/rewards-desk-ui/src/pages/console.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/pages/console.tsx
 │  import { useRunLogs, useBotStatus } from '@/hooks/use-desk';
 │  import { Card } from '@/components/ui/card';
 │  import { Terminal, Download, ShieldAlert, Cpu } from 'lucide-react';
@@ -6681,11 +5657,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/pages/console.tsx
 
-┌─ artifacts/rewards-desk-ui/src/pages/settings.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/pages/settings.tsx
 │  import { useState } from 'react';
 │  import { useMutation, useQueryClient } from '@tanstack/react-query';
 │  import { FlaskConical, Trash2, CheckCircle2, Loader2 } from 'lucide-react';
@@ -6784,11 +5758,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/pages/settings.tsx
 
-┌─ artifacts/rewards-desk-ui/src/pages/not-found.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/pages/not-found.tsx
 │  import { Card, CardContent } from '@/components/ui/card';
 │  import { AlertCircle } from 'lucide-react';
 │  
@@ -6812,11 +5784,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/pages/not-found.tsx
 
-┌─ artifacts/rewards-desk-ui/src/components/layout.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/components/layout.tsx
 │  import { Link, useLocation } from "wouter";
 │  import {
 │    Users, Settings,
@@ -6930,11 +5900,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/components/layout.tsx
 
-┌─ artifacts/rewards-desk-ui/src/components/account-card.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/components/account-card.tsx
 │  import { DeskAccount } from '@workspace/api-client-react';
 │  import { StatusChip } from '@/components/status-chip';
 │  import { Button } from '@/components/ui/button';
@@ -7106,11 +6074,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/components/account-card.tsx
 
-┌─ artifacts/rewards-desk-ui/src/components/account-grid-tile.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/components/account-grid-tile.tsx
 │  import { DeskAccount } from '@workspace/api-client-react';
 │  import { StatusChip } from '@/components/status-chip';
 │  import { Button } from '@/components/ui/button';
@@ -7259,11 +6225,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/components/account-grid-tile.tsx
 
-┌─ artifacts/rewards-desk-ui/src/components/stats-bar.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/components/stats-bar.tsx
 │  import { DeskAccount } from '@workspace/api-client-react';
 │  import { CheckCircle2, RefreshCw, XCircle } from 'lucide-react';
 │  
@@ -7323,11 +6287,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </div>
 │    );
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/components/stats-bar.tsx
 
-┌─ artifacts/rewards-desk-ui/src/components/status-chip.tsx
-│
+┌─ [DESKTOP UI] artifacts/rewards-desk-ui/src/components/status-chip.tsx
 │  import { DeskAccountStatus, RunLogStatus } from '@workspace/api-client-react';
 │  import { Badge } from '@/components/ui/badge';
 │  import { CheckCircle2, Clock, XCircle, Play } from 'lucide-react';
@@ -7378,159 +6340,21 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │        return <span className="text-muted-foreground">[UNKNOWN]</span>;
 │    }
 │  }
-│
 └─ END: artifacts/rewards-desk-ui/src/components/status-chip.tsx
 
-┌─ artifacts/rewards-desk-ui/src/hooks/use-desk.ts
-│
-│  import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-│  import {
-│    useListAccounts,
-│    getListAccountsQueryKey,
-│    useAddAccount,
-│    useDeleteAccount,
-│    useRunNow,
-│    useGetBotStatus,
-│    getGetBotStatusQueryKey,
-│    useGetRunLogs,
-│    getGetRunLogsQueryKey
-│  } from '@workspace/api-client-react';
-│  
-│  export function useAccounts() {
-│    const queryClient = useQueryClient();
-│    const query = useListAccounts();
-│  
-│    const addAccount = useAddAccount({
-│      mutation: {
-│        onSuccess: () => {
-│          queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
-│        }
-│      }
-│    });
-│  
-│    const deleteAccount = useDeleteAccount({
-│      mutation: {
-│        onSuccess: () => {
-│          queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
-│        }
-│      }
-│    });
-│  
-│    const updateAccount = useMutation({
-│      mutationFn: async ({ id, data }: { id: string; data: { name?: string; email?: string; resync?: boolean } }) => {
-│        const res = await fetch(`/api/desk/accounts/${id}`, {
-│          method: 'PATCH',
-│          headers: { 'Content-Type': 'application/json' },
-│          body: JSON.stringify(data),
-│        });
-│        if (!res.ok) throw new Error(await res.text());
-│        return res.json();
-│      },
-│      onSuccess: () => {
-│        queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
-│      },
-│    });
-│  
-│    return {
-│      accounts: query.data || [],
-│      isLoading: query.isLoading,
-│      error: query.error,
-│      addAccount,
-│      deleteAccount,
-│      updateAccount,
-│    };
-│  }
-│  
-│  export function useBotStatus() {
-│    const query = useGetBotStatus({
-│      query: {
-│        queryKey: getGetBotStatusQueryKey(),
-│        refetchInterval: 2000,
-│      }
-│    });
-│  
-│    const runNow = useRunNow();
-│  
-│    return {
-│      status: query.data,
-│      isLoading: query.isLoading,
-│      runNow,
-│    };
-│  }
-│  
-│  export function useRunLogs() {
-│    const query = useGetRunLogs({
-│      query: {
-│        queryKey: getGetRunLogsQueryKey(),
-│        refetchInterval: 3000,
-│      }
-│    });
-│  
-│    return {
-│      logs: query.data || [],
-│      isLoading: query.isLoading,
-│    };
-│  }
-│
-└─ END: artifacts/rewards-desk-ui/src/hooks/use-desk.ts
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  MOBILE APP — artifacts/mobile/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Expo React Native app (Android APK).
+  Users install this on their Android phones.
+  Handles: license gate, account management, Bing searches,
+  daily set, overnight automation, notifications, settings.
 
-┌─ artifacts/rewards-desk-ui/src/hooks/use-license.ts
-│
-│  import { useState, useEffect } from 'react';
-│  
-│  export interface LicenseData {
-│    key: string;
-│    keyType: 'trial' | 'basic' | 'premium' | 'unlimited' | 'admin';
-│    maxAccounts: number;
-│    expiresAt: string;
-│    label?: string | null;
-│    canInvite?: boolean;
-│    validatedAt?: string;
-│  }
-│  
-│  const STORAGE_KEY = '@ms_rewards_license_data';
-│  
-│  export function useLicense() {
-│    const [licenseData, setLicenseData] = useState<LicenseData | null>(null);
-│  
-│    useEffect(() => {
-│      try {
-│        const raw = localStorage.getItem(STORAGE_KEY);
-│        if (raw) {
-│          setLicenseData(JSON.parse(raw));
-│        }
-│      } catch {
-│        // localStorage unavailable or bad JSON — leave null
-│      }
-│    }, []);
-│  
-│    return { licenseData };
-│  }
-│  
-│  export const TIER_META: Record<string, { label: string; color: string; bg: string }> = {
-│    trial:     { label: 'Trial',     color: '#94a3b8', bg: 'rgba(148,163,184,0.12)' },
-│    basic:     { label: 'Basic',     color: '#60a5fa', bg: 'rgba(96,165,250,0.12)'  },
-│    premium:   { label: 'Premium',   color: '#a78bfa', bg: 'rgba(167,139,250,0.12)' },
-│    unlimited: { label: 'Unlimited', color: '#34d399', bg: 'rgba(52,211,153,0.12)'  },
-│    admin:     { label: 'Admin',     color: '#fb923c', bg: 'rgba(251,146,60,0.12)'  },
-│  };
-│
-└─ END: artifacts/rewards-desk-ui/src/hooks/use-license.ts
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Mobile — Config & Build
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-┌─ artifacts/rewards-desk-ui/src/lib/utils.ts
-│
-│  import { twMerge } from 'tailwind-merge';
-│  
-│  import { clsx, type ClassValue } from 'clsx';
-│  
-│  export function cn(...inputs: ClassValue[]) {
-│    return twMerge(clsx(inputs));
-│  }
-│
-└─ END: artifacts/rewards-desk-ui/src/lib/utils.ts
-
-┌─ artifacts/mobile/package.json
-│
+┌─ [MOBILE APP] artifacts/mobile/package.json
 │  {
 │    "name": "@workspace/mobile",
 │    "version": "0.0.0",
@@ -7609,11 +6433,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      "react-native-webview": "13.15.0"
 │    }
 │  }
-│
 └─ END: artifacts/mobile/package.json
 
-┌─ artifacts/mobile/tsconfig.json
-│
+┌─ [MOBILE APP] artifacts/mobile/tsconfig.json
 │  {
 │    "extends": "expo/tsconfig.base",
 │    "compilerOptions": {
@@ -7637,11 +6459,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      }
 │    ]
 │  }
-│
 └─ END: artifacts/mobile/tsconfig.json
 
-┌─ artifacts/mobile/app.config.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/app.config.ts
 │  /*
 │  import { ExpoConfig, ConfigContext } from "expo/config";
 │  
@@ -7857,30 +6677,24 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    // Updated Owner
 │    owner: "macro-r11",
 │  });
-│
 └─ END: artifacts/mobile/app.config.ts
 
-┌─ artifacts/mobile/babel.config.js
-│
+┌─ [MOBILE APP] artifacts/mobile/babel.config.js
 │  module.exports = function (api) {
 │    api.cache(true);
 │    return {
 │      presets: [["babel-preset-expo", { unstable_transformImportMeta: true }]],
 │    };
 │  };
-│
 └─ END: artifacts/mobile/babel.config.js
 
-┌─ artifacts/mobile/metro.config.js
-│
+┌─ [MOBILE APP] artifacts/mobile/metro.config.js
 │  const { getDefaultConfig } = require("expo/metro-config");
 │  
 │  module.exports = getDefaultConfig(__dirname);
-│
 └─ END: artifacts/mobile/metro.config.js
 
-┌─ artifacts/mobile/eas.json
-│
+┌─ [MOBILE APP] artifacts/mobile/eas.json
 │  {
 │    "cli": {
 │      "appVersionSource": "remote"
@@ -7929,11 +6743,13 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      "production": {}
 │    }
 │  }
-│
 └─ END: artifacts/mobile/eas.json
 
-┌─ artifacts/mobile/app/_layout.tsx
-│
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Mobile — App Screens (Expo Router)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─ [MOBILE APP] artifacts/mobile/app/_layout.tsx
 │  import {
 │    Inter_300Light,
 │    Inter_400Regular,
@@ -8227,11 +7043,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </SafeAreaProvider>
 │    );
 │  }
-│
 └─ END: artifacts/mobile/app/_layout.tsx
 
-┌─ artifacts/mobile/app/(tabs)/_layout.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/(tabs)/_layout.tsx
 │  import { BlurView } from "expo-blur";
 │  import { isLiquidGlassAvailable } from "expo-glass-effect";
 │  import { Tabs } from "expo-router";
@@ -8353,11 +7167,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    }
 │    return <ClassicTabLayout />;
 │  }
-│
 └─ END: artifacts/mobile/app/(tabs)/_layout.tsx
 
-┌─ artifacts/mobile/app/(tabs)/index.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/(tabs)/index.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import { router } from "expo-router";
@@ -9084,11 +7896,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    },
 │    fabText: { color: "#fff", fontSize: 13, fontFamily: "Inter_600SemiBold" },
 │  });
-│
 └─ END: artifacts/mobile/app/(tabs)/index.tsx
 
-┌─ artifacts/mobile/app/(tabs)/logs.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/(tabs)/logs.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { FileText, Trash2 } from "lucide-react-native";
 │  import React from "react";
@@ -9197,11 +8007,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    },
 │    clearText: { fontSize: 14, fontFamily: "Inter_500Medium" },
 │  });
-│
 └─ END: artifacts/mobile/app/(tabs)/logs.tsx
 
-┌─ artifacts/mobile/app/(tabs)/queries.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/(tabs)/queries.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { Check, CheckCircle, Edit2, Inbox, List, RotateCcw, Trash2 } from "lucide-react-native";
 │  import React, { useState } from "react";
@@ -9455,11 +8263,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    editHint: { fontSize: 12, fontFamily: "Inter_400Regular", paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
 │    editInput: { flex: 1, marginHorizontal: 16, marginBottom: 20, padding: 14, borderRadius: 12, borderWidth: 1, fontSize: 14, fontFamily: "Inter_400Regular", lineHeight: 22, textAlignVertical: "top" },
 │  });
-│
 └─ END: artifacts/mobile/app/(tabs)/queries.tsx
 
-┌─ artifacts/mobile/app/(tabs)/settings.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/(tabs)/settings.tsx
 │  import * as Haptics from "expo-haptics";
 │  import * as Updates from "expo-updates";
 │  import { CheckSquare, ChevronRight, Clock, Crown, Download, FlaskConical, Key, Moon, Search, Shield, Trash2, X } from "lucide-react-native";
@@ -10404,11 +9210,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    rowLabel: { fontSize: 15, fontFamily: "Inter_500Medium" },
 │    rowSublabel: { fontSize: 12, fontFamily: "Inter_400Regular", marginTop: 2 },
 │  });
-│
 └─ END: artifacts/mobile/app/(tabs)/settings.tsx
 
-┌─ artifacts/mobile/app/account/[id].tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/account/[id].tsx
 │  import * as Haptics from "expo-haptics";
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import { router, useLocalSearchParams } from "expo-router";
@@ -10784,11 +9588,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    backBtn: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10 },
 │    backBtnText: { color: "#fff", fontSize: 15, fontFamily: "Inter_500Medium" },
 │  });
-│
 └─ END: artifacts/mobile/app/account/[id].tsx
 
-┌─ artifacts/mobile/app/add-account.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/add-account.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import { router } from "expo-router";
@@ -11075,11 +9877,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    saveBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, paddingVertical: 16, borderRadius: 14, marginTop: 4 },
 │    saveBtnText: { color: "#fff", fontSize: 16, fontFamily: "Inter_600SemiBold" },
 │  });
-│
 └─ END: artifacts/mobile/app/add-account.tsx
 
-┌─ artifacts/mobile/app/admin-panel.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/admin-panel.tsx
 │  import { Redirect } from "expo-router";
 │  
 │  import { AdminPanel } from "@/components/AdminPanel";
@@ -11090,11 +9890,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    if (!isOwnerMode) return <Redirect href="/" />;
 │    return <AdminPanel />;
 │  }
-│
 └─ END: artifacts/mobile/app/admin-panel.tsx
 
-┌─ artifacts/mobile/app/login-webview.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/login-webview.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import { router, useLocalSearchParams } from "expo-router";
@@ -11814,11 +10612,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    webFallbackNote: { flexDirection: "row", alignItems: "center", gap: 8, padding: 14, borderRadius: 12, marginTop: 8 },
 │    webFallbackNoteText: { fontSize: 13, fontFamily: "Inter_400Regular", flex: 1 },
 │  });
-│
 └─ END: artifacts/mobile/app/login-webview.tsx
 
-┌─ artifacts/mobile/app/search-runner.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/search-runner.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { router, useLocalSearchParams } from "expo-router";
 │  import { CheckCircle, Search, Square, Wifi, WifiOff } from "lucide-react-native";
@@ -12821,11 +11617,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    statusText: { color: "#CBD5E1", fontSize: 12, fontFamily: "Inter_400Regular", flex: 1 },
 │    webView: { flex: 1 },
 │  });
-│
 └─ END: artifacts/mobile/app/search-runner.tsx
 
-┌─ artifacts/mobile/app/upgrade.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/upgrade.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { router } from "expo-router";
 │  import { ArrowLeft, Check, CreditCard, Crown, Link as LinkIcon, Loader, Sparkles } from "lucide-react-native";
@@ -13205,11 +11999,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    submitBtn: { borderRadius: 12, paddingVertical: 14, alignItems: "center" },
 │    submitBtnText: { fontSize: 14, fontFamily: "Inter_600SemiBold", color: "#fff" },
 │  });
-│
 └─ END: artifacts/mobile/app/upgrade.tsx
 
-┌─ artifacts/mobile/app/overnight.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/overnight.tsx
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  import * as Haptics from "expo-haptics";
 │  import { router, useFocusEffect } from "expo-router";
@@ -14004,11 +12796,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    buildNotice: { flexDirection: "row", gap: 8, alignItems: "flex-start", padding: 12, marginTop: 10, borderRadius: 10, borderWidth: 1 },
 │    buildNoticeText: { flex: 1, fontSize: 12, fontFamily: "Inter_400Regular", lineHeight: 17 },
 │  });
-│
 └─ END: artifacts/mobile/app/overnight.tsx
 
-┌─ artifacts/mobile/app/daily-set-settings.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/daily-set-settings.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { router } from "expo-router";
 │  import { ArrowLeft, Clock, RefreshCw, Timer, Zap } from "lucide-react-native";
@@ -14328,11 +13118,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    explainTitle: { fontSize: 13, fontFamily: "Inter_600SemiBold", marginBottom: 4 },
 │    explainDesc: { fontSize: 13, fontFamily: "Inter_400Regular", lineHeight: 19 },
 │  });
-│
 └─ END: artifacts/mobile/app/daily-set-settings.tsx
 
-┌─ artifacts/mobile/app/cookie-browser.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/app/cookie-browser.tsx
 │  import { router } from "expo-router";
 │  import { ArrowLeft, ExternalLink, RefreshCw } from "lucide-react-native";
 │  import React, { useEffect, useRef, useState } from "react";
@@ -14532,11 +13320,13 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      paddingVertical: 8,
 │    },
 │  });
-│
 └─ END: artifacts/mobile/app/cookie-browser.tsx
 
-┌─ artifacts/mobile/components/AccountCard.tsx
-│
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Mobile — Reusable Components
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─ [MOBILE APP] artifacts/mobile/components/AccountCard.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import { AlertCircle, CheckCircle, CheckSquare, Clock, Loader, Play, PowerOff, RefreshCw, Search, Shield, Star, XCircle } from "lucide-react-native";
@@ -14993,11 +13783,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      justifyContent: "center",
 │    },
 │  });
-│
 └─ END: artifacts/mobile/components/AccountCard.tsx
 
-┌─ artifacts/mobile/components/AccountGridTile.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/AccountGridTile.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import {
@@ -15550,11 +14338,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      justifyContent: "center",
 │    },
 │  });
-│
 └─ END: artifacts/mobile/components/AccountGridTile.tsx
 
-┌─ artifacts/mobile/components/AdminPanel.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/AdminPanel.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { router } from "expo-router";
 │  import { AlertTriangle, ArrowLeft, Calendar, Check, ChevronRight, Cookie, Copy, ExternalLink, Key, LogIn, Minus, Plus, Power, PowerOff, QrCode, RefreshCw, RotateCcw, Settings, Shield, Smartphone, Ticket, Trash2, UserX, Users, X } from "lucide-react-native";
@@ -18079,11 +16865,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      fontFamily: "Inter_600SemiBold",
 │    },
 │  });
-│
 └─ END: artifacts/mobile/components/AdminPanel.tsx
 
-┌─ artifacts/mobile/components/CustomAlert.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/CustomAlert.tsx
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import { X } from "lucide-react-native";
 │  import React, { useEffect, useRef } from "react";
@@ -18373,11 +17157,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      fontFamily: "Inter_600SemiBold",
 │    },
 │  });
-│
 └─ END: artifacts/mobile/components/CustomAlert.tsx
 
-┌─ artifacts/mobile/components/EmptyState.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/EmptyState.tsx
 │  import * as Haptics from "expo-haptics";
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import { LucideIcon, Plus } from "lucide-react-native";
@@ -18474,11 +17256,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      fontFamily: "Inter_600SemiBold",
 │    },
 │  });
-│
 └─ END: artifacts/mobile/components/EmptyState.tsx
 
-┌─ artifacts/mobile/components/ErrorBoundary.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/ErrorBoundary.tsx
 │  import React, { Component, ComponentType, PropsWithChildren } from "react";
 │  
 │  import { ErrorFallback, ErrorFallbackProps } from "@/components/ErrorFallback";
@@ -18533,11 +17313,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      );
 │    }
 │  }
-│
 └─ END: artifacts/mobile/components/ErrorBoundary.tsx
 
-┌─ artifacts/mobile/components/ErrorFallback.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/ErrorFallback.tsx
 │  import { reloadAppAsync } from "expo";
 │  import { AlertCircle, X } from "lucide-react-native";
 │  import React, { useState } from "react";
@@ -18675,11 +17453,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    errorContainer: { width: "100%", borderRadius: 8, overflow: "hidden", padding: 16 },
 │    errorText: { fontSize: 12, lineHeight: 18, width: "100%" },
 │  });
-│
 └─ END: artifacts/mobile/components/ErrorFallback.tsx
 
-┌─ artifacts/mobile/components/LicenseGate.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/LicenseGate.tsx
 │  import React, { useEffect, useState } from "react";
 │  import {
 │    ActivityIndicator,
@@ -19721,11 +18497,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    },
 │    secondaryBtnText: { fontSize: 14, fontFamily: "Inter_500Medium" },
 │  });
-│
 └─ END: artifacts/mobile/components/LicenseGate.tsx
 
-┌─ artifacts/mobile/components/LogItem.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/LogItem.tsx
 │  import { CheckCircle, Circle, LucideIcon, Search, Star } from "lucide-react-native";
 │  import React from "react";
 │  import { StyleSheet, Text, View, useColorScheme } from "react-native";
@@ -19833,11 +18607,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      fontFamily: "Inter_400Regular",
 │    },
 │  });
-│
 └─ END: artifacts/mobile/components/LogItem.tsx
 
-┌─ artifacts/mobile/components/StatsBar.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/StatsBar.tsx
 │  import { LinearGradient } from "expo-linear-gradient";
 │  import { CheckCircle, LucideIcon, RefreshCw, XCircle } from "lucide-react-native";
 │  import React from "react";
@@ -19918,11 +18690,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      marginHorizontal: 4,
 │    },
 │  });
-│
 └─ END: artifacts/mobile/components/StatsBar.tsx
 
-┌─ artifacts/mobile/components/KeyboardAwareScrollViewCompat.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/components/KeyboardAwareScrollViewCompat.tsx
 │  import {
 │    KeyboardAwareScrollView,
 │    KeyboardAwareScrollViewProps,
@@ -19952,11 +18722,13 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      </KeyboardAwareScrollView>
 │    );
 │  }
-│
 └─ END: artifacts/mobile/components/KeyboardAwareScrollViewCompat.tsx
 
-┌─ artifacts/mobile/context/AccountsContext.tsx
-│
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Mobile — React Context (global state)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─ [MOBILE APP] artifacts/mobile/context/AccountsContext.tsx
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  import React, {
 │    createContext,
@@ -20415,11 +19187,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    if (!ctx) throw new Error("useAccounts must be used within AccountsProvider");
 │    return ctx;
 │  }
-│
 └─ END: artifacts/mobile/context/AccountsContext.tsx
 
-┌─ artifacts/mobile/context/KycContext.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/context/KycContext.tsx
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 │  import { API_BASE } from "@/utils/apiUrl";
@@ -20555,11 +19325,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    if (!ctx) throw new Error("useKyc must be used inside KycProvider");
 │    return ctx;
 │  }
-│
 └─ END: artifacts/mobile/context/KycContext.tsx
 
-┌─ artifacts/mobile/context/LicenseContext.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/context/LicenseContext.tsx
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  import * as Application from "expo-application";
 │  import { Platform } from "react-native";
@@ -21128,11 +19896,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  export function useLicense() {
 │    return useContext(LicenseContext);
 │  }
-│
 └─ END: artifacts/mobile/context/LicenseContext.tsx
 
-┌─ artifacts/mobile/context/QueriesContext.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/context/QueriesContext.tsx
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 │  
@@ -21268,11 +20034,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    if (!ctx) throw new Error("useQueries must be used within QueriesProvider");
 │    return ctx;
 │  }
-│
 └─ END: artifacts/mobile/context/QueriesContext.tsx
 
-┌─ artifacts/mobile/context/SettingsContext.tsx
-│
+┌─ [MOBILE APP] artifacts/mobile/context/SettingsContext.tsx
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 │  
@@ -21359,11 +20123,13 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  }
 │  
 │  export { DEFAULT_OVERNIGHT_SLOTS };
-│
 └─ END: artifacts/mobile/context/SettingsContext.tsx
 
-┌─ artifacts/mobile/constants/colors.ts
-│
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Mobile — Constants
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─ [MOBILE APP] artifacts/mobile/constants/colors.ts
 │  const primary = "#2563EB";
 │  const primaryDark = "#1D4ED8";
 │  const accent = "#3B82F6";
@@ -21426,11 +20192,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      statusFailed: error,
 │    },
 │  };
-│
 └─ END: artifacts/mobile/constants/colors.ts
 
-┌─ artifacts/mobile/constants/defaultQueries.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/constants/defaultQueries.ts
 │  export const DEFAULT_QUERIES = [
 │    // Technology & AI
 │    "what is artificial intelligence",
@@ -24465,11 +23229,13 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    "how to pair beer with food",
 │    "what is cicerone certification",
 │  ];
-│
 └─ END: artifacts/mobile/constants/defaultQueries.ts
 
-┌─ artifacts/mobile/utils/apiUrl.ts
-│
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Mobile — Utilities
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─ [MOBILE APP] artifacts/mobile/utils/apiUrl.ts
 │  import Constants from "expo-constants";
 │  import { Platform } from "react-native";
 │  
@@ -24506,11 +23272,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  
 │  export const API_BASE: string =
 │    Platform.OS === "web" ? "/api" : normaliseApiUrl(rawUrl);
-│
 └─ END: artifacts/mobile/utils/apiUrl.ts
 
-┌─ artifacts/mobile/utils/backgroundSearch.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/utils/backgroundSearch.ts
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  import { AppState, Platform } from "react-native";
 │  
@@ -25058,11 +23822,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │  export { sleep, randomHex, buildCookieHeader };
 │  
 │  export const BACKGROUND_SEARCH_TASK_NAME = BACKGROUND_SEARCH_TASK;
-│
 └─ END: artifacts/mobile/utils/backgroundSearch.ts
 
-┌─ artifacts/mobile/utils/bingSearch.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/utils/bingSearch.ts
 │  export const BING_UA =
 │    "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
 │  
@@ -25255,11 +24017,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      return { available: 0, today: 0 };
 │    }
 │  }
-│
 └─ END: artifacts/mobile/utils/bingSearch.ts
 
-┌─ artifacts/mobile/utils/cookieBrowserStore.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/utils/cookieBrowserStore.ts
 │  let _pendingCookies: { cookies: Record<string, string>; accountName: string } | null = null;
 │  
 │  export function setCookieBrowserPayload(cookies: Record<string, string>, accountName: string) {
@@ -25271,11 +24031,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    _pendingCookies = null;
 │    return data;
 │  }
-│
 └─ END: artifacts/mobile/utils/cookieBrowserStore.ts
 
-┌─ artifacts/mobile/utils/featureFlags.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/utils/featureFlags.ts
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  
 │  const OVERNIGHT_FEATURE_KEY = "@ms_rewards_overnight_feature_enabled";
@@ -25295,11 +24053,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      await AsyncStorage.setItem(OVERNIGHT_FEATURE_KEY, enabled ? "true" : "false");
 │    } catch {}
 │  }
-│
 └─ END: artifacts/mobile/utils/featureFlags.ts
 
-┌─ artifacts/mobile/utils/keepAlive.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/utils/keepAlive.ts
 │  import { AppState, type AppStateStatus, type NativeEventSubscription } from "react-native";
 │  import { API_BASE } from "@/context/LicenseContext";
 │  
@@ -25362,11 +24118,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      subscription.remove();
 │    };
 │  }
-│
 └─ END: artifacts/mobile/utils/keepAlive.ts
 
-┌─ artifacts/mobile/utils/notifications.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/utils/notifications.ts
 │  import AsyncStorage from "@react-native-async-storage/async-storage";
 │  import { Alert, Linking, Platform } from "react-native";
 │  
@@ -25949,11 +24703,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    }
 │    return false;
 │  }
-│
 └─ END: artifacts/mobile/utils/notifications.ts
 
-┌─ artifacts/mobile/utils/time.ts
-│
+┌─ [MOBILE APP] artifacts/mobile/utils/time.ts
 │  /**
 │   * Formats the time remaining until a given ISO timestamp.
 │   *
@@ -26012,11 +24764,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    if (compact) return `${totalSeconds}s`;
 │    return `${totalSeconds} second${totalSeconds !== 1 ? "s" : ""}`;
 │  }
-│
 └─ END: artifacts/mobile/utils/time.ts
 
-┌─ artifacts/mobile/plugins/withBackgroundActions.js
-│
+┌─ [MOBILE APP] artifacts/mobile/plugins/withBackgroundActions.js
 │  const { withAndroidManifest } = require('@expo/config-plugins');
 │  
 │  /**
@@ -26060,11 +24810,14 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      return config;
 │    });
 │  };
-│
 └─ END: artifacts/mobile/plugins/withBackgroundActions.js
 
-┌─ scripts/package.json
-│
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SCRIPTS — scripts/
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Utility scripts for the desktop launcher (not the web UI).
+
+┌─ [SCRIPTS]    scripts/package.json
 │  {
 │    "name": "@workspace/scripts",
 │    "version": "0.0.0",
@@ -26078,11 +24831,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │      "tsx": "catalog:"
 │    }
 │  }
-│
 └─ END: scripts/package.json
 
-┌─ scripts/tsconfig.json
-│
+┌─ [SCRIPTS]    scripts/tsconfig.json
 │  {
 │    "extends": "../tsconfig.base.json",
 │    "compilerOptions": {
@@ -26092,17 +24843,13 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    },
 │    "include": ["src"]
 │  }
-│
 └─ END: scripts/tsconfig.json
 
-┌─ scripts/src/hello.ts
-│
+┌─ [SCRIPTS]    scripts/src/hello.ts
 │  console.log("Hello from @workspace/scripts");
-│
 └─ END: scripts/src/hello.ts
 
-┌─ scripts/desk/account-storage.js
-│
+┌─ [SCRIPTS]    scripts/desk/account-storage.js
 │  /**
 │   * account-storage.js
 │   * -------------------
@@ -26344,11 +25091,9 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    appendLog,
 │    clearLogs,
 │  };
-│
 └─ END: scripts/desk/account-storage.js
 
-┌─ scripts/desk/app-window.js
-│
+┌─ [SCRIPTS]    scripts/desk/app-window.js
 │  /**
 │   * app-window.js — Rewards Desk Command Center
 │   * --------------------------------------------
@@ -26677,16 +25422,13 @@ Generated: Sat Jul 18 06:19:53 AM UTC 2026
 │    console.log(`[window] Launching: ${path.basename(browser)}`);
 │    spawn(browser, args, { detached: true, stdio: "ignore" }).unref();
 │  }
-│
 └─ END: scripts/desk/app-window.js
 
-┌─ scripts/post-merge.sh
-│
+┌─ [SCRIPTS]    scripts/post-merge.sh
 │  #!/bin/bash
 │  set -e
 │  pnpm install --frozen-lockfile
 │  pnpm --filter db push
-│
 └─ END: scripts/post-merge.sh
 
 ╔══════════════════════════════════════════════════════════════════════════╗
