@@ -1,0 +1,51 @@
+Pasted-Already-up-to-date-preinstall-sh-c-if-EAS-BUILD-1-then-_1784374762680.txt
+Already up to date
+. preinstall$ sh -c 'if [ "$EAS_BUILD" = "1" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) …
+└─ Done in 241ms
+Done in 2.2s using pnpm v10.26.1
+PS C:\Users\Avinash Poudel\Documents\Macro-R> scripts\desk\build.bat
+
+[build] Installing dependencies...
+Scope: all 11 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+. preinstall$ sh -c 'if [ "$EAS_BUILD" = "1" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) …
+└─ Done in 115ms
+Done in 1.4s using pnpm v10.26.1
+
+[build] Building Rewards Desk UI...
+
+> workspace@0.0.0 build:desk C:\Users\Avinash Poudel\Documents\Macro-R
+> pnpm --filter @workspace/rewards-desk-ui run build:desk
+
+
+> @workspace/rewards-desk-ui@0.0.0 build:desk C:\Users\Avinash Poudel\Documents\Macro-R\artifacts\rewards-desk-ui
+> vite build --config vite.config.desk.ts
+
+vite v7.3.1 building client environment for production...
+src/components/ui/tooltip.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+src/components/ui/label.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+✓ 1826 modules transformed.
+../../dist-desk/index.html                   1.43 kB │ gzip:   0.56 kB
+../../dist-desk/assets/index-D9zO1jAL.css  111.44 kB │ gzip:  18.28 kB
+../../dist-desk/assets/index-g3RxgnZR.js   388.92 kB │ gzip: 123.91 kB
+✓ built in 5.55s
+
+[build] Done! Output written to dist-desk\
+
+[build] To launch the desktop app:
+        node scripts\desk\app-window.js
+
+PS C:\Users\Avinash Poudel\Documents\Macro-R> node scripts\desk\app-window.js
+
+╔══════════════════════════════════════════════╗
+║       Rewards Desk — Command Center          ║
+╠══════════════════════════════════════════════╣
+║  Server: http://localhost:3000                ║
+║  Token:  2090894eac2dc12bbebd46fa7fd132254c7be║
+╚══════════════════════════════════════════════╝
+
+[window] Launching: chrome.exe
+[run] Starting: Demo User A
+[run] Done: Demo User A — 33 searches, 132 pts
+[run] All accounts complete.
