@@ -181,13 +181,32 @@ export async function requestAgentStop(): Promise<boolean> {
  * Poll isAgentActive() after calling this to wait for it to be ready.
  */
 export function spawnBotProcess(): void {
-  // Prefer tsx from node_modules/.bin so we don't require a global install.
-  const tsxBin = path.join(WORKSPACE_ROOT, 'node_modules', '.bin', 'tsx');
+  // Prefer tsx from the api-server's own node_modules, then workspace root.
+  const candidates = [
+    path.join(path.dirname(fileURLToPath(import.meta.url)), '../../../../node_modules/.bin/tsx'),
+    path.join(WORKSPACE_ROOT, 'node_modules/.bin/tsx'),
+    'tsx', // global fallback
+  ];
+  const tsxBin = candidates.find(p => {
+    try { return p === 'tsx' || fs.existsSync(p); } catch { return false; }
+  }) ?? 'tsx';
+
   const botProcess = spawn(tsxBin, ['src/index.ts', '--background'], {
     cwd:      WORKSPACE_ROOT,
     detached: true,
     stdio:    'ignore',
     env:      { ...process.env },
+  });
+  // MUST handle 'error' or an ENOENT/EACCES will propagate as an unhandled
+  // exception and crash the API server process.
+  botProcess.on('error', (err) => {
+    pushLog({
+      userName: 'DESK',
+      level:    'error',
+      platform: 'MAIN',
+      title:    'SPAWN-ERR',
+      message:  `Failed to start bot process: ${err.message}. Run the automation locally on your Windows machine.`,
+    });
   });
   botProcess.unref();
 }
