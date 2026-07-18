@@ -1,0 +1,1778 @@
+ove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCKeyboardExtenderComponentDescriptor.h: Could not find a part of the path
+'RNKCKeyboardExtenderComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCKeyboardExt...entDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCKeyboardExtenderShadowNode.cpp: Could not find a part of the path
+'RNKCKeyboardExtenderShadowNode.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCKeyboardExtenderShadowNode.cpp:FileInfo) [Remove-Item], DirectoryNotFou
+   ndException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCKeyboardExtenderShadowNode.h: Could not find a part of the path
+'RNKCKeyboardExtenderShadowNode.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCKeyboardExtenderShadowNode.h:FileInfo) [Remove-Item], DirectoryNotFound
+   Exception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCKeyboardExtenderState.h: Could not find a part of the path
+'RNKCKeyboardExtenderState.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCKeyboardExtenderState.h:FileInfo) [Remove-Item], DirectoryNotFoundExcep
+   tion
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCKeyboardGestureAreaComponentDescriptor.h: Could not find a part of the path
+'RNKCKeyboardGestureAreaComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCKeyboardGes...entDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCKeyboardGestureAreaShadowNode.cpp: Could not find a part of the path
+'RNKCKeyboardGestureAreaShadowNode.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCKeyboardGestureAreaShadowNode.cpp:FileInfo) [Remove-Item], DirectoryNot
+   FoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCKeyboardGestureAreaShadowNode.h: Could not find a part of the path
+'RNKCKeyboardGestureAreaShadowNode.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCKeyboardGestureAreaShadowNode.h:FileInfo) [Remove-Item], DirectoryNotFo
+   undException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCKeyboardGestureAreaState.h: Could not find a part of the path
+'RNKCKeyboardGestureAreaState.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCKeyboardGestureAreaState.h:FileInfo) [Remove-Item], DirectoryNotFoundEx
+   ception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCOverKeyboardViewComponentDescriptor.h: Could not find a part of the path
+'RNKCOverKeyboardViewComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCOverKeyboar...entDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCOverKeyboardViewShadowNode.cpp: Could not find a part of the path
+'RNKCOverKeyboardViewShadowNode.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCOverKeyboardViewShadowNode.cpp:FileInfo) [Remove-Item], DirectoryNotFou
+   ndException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCOverKeyboardViewShadowNode.h: Could not find a part of the path
+'RNKCOverKeyboardViewShadowNode.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCOverKeyboardViewShadowNode.h:FileInfo) [Remove-Item], DirectoryNotFound
+   Exception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCOverKeyboardViewState.cpp: Could not find a part of the path
+'RNKCOverKeyboardViewState.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCOverKeyboardViewState.cpp:FileInfo) [Remove-Item], DirectoryNotFoundExc
+   eption
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller\RNKCOverKeyboardViewState.h: Could not find a part of the path
+'RNKCOverKeyboardViewState.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNKCOverKeyboardViewState.h:FileInfo) [Remove-Item], DirectoryNotFoundExcep
+   tion
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components\
+reactnativekeyboardcontroller: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (reactnativekeyboardcontroller:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer\components:
+ The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react\renderer: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp\react: The directory is
+not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common\cpp: The directory is not
+empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (cpp:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller\common: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (common:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-con
+tr_00e2f0770e477032ec218a8e03aea206\node_modules\react-native-keyboard-controller: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react-native-keyboard-controller:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-contr_00e2f0770e477032ec218a8e03aea206\node_modules:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (node_modules:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-keyboard-contr_00e2f0770e477032ec218a8e03aea206: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react-native-ke...c218a8e03aea206:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src\paper\java\com\facebook\rea
+ct\viewmanagers\RNCSafeAreaProviderManagerDelegate.java: Could not find a part of the path
+'RNCSafeAreaProviderManagerDelegate.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNCSafeAreaProviderManagerDelegate.java:FileInfo) [Remove-Item], DirectoryN
+   otFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src\paper\java\com\facebook\rea
+ct\viewmanagers\RNCSafeAreaProviderManagerInterface.java: Could not find a part of the path
+'RNCSafeAreaProviderManagerInterface.java'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RNCSafeAreaProviderManagerInterface.java:FileInfo) [Remove-Item], Directory
+   NotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src\paper\java\com\facebook\rea
+ct\viewmanagers: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (viewmanagers:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src\paper\java\com\facebook\rea
+ct: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src\paper\java\com\facebook:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (facebook:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src\paper\java\com: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (com:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src\paper\java: The directory
+is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (java:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src\paper: The directory is
+not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (paper:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android\src: The directory is not
+empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (src:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context\android: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (android:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-co
+nt_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules\react-native-safe-area-context: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react-native-safe-area-context:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-cont_db7e84308fa9a28cdc0cc9a7b78f5e93\node_modules:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (node_modules:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-safe-area-cont_db7e84308fa9a28cdc0cc9a7b78f5e93: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react-native-sa...c0cc9a7b78f5e93:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src\versioned\pointerevents\latest\com\sw
+mansion\rnscreens\bottomsheet\DimmingViewPointerEvents.kt: Could not find a part of the path
+'DimmingViewPointerEvents.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (DimmingViewPointerEvents.kt:FileInfo) [Remove-Item], DirectoryNotFoundExcep
+   tion
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src\versioned\pointerevents\latest\com\sw
+mansion\rnscreens\bottomsheet: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (bottomsheet:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src\versioned\pointerevents\latest\com\sw
+mansion\rnscreens: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (rnscreens:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src\versioned\pointerevents\latest\com\sw
+mansion: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (swmansion:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src\versioned\pointerevents\latest\com:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (com:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src\versioned\pointerevents\latest: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (latest:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src\versioned\pointerevents: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (pointerevents:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src\versioned: The directory is not
+empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (versioned:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android\src: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (src:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens\android: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (android:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16
+.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules\react-native-screens: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react-native-screens:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16.0_b8e1d3cca370dcdbbdf08944ff9ffe9a\node_modules:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (node_modules:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\react-native-screens@4.16.0_b8e1d3cca370dcdbbdf08944ff9ffe9a: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react-native-sc...df08944ff9ffe9a:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\internal\fe
+atureflags\ReactNativeFeatureFlagsOverrides_RNOSS_Canary_Android.kt: Could not find a part of the path
+'ReactNativeFeatureFlagsOverrides_RNOSS_Canary_Android.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactNativeFeat...nary_Android.kt:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\internal\fe
+atureflags\ReactNativeFeatureFlagsOverrides_RNOSS_Experimental_Android.kt: Could not find a part of the path
+'ReactNativeFeatureFlagsOverrides_RNOSS_Experimental_Android.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactNativeFeat...ntal_Android.kt:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\internal\fe
+atureflags\ReactNativeFeatureFlagsOverrides_RNOSS_Stable_Android.kt: Could not find a part of the path
+'ReactNativeFeatureFlagsOverrides_RNOSS_Stable_Android.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactNativeFeat...able_Android.kt:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\internal\fe
+atureflags\ReactNativeNewArchitectureFeatureFlagsDefaults.kt: Could not find a part of the path
+'ReactNativeNewArchitectureFeatureFlagsDefaults.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactNativeNewA...lagsDefaults.kt:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\internal\fe
+atureflags: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (featureflags:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\internal:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (internal:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\modules\dev
+toolsruntimesettings\ReactDevToolsRuntimeSettingsModule.kt: Could not find a part of the path
+'ReactDevToolsRuntimeSettingsModule.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactDevToolsRuntimeSettingsModule.kt:FileInfo) [Remove-Item], DirectoryNot
+   FoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\modules\dev
+toolsruntimesettings: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (devtoolsruntimesettings:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\modules\rea
+ctdevtoolssettings\ReactDevToolsSettingsManagerModule.kt: Could not find a part of the path
+'ReactDevToolsSettingsManagerModule.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactDevToolsSettingsManagerModule.kt:FileInfo) [Remove-Item], DirectoryNot
+   FoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\modules\rea
+ctdevtoolssettings: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (reactdevtoolssettings:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\modules:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (modules:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\views\text\
+frescosupport\FrescoBasedReactTextInlineImageShadowNode.kt: Could not find a part of the path
+'FrescoBasedReactTextInlineImageShadowNode.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (FrescoBasedReac...geShadowNode.kt:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\views\text\
+frescosupport\FrescoBasedReactTextInlineImageViewManager.kt: Could not find a part of the path
+'FrescoBasedReactTextInlineImageViewManager.kt'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (FrescoBasedReac...eViewManager.kt:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\views\text\
+frescosupport: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (frescosupport:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\views\text:
+ The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (text:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react\views: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (views:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook\react: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com\facebook: The directory
+is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (facebook:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java\com: The directory is not
+empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (com:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main\java: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (java:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src\main: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (main:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid\src: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (src:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactAndroid: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactAndroid:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\legacyviewmanagerin
+terop\UnstableLegacyViewManagerAutomaticComponentDescriptor.cpp: Could not find a part of the path
+'UnstableLegacyViewManagerAutomaticComponentDescriptor.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (UnstableLegacyV...tDescriptor.cpp:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\legacyviewmanagerin
+terop\UnstableLegacyViewManagerAutomaticComponentDescriptor.h: Could not find a part of the path
+'UnstableLegacyViewManagerAutomaticComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (UnstableLegacyV...entDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\legacyviewmanagerin
+terop\UnstableLegacyViewManagerInteropComponentDescriptor.h: Could not find a part of the path
+'UnstableLegacyViewManagerInteropComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (UnstableLegacyV...entDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\legacyviewmanagerin
+terop: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (legacyviewmanagerinterop:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react\renderer\components\progressbar\AndroidProgressBarComponentDescriptor.h: Could not find a part of the path
+'AndroidProgressBarComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidProgressBarComponentDescriptor.h:FileInfo) [Remove-Item], DirectoryN
+   otFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react\renderer\components\progressbar\AndroidProgressBarMeasurementsManager.cpp: Could not find a part of the path
+'AndroidProgressBarMeasurementsManager.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidProgress...entsManager.cpp:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react\renderer\components\progressbar\AndroidProgressBarMeasurementsManager.h: Could not find a part of the path
+'AndroidProgressBarMeasurementsManager.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidProgressBarMeasurementsManager.h:FileInfo) [Remove-Item], DirectoryN
+   otFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react\renderer\components\progressbar\AndroidProgressBarShadowNode.cpp: Could not find a part of the path
+'AndroidProgressBarShadowNode.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidProgressBarShadowNode.cpp:FileInfo) [Remove-Item], DirectoryNotFound
+   Exception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react\renderer\components\progressbar\AndroidProgressBarShadowNode.h: Could not find a part of the path
+'AndroidProgressBarShadowNode.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidProgressBarShadowNode.h:FileInfo) [Remove-Item], DirectoryNotFoundEx
+   ception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react\renderer\components\progressbar: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (progressbar:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar\android
+: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (android:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\progressbar: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (progressbar:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react\renderer\components\scrollview\AndroidHorizontalScrollContentViewComponentDescriptor.h: Could not find
+a part of the path 'AndroidHorizontalScrollContentViewComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidHorizont...entDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react\renderer\components\scrollview\AndroidHorizontalScrollContentViewShadowNode.cpp: Could not find a part
+of the path 'AndroidHorizontalScrollContentViewShadowNode.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidHorizont...wShadowNode.cpp:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react\renderer\components\scrollview\AndroidHorizontalScrollContentViewShadowNode.h: Could not find a part of
+the path 'AndroidHorizontalScrollContentViewShadowNode.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidHorizont...iewShadowNode.h:FileInfo) [Remove-Item], DirectoryNotFoun
+   dException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react\renderer\components\scrollview\HostPlatformScrollViewProps.cpp: Could not find a part of the path
+'HostPlatformScrollViewProps.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformScrollViewProps.cpp:FileInfo) [Remove-Item], DirectoryNotFoundE
+   xception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react\renderer\components\scrollview\HostPlatformScrollViewProps.h: Could not find a part of the path
+'HostPlatformScrollViewProps.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformScrollViewProps.h:FileInfo) [Remove-Item], DirectoryNotFoundExc
+   eption
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react\renderer\components\scrollview: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (scrollview:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\android: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (android:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\cxx\react\renderer\components\scrollview\HostPlatformScrollViewProps.h: Could not find a part of the path
+'HostPlatformScrollViewProps.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformScrollViewProps.h:FileInfo) [Remove-Item], DirectoryNotFoundExc
+   eption
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\cxx\react\renderer\components\scrollview: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (scrollview:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\cxx\react\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\cxx\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\cxx\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+\cxx: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (cxx:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview\platform
+: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (platform:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\scrollview: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (scrollview:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react\renderer\components\androidswitch\AndroidSwitchComponentDescriptor.h: Could not find a part of the path
+'AndroidSwitchComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidSwitchComponentDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFou
+   ndException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react\renderer\components\androidswitch\AndroidSwitchMeasurementsManager.cpp: Could not find a part of the path
+'AndroidSwitchMeasurementsManager.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidSwitchMeasurementsManager.cpp:FileInfo) [Remove-Item], DirectoryNotF
+   oundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react\renderer\components\androidswitch\AndroidSwitchMeasurementsManager.h: Could not find a part of the path
+'AndroidSwitchMeasurementsManager.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidSwitchMeasurementsManager.h:FileInfo) [Remove-Item], DirectoryNotFou
+   ndException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react\renderer\components\androidswitch\AndroidSwitchShadowNode.cpp: Could not find a part of the path
+'AndroidSwitchShadowNode.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidSwitchShadowNode.cpp:FileInfo) [Remove-Item], DirectoryNotFoundExcep
+   tion
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react\renderer\components\androidswitch\AndroidSwitchShadowNode.h: Could not find a part of the path
+'AndroidSwitchShadowNode.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidSwitchShadowNode.h:FileInfo) [Remove-Item], DirectoryNotFoundExcepti
+   on
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react\renderer\components\androidswitch: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (androidswitch:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\androidswitc
+h: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (androidswitch:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\iosswitch\re
+act\renderer\components\switch\AppleSwitchComponentDescriptor.h: Could not find a part of the path
+'AppleSwitchComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AppleSwitchComponentDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFound
+   Exception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\iosswitch\re
+act\renderer\components\switch\MacOSSwitchShadowNode.mm: Could not find a part of the path 'MacOSSwitchShadowNode.mm'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (MacOSSwitchShadowNode.mm:FileInfo) [Remove-Item], DirectoryNotFoundExceptio
+   n
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\iosswitch\re
+act\renderer\components\switch: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (switch:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\iosswitch\re
+act\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\iosswitch\re
+act\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\iosswitch\re
+act: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch\iosswitch:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (iosswitch:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\switch: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (switch:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput\AndroidTextInputComponentDescriptor.h: Could not find a part of the
+path 'AndroidTextInputComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidTextInputComponentDescriptor.h:FileInfo) [Remove-Item], DirectoryNot
+   FoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput\AndroidTextInputEventEmitter.h: Could not find a part of the path
+'AndroidTextInputEventEmitter.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidTextInputEventEmitter.h:FileInfo) [Remove-Item], DirectoryNotFoundEx
+   ception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput\AndroidTextInputProps.cpp: Could not find a part of the path
+'AndroidTextInputProps.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidTextInputProps.cpp:FileInfo) [Remove-Item], DirectoryNotFoundExcepti
+   on
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput\AndroidTextInputProps.h: Could not find a part of the path
+'AndroidTextInputProps.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidTextInputProps.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput\AndroidTextInputShadowNode.cpp: Could not find a part of the path
+'AndroidTextInputShadowNode.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidTextInputShadowNode.cpp:FileInfo) [Remove-Item], DirectoryNotFoundEx
+   ception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput\AndroidTextInputShadowNode.h: Could not find a part of the path
+'AndroidTextInputShadowNode.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidTextInputShadowNode.h:FileInfo) [Remove-Item], DirectoryNotFoundExce
+   ption
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput\AndroidTextInputState.cpp: Could not find a part of the path
+'AndroidTextInputState.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidTextInputState.cpp:FileInfo) [Remove-Item], DirectoryNotFoundExcepti
+   on
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput\AndroidTextInputState.h: Could not find a part of the path
+'AndroidTextInputState.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (AndroidTextInputState.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components\androidtextinput: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (androidtextinput:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+android: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (android:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput\conversions.h: Could not find a part of the path 'conversions.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (conversions.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput\primitives.h: Could not find a part of the path 'primitives.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (primitives.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput\propsConversions.h: Could not find a part of the path 'propsConversions.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (propsConversions.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput\TextInputComponentDescriptor.h: Could not find a part of the path
+'TextInputComponentDescriptor.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (TextInputComponentDescriptor.h:FileInfo) [Remove-Item], DirectoryNotFoundEx
+   ception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput\TextInputProps.cpp: Could not find a part of the path 'TextInputProps.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (TextInputProps.cpp:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput\TextInputProps.h: Could not find a part of the path 'TextInputProps.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (TextInputProps.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput\TextInputShadowNode.cpp: Could not find a part of the path
+'TextInputShadowNode.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (TextInputShadowNode.cpp:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput\TextInputShadowNode.h: Could not find a part of the path
+'TextInputShadowNode.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (TextInputShadowNode.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components\iostextinput: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (iostextinput:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform\
+ios: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ios:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput\platform:
+ The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (platform:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\textinput: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (textinput:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id\react\renderer\components\view\HostPlatformViewEventEmitter.h: Could not find a part of the path
+'HostPlatformViewEventEmitter.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformViewEventEmitter.h:FileInfo) [Remove-Item], DirectoryNotFoundEx
+   ception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id\react\renderer\components\view\HostPlatformViewProps.cpp: Could not find a part of the path
+'HostPlatformViewProps.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformViewProps.cpp:FileInfo) [Remove-Item], DirectoryNotFoundExcepti
+   on
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id\react\renderer\components\view\HostPlatformViewProps.h: Could not find a part of the path 'HostPlatformViewProps.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformViewProps.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id\react\renderer\components\view\HostPlatformViewTraitsInitializer.h: Could not find a part of the path
+'HostPlatformViewTraitsInitializer.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformViewTraitsInitializer.h:FileInfo) [Remove-Item], DirectoryNotFo
+   undException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id\react\renderer\components\view: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (view:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id\react\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\andro
+id: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (android:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\cxx\r
+eact\renderer\components\view\HostPlatformViewEventEmitter.h: Could not find a part of the path
+'HostPlatformViewEventEmitter.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformViewEventEmitter.h:FileInfo) [Remove-Item], DirectoryNotFoundEx
+   ception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\cxx\r
+eact\renderer\components\view\HostPlatformViewTraitsInitializer.h: Could not find a part of the path
+'HostPlatformViewTraitsInitializer.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (HostPlatformViewTraitsInitializer.h:FileInfo) [Remove-Item], DirectoryNotFo
+   undException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\cxx\r
+eact\renderer\components\view: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (view:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\cxx\r
+eact\renderer\components: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\cxx\r
+eact\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\cxx\r
+eact: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform\cxx:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (cxx:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view\platform: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (platform:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components\view: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (view:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\components: The directory is
+not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (components:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\imagemanager\platform\ios\reac
+t\renderer\imagemanager\RCTImagePrimitivesConversions.h: Could not find a part of the path
+'RCTImagePrimitivesConversions.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RCTImagePrimitivesConversions.h:FileInfo) [Remove-Item], DirectoryNotFoundE
+   xception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\imagemanager\platform\ios\reac
+t\renderer\imagemanager: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (imagemanager:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\imagemanager\platform\ios\reac
+t\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\imagemanager\platform\ios\reac
+t: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\imagemanager\platform\ios:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ios:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\imagemanager\platform: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (platform:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\imagemanager: The directory
+is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (imagemanager:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\and
+roid\react\renderer\textlayoutmanager\JPreparedLayout.h: Could not find a part of the path 'JPreparedLayout.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (JPreparedLayout.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\and
+roid\react\renderer\textlayoutmanager\TextLayoutManager.cpp: Could not find a part of the path 'TextLayoutManager.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (TextLayoutManager.cpp:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\and
+roid\react\renderer\textlayoutmanager\TextLayoutManager.h: Could not find a part of the path 'TextLayoutManager.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (TextLayoutManager.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\and
+roid\react\renderer\textlayoutmanager: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (textlayoutmanager:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\and
+roid\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\and
+roid\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\and
+roid: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (android:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\cxx
+\react\renderer\textlayoutmanager\TextLayoutManager.cpp: Could not find a part of the path 'TextLayoutManager.cpp'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (TextLayoutManager.cpp:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\cxx
+\react\renderer\textlayoutmanager: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (textlayoutmanager:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\cxx
+\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\cxx
+\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\cxx
+: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (cxx:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+\react\renderer\textlayoutmanager\RCTAttributedTextUtils.h: Could not find a part of the path
+'RCTAttributedTextUtils.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RCTAttributedTextUtils.h:FileInfo) [Remove-Item], DirectoryNotFoundExceptio
+   n
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+\react\renderer\textlayoutmanager\RCTAttributedTextUtils.mm: Could not find a part of the path
+'RCTAttributedTextUtils.mm'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RCTAttributedTextUtils.mm:FileInfo) [Remove-Item], DirectoryNotFoundExcepti
+   on
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+\react\renderer\textlayoutmanager\RCTTextLayoutManager.h: Could not find a part of the path 'RCTTextLayoutManager.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RCTTextLayoutManager.h:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+\react\renderer\textlayoutmanager\RCTTextLayoutManager.mm: Could not find a part of the path 'RCTTextLayoutManager.mm'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RCTTextLayoutManager.mm:FileInfo) [Remove-Item], DirectoryNotFoundException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+\react\renderer\textlayoutmanager\RCTTextPrimitivesConversions.h: Could not find a part of the path
+'RCTTextPrimitivesConversions.h'.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (RCTTextPrimitivesConversions.h:FileInfo) [Remove-Item], DirectoryNotFoundEx
+   ception
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+\react\renderer\textlayoutmanager: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (textlayoutmanager:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform\ios
+: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ios:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager\platform:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (platform:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer\textlayoutmanager: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (textlayoutmanager:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react\renderer: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (renderer:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon\react: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native\ReactCommon: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (ReactCommon:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babe
+l+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules\react-native: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react-native:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babel+_5b5f786695eb3a8a4ec36c9b8d1b667a\node_modules:
+The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (node_modules:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash
+Poudel\Documents\Macro-R\node_modules\.pnpm\react-native@0.81.5_@babel+_5b5f786695eb3a8a4ec36c9b8d1b667a: The
+directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (react-native@0....ec36c9b8d1b667a:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules\.pnpm: The directory is not
+empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (.pnpm:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+Remove-Item : Cannot remove item C:\Users\Avinash Poudel\Documents\Macro-R\node_modules: The directory is not empty.
+At line:1 char:1
++ Remove-Item -Recurse -Force node_modules
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : WriteError: (C:\Users\Avinas...-R\node_modules:DirectoryInfo) [Remove-Item], IOException
+    + FullyQualifiedErrorId : RemoveFileSystemItemIOError,Microsoft.PowerShell.Commands.RemoveItemCommand
+PS C:\Users\Avinash Poudel\Documents\Macro-R> pnpm install
+Scope: all 11 workspace projects
+Lockfile is up to date, resolution step is skipped
+Packages: +1191
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 1191, reused 1164, downloaded 0, added 1191, done
+
+devDependencies:
++ prettier 3.8.1
++ typescript 5.9.3
+
+. preinstall$ sh -c 'if [ "$EAS_BUILD" = "1" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case "$npm_config…
+└─ Done in 133ms
+Done in 30.6s using pnpm v10.26.1
+PS C:\Users\Avinash Poudel\Documents\Macro-R> scripts\desk\build.bat
