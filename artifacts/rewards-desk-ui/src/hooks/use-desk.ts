@@ -133,6 +133,72 @@ export function useBotStatus() {
   };
 }
 
+export interface CaptureStatus {
+  sessionId: string;
+  email: string;
+  status: 'opening' | 'waiting' | 'capturing' | 'done' | 'failed';
+  cookieCount?: number;
+  error?: string;
+}
+
+export function useCookieCapture() {
+  const queryClient = useQueryClient();
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  const start = useMutation({
+    mutationFn: async (email: string) => {
+      const res = await fetch('/api/desk/capture-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json() as { sessionId: string };
+      setSessionId(data.sessionId);
+      return data;
+    },
+  });
+
+  const poll = useQuery({
+    queryKey: ['capture-session', sessionId],
+    queryFn: async () => {
+      const res = await fetch(`/api/desk/capture-session/${sessionId}`);
+      if (!res.ok) throw new Error('Session not found');
+      return res.json() as Promise<CaptureStatus>;
+    },
+    enabled: !!sessionId,
+    refetchInterval: (query) => {
+      const s = query.state.data?.status;
+      return s === 'done' || s === 'failed' ? false : 1500;
+    },
+  });
+
+  const abort = useMutation({
+    mutationFn: async () => {
+      if (!sessionId) return;
+      await fetch(`/api/desk/capture-session/${sessionId}`, { method: 'DELETE' });
+      setSessionId(null);
+      queryClient.removeQueries({ queryKey: ['capture-session', sessionId] });
+    },
+  });
+
+  const reset = () => {
+    if (sessionId) {
+      queryClient.removeQueries({ queryKey: ['capture-session', sessionId] });
+    }
+    setSessionId(null);
+  };
+
+  return {
+    start,
+    abort,
+    reset,
+    sessionId,
+    captureStatus: poll.data ?? null,
+    isPolling: !!sessionId && poll.data?.status !== 'done' && poll.data?.status !== 'failed',
+  };
+}
+
 export function useRunLogs() {
   const query = useGetRunLogs({
     query: {

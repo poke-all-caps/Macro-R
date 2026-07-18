@@ -279,6 +279,34 @@ const botState = {
   activeRunId:        null,
 };
 
+// ─── Cookie-capture session registry ─────────────────────────────────────────
+// Tracks in-flight "open browser, capture cookies" sessions.
+// key: sessionId, value: { child, statusFile, email }
+
+const captureSessions = new Map();
+
+const DATA_DIR        = path.join(WORKSPACE_ROOT, "data");
+const CAPTURE_DIR     = path.join(DATA_DIR, "agent");
+
+function resolveTsx() {
+  const candidates = [
+    path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx.cmd"),
+    path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx"),
+    "tsx",
+  ];
+  return candidates.find((p) => {
+    try { return p === "tsx" || fs.existsSync(p); } catch { return false; }
+  }) ?? "tsx";
+}
+
+function readCaptureStatus(statusFile) {
+  try {
+    return JSON.parse(fs.readFileSync(statusFile, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
 /** Sync account cards from run-log data after a run completes. */
 function syncAccountStatsFromLogs() {
   try {
@@ -343,14 +371,15 @@ async function handleRequest(req, res) {
     // POST /api/desk/accounts
     if (pathname === "/api/desk/accounts" && method === "POST") {
       const body = await readBody(req);
-      const { email, name, password, totpSecret, recoveryEmail, geoLocale, langCode, proxy, saveFingerprint } = body;
-      if (!email || !name || !password) return sendJson(res, 400, { error: "email, name, and password are required" });
+      const { email, name, password, totpSecret, recoveryEmail, geoLocale, langCode, proxy, saveFingerprint, method: authMethod } = body;
+      const isCookieMethod = authMethod === "cookies";
+      if (!email || !name) return sendJson(res, 400, { error: "email and name are required" });
+      if (!isCookieMethod && !password) return sendJson(res, 400, { error: "password is required (or use method: 'cookies')" });
       try {
         const account = storage.addAccount({ email, name });
         try {
-          storage.addBotAccount({ email, password, totpSecret, recoveryEmail, geoLocale, langCode, proxy, saveFingerprint });
+          storage.addBotAccount({ email, password: password || "", totpSecret, recoveryEmail, geoLocale, langCode, proxy, saveFingerprint });
         } catch (botErr) {
-          // Non-fatal: desk record was created; bot store may be encrypted.
           return sendJson(res, 201, { ...account, _warning: botErr.message });
         }
         return sendJson(res, 201, account);
@@ -548,6 +577,68 @@ async function handleRequest(req, res) {
         }
       }
       return sendJson(res, 200, { removed: before - storage.loadAccounts().length, total: storage.loadAccounts().length });
+    }
+
+    // POST /api/desk/capture-session — spawn the cookie-capture browser
+    if (pathname === "/api/desk/capture-session" && method === "POST") {
+      const body  = await readBody(req);
+      const email = (body.email || "").trim();
+      if (!email) return sendJson(res, 400, { error: "email is required" });
+
+      const sessionId  = randomBytes(6).toString("hex");
+      const statusFile = path.join(CAPTURE_DIR, `capture-${sessionId}.json`);
+      fs.mkdirSync(CAPTURE_DIR, { recursive: true });
+
+      const tsxBin     = resolveTsx();
+      const scriptPath = path.join(WORKSPACE_ROOT, "scripts", "desk", "cookie-capture.ts");
+
+      const child = spawn(tsxBin, [scriptPath, sessionId, email, statusFile], {
+        cwd:   WORKSPACE_ROOT,
+        stdio: "ignore",
+        env:   { ...process.env },
+      });
+      child.on("error", (err) => {
+        try {
+          fs.writeFileSync(statusFile, JSON.stringify({ sessionId, email, status: "failed", error: err.message }, null, 2));
+        } catch {}
+      });
+      child.on("exit", (code) => {
+        const s = readCaptureStatus(statusFile);
+        if (s && s.status !== "done") {
+          try {
+            fs.writeFileSync(statusFile, JSON.stringify({ ...s, status: "failed", error: `Process exited with code ${code}` }, null, 2));
+          } catch {}
+        }
+        captureSessions.delete(sessionId);
+      });
+
+      captureSessions.set(sessionId, { child, statusFile, email });
+      return sendJson(res, 200, { sessionId });
+    }
+
+    // GET /api/desk/capture-session/:id — poll status
+    const captureGetMatch = pathname.match(/^\/api\/desk\/capture-session\/([a-f0-9]+)$/);
+    if (captureGetMatch && method === "GET") {
+      const sid    = captureGetMatch[1];
+      const sess   = captureSessions.get(sid);
+      const statusFile = sess ? sess.statusFile : path.join(CAPTURE_DIR, `capture-${sid}.json`);
+      const status = readCaptureStatus(statusFile);
+      if (!status) return sendJson(res, 404, { error: "Session not found" });
+      return sendJson(res, 200, status);
+    }
+
+    // DELETE /api/desk/capture-session/:id — abort
+    const captureDelMatch = pathname.match(/^\/api\/desk\/capture-session\/([a-f0-9]+)$/);
+    if (captureDelMatch && method === "DELETE") {
+      const sid  = captureDelMatch[1];
+      const sess = captureSessions.get(sid);
+      if (sess) {
+        try { sess.child.kill(); } catch {}
+        captureSessions.delete(sid);
+      }
+      // Clean up the status file regardless
+      try { fs.rmSync(path.join(CAPTURE_DIR, `capture-${sid}.json`), { force: true }); } catch {}
+      return sendJson(res, 200, { aborted: true });
     }
 
     return sendJson(res, 404, { error: "Unknown API route" });

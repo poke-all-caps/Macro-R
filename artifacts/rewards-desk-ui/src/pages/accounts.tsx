@@ -1,4 +1,4 @@
-import { useAccounts } from '@/hooks/use-desk';
+import { useAccounts, useCookieCapture } from '@/hooks/use-desk';
 import type { AccountInput, AccountPatch, AccountProxy } from '@/hooks/use-desk';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Users, Plus, Trash2, Database, AlertCircle, Pencil,
   RefreshCw, Eye, EyeOff, ShieldAlert, Network, Settings2,
+  Globe, CheckCircle2, Loader2, MonitorSmartphone,
 } from 'lucide-react';
 import { useState } from 'react';
 import type { DeskAccount } from '@workspace/api-client-react';
@@ -48,11 +49,12 @@ function PasswordInput({ id, value, onChange, placeholder, className }: {
   );
 }
 
-function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
+function FieldRow({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label className="font-mono text-xs uppercase text-muted-foreground tracking-wider">{label}</Label>
       {children}
+      {hint && <p className="text-xs text-muted-foreground font-mono">{hint}</p>}
     </div>
   );
 }
@@ -73,66 +75,6 @@ function emptyForm(): AccountInput {
   };
 }
 
-// ─── Credentials tab ──────────────────────────────────────────────────────────
-
-function CredentialsTab({ form, set }: { form: AccountInput; set: (p: Partial<AccountInput>) => void }) {
-  return (
-    <div className="space-y-4">
-      <FieldRow label="Alias *">
-        <Input
-          value={form.name}
-          onChange={e => set({ name: e.target.value })}
-          placeholder="e.g. Primary Account"
-          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary"
-          autoComplete="off"
-        />
-      </FieldRow>
-
-      <FieldRow label="Microsoft Email *">
-        <Input
-          type="email"
-          value={form.email}
-          onChange={e => set({ email: e.target.value })}
-          placeholder="user@outlook.com"
-          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary"
-          autoComplete="off"
-        />
-      </FieldRow>
-
-      <FieldRow label="Password *">
-        <PasswordInput
-          id="add-password"
-          value={form.password}
-          onChange={v => set({ password: v })}
-          placeholder="Account password"
-        />
-      </FieldRow>
-
-      <FieldRow label="TOTP / 2FA Secret">
-        <Input
-          value={form.totpSecret ?? ''}
-          onChange={e => set({ totpSecret: e.target.value })}
-          placeholder="Base32 TOTP secret (optional)"
-          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary"
-          autoComplete="off"
-        />
-        <p className="text-xs text-muted-foreground font-mono">Leave blank if the account doesn't use an authenticator app.</p>
-      </FieldRow>
-
-      <FieldRow label="Recovery Email">
-        <Input
-          type="email"
-          value={form.recoveryEmail ?? ''}
-          onChange={e => set({ recoveryEmail: e.target.value })}
-          placeholder="recovery@example.com (optional)"
-          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary"
-          autoComplete="off"
-        />
-      </FieldRow>
-    </div>
-  );
-}
-
 // ─── Proxy tab ────────────────────────────────────────────────────────────────
 
 function ProxyTab({ proxy, setProxy }: {
@@ -142,44 +84,24 @@ function ProxyTab({ proxy, setProxy }: {
   return (
     <div className="space-y-4">
       <p className="text-xs font-mono text-muted-foreground">All proxy fields are optional. Leave URL blank to run without a proxy.</p>
-
       <FieldRow label="Proxy URL">
-        <Input
-          value={proxy.url ?? ''}
-          onChange={e => setProxy({ url: e.target.value })}
+        <Input value={proxy.url ?? ''} onChange={e => setProxy({ url: e.target.value })}
           placeholder="socks5://host or http://host"
-          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary"
-          autoComplete="off"
-        />
+          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
       </FieldRow>
-
       <FieldRow label="Port">
-        <Input
-          type="number"
-          value={proxy.port ?? ''}
-          onChange={e => setProxy({ port: e.target.value })}
+        <Input type="number" value={proxy.port ?? ''} onChange={e => setProxy({ port: e.target.value })}
           placeholder="1080"
-          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary"
-        />
+          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" />
       </FieldRow>
-
       <FieldRow label="Username">
-        <Input
-          value={proxy.username ?? ''}
-          onChange={e => setProxy({ username: e.target.value })}
+        <Input value={proxy.username ?? ''} onChange={e => setProxy({ username: e.target.value })}
           placeholder="proxy username (optional)"
-          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary"
-          autoComplete="off"
-        />
+          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
       </FieldRow>
-
       <FieldRow label="Password">
-        <PasswordInput
-          id="add-proxy-password"
-          value={(proxy.password as string) ?? ''}
-          onChange={v => setProxy({ password: v })}
-          placeholder="proxy password (optional)"
-        />
+        <PasswordInput id="proxy-password" value={(proxy.password as string) ?? ''}
+          onChange={v => setProxy({ password: v })} placeholder="proxy password (optional)" />
       </FieldRow>
     </div>
   );
@@ -187,80 +109,217 @@ function ProxyTab({ proxy, setProxy }: {
 
 // ─── Options tab ──────────────────────────────────────────────────────────────
 
-const GEO_LOCALES = ['auto', 'en-US', 'en-GB', 'en-AU', 'en-CA', 'de-DE', 'fr-FR', 'es-ES', 'pt-BR', 'it-IT', 'nl-NL', 'pl-PL', 'sv-SE', 'ja-JP', 'ko-KR', 'zh-CN', 'zh-TW'];
-const LANG_CODES  = ['en', 'de', 'fr', 'es', 'pt', 'it', 'nl', 'pl', 'sv', 'ja', 'ko', 'zh'];
+const GEO_LOCALES = ['auto','en-US','en-GB','en-AU','en-CA','de-DE','fr-FR','es-ES','pt-BR','it-IT','nl-NL','pl-PL','sv-SE','ja-JP','ko-KR','zh-CN','zh-TW'];
+const LANG_CODES  = ['en','de','fr','es','pt','it','nl','pl','sv','ja','ko','zh'];
 
 function OptionsTab({ form, set }: { form: AccountInput; set: (p: Partial<AccountInput>) => void }) {
   const fp = form.saveFingerprint ?? {};
   return (
     <div className="space-y-5">
       <FieldRow label="Geo Locale">
-        <select
-          value={form.geoLocale ?? 'auto'}
-          onChange={e => set({ geoLocale: e.target.value })}
-          className="w-full bg-black/50 border border-border/50 rounded-md px-3 py-2 text-sm font-mono text-white focus:outline-none focus:ring-1 focus:ring-primary"
-        >
+        <select value={form.geoLocale ?? 'auto'} onChange={e => set({ geoLocale: e.target.value })}
+          className="w-full bg-black/50 border border-border/50 rounded-md px-3 py-2 text-sm font-mono text-white focus:outline-none focus:ring-1 focus:ring-primary">
           {GEO_LOCALES.map(l => <option key={l} value={l}>{l}</option>)}
         </select>
       </FieldRow>
-
       <FieldRow label="Language Code">
-        <select
-          value={form.langCode ?? 'en'}
-          onChange={e => set({ langCode: e.target.value })}
-          className="w-full bg-black/50 border border-border/50 rounded-md px-3 py-2 text-sm font-mono text-white focus:outline-none focus:ring-1 focus:ring-primary"
-        >
+        <select value={form.langCode ?? 'en'} onChange={e => set({ langCode: e.target.value })}
+          className="w-full bg-black/50 border border-border/50 rounded-md px-3 py-2 text-sm font-mono text-white focus:outline-none focus:ring-1 focus:ring-primary">
           {LANG_CODES.map(l => <option key={l} value={l}>{l}</option>)}
         </select>
       </FieldRow>
-
       <div className="space-y-3 pt-1 border-t border-border/40">
         <p className="font-mono text-xs uppercase text-muted-foreground tracking-wider pt-1">Save Fingerprint</p>
-        <p className="text-xs text-muted-foreground font-mono">When enabled the bot reuses the same browser fingerprint across runs for this account.</p>
-
+        <p className="text-xs text-muted-foreground font-mono">Reuse the same browser fingerprint across runs for this account.</p>
         <div className="flex items-center justify-between">
           <Label className="font-mono text-sm text-white">Desktop</Label>
-          <Switch
-            checked={Boolean(fp.desktop)}
-            onCheckedChange={v => set({ saveFingerprint: { ...fp, desktop: v } })}
-          />
+          <Switch checked={Boolean(fp.desktop)} onCheckedChange={v => set({ saveFingerprint: { ...fp, desktop: v } })} />
         </div>
         <div className="flex items-center justify-between">
           <Label className="font-mono text-sm text-white">Mobile</Label>
-          <Switch
-            checked={Boolean(fp.mobile)}
-            onCheckedChange={v => set({ saveFingerprint: { ...fp, mobile: v } })}
-          />
+          <Switch checked={Boolean(fp.mobile)} onCheckedChange={v => set({ saveFingerprint: { ...fp, mobile: v } })} />
         </div>
       </div>
     </div>
   );
 }
 
+// ─── Cookie capture panel (shown inside the Credentials tab) ──────────────────
+
+function CookieCapturePanel({
+  form,
+  set,
+  onCaptured,
+}: {
+  form: AccountInput;
+  set: (p: Partial<AccountInput>) => void;
+  onCaptured: (cookieCount: number) => void;
+}) {
+  const capture = useCookieCapture();
+  const status  = capture.captureStatus;
+
+  const isDone    = status?.status === 'done';
+  const isFailed  = status?.status === 'failed';
+  const isActive  = !!capture.sessionId && !isDone && !isFailed;
+
+  // Notify parent when capture finishes successfully
+  if (isDone && status.cookieCount !== undefined) {
+    onCaptured(status.cookieCount);
+  }
+
+  const handleLaunch = () => {
+    if (!form.email) return;
+    capture.reset();
+    capture.start.mutate(form.email);
+  };
+
+  const handleAbort = () => {
+    capture.abort.mutate(undefined as unknown as void);
+    capture.reset();
+  };
+
+  const statusLabel: Record<string, string> = {
+    opening:   'Opening browser window…',
+    waiting:   'Waiting for you to sign in to Microsoft Rewards…',
+    capturing: 'Capturing cookies…',
+    done:      `Cookies captured successfully`,
+    failed:    'Capture failed',
+  };
+
+  return (
+    <div className="space-y-4">
+      <FieldRow label="Alias *">
+        <Input value={form.name} onChange={e => set({ name: e.target.value })}
+          placeholder="e.g. Primary Account"
+          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
+      </FieldRow>
+
+      <FieldRow label="Microsoft Email *"
+        hint="Must match the account you'll sign into in the browser.">
+        <Input type="email" value={form.email} onChange={e => set({ email: e.target.value })}
+          placeholder="user@outlook.com"
+          className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off"
+          disabled={isActive || isDone} />
+      </FieldRow>
+
+      {/* Launch / status area */}
+      {!capture.sessionId && (
+        <Button type="button"
+          disabled={!form.email || !form.name || capture.start.isPending}
+          onClick={handleLaunch}
+          className="w-full font-mono text-xs uppercase bg-primary/90 hover:bg-primary text-primary-foreground">
+          <Globe className="w-4 h-4 mr-2" />
+          Launch Login Browser
+        </Button>
+      )}
+
+      {capture.sessionId && (
+        <div className={`rounded border px-4 py-3 space-y-2 font-mono text-xs
+          ${isDone   ? 'border-green-500/30 bg-green-500/10'  :
+            isFailed ? 'border-destructive/30 bg-destructive/10' :
+                       'border-primary/30 bg-primary/5'}`}>
+
+          <div className="flex items-center gap-2">
+            {isDone
+              ? <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+              : isFailed
+              ? <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+              : <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />}
+            <span className={isDone ? 'text-green-300' : isFailed ? 'text-destructive' : 'text-primary'}>
+              {statusLabel[status?.status ?? 'opening']}
+            </span>
+          </div>
+
+          {isDone && (
+            <p className="text-green-400/80">
+              {status!.cookieCount} cookie{status!.cookieCount !== 1 ? 's' : ''} saved to{' '}
+              <span className="text-green-300">sessions/{form.email}/session_desktop.json</span>
+            </p>
+          )}
+
+          {isFailed && status?.error && (
+            <p className="text-destructive/80">{status.error}</p>
+          )}
+
+          {!isDone && !isFailed && (
+            <p className="text-muted-foreground">
+              A Chromium window has opened. Sign in, then wait — this dialog will update automatically.
+            </p>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            {isFailed && (
+              <Button type="button" size="sm" variant="outline"
+                onClick={handleLaunch}
+                className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
+                Retry
+              </Button>
+            )}
+            {isActive && (
+              <Button type="button" size="sm" variant="outline"
+                onClick={handleAbort}
+                className="font-mono text-xs border-destructive/30 text-destructive hover:bg-destructive/10">
+                Abort
+              </Button>
+            )}
+            {(isDone || isFailed) && (
+              <Button type="button" size="sm" variant="ghost"
+                onClick={() => { capture.reset(); }}
+                className="font-mono text-xs text-muted-foreground hover:text-white">
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Add dialog ───────────────────────────────────────────────────────────────
 
+type AuthMethod = 'credentials' | 'cookies';
+
 function AddDialog({ addAccount }: { addAccount: ReturnType<typeof useAccounts>['addAccount'] }) {
-  const [open, setOpen]   = useState(false);
-  const [form, setForm]   = useState<AccountInput>(emptyForm);
-  const [error, setError] = useState('');
+  const [open, setOpen]         = useState(false);
+  const [form, setForm]         = useState<AccountInput>(emptyForm);
+  const [authMethod, setMethod] = useState<AuthMethod>('credentials');
+  const [cookiesDone, setCookiesDone] = useState(false);
+  const [error, setError]       = useState('');
 
   const set = (patch: Partial<AccountInput>) => setForm(f => ({ ...f, ...patch }));
   const setProxy = (patch: Partial<AccountProxy>) =>
     setForm(f => ({ ...f, proxy: { ...f.proxy, ...patch } as AccountProxy }));
 
-  const canSubmit = !!form.email && !!form.name && !!form.password;
+  const canSubmitCredentials = !!form.email && !!form.name && !!form.password;
+  const canSubmitCookies     = !!form.email && !!form.name && cookiesDone;
+  const canSubmit = authMethod === 'credentials' ? canSubmitCredentials : canSubmitCookies;
+
+  const handleClose = (o: boolean) => {
+    setOpen(o);
+    if (!o) {
+      setForm(emptyForm());
+      setMethod('credentials');
+      setCookiesDone(false);
+      setError('');
+    }
+  };
 
   const handle = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    addAccount.mutate(form, {
-      onSuccess: () => { setOpen(false); setForm(emptyForm()); },
+    const payload: AccountInput = {
+      ...form,
+      ...(authMethod === 'cookies' ? { method: 'cookies' } as never : {}),
+    };
+    addAccount.mutate(payload, {
+      onSuccess: () => handleClose(false),
       onError: (err: unknown) => setError(err instanceof Error ? err.message : String(err)),
     });
   };
 
   return (
-    <Dialog open={open} onOpenChange={o => { setOpen(o); if (!o) { setForm(emptyForm()); setError(''); } }}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogTrigger asChild>
         <Button className="font-mono tracking-wider bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="w-4 h-4 mr-2" />
@@ -275,7 +334,7 @@ function AddDialog({ addAccount }: { addAccount: ReturnType<typeof useAccounts>[
             New Target Registration
           </DialogTitle>
           <DialogDescription className="font-mono text-xs">
-            Credentials are written to both the desk display store and the bot engine's account file.
+            Credentials are written to the desk display store and the bot engine's account file.
           </DialogDescription>
         </DialogHeader>
 
@@ -293,9 +352,74 @@ function AddDialog({ addAccount }: { addAccount: ReturnType<typeof useAccounts>[
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="credentials" className="pt-4">
-              <CredentialsTab form={form} set={set} />
+            {/* ── Credentials tab ── */}
+            <TabsContent value="credentials" className="pt-4 space-y-4">
+
+              {/* Auth method toggle */}
+              <div className="flex rounded border border-border/40 overflow-hidden bg-black/30 p-0.5 gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => setMethod('credentials')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-mono uppercase rounded transition-colors
+                    ${authMethod === 'credentials'
+                      ? 'bg-primary/20 text-primary'
+                      : 'text-muted-foreground hover:text-white'}`}
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" /> Enter Password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMethod('cookies')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-mono uppercase rounded transition-colors
+                    ${authMethod === 'cookies'
+                      ? 'bg-primary/20 text-primary'
+                      : 'text-muted-foreground hover:text-white'}`}
+                >
+                  <MonitorSmartphone className="w-3.5 h-3.5" /> Capture Cookies
+                </button>
+              </div>
+
+              {/* Credential fields */}
+              {authMethod === 'credentials' && (
+                <div className="space-y-4">
+                  <FieldRow label="Alias *">
+                    <Input value={form.name} onChange={e => set({ name: e.target.value })}
+                      placeholder="e.g. Primary Account"
+                      className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
+                  </FieldRow>
+                  <FieldRow label="Microsoft Email *">
+                    <Input type="email" value={form.email} onChange={e => set({ email: e.target.value })}
+                      placeholder="user@outlook.com"
+                      className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
+                  </FieldRow>
+                  <FieldRow label="Password *">
+                    <PasswordInput id="add-password" value={form.password} onChange={v => set({ password: v })}
+                      placeholder="Account password" />
+                  </FieldRow>
+                  <FieldRow label="TOTP / 2FA Secret"
+                    hint="Leave blank if the account doesn't use an authenticator app.">
+                    <Input value={form.totpSecret ?? ''} onChange={e => set({ totpSecret: e.target.value })}
+                      placeholder="Base32 TOTP secret (optional)"
+                      className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
+                  </FieldRow>
+                  <FieldRow label="Recovery Email">
+                    <Input type="email" value={form.recoveryEmail ?? ''} onChange={e => set({ recoveryEmail: e.target.value })}
+                      placeholder="recovery@example.com (optional)"
+                      className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
+                  </FieldRow>
+                </div>
+              )}
+
+              {/* Cookie capture panel */}
+              {authMethod === 'cookies' && (
+                <CookieCapturePanel
+                  form={form}
+                  set={set}
+                  onCaptured={(count) => setCookiesDone(count > 0)}
+                />
+              )}
             </TabsContent>
+
             <TabsContent value="proxy" className="pt-4">
               <ProxyTab proxy={(form.proxy ?? {}) as AccountProxy} setProxy={setProxy} />
             </TabsContent>
@@ -311,12 +435,9 @@ function AddDialog({ addAccount }: { addAccount: ReturnType<typeof useAccounts>[
           )}
 
           <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="font-mono text-xs uppercase">Cancel</Button>
-            <Button
-              type="submit"
-              disabled={addAccount.isPending || !canSubmit}
-              className="font-mono text-xs uppercase bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
+            <Button type="button" variant="outline" onClick={() => handleClose(false)} className="font-mono text-xs uppercase">Cancel</Button>
+            <Button type="submit" disabled={addAccount.isPending || !canSubmit}
+              className="font-mono text-xs uppercase bg-primary hover:bg-primary/90 text-primary-foreground">
               {addAccount.isPending ? 'Registering…' : 'Register'}
             </Button>
           </DialogFooter>
@@ -358,7 +479,6 @@ function EditDialog({
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    // Only send non-empty optional fields so we don't accidentally blank things out.
     const payload: AccountPatch = {
       name: form.name || undefined,
       email: form.email || undefined,
@@ -373,7 +493,7 @@ function EditDialog({
     if (form.saveFingerprint) payload.saveFingerprint = form.saveFingerprint;
 
     updateAccount.mutate({ id: account.id, data: payload }, {
-      onSuccess: () => { setOpen(false); },
+      onSuccess: () => setOpen(false),
       onError: (err: unknown) => setError(err instanceof Error ? err.message : String(err)),
     });
   };
@@ -430,7 +550,7 @@ function EditDialog({
                 <Input type="email" value={form.email ?? ''} onChange={e => set({ email: e.target.value })}
                   className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
               </FieldRow>
-              <FieldRow label="New Password">
+              <FieldRow label="New Password" hint="Leave blank to keep the current password.">
                 <PasswordInput id="edit-password" value={(form.password as string) ?? ''} onChange={v => set({ password: v })}
                   placeholder="Leave blank to keep current" />
               </FieldRow>
@@ -449,13 +569,11 @@ function EditDialog({
             <TabsContent value="proxy" className="pt-4">
               <ProxyTab proxy={(form.proxy ?? {}) as AccountProxy} setProxy={setProxy} />
             </TabsContent>
-
             <TabsContent value="options" className="pt-4">
               <OptionsTab form={form as AccountInput} set={patch => set(patch)} />
             </TabsContent>
           </Tabs>
 
-          {/* Session Reset */}
           <div className="pt-2 border-t border-border/40">
             <p className="font-mono text-xs uppercase text-muted-foreground mb-2 tracking-wider">Session Reset</p>
             <Button type="button" variant="outline" onClick={handleResync} disabled={updateAccount.isPending}
@@ -526,44 +644,34 @@ export default function Accounts() {
               </div>
             ) : (
               accounts.map(account => (
-                <div
-                  key={account.id}
-                  className="grid grid-cols-12 gap-4 p-4 items-center rounded bg-white/5 border border-transparent hover:border-border transition-colors group"
-                >
+                <div key={account.id}
+                  className="grid grid-cols-12 gap-4 p-4 items-center rounded bg-white/5 border border-transparent hover:border-border transition-colors group">
                   <div className="col-span-3 min-w-0">
                     <p className="font-bold text-sm text-white truncate">{account.name}</p>
                     <p className="font-mono text-xs text-muted-foreground truncate">{account.email}</p>
                   </div>
-
                   <div className="col-span-2">
                     <StatusChip status={account.status} />
                   </div>
-
                   <div className="col-span-2 text-right font-mono text-sm">
                     <div className="text-yellow-500">+{account.todayPoints}</div>
                     <div className="text-xs text-muted-foreground opacity-50">{account.totalPoints} total</div>
                   </div>
-
                   <div className="col-span-2 text-right font-mono text-sm">
                     {account.searchesCompleted || 0} / 50
                   </div>
-
                   <div className="col-span-2 font-mono text-xs text-muted-foreground">
                     {account.lastRun ? new Date(account.lastRun).toLocaleString(undefined, {
                       month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                     }) : 'Never'}
                   </div>
-
                   <div className="col-span-1 flex justify-center items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <EditDialog account={account} updateAccount={updateAccount} />
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                    <Button variant="ghost" size="icon"
                       onClick={() => deleteAccount.mutate({ id: account.id })}
                       disabled={deleteAccount.isPending}
                       className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8"
-                      title="Remove Target"
-                    >
+                      title="Remove Target">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
