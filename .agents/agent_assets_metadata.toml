@@ -48,3 +48,9 @@ id = "iZOqnfrD0H_O-QOsyS8rF"
 uri = "file://codebase-dump.txt"
 type = "text"
 title = "Macro Rewards — Full Annotated Codebase Dump"
+
+[[outputs]]
+id = "UCY-5USFTnPD2-O6iCrXV"
+uri = "file://automation-codebase-dump.txt"
+type = "text"
+title = "Automation Folder — Full Codebase Dump"
