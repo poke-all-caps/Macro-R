@@ -14,20 +14,24 @@
  *   NO_WINDOW     Set to "1" to skip launching the browser window
  */
 
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
+const http        = require("http");
+const fs          = require("fs");
+const net         = require("net");
+const path        = require("path");
 const { spawnSync, spawn } = require("child_process");
-const { randomBytes } = require("crypto");
-const storage = require("./account-storage");
+const { randomBytes }      = require("crypto");
+const storage     = require("./account-storage");
 
 // ─── Configuration ────────────────────────────────────────────────────────────
 
-const PORT = parseInt(process.env.PORT ?? "3000", 10);
-const MSRB_TOKEN = process.env.MSRB_TOKEN ?? randomBytes(24).toString("hex");
+const PORT        = parseInt(process.env.PORT ?? "3000", 10);
+const MSRB_TOKEN  = process.env.MSRB_TOKEN ?? randomBytes(24).toString("hex");
 const OPEN_WINDOW = process.env.NO_WINDOW !== "1";
 
-// Pre-built UI lives at <project-root>/dist-desk/
+/** Absolute path to the workspace root (two levels up from scripts/desk/). */
+const WORKSPACE_ROOT = path.resolve(__dirname, "../../");
+
+/** Pre-built UI lives at <project-root>/dist-desk/ */
 const UI_DIST = path.resolve(__dirname, "../../dist-desk");
 
 // ─── MIME types ───────────────────────────────────────────────────────────────
@@ -66,25 +70,21 @@ function readBody(req) {
     let raw = "";
     req.on("data", (chunk) => (raw += chunk));
     req.on("end", () => {
-      try {
-        resolve(raw ? JSON.parse(raw) : {});
-      } catch {
-        resolve({});
-      }
+      try { resolve(raw ? JSON.parse(raw) : {}); }
+      catch  { resolve({}); }
     });
     req.on("error", reject);
   });
 }
 
 function serveStatic(res, filePath) {
-  const ext = path.extname(filePath).toLowerCase();
+  const ext  = path.extname(filePath).toLowerCase();
   const mime = MIME[ext] ?? "application/octet-stream";
   try {
     const data = fs.readFileSync(filePath);
     res.writeHead(200, { "Content-Type": mime });
     res.end(data);
   } catch {
-    // File not found — serve SPA index.html
     try {
       const index = fs.readFileSync(path.join(UI_DIST, "index.html"));
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
@@ -96,29 +96,234 @@ function serveStatic(res, filePath) {
   }
 }
 
-// ─── Bot state ────────────────────────────────────────────────────────────────
+// ─── Agent IPC client (pure Node built-ins) ──────────────────────────────────
+//
+// The bot process writes its port + token to data/agent/agent.json.
+// We read that file and send JSON-newline messages over a TCP socket.
+
+const AGENT_STATE_FILE = path.join(WORKSPACE_ROOT, "data", "agent", "agent.json");
+
+/** In-memory log buffer (most recent first, capped at 150). */
+const logBuffer = [];
+const MAX_BUFFERED_LOGS = 150;
+let   logSocket = null;
+
+function _parseJson(raw) {
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+async function _readAgentState() {
+  try {
+    const raw   = await fs.promises.readFile(AGENT_STATE_FILE, "utf8");
+    const state = _parseJson(raw);
+    if (
+      !state ||
+      state.version !== 1 ||
+      !state.port   ||
+      !state.token  ||
+      !state.pid    ||
+      state.cwd !== WORKSPACE_ROOT
+    ) {
+      await fs.promises.rm(AGENT_STATE_FILE, { force: true }).catch(() => {});
+      return null;
+    }
+    return state;
+  } catch {
+    return null;
+  }
+}
+
+function _sendMessage(state, message, timeoutMs) {
+  return new Promise((resolve) => {
+    const socket = net.connect({ host: "127.0.0.1", port: state.port });
+    socket.setEncoding("utf8");
+    let buffer  = "";
+    let settled = false;
+
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      socket.end();
+      resolve(value);
+    };
+
+    const timer = setTimeout(() => { settled = true; socket.destroy(); resolve(null); }, timeoutMs);
+
+    socket.on("connect", () => {
+      socket.write(JSON.stringify({ token: state.token, ...message }) + "\n");
+    });
+    socket.on("data", (chunk) => {
+      buffer += chunk;
+      let nl = buffer.indexOf("\n");
+      while (nl >= 0) {
+        const line = buffer.slice(0, nl);
+        buffer = buffer.slice(nl + 1);
+        finish(_parseJson(line));
+        nl = buffer.indexOf("\n");
+      }
+    });
+    socket.on("error", () => finish(null));
+    socket.on("close",  () => finish(null));
+  });
+}
+
+async function getAgentStatus() {
+  const state = await _readAgentState();
+  if (!state) return { active: false, runState: "idle" };
+  const response = await _sendMessage(state, { type: "ping" }, 3000);
+  if (!response || response.type !== "pong") return { active: false, runState: "idle" };
+  return { active: true, pid: state.pid, runState: response.runState ?? "idle" };
+}
+
+async function requestAgentRun() {
+  const state = await _readAgentState();
+  if (!state) return { accepted: false, reason: "Agent offline" };
+  const response = await _sendMessage(state, { type: "run_now" }, 8000);
+  if (!response) return { accepted: false, reason: "IPC timeout — agent may be busy" };
+  return { accepted: response.accepted === true, reason: response.reason };
+}
+
+async function requestAgentStop() {
+  const state = await _readAgentState();
+  if (!state) return false;
+  const response = await _sendMessage(state, { type: "stop" }, 5000);
+  return !!response?.stopped;
+}
+
+function spawnBotProcess() {
+  // Try tsx.cmd (Windows) first, then tsx (Unix), then fall back to global tsx.
+  const candidates = [
+    path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx.cmd"),
+    path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx"),
+    "tsx",
+  ];
+  const tsxBin = candidates.find((p) => {
+    try { return p === "tsx" || fs.existsSync(p); } catch { return false; }
+  }) ?? "tsx";
+
+  console.log(`[bot] Spawning: ${tsxBin} src/index.ts --background`);
+
+  const child = spawn(tsxBin, ["src/index.ts", "--background"], {
+    cwd:      WORKSPACE_ROOT,
+    detached: true,
+    stdio:    "ignore",
+    env:      { ...process.env, MSRB_UI_CHILD: "1" },
+  });
+  // MUST handle 'error' or an ENOENT will crash this process.
+  child.on("error", (err) => {
+    console.error(`[bot] Failed to start: ${err.message}`);
+    _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "SPAWN-ERR",
+               message: `Failed to start bot: ${err.message}` });
+  });
+  child.unref();
+}
+
+async function waitForAgent(maxMs = 15000) {
+  const deadline = Date.now() + maxMs;
+  while (Date.now() < deadline) {
+    const status = await getAgentStatus();
+    if (status.active) return true;
+    await new Promise((r) => setTimeout(r, 500));
+  }
+  return false;
+}
+
+function _pushLog(entry) {
+  logBuffer.unshift({ time: new Date().toISOString(), ...entry });
+  if (logBuffer.length > MAX_BUFFERED_LOGS) logBuffer.pop();
+}
+
+/** Attach to the bot's log stream (idempotent). */
+async function ensureLogSubscription() {
+  if (logSocket && !logSocket.destroyed) return;
+  const state = await _readAgentState();
+  if (!state) return;
+
+  const socket = net.connect({ host: "127.0.0.1", port: state.port });
+  socket.setEncoding("utf8");
+  let buffer = "";
+
+  socket.on("connect", () => {
+    socket.write(JSON.stringify({ token: state.token, type: "attach" }) + "\n");
+  });
+  socket.on("data", (chunk) => {
+    buffer += chunk;
+    let nl = buffer.indexOf("\n");
+    while (nl >= 0) {
+      const line = buffer.slice(0, nl);
+      buffer = buffer.slice(nl + 1);
+      const msg = _parseJson(line);
+      if (msg?.type === "log" && msg.log) {
+        logBuffer.unshift(msg.log);
+        if (logBuffer.length > MAX_BUFFERED_LOGS) logBuffer.pop();
+      }
+      nl = buffer.indexOf("\n");
+    }
+  });
+  socket.on("close", () => { logSocket = null; });
+  socket.on("error", () => { logSocket = null; });
+  logSocket = socket;
+}
+
+// Kick off log subscription in background.
+void ensureLogSubscription();
+
+// ─── Bot state overlay ────────────────────────────────────────────────────────
 
 const botState = {
-  isRunning: false,
-  currentAccount: null,
-  lastRunAt: null,
+  isRunning:          false,
+  currentAccount:     null,
+  lastRunAt:          null,
   totalSearchesToday: 0,
-  activeRunId: null,
+  activeRunId:        null,
 };
+
+/** Sync account cards from run-log data after a run completes. */
+function syncAccountStatsFromLogs() {
+  try {
+    const logs     = storage.loadLogs();
+    const accounts = storage.loadAccounts();
+
+    // Build map: accountId → most-recent log entry
+    const latest = new Map();
+    for (const log of logs) {
+      if (!latest.has(log.accountId)) latest.set(log.accountId, log);
+    }
+
+    for (const account of accounts) {
+      const log = latest.get(account.id);
+      if (!log) continue;
+      const newStatus   = log.status === "success" ? "done" : log.status === "failed" ? "failed" : account.status;
+      const newPoints   = Math.max(account.totalPoints   ?? 0, log.pointsEarned ?? 0);
+      const newSearches = Math.max(account.searchesCompleted ?? 0, log.searchesDone ?? 0);
+      if (account.status !== newStatus || account.totalPoints !== newPoints || account.searchesCompleted !== newSearches) {
+        try {
+          storage.updateAccount(account.id, {
+            status:            newStatus,
+            totalPoints:       newPoints,
+            searchesCompleted: newSearches,
+            lastRun:           log.timestamp,
+          });
+        } catch { /* unknown id */ }
+      }
+    }
+  } catch { /* never crash the status endpoint */ }
+}
 
 // ─── Request router ───────────────────────────────────────────────────────────
 
 async function handleRequest(req, res) {
-  const url = new URL(req.url, `http://localhost:${PORT}`);
+  const url      = new URL(req.url, `http://localhost:${PORT}`);
   const pathname = url.pathname;
-  const method = req.method.toUpperCase();
+  const method   = req.method.toUpperCase();
 
   // CORS headers (localhost only)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-msrb-token");
   if (method === "OPTIONS") { res.writeHead(204); res.end(); return; }
 
-  // ── Public endpoints (no token required) ──────────────────────────────────
+  // ── Public endpoints ──────────────────────────────────────────────────────
   if (pathname === "/api/token" && method === "GET") {
     return sendJson(res, 200, { token: MSRB_TOKEN });
   }
@@ -126,9 +331,7 @@ async function handleRequest(req, res) {
     return sendJson(res, 200, { status: "ok" });
   }
 
-  // ── API routes ─────────────────────────────────────────────────────────────
-  // Token auth is skipped — the server binds to 127.0.0.1 only, which is
-  // localhost-only access. No external process can reach these endpoints.
+  // ── API routes ────────────────────────────────────────────────────────────
   if (pathname.startsWith("/api/")) {
 
     // GET /api/desk/accounts
@@ -143,9 +346,18 @@ async function handleRequest(req, res) {
       const { email, name } = body;
       if (!email || !name) return sendJson(res, 400, { error: "email and name are required" });
       try {
-        const account = storage.addAccount({ email, name });
-        return sendJson(res, 201, account);
+        return sendJson(res, 201, storage.addAccount({ email, name }));
       } catch (e) { return sendJson(res, 409, { error: e.message }); }
+    }
+
+    // PATCH /api/desk/accounts/:id
+    const patchMatch = pathname.match(/^\/api\/desk\/accounts\/(.+)$/);
+    if (patchMatch && method === "PATCH") {
+      const body = await readBody(req);
+      try {
+        const updated = storage.updateAccount(patchMatch[1], body);
+        return sendJson(res, 200, updated);
+      } catch (e) { return sendJson(res, 404, { error: e.message }); }
     }
 
     // DELETE /api/desk/accounts/:id
@@ -156,26 +368,61 @@ async function handleRequest(req, res) {
       return sendJson(res, 200, { success: true });
     }
 
-    // GET /api/desk/status
+    // GET /api/desk/status — real agent IPC check
     if (pathname === "/api/desk/status" && method === "GET") {
-      return sendJson(res, 200, botState);
+      try {
+        const agentStatus = await getAgentStatus();
+        const agentRunning = agentStatus.active && agentStatus.runState === "running";
+
+        // Detect run completion
+        if (!agentRunning && botState.isRunning) {
+          botState.isRunning      = false;
+          botState.activeRunId    = null;
+          botState.currentAccount = null;
+          botState.lastRunAt      = new Date().toISOString();
+          // Fix any accounts stuck in "running"
+          const accs = storage.loadAccounts();
+          for (const a of accs) {
+            if (a.status === "running") {
+              try { storage.updateAccount(a.id, { status: "done" }); } catch { /* ignore */ }
+            }
+          }
+          syncAccountStatsFromLogs();
+        }
+
+        return sendJson(res, 200, {
+          ...botState,
+          isRunning:   agentRunning || botState.isRunning,
+          agentActive: agentStatus.active,
+          agentPid:    agentStatus.pid ?? null,
+        });
+      } catch {
+        return sendJson(res, 200, { ...botState, agentActive: false });
+      }
     }
 
-    // GET /api/desk/logs
+    // GET /api/desk/logs — run history from disk
     if (pathname === "/api/desk/logs" && method === "GET") {
-      try { return sendJson(res, 200, storage.loadLogs()); }
+      void ensureLogSubscription();
+      try { return sendJson(res, 200, storage.loadLogs().slice(0, 50)); }
       catch (e) { return sendJson(res, 500, { error: e.message }); }
     }
 
-    // POST /api/desk/run-now
+    // GET /api/desk/agent-logs — live log stream buffer
+    if (pathname === "/api/desk/agent-logs" && method === "GET") {
+      return sendJson(res, 200, logBuffer.slice(0, 100));
+    }
+
+    // POST /api/desk/run-now — spawn bot + IPC run command
     if (pathname === "/api/desk/run-now" && method === "POST") {
       if (botState.isRunning) {
         return sendJson(res, 409, { started: false, message: "Bot is already running" });
       }
-      const body = await readBody(req);
+
+      const body     = await readBody(req);
       const accounts = storage.loadAccounts();
       const { accountIds } = body;
-      const targets = accountIds?.length
+      const targets  = accountIds?.length
         ? accounts.filter((a) => accountIds.includes(a.id))
         : accounts;
 
@@ -183,74 +430,105 @@ async function handleRequest(req, res) {
         return sendJson(res, 400, { started: false, message: "No accounts configured. Add accounts first." });
       }
 
-      const runId = `run-${randomBytes(4).toString("hex")}`;
-      botState.isRunning = true;
-      botState.activeRunId = runId;
-      botState.currentAccount = targets[0]?.name ?? null;
-      targets.forEach((t) => storage.updateAccount(t.id, { status: "running" }));
+      // Ensure agent is running
+      let agentStatus = await getAgentStatus();
+      if (!agentStatus.active) {
+        _pushLog({ userName: "DESK", level: "info", platform: "MAIN", title: "BOT-START",
+                   message: "Spawning bot background process…" });
+        spawnBotProcess();
+        const ready = await waitForAgent(15000);
+        if (!ready) {
+          _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "BOT-TIMEOUT",
+                     message: "Bot did not start in 15 s. Check pnpm install and src/accounts.json." });
+          return sendJson(res, 503, {
+            started: false,
+            message: "Bot process did not start within 15 seconds. Make sure `pnpm install` has been run.",
+          });
+        }
+        agentStatus = await getAgentStatus();
+        void ensureLogSubscription();
+      }
 
-      sendJson(res, 200, {
+      if (agentStatus.runState === "running") {
+        return sendJson(res, 409, { started: false, message: "Bot is already running a task" });
+      }
+
+      const result = await requestAgentRun();
+      if (!result.accepted) {
+        return sendJson(res, 409, { started: false, message: result.reason ?? "Bot rejected the run" });
+      }
+
+      const runId            = `run-${randomBytes(4).toString("hex")}`;
+      botState.isRunning     = true;
+      botState.activeRunId   = runId;
+      botState.currentAccount = targets[0]?.name ?? null;
+      targets.forEach((t) => {
+        try { storage.updateAccount(t.id, { status: "running" }); } catch { /* ignore */ }
+      });
+
+      _pushLog({ userName: "DESK", level: "info", platform: "MAIN", title: "RUN-START",
+                 message: `Run ${runId} started for ${targets.length} account(s)` });
+
+      return sendJson(res, 200, {
         started: true,
         message: `Run started for ${targets.length} account(s)`,
         runId,
       });
+    }
 
-      // Simulate automation — replace with your Playwright runner
-      (async () => {
-        for (const account of targets) {
-          botState.currentAccount = account.name;
-          console.log(`[run] Starting: ${account.name}`);
-
-          // ── Drop your Playwright/Patchright logic here ──────────────────
-          // const { runRewardsSearch } = require('../../src/core/rewards-runner');
-          // const result = await runRewardsSearch(account);
-          await new Promise((r) => setTimeout(r, 3000));
-
-          const searchesDone = 25 + Math.floor(Math.random() * 10);
-          const pointsEarned = searchesDone * 4 + Math.floor(Math.random() * 20);
-
-          storage.updateAccount(account.id, {
-            status: "done",
-            searchesCompleted: searchesDone,
-            todayPoints: (account.todayPoints ?? 0) + pointsEarned,
-            totalPoints: (account.totalPoints ?? 0) + pointsEarned,
-            lastRun: new Date().toISOString(),
-          });
-          storage.appendLog({
-            accountId: account.id,
-            accountName: account.name,
-            timestamp: new Date().toISOString(),
-            searchesDone,
-            pointsEarned,
-            status: "success",
-            errorMessage: null,
-          });
-          botState.totalSearchesToday += searchesDone;
-          console.log(`[run] Done: ${account.name} — ${searchesDone} searches, ${pointsEarned} pts`);
+    // POST /api/desk/stop
+    if (pathname === "/api/desk/stop" && method === "POST") {
+      const stopped = await requestAgentStop();
+      if (botState.activeRunId) {
+        botState.isRunning      = false;
+        botState.activeRunId    = null;
+        botState.currentAccount = null;
+        botState.lastRunAt      = new Date().toISOString();
+        const accs = storage.loadAccounts();
+        for (const a of accs) {
+          if (a.status === "running") {
+            try { storage.updateAccount(a.id, { status: "idle" }); } catch { /* ignore */ }
+          }
         }
-        botState.isRunning = false;
-        botState.activeRunId = null;
-        botState.currentAccount = null;
-        botState.lastRunAt = new Date().toISOString();
-        console.log("[run] All accounts complete.");
-      })().catch((err) => {
-        console.error("[run] Error:", err.message);
-        botState.isRunning = false;
-        botState.activeRunId = null;
-        botState.currentAccount = null;
-      });
+      }
+      return sendJson(res, 200, { stopped, message: stopped ? "Bot stopped" : "Bot was not running" });
+    }
 
-      return; // response already sent above
+    // POST /api/desk/seed-demo
+    if (pathname === "/api/desk/seed-demo" && method === "POST") {
+      const demos = [
+        { name: "Demo User A", email: "demo.a@outlook.com" },
+        { name: "Demo User B", email: "demo.b@hotmail.com" },
+        { name: "Demo User C", email: "demo.c@live.com" },
+        { name: "Demo User D", email: "demo.d@msn.com" },
+      ];
+      let added = 0;
+      const existing = storage.loadAccounts();
+      for (const d of demos) {
+        if (!existing.some((a) => a.email === d.email)) {
+          try { storage.addAccount(d); added++; } catch { /* skip */ }
+        }
+      }
+      return sendJson(res, 200, { added, total: storage.loadAccounts().length });
+    }
+
+    // DELETE /api/desk/seed-demo
+    if (pathname === "/api/desk/seed-demo" && method === "DELETE") {
+      const demoEmails = ["demo.a@outlook.com","demo.b@hotmail.com","demo.c@live.com","demo.d@msn.com"];
+      const before = storage.loadAccounts().length;
+      for (const a of storage.loadAccounts()) {
+        if (demoEmails.includes(a.email)) {
+          try { storage.deleteAccount(a.id); } catch { /* ignore */ }
+        }
+      }
+      return sendJson(res, 200, { removed: before - storage.loadAccounts().length, total: storage.loadAccounts().length });
     }
 
     return sendJson(res, 404, { error: "Unknown API route" });
   }
 
-  // ── Static file serving ────────────────────────────────────────────────────
-  // Strip the leading "/" before joining so path.join doesn't treat it as an
-  // absolute path root on Windows (e.g. "C:\assets\..." instead of the expected
-  // "C:\...\dist-desk\assets\...").
-  const rel = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  // ── Static file serving ───────────────────────────────────────────────────
+  const rel      = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
   const filePath = path.join(UI_DIST, rel);
   serveStatic(res, filePath);
 }
