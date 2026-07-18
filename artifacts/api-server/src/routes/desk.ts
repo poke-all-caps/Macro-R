@@ -56,6 +56,61 @@ const overlay: BotOverlay = {
 // Kick off log subscription in background on startup.
 void ensureLogSubscription();
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * After a run completes, read the most recent run log entry per account and
+ * update accounts.json with the accumulated points, searches, status and lastRun.
+ */
+function syncAccountStatsFromLogs(): void {
+  try {
+    const logs     = loadLogs();
+    const accounts = loadAccounts();
+
+    // Build a map: accountId → most recent log entry
+    const latest = new Map<string, ReturnType<typeof loadLogs>[number]>();
+    for (const log of logs) {
+      if (!latest.has(log.accountId)) latest.set(log.accountId, log);
+    }
+
+    let changed = false;
+    for (const account of accounts) {
+      const log = latest.get(account.id);
+      if (!log) continue;
+
+      const newStatus = log.status === "success" ? "done" : log.status === "failed" ? "failed" : account.status;
+      const newPoints = Math.max(account.totalPoints, log.pointsEarned);
+      const newSearches = Math.max(account.searchesCompleted, log.searchesDone);
+
+      if (
+        account.status !== newStatus ||
+        account.totalPoints !== newPoints ||
+        account.searchesCompleted !== newSearches
+      ) {
+        try {
+          updateAccount(account.id, {
+            status:            newStatus as "done" | "failed" | "idle" | "running",
+            totalPoints:       newPoints,
+            searchesCompleted: newSearches,
+            lastRun:           log.timestamp,
+          });
+          changed = true;
+        } catch { /* ignore unknown ids */ }
+      }
+    }
+
+    if (changed) {
+      pushLog({
+        userName: "DESK",
+        level:    "info",
+        platform: "MAIN",
+        title:    "SYNC",
+        message:  "Account stats synced from run logs.",
+      });
+    }
+  } catch { /* never crash the status endpoint */ }
+}
+
 // ─── Routes ──────────────────────────────────────────────────────────────────
 
 // GET /desk/accounts
@@ -129,6 +184,17 @@ router.get("/desk/status", async (_req, res): Promise<void> => {
       overlay.lastRunAt    = new Date().toISOString();
       overlay.activeRunId  = null;
       overlay.currentAccount = null;
+
+      // Sync account stats from the most recent run log per account
+      syncAccountStatsFromLogs();
+    }
+
+    // Also fix any accounts stuck in "running" status when the agent is idle
+    if (!isRunning) {
+      const stuckAccounts = loadAccounts().filter(a => a.status === "running");
+      for (const a of stuckAccounts) {
+        try { updateAccount(a.id, { status: "done" }); } catch { /* ignore */ }
+      }
     }
 
     res.json({
