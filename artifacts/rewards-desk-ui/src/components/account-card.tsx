@@ -41,8 +41,8 @@ export function AccountCard({ account, onRun, isRunningGlobal }: Props) {
   const stale = isSessionStale(account.lastRun);
   const noRun = account.lastRun === null;
 
-  const progressPercent = account.searchesCompleted > 0
-    ? Math.min((account.searchesCompleted / 30) * 100, 100)
+  const progressPercent = (account.searchesCompleted ?? 0) > 0
+    ? Math.min(((account.searchesCompleted ?? 0) / 30) * 100, 100)
     : 0;
 
   return (

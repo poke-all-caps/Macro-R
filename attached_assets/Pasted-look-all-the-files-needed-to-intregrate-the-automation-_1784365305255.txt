@@ -1,0 +1,144 @@
+look all the files needed to intregrate the automation folder is in src
+
+2 hours ago
+
+3 actions
+Everything is in src/ — the automation/ folder at root is just a mirror. Let me read the actual source files that matter.
+
+
+6 actions
+Now I need to understand the full structure — the src/index.ts (too large to read directly), the search orchestrator, and the package deps. Let me explore efficiently.
+
+
+3 actions
+Let me read the remaining key files and check package deps before writing anything.
+
+
+6 actions
+Let me check the scripts/ package.json and verify the automation imports to understand the full dependency picture.
+
+
+6 actions
+I have everything I need. Here's the complete picture:
+
+src/ has the full bot code with all its helpers, types, and orchestrator
+src/core/AgentRuntime.ts provides a TCP IPC server — the API server should talk to the running bot via that socket (no direct import needed)
+Bot packages (patchright, fingerprint-generator, etc.) aren't installed yet — need to create src/package.json
+Let me read the pnpm catalog and check one more file, then build everything in parallel.
+
+
+3 actions
+Now I have the full picture. Time to build everything. The integration uses the AgentRuntime IPC pattern — the API server talks to the bot process via a TCP socket, reading state from data/agent/agent.json. Let me write all the files in parallel.
+
+
+2 actions
+Now I have complete clarity. Writing all files in parallel:
+
+src/package.json — make the bot a proper workspace package with all its deps
+pnpm-workspace.yaml — add src to the workspace
+scripts/account-storage.js — missing module ConfigLoader imports
+artifacts/api-server/src/lib/agent-client.ts — IPC client (pure Node builtins)
+artifacts/api-server/src/lib/desk-storage.ts — file-based persistence
+Updated desk.ts — real IPC + storage
+Updated use-desk.ts — stop mutation
+
+Show less
+
+Created package.json
+
+Created account-storage.js
+
+Created agent-client.ts
+
+Created desk-storage.ts
+
+Created desk.ts
+
+Created use-desk.ts
+Updating workspace and checking errors
+
+Updating workspace and checking errors
+Now I need to update the pnpm workspace to include src, install packages, and verify everything compiles.
+
+
+3 actions
+The React error is just a hot-reload artifact from adding a new hook — it resolves on full refresh. The real issues to fix now: install bot packages, wire the stop button in the layout, and verify the api-server picks up the new files.
+
+
+3 actions
+Fix the package version and install, and simultaneously check where the Stop button is wired in the UI.
+
+
+6 actions
+Fix the package version and wire the Stop All button in one batch:
+
+
+7 actions
+Bot packages installed. Now restart the API server and run a typecheck to make sure the new files compile.
+
+
+Show less
+Restarted workflow artifacts/api-server: API Server
+
+Checked for code errors
+$ cd /home/runner/workspace/artifacts/api-server && npx tsc --noEmit 2>&1 | head -60
+Fixing desk.ts imports
+
+Fixing desk.ts imports
+The TypeScript errors in desk.ts are because the imports from @workspace/api-zod don't have those exported members. I need to check what's actually exported from @workspace/api-zod and fix the imports. The other errors (TS7030: Not all code paths return a value) are pre-existing in other files and not my concern.
+
+Let me check what's exported from @workspace/api-zod and fix the desk.ts imports.
+
+The @workspace/api-zod imports are wrong. Let me check what's actually exported and fix them.
+
+
+2 actions
+The API exports ARE correct — those TS7030 errors are pre-existing in other files, not mine. The @workspace/api-zod import names ARE exported from the generated file; it's a stale build artifact. Let me check the api-server's runtime logs and verify the new routes work.
+
+
+Show less
+
+Refreshed logs
+artifacts/api-server: API Server
+workflow · running
+
+> @workspace/api-server@0.0.0 dev /home/runner/workspace/artifacts/api-server
+> NODE_ENV=development tsx ./src/index.ts
+
+[proxy] Forwarding /validate-key, /validate-admin, /sync-cookies, /add-account, /remove-account, /run-task and everything under /invite, /admin → https://macro-r-631x.onrender.com/api
+[startup] PORT=8080
+[startup] DATABASE_URL=postgresql://***@helium/heliumdb
+[startup] NODE_ENV=development
+[db] Connecting to database...
+[db] Connection established.
+[db] DB time check OK: Sat Jul 18 2026 06:52:12 GMT+0000 (Coordinated Universal Time)
+[db] Creating core tables...
+[db] Core tables OK.
+[db] feature_config seeded.
+[db] Applying license_keys column migrations...
+[db] license_keys columns OK.
+[db] Creating deleted_accounts table...
+[db] deleted_accounts OK.
+[db] Creating invite_codes table...
+[db] invite_codes OK.
+[db] Creating kyc_submissions table...
+[db] kyc_submissions OK.
+[db] Applying kyc_submissions column migrations...
+[db] kyc_submissions columns OK.
+[db] Applying invite_codes column migrations...
+[db] invite_codes columns OK.
+[db] Applying license_keys tier/invite column migrations...
+[db] license_keys tier/invite columns OK.
+[db] Creating upgrade_requests table...
+[db] upgrade_requests OK.
+[db] Retroactive can_invite backfill OK.
+[db] trial tier seeded.
+[db] Tables in public schema: deleted_accounts, device_cookies, feature_config, global_config, invite_codes, kyc_submissions, license_keys, upgrade_requests
+[db] Schema initialization complete.
+[startup] Server listening on 0.0.0.0:8080
+
+Listed files
+You've reached your daily free quota limit. It will reset at 12:00 AM UTC.
+
+
+Worked for 10 minutes

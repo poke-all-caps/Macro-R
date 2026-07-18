@@ -118,7 +118,7 @@ function AccountCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const { status, runNow } = useBotStatus();
+  const { status, runNow, stopAll } = useBotStatus();
   const { accounts, isLoading } = useAccounts();
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -187,10 +187,12 @@ export default function Home() {
           </button>
           <div className="w-[1px] h-4 bg-slate-600 mx-1" />
           <button
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-all"
+            onClick={() => stopAll.mutate()}
+            disabled={!isRunning || stopAll.isPending}
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 transition-all"
           >
             <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
-            Stop All
+            {stopAll.isPending ? 'Stopping…' : 'Stop All'}
           </button>
         </div>
       </div>

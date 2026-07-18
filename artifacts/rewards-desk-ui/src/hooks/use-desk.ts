@@ -57,6 +57,7 @@ export function useAccounts() {
 }
 
 export function useBotStatus() {
+  const queryClient = useQueryClient();
   const query = useGetBotStatus({
     query: {
       queryKey: getGetBotStatusQueryKey(),
@@ -64,12 +65,33 @@ export function useBotStatus() {
     }
   });
 
-  const runNow = useRunNow();
+  const runNow = useRunNow({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetBotStatusQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
+      }
+    }
+  });
+
+  const stopAll = useMutation({
+    mutationFn: async () => {
+      const res = await fetch('/api/desk/stop', { method: 'POST' });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json() as Promise<{ stopped: boolean; message: string }>;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGetBotStatusQueryKey() });
+      queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
+      queryClient.invalidateQueries({ queryKey: getGetRunLogsQueryKey() });
+    },
+  });
 
   return {
     status: query.data,
     isLoading: query.isLoading,
     runNow,
+    stopAll,
   };
 }
 
@@ -81,8 +103,27 @@ export function useRunLogs() {
     }
   });
 
+  // Also fetch raw agent logs for live streaming
+  const agentLogs = useQuery({
+    queryKey: ['agent-logs'],
+    queryFn: async () => {
+      const res = await fetch('/api/desk/agent-logs');
+      if (!res.ok) return [];
+      return res.json() as Promise<Array<{
+        time: string;
+        userName: string;
+        level: string;
+        platform: string;
+        title: string;
+        message: string;
+      }>>;
+    },
+    refetchInterval: 2000,
+  });
+
   return {
     logs: query.data || [],
+    agentLogs: agentLogs.data || [],
     isLoading: query.isLoading,
   };
 }

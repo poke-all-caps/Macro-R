@@ -30,7 +30,7 @@ export function AccountGridTile({ account, onRun, isRunningGlobal }: Props) {
   const stale = isSessionStale(account.lastRun);
   const noRun = account.lastRun === null;
   const initial = account.name.charAt(0).toUpperCase();
-  const progressPercent = Math.min((account.searchesCompleted / 30) * 100, 100);
+  const progressPercent = Math.min(((account.searchesCompleted ?? 0) / 30) * 100, 100);
 
   return (
     <div

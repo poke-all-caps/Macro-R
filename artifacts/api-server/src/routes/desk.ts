@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { randomBytes, randomUUID } from "crypto";
+import { randomBytes } from "crypto";
 import {
   ListAccountsResponseItem,
   AddAccountBody,
@@ -10,110 +10,57 @@ import {
 } from "@workspace/api-zod";
 import { z } from "zod";
 
+import {
+  getAgentStatus,
+  requestAgentRun,
+  requestAgentStop,
+  spawnBotProcess,
+  waitForAgent,
+  getBufferedLogs,
+  ensureLogSubscription,
+  pushLog,
+} from "../lib/agent-client.js";
+
+import {
+  loadAccounts,
+  addAccount,
+  updateAccount,
+  deleteAccount,
+  loadLogs,
+  appendLog,
+  type DeskAccount,
+} from "../lib/desk-storage.js";
+
 const router = Router();
 
-// ─── In-memory state (desk prototype — no DB needed) ─────────────────────────
+// ─── In-memory bot state overlay ─────────────────────────────────────────────
+//
+// We track a lightweight overlay on top of the agent IPC state so the desk UI
+// can show "which account is currently running" without a separate IPC call on
+// every poll tick.
 
-interface DeskAccount {
-  id: string;
-  email: string;
-  name: string;
-  status: "idle" | "running" | "done" | "failed";
-  totalPoints: number;
-  todayPoints: number;
-  lastRun: string | null;
-  searchesCompleted: number;
-}
-
-interface BotState {
-  isRunning: boolean;
-  currentAccount: string | null;
-  lastRunAt: string | null;
+interface BotOverlay {
+  currentAccount:    string | null;
+  lastRunAt:         string | null;
   totalSearchesToday: number;
-  activeRunId: string | null;
+  activeRunId:       string | null;
 }
 
-interface RunLog {
-  id: string;
-  accountId: string;
-  accountName: string;
-  timestamp: string;
-  searchesDone: number;
-  pointsEarned: number;
-  status: "success" | "failed" | "running";
-  errorMessage: string | null;
-}
-
-// Seed some demo accounts
-const accounts: DeskAccount[] = [
-  {
-    id: "acc-001",
-    email: "demo.user1@outlook.com",
-    name: "Demo User 1",
-    status: "done",
-    totalPoints: 12450,
-    todayPoints: 120,
-    lastRun: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    searchesCompleted: 30,
-  },
-  {
-    id: "acc-002",
-    email: "demo.user2@hotmail.com",
-    name: "Demo User 2",
-    status: "idle",
-    totalPoints: 8340,
-    todayPoints: 0,
-    lastRun: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
-    searchesCompleted: 0,
-  },
-  {
-    id: "acc-003",
-    email: "rewards.acct3@live.com",
-    name: "Rewards Acct 3",
-    status: "failed",
-    totalPoints: 5200,
-    todayPoints: 45,
-    lastRun: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    searchesCompleted: 12,
-  },
-];
-
-const botState: BotState = {
-  isRunning: false,
-  currentAccount: null,
-  lastRunAt: null,
-  totalSearchesToday: accounts.reduce((s, a) => s + a.searchesCompleted, 0),
-  activeRunId: null,
+const overlay: BotOverlay = {
+  currentAccount:    null,
+  lastRunAt:         null,
+  totalSearchesToday: 0,
+  activeRunId:       null,
 };
 
-const runLogs: RunLog[] = [
-  {
-    id: randomUUID(),
-    accountId: "acc-001",
-    accountName: "Demo User 1",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    searchesDone: 30,
-    pointsEarned: 120,
-    status: "success",
-    errorMessage: null,
-  },
-  {
-    id: randomUUID(),
-    accountId: "acc-003",
-    accountName: "Rewards Acct 3",
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-    searchesDone: 12,
-    pointsEarned: 45,
-    status: "failed",
-    errorMessage: "Network request failed after 12 searches",
-  },
-];
+// Kick off log subscription in background on startup.
+void ensureLogSubscription();
 
 // ─── Routes ──────────────────────────────────────────────────────────────────
 
 // GET /desk/accounts
 router.get("/desk/accounts", (_req, res): void => {
-  res.json(accounts);
+  res.json(loadAccounts());
 });
 
 // POST /desk/accounts
@@ -123,178 +70,244 @@ router.post("/desk/accounts", (req, res): void => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const account: DeskAccount = {
-    id: `acc-${randomBytes(4).toString("hex")}`,
-    email: parsed.data.email,
-    name: parsed.data.name,
-    status: "idle",
-    totalPoints: 0,
-    todayPoints: 0,
-    lastRun: null,
-    searchesCompleted: 0,
-  };
-  accounts.push(account);
-  res.status(201).json(account);
+  try {
+    const account = addAccount({ email: parsed.data.email, name: parsed.data.name });
+    res.status(201).json(account);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(409).json({ error: message });
+  }
 });
 
 // PATCH /desk/accounts/:id
 router.patch("/desk/accounts/:id", (req, res): void => {
-  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const idx = accounts.findIndex((a) => a.id === raw);
-  if (idx === -1) {
-    res.status(404).json({ error: "Account not found" });
-    return;
-  }
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const body = z.object({
-    name:  z.string().min(1).optional(),
-    email: z.string().email().optional(),
+    name:   z.string().min(1).optional(),
+    email:  z.string().email().optional(),
     resync: z.boolean().optional(),
   }).safeParse(req.body);
   if (!body.success) {
     res.status(400).json({ error: body.error.message });
     return;
   }
-  if (body.data.name)  accounts[idx].name  = body.data.name;
-  if (body.data.email) accounts[idx].email = body.data.email;
-  if (body.data.resync) {
-    accounts[idx].status = "idle";
-    accounts[idx].searchesCompleted = 0;
-    accounts[idx].todayPoints = 0;
+  try {
+    const patch: Partial<DeskAccount> = {};
+    if (body.data.name)  patch.name  = body.data.name;
+    if (body.data.email) patch.email = body.data.email;
+    if (body.data.resync) {
+      patch.status           = "idle";
+      patch.searchesCompleted = 0;
+      patch.todayPoints      = 0;
+    }
+    const account = updateAccount(id, patch);
+    res.json(account);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(404).json({ error: message });
   }
-  res.json(accounts[idx]);
 });
 
 // DELETE /desk/accounts/:id
 router.delete("/desk/accounts/:id", (req, res): void => {
-  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
-  const idx = accounts.findIndex((a) => a.id === raw);
-  if (idx === -1) {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  if (!deleteAccount(id)) {
     res.status(404).json({ error: "Account not found" });
     return;
   }
-  accounts.splice(idx, 1);
   res.json({ success: true });
 });
 
+// GET /desk/status
+router.get("/desk/status", async (_req, res): Promise<void> => {
+  try {
+    const agentStatus = await getAgentStatus();
+    const isRunning   = agentStatus.active && agentStatus.runState === "running";
+
+    if (!isRunning && overlay.activeRunId) {
+      // Run finished — record final overlay state
+      overlay.lastRunAt    = new Date().toISOString();
+      overlay.activeRunId  = null;
+      overlay.currentAccount = null;
+    }
+
+    res.json({
+      isRunning,
+      currentAccount:    overlay.currentAccount,
+      lastRunAt:         overlay.lastRunAt,
+      totalSearchesToday: overlay.totalSearchesToday,
+      activeRunId:       overlay.activeRunId,
+      agentActive:       agentStatus.active,
+      agentPid:          agentStatus.pid,
+    });
+  } catch {
+    res.json({
+      isRunning:          false,
+      currentAccount:     null,
+      lastRunAt:          overlay.lastRunAt,
+      totalSearchesToday: overlay.totalSearchesToday,
+      activeRunId:        null,
+      agentActive:        false,
+    });
+  }
+});
+
 // POST /desk/run-now
-router.post("/desk/run-now", (req, res): void => {
+router.post("/desk/run-now", async (req, res): Promise<void> => {
   const parsed = RunNowBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
 
-  if (botState.isRunning) {
+  // Check if already running via the overlay (fast, no IPC)
+  if (overlay.activeRunId) {
     res.status(409).json({ started: false, message: "Bot is already running" });
     return;
   }
 
-  const runId = `run-${randomBytes(4).toString("hex")}`;
-  const targetIds = parsed.data.accountIds?.length
-    ? parsed.data.accountIds
-    : accounts.map((a) => a.id);
-
-  const targets = accounts.filter((a) => targetIds.includes(a.id));
-  if (targets.length === 0) {
-    res.status(400).json({ started: false, message: "No matching accounts found" });
+  const accounts = loadAccounts();
+  if (accounts.length === 0) {
+    res.status(400).json({ started: false, message: "No accounts configured. Add accounts first." });
     return;
   }
 
-  // Kick off a simulated run
-  botState.isRunning = true;
-  botState.activeRunId = runId;
-  botState.currentAccount = targets[0].name;
+  // ── Ensure agent is running ──────────────────────────────────────────────
+  let agentStatus = await getAgentStatus();
 
-  targets.forEach((a) => {
-    a.status = "running";
-  });
-
-  // Simulate completion after a short delay
-  let idx = 0;
-  const tick = () => {
-    if (idx >= targets.length) {
-      botState.isRunning = false;
-      botState.activeRunId = null;
-      botState.currentAccount = null;
-      botState.lastRunAt = new Date().toISOString();
+  if (!agentStatus.active) {
+    pushLog({
+      userName: "DESK",
+      level:    "info",
+      platform: "MAIN",
+      title:    "BOT-START",
+      message:  "Spawning bot background process…",
+    });
+    spawnBotProcess();
+    const ready = await waitForAgent(10_000);
+    if (!ready) {
+      res.status(503).json({
+        started: false,
+        message: "Bot process did not start within 10 seconds. Check that src/accounts.json exists and packages are installed.",
+      });
       return;
     }
-    const account = targets[idx];
-    const searches = 25 + Math.floor(Math.random() * 10);
-    const points = searches * 4 + Math.floor(Math.random() * 20);
-    account.status = "done";
-    account.searchesCompleted = searches;
-    account.todayPoints += points;
-    account.totalPoints += points;
-    account.lastRun = new Date().toISOString();
-    botState.totalSearchesToday += searches;
-    botState.currentAccount = targets[idx + 1]?.name ?? null;
-    runLogs.unshift({
-      id: randomUUID(),
-      accountId: account.id,
-      accountName: account.name,
-      timestamp: new Date().toISOString(),
-      searchesDone: searches,
-      pointsEarned: points,
-      status: "success",
-      errorMessage: null,
-    });
-    // Keep only 50 logs
-    if (runLogs.length > 50) runLogs.pop();
-    idx++;
-    setTimeout(tick, 2500 + Math.random() * 1500);
-  };
-  setTimeout(tick, 1000);
+    agentStatus = await getAgentStatus();
+    // Re-subscribe to logs after the new process starts
+    void ensureLogSubscription();
+  }
 
-  res.json({ started: true, message: `Run started for ${targets.length} account(s)`, runId });
+  if (agentStatus.runState === "running") {
+    res.status(409).json({ started: false, message: "Bot is already running a task" });
+    return;
+  }
+
+  // ── Send run_now via IPC ─────────────────────────────────────────────────
+  const result = await requestAgentRun();
+
+  if (!result.accepted) {
+    res.status(409).json({ started: false, message: result.reason ?? "Bot rejected the run" });
+    return;
+  }
+
+  const runId = `run-${randomBytes(4).toString("hex")}`;
+  overlay.activeRunId    = runId;
+  overlay.currentAccount = accounts[0]?.name ?? null;
+
+  // Update account statuses to "running"
+  const targetIds = parsed.data.accountIds?.length
+    ? parsed.data.accountIds
+    : accounts.map(a => a.id);
+  for (const id of targetIds) {
+    try { updateAccount(id, { status: "running" }); } catch { /* ignore unknown ids */ }
+  }
+
+  pushLog({
+    userName: "DESK",
+    level:    "info",
+    platform: "MAIN",
+    title:    "RUN-START",
+    message:  `Run ${runId} started for ${targetIds.length} account(s)`,
+  });
+
+  res.json({ started: true, message: `Run started for ${targetIds.length} account(s)`, runId });
 });
 
-// GET /desk/status
-router.get("/desk/status", (_req, res): void => {
-  res.json(botState);
+// POST /desk/stop
+router.post("/desk/stop", async (_req, res): Promise<void> => {
+  const stopped = await requestAgentStop();
+
+  if (overlay.activeRunId) {
+    overlay.activeRunId    = null;
+    overlay.currentAccount = null;
+    overlay.lastRunAt      = new Date().toISOString();
+  }
+
+  // Mark all running accounts as idle
+  const accounts = loadAccounts();
+  for (const account of accounts) {
+    if (account.status === "running") {
+      try { updateAccount(account.id, { status: "idle" }); } catch { /* ignore */ }
+    }
+  }
+
+  pushLog({
+    userName: "DESK",
+    level:    "info",
+    platform: "MAIN",
+    title:    "STOP-REQUESTED",
+    message:  stopped ? "Stop signal sent to bot" : "Bot was not running",
+  });
+
+  res.json({ stopped, message: stopped ? "Stop signal sent" : "Bot was not running" });
 });
 
 // GET /desk/logs
+//
+// Returns a merged view: buffered agent logs + desk run-logs from disk.
+// Sorted by time, most recent first.
 router.get("/desk/logs", (_req, res): void => {
-  res.json(runLogs.slice(0, 50));
+  // Refresh subscription in case the bot restarted
+  void ensureLogSubscription();
+
+  const diskLogs = loadLogs();
+  res.json(diskLogs.slice(0, 50));
 });
 
-// POST /desk/seed-demo — add a batch of demo accounts for dev/preview purposes
+// GET /desk/agent-logs — raw agent log stream buffer
+router.get("/desk/agent-logs", (_req, res): void => {
+  res.json(getBufferedLogs().slice(0, 100));
+});
+
+// POST /desk/seed-demo — add demo accounts for dev/preview
 router.post("/desk/seed-demo", (_req, res): void => {
-  const demoAccounts = [
+  const demos = [
     { name: "Demo User A", email: "demo.a@outlook.com" },
     { name: "Demo User B", email: "demo.b@hotmail.com" },
     { name: "Demo User C", email: "demo.c@live.com" },
     { name: "Demo User D", email: "demo.d@msn.com" },
   ];
-
   let added = 0;
-  for (const d of demoAccounts) {
-    const alreadyExists = accounts.some(a => a.email === d.email);
-    if (!alreadyExists) {
-      accounts.push({
-        id: randomUUID(),
-        email: d.email,
-        name: d.name,
-        status: "idle",
-        totalPoints: Math.floor(Math.random() * 20000) + 1000,
-        todayPoints: Math.floor(Math.random() * 500),
-        lastRun: null,
-        searchesCompleted: Math.floor(Math.random() * 50),
-      });
-      added++;
+  const existing = loadAccounts();
+  for (const d of demos) {
+    if (!existing.some(a => a.email === d.email)) {
+      try { addAccount(d); added++; } catch { /* skip duplicates */ }
     }
   }
-
-  res.json({ added, total: accounts.length });
+  res.json({ added, total: loadAccounts().length });
 });
 
-// DELETE /desk/seed-demo — remove all demo accounts
+// DELETE /desk/seed-demo — remove demo accounts
 router.delete("/desk/seed-demo", (_req, res): void => {
-  const before = accounts.length;
   const demoEmails = ["demo.a@outlook.com", "demo.b@hotmail.com", "demo.c@live.com", "demo.d@msn.com"];
-  accounts.splice(0, accounts.length, ...accounts.filter(a => !demoEmails.includes(a.email)));
-  res.json({ removed: before - accounts.length, total: accounts.length });
+  const accounts = loadAccounts();
+  const before = accounts.length;
+  for (const a of accounts) {
+    if (demoEmails.includes(a.email)) {
+      try { deleteAccount(a.id); } catch { /* ignore */ }
+    }
+  }
+  res.json({ removed: before - loadAccounts().length, total: loadAccounts().length });
 });
 
 export default router;
