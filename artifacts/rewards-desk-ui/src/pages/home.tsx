@@ -5,6 +5,7 @@ import { Play, AlertCircle, Loader2, Square, Power } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 import type { DeskAccount } from '@workspace/api-client-react';
+import { AddAccountDialog } from '@/components/add-account-dialog';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -117,7 +118,7 @@ function AccountCard({
 
 export default function Home() {
   const { toast } = useToast();
-  const { accounts, isLoading } = useAccounts();
+  const { accounts, isLoading, addAccount } = useAccounts();
   const { status, runNow, stopAll } = useBotStatus();
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -242,6 +243,9 @@ export default function Home() {
               </button>
             ))}
           </div>
+
+          {/* Add Account */}
+          <AddAccountDialog addAccount={addAccount} />
 
           {/* Start All / Stop All */}
           <div className="flex items-center shrink-0 bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
