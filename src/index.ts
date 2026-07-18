@@ -1679,11 +1679,6 @@ async function main(): Promise<void> {
 }
 
 async function runBackgroundAgent(rewardsBot: MicrosoftRewardsBot): Promise<number> {
-    if (!rewardsBot.pluginManager.hasOfficialCoreEntitlement()) {
-        rewardsBot.logger.warn('main', 'AGENT', 'Background agent requires Core with a valid license.')
-        return 0
-    }
-
     rewardsBot.dashboardRunState = 'idle'
     rewardsBot.logger.info('main', 'AGENT', 'Background agent connected. Waiting for dashboard commands.')
     await new Promise<void>(() => undefined)

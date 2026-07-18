@@ -126,7 +126,7 @@
         "enabled": true
     },
     "backgroundAgent": {
-        "enabled": false,
+        "enabled": true,
         "allowDashboardAutostart": false,
         "openConsole": false
     },
