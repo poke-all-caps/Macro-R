@@ -1,4 +1,0 @@
-*.sh text eol=lf
-*.template text eol=lf
-plugins/official-core.json text eol=lf
-plugins/official-core.sig text eol=lf
