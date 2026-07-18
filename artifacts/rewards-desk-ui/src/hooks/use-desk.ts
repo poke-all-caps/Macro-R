@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   useListAccounts,
   getListAccountsQueryKey,
-  useAddAccount,
   useDeleteAccount,
   useRunNow,
   useGetBotStatus,
@@ -11,16 +10,55 @@ import {
   getGetRunLogsQueryKey
 } from '@workspace/api-client-react';
 
+export interface AccountProxy {
+  url?: string;
+  port?: number | string;
+  username?: string;
+  password?: string;
+}
+
+export interface AccountInput {
+  email: string;
+  name: string;
+  password: string;
+  totpSecret?: string;
+  recoveryEmail?: string;
+  geoLocale?: string;
+  langCode?: string;
+  proxy?: AccountProxy;
+  saveFingerprint?: { mobile?: boolean; desktop?: boolean };
+}
+
+export interface AccountPatch {
+  name?: string;
+  email?: string;
+  password?: string;
+  totpSecret?: string;
+  recoveryEmail?: string;
+  geoLocale?: string;
+  langCode?: string;
+  proxy?: AccountProxy;
+  saveFingerprint?: { mobile?: boolean; desktop?: boolean };
+  resync?: boolean;
+}
+
 export function useAccounts() {
   const queryClient = useQueryClient();
   const query = useListAccounts();
 
-  const addAccount = useAddAccount({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
-      }
-    }
+  const addAccount = useMutation({
+    mutationFn: async (data: AccountInput) => {
+      const res = await fetch('/api/desk/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getListAccountsQueryKey() });
+    },
   });
 
   const deleteAccount = useDeleteAccount({
@@ -32,7 +70,7 @@ export function useAccounts() {
   });
 
   const updateAccount = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: { name?: string; email?: string; resync?: boolean } }) => {
+    mutationFn: async ({ id, data }: { id: string; data: AccountPatch }) => {
       const res = await fetch(`/api/desk/accounts/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

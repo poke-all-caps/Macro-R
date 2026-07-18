@@ -343,10 +343,17 @@ async function handleRequest(req, res) {
     // POST /api/desk/accounts
     if (pathname === "/api/desk/accounts" && method === "POST") {
       const body = await readBody(req);
-      const { email, name } = body;
-      if (!email || !name) return sendJson(res, 400, { error: "email and name are required" });
+      const { email, name, password, totpSecret, recoveryEmail, geoLocale, langCode, proxy, saveFingerprint } = body;
+      if (!email || !name || !password) return sendJson(res, 400, { error: "email, name, and password are required" });
       try {
-        return sendJson(res, 201, storage.addAccount({ email, name }));
+        const account = storage.addAccount({ email, name });
+        try {
+          storage.addBotAccount({ email, password, totpSecret, recoveryEmail, geoLocale, langCode, proxy, saveFingerprint });
+        } catch (botErr) {
+          // Non-fatal: desk record was created; bot store may be encrypted.
+          return sendJson(res, 201, { ...account, _warning: botErr.message });
+        }
+        return sendJson(res, 201, account);
       } catch (e) { return sendJson(res, 409, { error: e.message }); }
     }
 
@@ -355,7 +362,22 @@ async function handleRequest(req, res) {
     if (patchMatch && method === "PATCH") {
       const body = await readBody(req);
       try {
+        // Look up old email before patching so we can mirror the change to the bot store.
+        const accounts = storage.loadAccounts();
+        const existing = accounts.find((a) => a.id === patchMatch[1]);
         const updated = storage.updateAccount(patchMatch[1], body);
+        if (existing) {
+          storage.updateBotAccount(existing.email, {
+            email: body.email,
+            password: body.password,
+            totpSecret: body.totpSecret,
+            recoveryEmail: body.recoveryEmail,
+            geoLocale: body.geoLocale,
+            langCode: body.langCode,
+            proxy: body.proxy,
+            saveFingerprint: body.saveFingerprint,
+          });
+        }
         return sendJson(res, 200, updated);
       } catch (e) { return sendJson(res, 404, { error: e.message }); }
     }
@@ -363,8 +385,12 @@ async function handleRequest(req, res) {
     // DELETE /api/desk/accounts/:id
     const delMatch = pathname.match(/^\/api\/desk\/accounts\/(.+)$/);
     if (delMatch && method === "DELETE") {
+      // Fetch the email before deletion so we can remove from the bot store too.
+      const allAccounts = storage.loadAccounts();
+      const target = allAccounts.find((a) => a.id === delMatch[1]);
       const removed = storage.deleteAccount(delMatch[1]);
       if (!removed) return sendJson(res, 404, { error: "Account not found" });
+      if (target) storage.deleteBotAccount(target.email);
       return sendJson(res, 200, { success: true });
     }
 

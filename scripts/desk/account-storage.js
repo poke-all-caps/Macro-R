@@ -224,12 +224,116 @@ function clearLogs() {
   writeJson(LOGS_FILE, []);
 }
 
+// ─── Bot engine account store (src/accounts.json) ────────────────────────────
+// These functions keep src/accounts.json (the file the bot actually reads) in
+// sync with any changes made through the desk UI.
+
+const BOT_ACCOUNTS_FILE = path.resolve(__dirname, "../../src/accounts.json");
+const BOT_ACCOUNTS_ENC_FILE = path.resolve(__dirname, "../../src/accounts.enc.json");
+
+/**
+ * Returns true when the bot store is encrypted (accounts.enc.json exists).
+ * In that case we skip writes silently — the user must manage credentials via CLI.
+ */
+function isBotStoreEncrypted() {
+  return fs.existsSync(BOT_ACCOUNTS_ENC_FILE);
+}
+
+function loadBotAccounts() {
+  if (isBotStoreEncrypted()) return [];
+  return readJson(BOT_ACCOUNTS_FILE, []);
+}
+
+/**
+ * Add a full account entry to src/accounts.json.
+ * Throws if the store is encrypted or the email already exists.
+ */
+function addBotAccount({ email, password, totpSecret = "", recoveryEmail = "", geoLocale = "auto", langCode = "en", proxy = {}, saveFingerprint = {} }) {
+  if (isBotStoreEncrypted()) {
+    throw new Error("Bot accounts are encrypted — manage credentials via the CLI.");
+  }
+  const accounts = loadBotAccounts();
+  if (accounts.find((a) => a.email === email)) {
+    throw new Error(`Bot account ${email} already exists`);
+  }
+  const entry = {
+    email,
+    enabled: true,
+    password: password || "",
+    totpSecret: totpSecret || "",
+    recoveryEmail: recoveryEmail || "",
+    geoLocale: geoLocale || "auto",
+    langCode: langCode || "en",
+    dashboardMode: "auto",
+    strictProxy: "auto",
+    proxy: {
+      proxyAxios: true,
+      url: proxy.url || "",
+      port: Number(proxy.port) || 0,
+      username: proxy.username || "",
+      password: proxy.password || "",
+    },
+    saveFingerprint: {
+      mobile: Boolean(saveFingerprint.mobile),
+      desktop: Boolean(saveFingerprint.desktop),
+    },
+  };
+  accounts.push(entry);
+  writeJson(BOT_ACCOUNTS_FILE, accounts);
+}
+
+/**
+ * Update an existing bot account entry identified by its current email.
+ * Only the fields present in `patch` are changed.
+ */
+function updateBotAccount(currentEmail, patch) {
+  if (isBotStoreEncrypted()) return; // silently skip — store is encrypted
+  const accounts = loadBotAccounts();
+  const idx = accounts.findIndex((a) => a.email === currentEmail);
+  if (idx === -1) return; // account not in bot store — that's fine, skip
+  const acc = accounts[idx];
+  if (patch.email !== undefined) acc.email = patch.email;
+  if (patch.password !== undefined) acc.password = patch.password;
+  if (patch.totpSecret !== undefined) acc.totpSecret = patch.totpSecret;
+  if (patch.recoveryEmail !== undefined) acc.recoveryEmail = patch.recoveryEmail;
+  if (patch.geoLocale !== undefined) acc.geoLocale = patch.geoLocale;
+  if (patch.langCode !== undefined) acc.langCode = patch.langCode;
+  if (patch.proxy !== undefined) {
+    acc.proxy = {
+      ...acc.proxy,
+      ...patch.proxy,
+      port: Number(patch.proxy.port) || acc.proxy.port || 0,
+    };
+  }
+  if (patch.saveFingerprint !== undefined) {
+    acc.saveFingerprint = { ...acc.saveFingerprint, ...patch.saveFingerprint };
+  }
+  accounts[idx] = acc;
+  writeJson(BOT_ACCOUNTS_FILE, accounts);
+}
+
+/**
+ * Remove an account from src/accounts.json by email.
+ */
+function deleteBotAccount(email) {
+  if (isBotStoreEncrypted()) return;
+  const accounts = loadBotAccounts();
+  const filtered = accounts.filter((a) => a.email !== email);
+  if (filtered.length !== accounts.length) {
+    writeJson(BOT_ACCOUNTS_FILE, filtered);
+  }
+}
+
 module.exports = {
   loadAccounts,
   saveAccounts,
   addAccount,
   updateAccount,
   deleteAccount,
+  addBotAccount,
+  updateBotAccount,
+  deleteBotAccount,
+  isBotStoreEncrypted,
   loadSession,
   saveSession,
   getSessionItem,
