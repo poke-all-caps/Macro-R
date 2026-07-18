@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
+import { useToast } from '@/hooks/use-toast';
 import { Play, AlertCircle, Loader2, Square, Power } from 'lucide-react';
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
@@ -81,34 +82,31 @@ function AccountCard({
 
       {/* ── Footer: action buttons ── */}
       <div className="flex items-center gap-2 pt-3 border-t border-slate-700/50">
-        {/* Circular re-sync / settings shortcut */}
         <Link href="/accounts">
           <button
             title="Settings"
-            className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-[hsl(220,38%,9%)] border border-slate-700 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition-colors shadow-sm"
+            className="w-8 h-8 rounded-full bg-slate-700/50 hover:bg-slate-700 flex items-center justify-center transition-colors shrink-0"
           >
-            <Power className="w-4 h-4" />
+            <Power className="w-3.5 h-3.5 text-slate-400" />
           </button>
         </Link>
 
-        {/* Search pill buttons */}
-        <button
-          onClick={() => onRun(account.id)}
-          disabled={isRunning || globalRunning}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
-        >
-          {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-white" />}
-          <span>{isRunning ? 'Running…' : 'Search'}</span>
-        </button>
+        <div className="flex-1" />
 
         <button
-          disabled={globalRunning}
-          className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-full text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-opacity shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}
+          onClick={() => onRun(account.id)}
+          disabled={globalRunning || isRunning}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all',
+            isRunning
+              ? 'bg-blue-500/20 text-blue-400 cursor-default'
+              : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-40'
+          )}
         >
-          <Play className="w-3.5 h-3.5 fill-white" />
-          <span>Search</span>
+          {isRunning
+            ? <><Loader2 className="w-3 h-3 animate-spin" /> Running</>
+            : <><Play className="w-3 h-3 fill-emerald-400" /> Run</>
+          }
         </button>
       </div>
     </div>
@@ -118,11 +116,87 @@ function AccountCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const { status, runNow, stopAll } = useBotStatus();
+  const { toast } = useToast();
   const { accounts, isLoading } = useAccounts();
+  const { status, runNow, stopAll } = useBotStatus();
   const [filter, setFilter] = useState<Filter>('all');
 
   const isRunning = status?.isRunning ?? false;
+
+  const filtered = accounts.filter(a => {
+    if (filter === 'all')     return true;
+    if (filter === 'running') return a.status === 'running';
+    if (filter === 'done')    return a.status === 'done';
+    if (filter === 'failed')  return a.status === 'failed';
+    if (filter === 'idle')    return !a.status || a.status === 'idle';
+    return true;
+  });
+
+  function handleRunOne(id: string) {
+    runNow.mutate(
+      { data: { accountIds: [id] } },
+      {
+        onError: (err) => {
+          toast({
+            title: 'Failed to start',
+            description: err instanceof Error ? err.message : 'Unknown error — check the Logs page.',
+            variant: 'destructive',
+          });
+        },
+      }
+    );
+  }
+
+  function handleRunAll() {
+    if (accounts.length === 0) {
+      toast({
+        title: 'No accounts',
+        description: 'Add at least one account before running.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    runNow.mutate(
+      { data: { accountIds: accounts.map(a => a.id) } },
+      {
+        onSuccess: (data) => {
+          toast({
+            title: 'Started',
+            description: (data as { message?: string })?.message ?? 'Bot is now running.',
+          });
+        },
+        onError: (err) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          // Try to parse JSON error body from the server
+          let detail = msg;
+          try {
+            const parsed = JSON.parse(msg) as { message?: string };
+            if (parsed.message) detail = parsed.message;
+          } catch { /* ignore */ }
+          toast({
+            title: 'Failed to start',
+            description: detail,
+            variant: 'destructive',
+          });
+        },
+      }
+    );
+  }
+
+  function handleStopAll() {
+    stopAll.mutate(undefined, {
+      onSuccess: () => {
+        toast({ title: 'Stopped', description: 'All automation stopped.' });
+      },
+      onError: (err) => {
+        toast({
+          title: 'Stop failed',
+          description: err instanceof Error ? err.message : 'Unknown error.',
+          variant: 'destructive',
+        });
+      },
+    });
+  }
 
   const counts = {
     all:     accounts.length,
@@ -132,16 +206,7 @@ export default function Home() {
     idle:    accounts.filter(a => !a.status || a.status === 'idle').length,
   };
 
-  const filtered = filter === 'all' ? accounts : accounts.filter(a => {
-    if (filter === 'idle') return !a.status || a.status === 'idle';
-    return a.status === filter;
-  });
-
-  const handleRunOne = (id: string) => {
-    if (!isRunning) runNow.mutate({ data: { accountIds: [id] } });
-  };
-
-  const PILLS: { key: Filter; label: string }[] = [
+  const FILTERS: { key: Filter; label: string }[] = [
     { key: 'all',     label: `All (${counts.all})` },
     { key: 'running', label: `Running (${counts.running})` },
     { key: 'done',    label: `Done (${counts.done})` },
@@ -149,51 +214,58 @@ export default function Home() {
   ];
 
   return (
-    <div className="px-6 py-6 space-y-5 min-h-full">
+    <div className="p-6 max-w-7xl mx-auto w-full space-y-5">
 
-      {/* ── Page title ───────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl font-bold text-white">Accounts</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage and run your automation targets</p>
-      </div>
-
-      {/* ── Filter pills + command pill ───────────────────────────────────── */}
-      <div className="flex items-center justify-between w-full gap-4">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {PILLS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              className={cn(
-                'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border',
-                filter === key
-                  ? 'bg-white text-black border-white'
-                  : 'bg-[hsl(220,30%,17%)] text-slate-300 border-transparent hover:bg-[hsl(220,30%,22%)] hover:text-white'
-              )}
-            >
-              {label}
-            </button>
-          ))}
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Accounts</h2>
+          <p className="text-sm text-muted-foreground">Manage and run your automation targets</p>
         </div>
 
-        <div className="flex items-center shrink-0 bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
-          <button
-            onClick={() => runNow.mutate({ data: { accountIds: accounts.map(a => a.id) } })}
-            disabled={isRunning}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-50 transition-all"
-          >
-            <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
-            Start All
-          </button>
-          <div className="w-[1px] h-4 bg-slate-600 mx-1" />
-          <button
-            onClick={() => stopAll.mutate()}
-            disabled={!isRunning || stopAll.isPending}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 transition-all"
-          >
-            <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
-            {stopAll.isPending ? 'Stopping…' : 'Stop All'}
-          </button>
+        {/* Filter pills + action bar */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Filter pills */}
+          <div className="flex items-center gap-1">
+            {FILTERS.map(f => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-sm font-medium transition-colors',
+                  filter === f.key
+                    ? 'bg-white text-black'
+                    : 'text-muted-foreground hover:text-white'
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Start All / Stop All */}
+          <div className="flex items-center shrink-0 bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
+            <button
+              onClick={handleRunAll}
+              disabled={isRunning || runNow.isPending}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-50 transition-all"
+            >
+              {runNow.isPending
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
+              }
+              {runNow.isPending ? 'Starting…' : 'Start All'}
+            </button>
+            <div className="w-[1px] h-4 bg-slate-600 mx-1" />
+            <button
+              onClick={handleStopAll}
+              disabled={!isRunning || stopAll.isPending}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 transition-all"
+            >
+              <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
+              {stopAll.isPending ? 'Stopping…' : 'Stop All'}
+            </button>
+          </div>
         </div>
       </div>
 
