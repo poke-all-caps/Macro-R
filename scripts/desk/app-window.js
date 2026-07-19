@@ -290,8 +290,16 @@ const CAPTURE_DIR     = path.join(DATA_DIR, "agent");
 
 function resolveTsx() {
   const candidates = [
+    // workspace root (populated when running `pnpm install` at root)
     path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx.cmd"),
     path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx"),
+    // api-server's own node_modules (always present after pnpm install)
+    path.join(WORKSPACE_ROOT, "artifacts", "api-server", "node_modules", ".bin", "tsx.cmd"),
+    path.join(WORKSPACE_ROOT, "artifacts", "api-server", "node_modules", ".bin", "tsx"),
+    // scripts package node_modules
+    path.join(WORKSPACE_ROOT, "scripts", "node_modules", ".bin", "tsx.cmd"),
+    path.join(WORKSPACE_ROOT, "scripts", "node_modules", ".bin", "tsx"),
+    // global / PATH fallback
     "tsx",
   ];
   return candidates.find((p) => {
