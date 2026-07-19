@@ -73,12 +73,15 @@ async function main() {
         writeStatus({
             status: 'failed',
             error:
-                'Patchright Chromium not installed. Run this once in your project:\n' +
-                '  node .\\node_modules\\patchright\\cli.js install chromium\n' +
+                'Patchright Chromium not installed. Run this once:\n' +
+                '  node .\\node_modules\\.pnpm\\patchright@1.61.1\\node_modules\\patchright\\cli.js install chromium\n' +
                 'Then try again.',
         })
         process.exit(1)
     }
+
+    // Tell the UI which binary we resolved so the user can verify it.
+    writeStatus({ status: 'opening', step: 'launching', executablePath })
 
     // Give the browser 30 s to launch. If it hangs for any reason the process
     // would otherwise spin forever at 'opening'.
@@ -93,22 +96,23 @@ async function main() {
                 '--disable-blink-features=Attestation',
                 '--window-size=960,680',
                 '--window-position=120,80',
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
             ],
         }),
         new Promise<never>((_, reject) =>
             setTimeout(
                 () => reject(new Error(
-                    'Browser failed to open within 30 s. ' +
-                    'Run: node .\\node_modules\\patchright\\cli.js install chromium'
+                    `Browser failed to open within 30 s.\nBinary used: ${executablePath}\n` +
+                    'Try: node .\\node_modules\\.pnpm\\patchright@1.61.1\\node_modules\\patchright\\cli.js install chromium'
                 )),
                 LAUNCH_TIMEOUT_MS
             )
         ),
     ])
 
+    writeStatus({ status: 'opening', step: 'creating-context', executablePath })
     const context = await browser.newContext()
+
+    writeStatus({ status: 'opening', step: 'new-page', executablePath })
     const page = await context.newPage()
 
     // Set a title so the user knows which window to use
@@ -118,6 +122,8 @@ async function main() {
         })
     })
 
+    writeStatus({ status: 'opening', step: 'navigating', executablePath })
+    // (page.goto follows immediately below — status advances to 'waiting' after)
     writeStatus({ status: 'waiting' })
 
     // Go straight to the Rewards login page so the session lands with the

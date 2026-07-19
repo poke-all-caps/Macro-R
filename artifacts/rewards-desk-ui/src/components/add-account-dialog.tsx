@@ -316,9 +316,17 @@ function CookieCapturePanel({
                 <p className="text-destructive/80">{status.error}</p>
               )}
               {!isDone && !isFailed && (
-                <p className="text-muted-foreground">
-                  A Chromium window has opened on the server. Sign in there, then wait — this dialog will update automatically.
-                </p>
+                <div className="text-muted-foreground space-y-1">
+                  {status?.status === 'waiting'
+                    ? <p>Sign in inside the Chromium window, then wait — this dialog updates automatically.</p>
+                    : status?.step
+                    ? <p>Step: <span className="text-primary/80">{status.step}</span></p>
+                    : <p>Starting…</p>
+                  }
+                  {status?.executablePath && (
+                    <p className="text-[10px] break-all text-muted-foreground/60">Binary: {status.executablePath}</p>
+                  )}
+                </div>
               )}
               <div className="flex gap-2 pt-1">
                 {isFailed && (
