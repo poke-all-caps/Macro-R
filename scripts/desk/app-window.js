@@ -208,6 +208,7 @@ function spawnBotProcess() {
     cwd:      WORKSPACE_ROOT,
     detached: true,
     stdio:    "ignore",
+    shell:    tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat"),
     env:      { ...process.env, MSRB_UI_CHILD: "1" },
   });
   // MUST handle 'error' or an ENOENT will crash this process.
@@ -603,6 +604,7 @@ async function handleRequest(req, res) {
       const child = spawn(tsxBin, [scriptPath, sessionId, email, statusFile], {
         cwd:   WORKSPACE_ROOT,
         stdio: "ignore",
+        shell: tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat"),
         env:   { ...process.env },
       });
       child.on("error", (err) => {
