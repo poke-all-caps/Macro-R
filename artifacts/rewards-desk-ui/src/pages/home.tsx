@@ -255,29 +255,32 @@ export default function Home() {
           {/* Add Account */}
           <AddAccountDialog addAccount={addAccount} />
 
-          {/* Start All / Stop All */}
-          <div className="flex items-center shrink-0 bg-[#121827] border border-slate-700 rounded-full p-1 shadow-sm">
+          {/* Run All / Stop toggle */}
+          {isRunning ? (
+            <button
+              onClick={handleStopAll}
+              disabled={stopAll.isPending}
+              className="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold bg-rose-500/15 border border-rose-500/30 text-rose-400 hover:bg-rose-500/25 hover:border-rose-500/50 disabled:opacity-50 transition-all shadow-sm"
+            >
+              {stopAll.isPending
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <Square className="w-3.5 h-3.5 fill-rose-400" />
+              }
+              {stopAll.isPending ? 'Stopping…' : 'Stop'}
+            </button>
+          ) : (
             <button
               onClick={handleRunAll}
-              disabled={isRunning || runNow.isPending}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-50 transition-all"
+              disabled={runNow.isPending}
+              className="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 hover:border-emerald-500/50 disabled:opacity-50 transition-all shadow-sm"
             >
               {runNow.isPending
                 ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                : <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
+                : <Play className="w-3.5 h-3.5 fill-emerald-400" />
               }
-              {runNow.isPending ? 'Starting…' : 'Start All'}
+              {runNow.isPending ? 'Starting…' : 'Run All'}
             </button>
-            <div className="w-[1px] h-4 bg-slate-600 mx-1" />
-            <button
-              onClick={handleStopAll}
-              disabled={!isRunning || stopAll.isPending}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 transition-all"
-            >
-              <Square className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
-              {stopAll.isPending ? 'Stopping…' : 'Stop All'}
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
