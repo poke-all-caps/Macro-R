@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useBotStatus, useAccounts } from '@/hooks/use-desk';
 import { useToast } from '@/hooks/use-toast';
 import { Play, AlertCircle, Loader2, Square, Power } from 'lucide-react';
@@ -123,6 +123,14 @@ export default function Home() {
   const [filter, setFilter] = useState<Filter>('all');
 
   const isRunning = status?.isRunning ?? false;
+
+  // Reset the stopAll mutation once the bot is no longer running so the
+  // button never stays stuck in "Stopping…" after the run finishes.
+  useEffect(() => {
+    if (!isRunning && stopAll.isPending) {
+      stopAll.reset();
+    }
+  }, [isRunning]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filtered = accounts.filter(a => {
     if (filter === 'all')     return true;
