@@ -233,24 +233,28 @@ const BOT_ACCOUNTS_ENC_FILE = path.resolve(__dirname, "../../src/accounts.enc.js
 
 /**
  * Returns true when the bot store is encrypted (accounts.enc.json exists).
- * In that case we skip writes silently — the user must manage credentials via CLI.
+ * NOTE: This no longer blocks reads or writes — it only warns.
+ * Encryption is not yet implemented; the enc file is treated as a stale
+ * artefact and plain-JSON access proceeds normally in all cases.
  */
 function isBotStoreEncrypted() {
   return fs.existsSync(BOT_ACCOUNTS_ENC_FILE);
 }
 
 function loadBotAccounts() {
-  if (isBotStoreEncrypted()) return [];
+  if (isBotStoreEncrypted()) {
+    console.warn("[account-storage] accounts.enc.json found but encryption is not implemented — using plain JSON store.");
+  }
   return readJson(BOT_ACCOUNTS_FILE, []);
 }
 
 /**
  * Add a full account entry to src/accounts.json.
- * Throws if the store is encrypted or the email already exists.
+ * Throws only if the email already exists.
  */
 function addBotAccount({ email, password, totpSecret = "", recoveryEmail = "", geoLocale = "auto", langCode = "en", proxy = {}, saveFingerprint = {} }) {
   if (isBotStoreEncrypted()) {
-    throw new Error("Bot accounts are encrypted — manage credentials via the CLI.");
+    console.warn("[account-storage] accounts.enc.json found but encryption is not implemented — writing to plain JSON store.");
   }
   const accounts = loadBotAccounts();
   if (accounts.find((a) => a.email === email)) {
@@ -287,7 +291,9 @@ function addBotAccount({ email, password, totpSecret = "", recoveryEmail = "", g
  * Only the fields present in `patch` are changed.
  */
 function updateBotAccount(currentEmail, patch) {
-  if (isBotStoreEncrypted()) return; // silently skip — store is encrypted
+  if (isBotStoreEncrypted()) {
+    console.warn("[account-storage] accounts.enc.json found but encryption is not implemented — updating plain JSON store.");
+  }
   const accounts = loadBotAccounts();
   const idx = accounts.findIndex((a) => a.email === currentEmail);
   if (idx === -1) return; // account not in bot store — that's fine, skip
@@ -316,7 +322,9 @@ function updateBotAccount(currentEmail, patch) {
  * Remove an account from src/accounts.json by email.
  */
 function deleteBotAccount(email) {
-  if (isBotStoreEncrypted()) return;
+  if (isBotStoreEncrypted()) {
+    console.warn("[account-storage] accounts.enc.json found but encryption is not implemented — deleting from plain JSON store.");
+  }
   const accounts = loadBotAccounts();
   const filtered = accounts.filter((a) => a.email !== email);
   if (filtered.length !== accounts.length) {
