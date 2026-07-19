@@ -165,6 +165,11 @@ function CookieCapturePanel({
     failed:    'Capture failed',
   };
 
+  // Error from the POST itself (before a session was even created)
+  const startError = !capture.sessionId && capture.start.isError
+    ? (capture.start.error instanceof Error ? capture.start.error.message : String(capture.start.error))
+    : null;
+
   return (
     <div className="space-y-4">
       <FieldRow label="Alias *">
@@ -184,9 +189,25 @@ function CookieCapturePanel({
           disabled={!form.email || !form.name || capture.start.isPending}
           onClick={handleLaunch}
           className="w-full font-mono text-xs uppercase bg-primary/90 hover:bg-primary text-primary-foreground">
-          <Globe className="w-4 h-4 mr-2" />
-          Launch Login Browser
+          {capture.start.isPending
+            ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            : <Globe className="w-4 h-4 mr-2" />}
+          {capture.start.isPending ? 'Launching…' : 'Launch Login Browser'}
         </Button>
+      )}
+
+      {startError && (
+        <div className="rounded border border-destructive/30 bg-destructive/10 px-4 py-3 space-y-2 font-mono text-xs">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+            <span className="text-destructive">Failed to start capture session</span>
+          </div>
+          <p className="text-destructive/80">{startError}</p>
+          <Button type="button" size="sm" variant="outline" onClick={handleLaunch}
+            className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
+            Retry
+          </Button>
+        </div>
       )}
 
       {capture.sessionId && (
