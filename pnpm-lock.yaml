@@ -808,6 +808,10 @@ importers:
         version: 0.31.9
 
   scripts:
+    dependencies:
+      patchright:
+        specifier: ^1.61.1
+        version: 1.61.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

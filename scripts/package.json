@@ -6,6 +6,9 @@
     "hello": "tsx ./src/hello.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "dependencies": {
+    "patchright": "^1.61.1"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "tsx": "catalog:"

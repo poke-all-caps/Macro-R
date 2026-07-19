@@ -102,7 +102,23 @@ async function main() {
 }
 
 main().catch(err => {
-    const msg = err instanceof Error ? err.message : String(err)
+    const raw = err instanceof Error ? err.message : String(err)
+
+    // Distil the long Playwright/Patchright error into one readable line.
+    let msg = raw.split('\n')[0].trim()
+
+    // Detect "no display" failures that occur in headless/server environments.
+    if (
+        raw.includes('libglib') ||
+        raw.includes('cannot open shared object') ||
+        raw.includes('DISPLAY') ||
+        raw.includes('no display') ||
+        raw.includes('target page, context or browser has been closed') ||
+        raw.toLowerCase().includes('error while loading shared')
+    ) {
+        msg = 'Cookie capture requires a desktop environment. Run the bot locally (node scripts/desk/app-window.js) where a real browser window can open.'
+    }
+
     writeStatus({ status: 'failed', error: msg })
     process.exit(1)
 })

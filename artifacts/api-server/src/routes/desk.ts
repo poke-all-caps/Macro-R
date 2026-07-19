@@ -1,5 +1,8 @@
 import { Router } from "express";
 import { randomBytes } from "crypto";
+import fs from "fs";
+import path from "path";
+import { spawn } from "child_process";
 import {
   ListAccountsResponseItem,
   AddAccountBody,
@@ -19,6 +22,7 @@ import {
   getBufferedLogs,
   ensureLogSubscription,
   pushLog,
+  WORKSPACE_ROOT,
 } from "../lib/agent-client.js";
 
 import {
@@ -30,6 +34,31 @@ import {
   appendLog,
   type DeskAccount,
 } from "../lib/desk-storage.js";
+
+// ─── Cookie-capture session registry ─────────────────────────────────────────
+
+interface CaptureSession {
+  child: ReturnType<typeof spawn>;
+  statusFile: string;
+  email: string;
+}
+const captureSessions = new Map<string, CaptureSession>();
+
+const CAPTURE_DIR = path.join(WORKSPACE_ROOT, "data", "agent");
+
+/** Resolve the tsx binary — prefer the api-server's own node_modules. */
+function resolveTsx(): string {
+  const candidates = [
+    path.join(WORKSPACE_ROOT, "artifacts", "api-server", "node_modules", ".bin", "tsx"),
+    path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx"),
+    "tsx",
+  ];
+  return candidates.find(p => p === "tsx" || fs.existsSync(p)) ?? "tsx";
+}
+
+function readCaptureStatus(statusFile: string): Record<string, unknown> | null {
+  try { return JSON.parse(fs.readFileSync(statusFile, "utf8")); } catch { return null; }
+}
 
 const router = Router();
 
@@ -374,6 +403,70 @@ router.delete("/desk/seed-demo", (_req, res): void => {
     }
   }
   res.json({ removed: before - loadAccounts().length, total: loadAccounts().length });
+});
+
+// ─── Cookie-capture routes ────────────────────────────────────────────────────
+
+// POST /desk/capture-session — spawn the cookie-capture browser helper
+router.post("/desk/capture-session", (req, res): void => {
+  const email = ((req.body as Record<string, unknown>)?.email as string | undefined ?? "").trim();
+  if (!email) { res.status(400).json({ error: "email is required" }); return; }
+
+  const sessionId  = randomBytes(6).toString("hex");
+  const statusFile = path.join(CAPTURE_DIR, `capture-${sessionId}.json`);
+  fs.mkdirSync(CAPTURE_DIR, { recursive: true });
+
+  const tsxBin     = resolveTsx();
+  const scriptPath = path.join(WORKSPACE_ROOT, "scripts", "desk", "cookie-capture.ts");
+
+  const child = spawn(tsxBin, [scriptPath, sessionId, email, statusFile], {
+    cwd:   WORKSPACE_ROOT,
+    stdio: "ignore",
+    env:   { ...process.env },
+  });
+
+  child.on("error", (err: Error) => {
+    try {
+      fs.writeFileSync(statusFile, JSON.stringify({ sessionId, email, status: "failed", error: err.message }, null, 2));
+    } catch { /* best-effort */ }
+  });
+
+  child.on("exit", (code: number | null) => {
+    const s = readCaptureStatus(statusFile);
+    if (s && s["status"] !== "done") {
+      try {
+        fs.writeFileSync(statusFile, JSON.stringify({ ...s, status: "failed", error: `Process exited with code ${code}` }, null, 2));
+      } catch { /* best-effort */ }
+    }
+    captureSessions.delete(sessionId);
+  });
+
+  captureSessions.set(sessionId, { child, statusFile, email });
+  res.json({ sessionId });
+});
+
+// GET /desk/capture-session/:id — poll status
+router.get("/desk/capture-session/:id", (req, res): void => {
+  const sid  = req.params.id;
+  const sess = captureSessions.get(sid);
+  const statusFile = sess
+    ? sess.statusFile
+    : path.join(CAPTURE_DIR, `capture-${sid}.json`);
+  const status = readCaptureStatus(statusFile);
+  if (!status) { res.status(404).json({ error: "Session not found" }); return; }
+  res.json(status);
+});
+
+// DELETE /desk/capture-session/:id — abort
+router.delete("/desk/capture-session/:id", (req, res): void => {
+  const sid  = req.params.id;
+  const sess = captureSessions.get(sid);
+  if (sess) {
+    try { sess.child.kill(); } catch { /* ignore */ }
+    captureSessions.delete(sid);
+  }
+  try { fs.rmSync(path.join(CAPTURE_DIR, `capture-${sid}.json`), { force: true }); } catch { /* ignore */ }
+  res.json({ aborted: true });
 });
 
 export default router;
