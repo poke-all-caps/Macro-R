@@ -36,6 +36,21 @@ function writeStatus(obj: Record<string, unknown>) {
     }
 }
 
+/** Save cookies from context to disk. Returns { count, sessionFile } or null on failure. */
+async function persistCookies(context: { cookies(): Promise<unknown[]> }): Promise<{ count: number; sessionFile: string } | null> {
+    try {
+        const cookies = await context.cookies()
+        if (cookies.length === 0) return null
+        const sessionDir = path.join(ROOT, 'sessions', email)
+        fs.mkdirSync(sessionDir, { recursive: true })
+        const sessionFile = path.join(sessionDir, 'session_desktop.json')
+        fs.writeFileSync(sessionFile, JSON.stringify(cookies, null, 2), 'utf8')
+        return { count: cookies.length, sessionFile }
+    } catch {
+        return null
+    }
+}
+
 async function main() {
     writeStatus({ status: 'opening' })
 
@@ -70,32 +85,55 @@ async function main() {
         { waitUntil: 'domcontentloaded' }
     )
 
-    // Wait until the user finishes signing in and lands somewhere useful.
-    // We accept the rewards page OR the account overview page.
-    await page.waitForURL(
-        url => {
-            const h = url.toString()
-            return (
-                (h.includes('rewards.microsoft.com') && !h.includes('/auth') && !h.includes('login')) ||
-                (h.includes('account.microsoft.com') && !h.includes('login'))
-            )
-        },
-        { timeout: 600_000 } // 10 minutes — plenty of time for manual login
-    )
+    try {
+        // Wait until the user finishes signing in and lands somewhere useful.
+        // We accept the rewards page OR the account overview page.
+        await page.waitForURL(
+            url => {
+                const h = url.toString()
+                return (
+                    (h.includes('rewards.microsoft.com') && !h.includes('/auth') && !h.includes('login')) ||
+                    (h.includes('account.microsoft.com') && !h.includes('login'))
+                )
+            },
+            { timeout: 600_000 } // 10 minutes — plenty of time for manual login
+        )
+    } catch (waitErr) {
+        const msg = waitErr instanceof Error ? waitErr.message : String(waitErr)
+        const isBrowserClosed =
+            msg.includes('Target closed') ||
+            msg.includes('target page, context or browser has been closed') ||
+            msg.includes('Browser closed') ||
+            msg.includes('Context was destroyed')
+
+        // Passkey and Windows Hello close the browser window automatically after
+        // successful authentication. Treat a browser-close as a graceful exit:
+        // whatever cookies the context accumulated are still readable and should
+        // be saved so the bot can use the session without re-logging in.
+        if (isBrowserClosed) {
+            const saved = await persistCookies(context)
+            if (saved && saved.count > 0) {
+                writeStatus({ status: 'done', cookieCount: saved.count, sessionFile: saved.sessionFile })
+                process.exit(0)
+            }
+            // Browser closed before login completed — fall through to error
+            writeStatus({ status: 'failed', error: 'Browser was closed before sign-in completed.' })
+            process.exit(1)
+        }
+        throw waitErr
+    }
 
     writeStatus({ status: 'capturing' })
 
     // Grab every cookie the context has accumulated across all domains.
-    const cookies = await context.cookies()
+    const saved = await persistCookies(context)
+    if (!saved) {
+        writeStatus({ status: 'failed', error: 'No cookies captured — try signing in again.' })
+        await browser.close()
+        process.exit(1)
+    }
 
-    // Persist to the same path the bot's ConfigLoader expects:
-    // sessions/<email>/session_desktop.json
-    const sessionDir = path.join(ROOT, 'sessions', email)
-    fs.mkdirSync(sessionDir, { recursive: true })
-    const sessionFile = path.join(sessionDir, 'session_desktop.json')
-    fs.writeFileSync(sessionFile, JSON.stringify(cookies, null, 2), 'utf8')
-
-    writeStatus({ status: 'done', cookieCount: cookies.length, sessionFile })
+    writeStatus({ status: 'done', cookieCount: saved.count, sessionFile: saved.sessionFile })
 
     await browser.close()
     process.exit(0)
@@ -113,7 +151,6 @@ main().catch(err => {
         raw.includes('cannot open shared object') ||
         raw.includes('DISPLAY') ||
         raw.includes('no display') ||
-        raw.includes('target page, context or browser has been closed') ||
         raw.toLowerCase().includes('error while loading shared')
     ) {
         msg = 'Cookie capture requires a desktop environment. Run the bot locally (node scripts/desk/app-window.js) where a real browser window can open.'

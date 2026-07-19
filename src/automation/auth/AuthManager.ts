@@ -79,10 +79,46 @@ export class AuthManager {
         this.recoveryStrategy = new RecoveryStrategy(this.bot)
     }
 
+    /**
+     * Quick pre-check: navigate to rewards.bing.com and see if existing
+     * browser-context cookies already give an authenticated session.
+     * Returns true if the page lands on rewards.bing.com without being
+     * redirected to a login page — meaning the full OAuth round-trip can be skipped.
+     */
+    private async hasValidSession(page: Page): Promise<boolean> {
+        try {
+            await page.goto('https://rewards.bing.com/', {
+                waitUntil: 'domcontentloaded',
+                timeout: 10_000,
+            }).catch(() => {})
+            await this.bot.utils.wait(1500)
+            const url = page.url()
+            const isOnRewards = url.includes('rewards.bing.com') || url.includes('rewards.microsoft.com')
+            const isOnLogin   = url.includes('login.') || url.includes('login.live') || url.includes('account.live') || url.includes('loginwelcome')
+            return isOnRewards && !isOnLogin
+        } catch {
+            return false
+        }
+    }
+
     async login(page: Page, account: Account) {
         try {
             this.bot.logger.info(this.bot.isMobile, 'LOGIN', 'Starting login process')
 
+            // If session cookies are already loaded into the context (e.g. from a
+            // prior cookie-capture run), skip the full OAuth round-trip entirely.
+            const sessionValid = await this.hasValidSession(page)
+            if (sessionValid) {
+                this.bot.logger.info(
+                    this.bot.isMobile,
+                    'LOGIN',
+                    'Existing session is valid — skipping full login flow'
+                )
+                await this.finalizeLogin(page, account)
+                return
+            }
+
+            // No valid session — proceed with the Rewards sign-in/enrollment scenario.
             // Enter via the Rewards sign-in/enrollment scenario, NOT /dashboard. The
             // `createuser?...&userScenarioId=anonsignin` entry forces Microsoft's full
             // OAuth round-trip, which is what mints the rewards.bing.com session cookie.
