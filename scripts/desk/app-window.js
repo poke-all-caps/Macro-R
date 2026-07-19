@@ -197,11 +197,10 @@ function spawnBotProcess() {
 
   console.log(`[bot] Spawning: ${tsxBin} src/index.ts --background`);
 
-  const child = spawn(tsxBin, ["src/index.ts", "--background"], {
+  const child = spawnTsx(tsxBin, ["src/index.ts", "--background"], {
     cwd:      WORKSPACE_ROOT,
     detached: true,
     stdio:    "ignore",
-    shell:    tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat"),
     env:      { ...process.env, MSRB_UI_CHILD: "1" },
   });
   // MUST handle 'error' or an ENOENT will crash this process.
@@ -299,6 +298,19 @@ function resolveTsx() {
   return candidates.find((p) => {
     try { return p === "tsx" || fs.existsSync(p); } catch { return false; }
   }) ?? "tsx";
+}
+
+/**
+ * Spawn tsx safely on all platforms.
+ * On Windows, .cmd files must be invoked via `cmd.exe /c` to avoid both the
+ * EINVAL error (no shell) and the DEP0190 deprecation warning (shell + args).
+ */
+function spawnTsx(tsxBin, args, options = {}) {
+  const isCmd = tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat");
+  if (isCmd) {
+    return spawn("cmd.exe", ["/c", tsxBin, ...args], { ...options, shell: false });
+  }
+  return spawn(tsxBin, args, { ...options, shell: false });
 }
 
 function readCaptureStatus(statusFile) {
@@ -594,10 +606,9 @@ async function handleRequest(req, res) {
       const tsxBin     = resolveTsx();
       const scriptPath = path.join(WORKSPACE_ROOT, "scripts", "desk", "cookie-capture.ts");
 
-      const child = spawn(tsxBin, [scriptPath, sessionId, email, statusFile], {
+      const child = spawnTsx(tsxBin, [scriptPath, sessionId, email, statusFile], {
         cwd:   WORKSPACE_ROOT,
         stdio: "ignore",
-        shell: tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat"),
         env:   { ...process.env },
       });
       child.on("error", (err) => {
