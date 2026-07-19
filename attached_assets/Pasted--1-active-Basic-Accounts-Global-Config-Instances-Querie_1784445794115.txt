@@ -1,0 +1,143 @@
+
+1 active
+—
+Basic
+Accounts
+Global Config
+Instances
+Queries
+Logs
+Settings
+System Terminal
+IDLE
+AGENT ONLINE
+Live Output
+Run History
+↓ Following
+── Macro Rewards Agent Terminal ── connected ──
+07:22:01.507
+MAIN
+INFO
+DESK
+[BOT-START]
+Spawning bot background process…
+07:22:03.040
+MAIN
+INFO
+MAIN
+[RUN-START]
+Starting Microsoft Rewards Script | v0.0.0 | Accounts: 1 | Clusters: 1
+07:22:03.041
+MAIN
+INFO
+adventurepoke2
+[ACCOUNT-START]
+Starting account: adventurepoke2@gmail.com | geoLocale: auto
+07:22:03.042
+MAIN
+INFO
+adventurepoke2
+[FLOW]
+Starting session for adventurepoke2@gmail.com
+07:22:03.043
+MOBILE
+INFO
+adventurepoke2
+[BROWSER]
+Initializing browser — detecting available channel (Chromium › Chrome › Edge)...
+07:22:03.043
+MOBILE
+INFO
+adventurepoke2
+[BROWSER]
+Using browser channel: chromium (Patchright bundled)
+07:22:05.135
+MOBILE
+INFO
+adventurepoke2
+[BROWSER]
+Created browser with User-Agent: "Mozilla/5.0 (Linux; Android 14; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Mobile Safari/537.36"
+07:22:05.274
+MAIN
+INFO
+adventurepoke2
+[BROWSER]
+Mobile Browser started | adventurepoke2@gmail.com
+07:22:05.275
+MOBILE
+INFO
+adventurepoke2
+[LOGIN]
+Starting login process
+07:22:17.457
+MOBILE
+INFO
+adventurepoke2
+[LOGIN]
+Entering email
+07:22:24.995
+MOBILE
+INFO
+adventurepoke2
+[LOGIN-ENTER-EMAIL]
+Email submitted
+07:22:30.008
+MOBILE
+INFO
+adventurepoke2
+[LOGIN]
+Email entered successfully
+07:22:36.647
+MOBILE
+INFO
+adventurepoke2
+[LOGIN]
+Entering email
+07:22:43.746
+MOBILE
+INFO
+adventurepoke2
+[LOGIN-ENTER-EMAIL]
+Email submitted
+07:22:48.755
+MOBILE
+INFO
+adventurepoke2
+[LOGIN]
+Email entered successfully
+07:22:55.400
+MOBILE
+INFO
+adventurepoke2
+[LOGIN]
+State transition: EMAIL_INPUT → ERROR_ALERT
+07:22:55.406
+MOBILE
+ERROR
+adventurepoke2
+[LOGIN]
+Account error: There was an issue looking up your account. Tap Next to try again.
+07:22:55.407
+MOBILE
+ERROR
+adventurepoke2
+[LOGIN]
+Fatal error: Microsoft login error: There was an issue looking up your account. Tap Next to try again.
+07:22:57.481
+MOBILE
+INFO
+adventurepoke2
+[CLOSE-BROWSER]
+Browser closed cleanly!
+07:22:57.482
+MOBILE
+ERROR
+adventurepoke2
+[FLOW]
+Mobile flow failed for adventurepoke2@gmail.com: Microsoft login error: There was an issue looking up your account. Tap Next to try again.
+07:22:57.522
+MAIN
+INFO
+adventurepoke2
+[RUN-END]
+Completed all accounts | Accounts processed: 1 | Total points collected: +0 | Old total: 0 → New total: 0 | Total runtime: 0.9min
