@@ -192,15 +192,8 @@ async function requestAgentStop() {
 }
 
 function spawnBotProcess() {
-  // Try tsx.cmd (Windows) first, then tsx (Unix), then fall back to global tsx.
-  const candidates = [
-    path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx.cmd"),
-    path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx"),
-    "tsx",
-  ];
-  const tsxBin = candidates.find((p) => {
-    try { return p === "tsx" || fs.existsSync(p); } catch { return false; }
-  }) ?? "tsx";
+  // Try tsx in every known location before falling back to global tsx.
+  const tsxBin = resolveTsx();
 
   console.log(`[bot] Spawning: ${tsxBin} src/index.ts --background`);
 
