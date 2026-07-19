@@ -9,7 +9,9 @@ import type { DashboardVariant } from '../types/Dashboard'
 import { writeJsonAtomic } from './AtomicFile'
 import { validateAccounts, validateConfig } from './SchemaValidator'
 
-const { createAccountStorage } = require('../../scripts/account-storage') as {
+import { createRequire } from 'module'
+const _require = createRequire(import.meta.url)
+const { createAccountStorage } = _require('../../scripts/account-storage') as {
     createAccountStorage(options: { root: string }): { readAccounts(): Account[]; encryptedPath: string }
 }
 
