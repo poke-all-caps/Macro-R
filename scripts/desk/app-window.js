@@ -197,47 +197,44 @@ function spawnBotProcess() {
 
   console.log(`[bot] Spawning: ${tsxBin} src/index.ts --background`);
 
-  // Write bot stdout+stderr to a log file so crash errors are readable.
+  // Capture bot output via pipe so errors are always readable on all platforms.
   const botLogPath = path.join(WORKSPACE_ROOT, "bot-crash.log");
-  fs.writeFileSync(botLogPath, ""); // clear previous run
+  const logStream  = fs.createWriteStream(botLogPath, { flags: "w" });
   console.log(`[bot] Output → ${botLogPath}`);
 
-  // On Windows, file-descriptor inheritance breaks through cmd.exe layers.
-  // Instead, embed shell redirection directly in the cmd.exe command string.
   const isCmd = tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat");
-  let child;
-  if (isCmd) {
-    // cmd.exe /c "tsx.cmd" src/index.ts --background >> log 2>&1
-    const cmdStr = `"${tsxBin}" src/index.ts --background >> "${botLogPath}" 2>&1`;
-    child = spawn("cmd.exe", ["/c", cmdStr], {
-      cwd:      WORKSPACE_ROOT,
-      detached: true,
-      stdio:    "ignore",
-      env:      { ...process.env, MSRB_UI_CHILD: "1" },
-    });
-  } else {
-    const logFd = fs.openSync(botLogPath, "w");
-    child = spawn(tsxBin, ["src/index.ts", "--background"], {
-      cwd:      WORKSPACE_ROOT,
-      detached: true,
-      stdio:    ["ignore", logFd, logFd],
-      env:      { ...process.env, MSRB_UI_CHILD: "1" },
-    });
-    child.on("close", () => { try { fs.closeSync(logFd); } catch {} });
-  }
+  const child = isCmd
+    ? spawn("cmd.exe", ["/c", tsxBin, "src/index.ts", "--background"], {
+        cwd:   WORKSPACE_ROOT,
+        stdio: ["ignore", "pipe", "pipe"],
+        env:   { ...process.env, MSRB_UI_CHILD: "1" },
+      })
+    : spawn(tsxBin, ["src/index.ts", "--background"], {
+        cwd:   WORKSPACE_ROOT,
+        stdio: ["ignore", "pipe", "pipe"],
+        env:   { ...process.env, MSRB_UI_CHILD: "1" },
+      });
+
+  child.stdout.pipe(logStream, { end: false });
+  child.stderr.pipe(logStream, { end: false });
 
   child.on("error", (err) => {
+    logStream.write(`[spawn-error] ${err.message}\n`);
+    logStream.end();
     console.error(`[bot] Failed to start: ${err.message}`);
     _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "SPAWN-ERR",
                message: `Failed to start bot: ${err.message}` });
   });
   child.on("exit", (code) => {
+    logStream.end();
     if (code !== 0) {
       console.error(`[bot] Exited with code ${code} — see bot-crash.log`);
       _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "BOT-CRASH",
                  message: `Bot exited (code ${code}). Open bot-crash.log for details.` });
     }
   });
+  // Do NOT detach — keeping the child attached to this process is what makes
+  // stdio piping work. child.unref() still lets app-window exit independently.
   child.unref();
 }
 
