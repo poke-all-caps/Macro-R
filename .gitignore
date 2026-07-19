@@ -44,6 +44,9 @@ Thumbs.db
 # Runtime data (accounts, logs — local only, never committed)
 data/
 
+# Encrypted account store — never committed (contains real credentials)
+src/accounts.enc.json
+
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
