@@ -22,6 +22,10 @@ import type {
 } from './InternalPluginAPI'
 import type { PluginDiagnosticsProvider, PluginFetch, PluginNotification, PluginNotificationSink, PluginPanelData, PluginStorage, PluginUI, PublicPluginContext } from '../plugin-api'
 
+import { createRequire } from 'module'
+const _require = createRequire(import.meta.url)
+
+
 /** The shared capability backend (scripts/plugins/plugin-data-store.js). */
 interface PluginDataStore {
     resolveSettings(root: string, name: string, pluginConfig: Record<string, unknown>): Record<string, unknown>
@@ -335,9 +339,9 @@ export class PluginManager {
         }
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            mp = require('../../scripts/security/marketplace-catalog')
+            mp = _require('../../scripts/security/marketplace-catalog')
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            installer = require('../../scripts/plugins/plugin-installer')
+            installer = _require('../../scripts/plugins/plugin-installer')
         } catch (error) {
             this.bot.logger.warn(
                 'main',
@@ -421,7 +425,7 @@ export class PluginManager {
     private defaultMarketplaceFetcher(): MarketplaceFetcher | undefined {
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const { fetchMarketplaceAsset } = require('../../scripts/plugins/marketplace-fetch') as {
+            const { fetchMarketplaceAsset } = _require('../../scripts/plugins/marketplace-fetch') as {
                 fetchMarketplaceAsset: (url: string) => Promise<Buffer>
             }
             return (url: string) => fetchMarketplaceAsset(url)
@@ -445,7 +449,7 @@ export class PluginManager {
         // catalog (a fail-closed DoS) or from delivering a rollback that re-enables a revoked
         // plugin. Never replace a verified-good catalog with unverified bytes.
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const mp = require('../../scripts/security/marketplace-catalog') as {
+        const mp = _require('../../scripts/security/marketplace-catalog') as {
             verifyCatalogBytes(
                 payload: Buffer | string,
                 signature: string,
@@ -471,7 +475,7 @@ export class PluginManager {
     private defaultCatalogFetcher(): CatalogFetcher | undefined {
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const { fetchSignedCatalog } = require('../../scripts/plugins/marketplace-fetch') as {
+            const { fetchSignedCatalog } = _require('../../scripts/plugins/marketplace-fetch') as {
                 fetchSignedCatalog: (url: string) => Promise<{ catalog: string; signature: string }>
             }
             return (url: string) => fetchSignedCatalog(url)
@@ -754,18 +758,18 @@ export class PluginManager {
         }
 
         // Untrusted third-party plugins run in a V8 isolate with no Node APIs.
-        // Core and trusted/first-party plugins keep the in-process require() path.
+        // Core and trusted/first-party plugins keep the in-process _require() path.
         if (trust === 'sandboxed') {
             return this.loadSandboxedPlugin(entryName, filePath, entryConfig)
         }
 
         if (filePath.endsWith('.jsc') || this.isOfficialCoreLoader(entryName, filePath)) {
             this.assertBytecodeTarget(entryName, filePath)
-            require('bytenode')
+            _require('bytenode')
         }
 
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const pluginModule = require(filePath) as Record<string, unknown>
+        const pluginModule = _require(filePath) as Record<string, unknown>
         const exported = (pluginModule.default ?? pluginModule.plugin ?? pluginModule) as
             | IPlugin
             | (new () => IPlugin)
@@ -866,7 +870,7 @@ export class PluginManager {
             // Lazy-require: isolated-vm is a native module. If it can't load here,
             // refuse the plugin rather than run untrusted code unsandboxed.
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            ;({ createPluginSandbox } = require('../../scripts/plugins/plugin-sandbox') as { createPluginSandbox: CreatePluginSandbox })
+            ;({ createPluginSandbox } = _require('../../scripts/plugins/plugin-sandbox') as { createPluginSandbox: CreatePluginSandbox })
         } catch (error) {
             this.bot.logger.warn(
                 'main',
@@ -977,7 +981,7 @@ export class PluginManager {
      */
     private assertMarketplaceTrust(entryName: string, filePath: string, entryConfig: PluginConfigEntry | undefined): void {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const mp = require('../../scripts/security/marketplace-catalog') as {
+        const mp = _require('../../scripts/security/marketplace-catalog') as {
             verifyMarketplaceCatalog(options: { root?: string; keysDir?: string; minSequence?: number }): {
                 ok: boolean
                 reason?: string
@@ -1098,7 +1102,7 @@ export class PluginManager {
         }
 
         // Pin the LOADED entrypoint too, not just the bytecode it loads. `filePath` here
-        // is the tiny in-process shim (plugins/core/index.js) that require()s the verified
+        // is the tiny in-process shim (plugins/core/index.js) that _require()s the verified
         // .jsc — a tampered shim could load a different file while the bytecode hash still
         // "passes". The signer always populates shimSha256 now; the fallback branch below
         // only still applies to Cores signed before that (older manifests without the pin).
@@ -1224,7 +1228,7 @@ export class PluginManager {
     private pluginDataStore(): PluginDataStore | undefined {
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            return require('../../scripts/plugins/plugin-data-store') as PluginDataStore
+            return _require('../../scripts/plugins/plugin-data-store') as PluginDataStore
         } catch {
             return undefined
         }
@@ -1234,7 +1238,7 @@ export class PluginManager {
     private fetchBrokerFactory(): ((opts: { allowedHosts: string[] }) => FetchBroker) | undefined {
         try {
             // eslint-disable-next-line @typescript-eslint/no-require-imports
-            return (require('../../scripts/plugins/plugin-fetch-broker') as { createFetchBroker: (opts: { allowedHosts: string[] }) => FetchBroker }).createFetchBroker
+            return (_require('../../scripts/plugins/plugin-fetch-broker') as { createFetchBroker: (opts: { allowedHosts: string[] }) => FetchBroker }).createFetchBroker
         } catch {
             return undefined
         }

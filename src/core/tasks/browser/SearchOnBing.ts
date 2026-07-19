@@ -9,6 +9,11 @@ import { TaskBase } from '../../TaskBase'
 
 import type { BasePromotion } from '../../../types/DashboardData'
 
+import { fileURLToPath } from 'url'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+
 // "Explore on Bing" promos (offerId ENUS_<topic>_exploreonbing_*) credit only
 // when you run a COMMERCIAL search on the topic carrying the explore tracking
 // params (form=ML2PCR…) — NOT a generic search. Map each topic to commercial

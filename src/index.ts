@@ -61,6 +61,10 @@ import type { DashboardData } from './types/DashboardData'
 import type { DashboardActions } from './automation/dashboard/DashboardActions'
 import { getDashboardActions } from './automation/dashboard/DashboardActionsFactory'
 
+import { createRequire } from 'module'
+const _require = createRequire(import.meta.url)
+
+
 interface BrowserSession {
     context: BrowserContext
     fingerprint: BrowserFingerprintWithHeaders
@@ -1733,7 +1737,7 @@ async function checkForUpdateAndRestart(rewardsBot: MicrosoftRewardsBot): Promis
         const updaterPath = path.join(process.cwd(), 'scripts', 'updater', 'UpdateManager.js')
         // UpdateManager is a launcher-side CommonJS module that lives outside the
         // compiled bundle, so it is resolved at runtime rather than imported.
-        const { UpdateManager } = require(updaterPath) as {
+        const { UpdateManager } = _require(updaterPath) as {
             UpdateManager: new () => { run(): Promise<{ status: string; remote?: { version?: string } }> }
         }
         const result = await new UpdateManager().run()

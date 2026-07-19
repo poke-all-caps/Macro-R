@@ -5,6 +5,11 @@ import type { MicrosoftRewardsBot } from '../index'
 import { QueryEngine } from '../types/Config'
 import type { GoogleSearch, GoogleTrendsResponse, RedditListing, WikipediaTopResponse } from '../types/Search'
 
+import { fileURLToPath } from 'url'
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+
 export class QueryProvider {
     constructor(private bot: MicrosoftRewardsBot) {}
 
