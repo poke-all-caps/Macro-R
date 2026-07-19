@@ -140,7 +140,7 @@ function CookieCapturePanel({
   const importCookies = useImportCookies();
   const status      = capture.captureStatus;
 
-  const [captureMode, setCaptureMode] = useState<'browser' | 'paste'>('paste');
+  const [captureMode, setCaptureMode] = useState<'browser' | 'paste'>('browser');
   const [pasteValue, setPasteValue]   = useState('');
 
   const isDone   = status?.status === 'done';

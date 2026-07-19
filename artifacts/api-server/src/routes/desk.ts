@@ -464,13 +464,27 @@ router.post("/desk/capture-session", (req, res): void => {
   const statusFile = path.join(CAPTURE_DIR, `capture-${sessionId}.json`);
   fs.mkdirSync(CAPTURE_DIR, { recursive: true });
 
+  // Pre-write the status file so the poll endpoint always has something to
+  // return, even if the child process crashes before running a single line.
+  fs.writeFileSync(
+    statusFile,
+    JSON.stringify({ sessionId, email, status: "opening" }, null, 2)
+  );
+
   const tsxBin     = resolveTsx();
   const scriptPath = path.join(WORKSPACE_ROOT, "scripts", "desk", "cookie-capture.ts");
 
   const child = spawn(tsxBin, [scriptPath, sessionId, email, statusFile], {
     cwd:   WORKSPACE_ROOT,
-    stdio: "ignore",
+    stdio: ["ignore", "ignore", "pipe"], // capture stderr for error reporting
     env:   { ...process.env },
+  });
+
+  // Collect stderr so early crashes (tsx compile error, missing binary, etc.)
+  // show a meaningful error in the UI instead of silently staying at "opening".
+  let stderrBuf = "";
+  (child.stderr as NodeJS.ReadableStream | null)?.on("data", (chunk: Buffer) => {
+    stderrBuf += chunk.toString();
   });
 
   child.on("error", (err: Error) => {
@@ -481,9 +495,16 @@ router.post("/desk/capture-session", (req, res): void => {
 
   child.on("exit", (code: number | null) => {
     const s = readCaptureStatus(statusFile);
-    if (s && s["status"] !== "done") {
+    const currentStatus = s?.["status"] as string | undefined;
+    if (currentStatus !== "done") {
       try {
-        fs.writeFileSync(statusFile, JSON.stringify({ ...s, status: "failed", error: `Process exited with code ${code}` }, null, 2));
+        // Use captured stderr as the error message when available.
+        const errMsg = stderrBuf.trim().split("\n")[0]?.trim()
+          || `Process exited with code ${code}`;
+        fs.writeFileSync(
+          statusFile,
+          JSON.stringify({ sessionId, email, status: "failed", error: errMsg }, null, 2)
+        );
       } catch { /* best-effort */ }
     }
     captureSessions.delete(sessionId);
