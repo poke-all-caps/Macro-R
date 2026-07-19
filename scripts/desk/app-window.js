@@ -197,17 +197,30 @@ function spawnBotProcess() {
 
   console.log(`[bot] Spawning: ${tsxBin} src/index.ts --background`);
 
+  // Write bot stdout+stderr to a log file so crash errors are readable.
+  const botLogPath = path.join(WORKSPACE_ROOT, "bot-crash.log");
+  const logFd = fs.openSync(botLogPath, "w");
+  console.log(`[bot] Output → ${botLogPath}`);
+
   const child = spawnTsx(tsxBin, ["src/index.ts", "--background"], {
     cwd:      WORKSPACE_ROOT,
     detached: true,
-    stdio:    "ignore",
+    stdio:    ["ignore", logFd, logFd],
     env:      { ...process.env, MSRB_UI_CHILD: "1" },
   });
-  // MUST handle 'error' or an ENOENT will crash this process.
   child.on("error", (err) => {
+    try { fs.closeSync(logFd); } catch {}
     console.error(`[bot] Failed to start: ${err.message}`);
     _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "SPAWN-ERR",
                message: `Failed to start bot: ${err.message}` });
+  });
+  child.on("exit", (code) => {
+    try { fs.closeSync(logFd); } catch {}
+    if (code !== 0) {
+      console.error(`[bot] Exited with code ${code} — see bot-crash.log`);
+      _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "BOT-CRASH",
+                 message: `Bot exited (code ${code}). Open bot-crash.log in the project folder for details.` });
+    }
   });
   child.unref();
 }
