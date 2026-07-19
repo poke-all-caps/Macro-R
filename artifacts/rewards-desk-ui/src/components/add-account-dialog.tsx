@@ -4,15 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Plus, Database, Eye, EyeOff, ShieldAlert, Network, Settings2,
-  Globe, CheckCircle2, Loader2, MonitorSmartphone, AlertCircle,
+  Globe, CheckCircle2, Loader2, MonitorSmartphone, AlertCircle, ClipboardPaste,
 } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogDescription,
   DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from '@/components/ui/dialog';
-import { useCookieCapture, useAccounts } from '@/hooks/use-desk';
+import { useCookieCapture, useImportCookies, useAccounts } from '@/hooks/use-desk';
 import type { AccountInput, AccountProxy } from '@/hooks/use-desk';
 
 // ─── PasswordInput ────────────────────────────────────────────────────────────
@@ -135,8 +136,12 @@ function CookieCapturePanel({
   set: (p: Partial<AccountInput>) => void;
   onCaptured: (cookieCount: number) => void;
 }) {
-  const capture = useCookieCapture();
-  const status  = capture.captureStatus;
+  const capture     = useCookieCapture();
+  const importCookies = useImportCookies();
+  const status      = capture.captureStatus;
+
+  const [captureMode, setCaptureMode] = useState<'browser' | 'paste'>('paste');
+  const [pasteValue, setPasteValue]   = useState('');
 
   const isDone   = status?.status === 'done';
   const isFailed = status?.status === 'failed';
@@ -145,9 +150,12 @@ function CookieCapturePanel({
   if (isDone && status.cookieCount !== undefined) {
     onCaptured(status.cookieCount);
   }
+  if (importCookies.isSuccess && importCookies.data?.count) {
+    onCaptured(importCookies.data.count);
+  }
 
   const handleLaunch = () => {
-    if (!form.email) return;
+    if (!form.email || !form.name) return;
     capture.reset();
     capture.start.mutate(form.email);
   };
@@ -155,6 +163,11 @@ function CookieCapturePanel({
   const handleAbort = () => {
     capture.abort.mutate(undefined as unknown as void);
     capture.reset();
+  };
+
+  const handlePasteImport = () => {
+    if (!form.email || !form.name || !pasteValue.trim()) return;
+    importCookies.mutate({ email: form.email, cookies: pasteValue.trim() });
   };
 
   const statusLabel: Record<string, string> = {
@@ -165,9 +178,12 @@ function CookieCapturePanel({
     failed:    'Capture failed',
   };
 
-  // Error from the POST itself (before a session was even created)
   const startError = !capture.sessionId && capture.start.isError
     ? (capture.start.error instanceof Error ? capture.start.error.message : String(capture.start.error))
+    : null;
+
+  const pasteError = importCookies.isError
+    ? (importCookies.error instanceof Error ? importCookies.error.message : String(importCookies.error))
     : null;
 
   return (
@@ -181,85 +197,152 @@ function CookieCapturePanel({
         <Input type="email" value={form.email} onChange={e => set({ email: e.target.value })}
           placeholder="user@outlook.com"
           className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off"
-          disabled={isActive || isDone} />
+          disabled={isActive || isDone || importCookies.isSuccess} />
       </FieldRow>
 
-      {!capture.sessionId && (
-        <Button type="button"
-          disabled={!form.email || !form.name || capture.start.isPending}
-          onClick={handleLaunch}
-          className="w-full font-mono text-xs uppercase bg-primary/90 hover:bg-primary text-primary-foreground">
-          {capture.start.isPending
-            ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            : <Globe className="w-4 h-4 mr-2" />}
-          {capture.start.isPending ? 'Launching…' : 'Launch Login Browser'}
-        </Button>
+      {/* Mode toggle */}
+      {!importCookies.isSuccess && (
+        <div className="flex rounded border border-border/40 overflow-hidden bg-black/20 p-0.5 gap-0.5">
+          <button type="button" onClick={() => setCaptureMode('paste')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-mono uppercase rounded transition-colors
+              ${captureMode === 'paste' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-white'}`}>
+            <ClipboardPaste className="w-3.5 h-3.5" /> Paste Cookies
+          </button>
+          <button type="button" onClick={() => { setCaptureMode('browser'); capture.reset(); }}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-mono uppercase rounded transition-colors
+              ${captureMode === 'browser' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-white'}`}>
+            <Globe className="w-3.5 h-3.5" /> Launch Browser
+          </button>
+        </div>
       )}
 
-      {startError && (
-        <div className="rounded border border-destructive/30 bg-destructive/10 px-4 py-3 space-y-2 font-mono text-xs">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
-            <span className="text-destructive">Failed to start capture session</span>
+      {/* ── Paste mode ── */}
+      {captureMode === 'paste' && !importCookies.isSuccess && (
+        <div className="space-y-3">
+          <div className="rounded border border-border/30 bg-black/30 px-3 py-2.5 text-xs font-mono text-muted-foreground space-y-1.5 leading-relaxed">
+            <p className="text-white/70 font-semibold">How to export cookies:</p>
+            <ol className="list-decimal list-inside space-y-1">
+              <li>Open <span className="text-primary">rewards.microsoft.com</span> in your browser and sign in.</li>
+              <li>Install the <span className="text-primary">Cookie-Editor</span> extension (Chrome / Firefox).</li>
+              <li>Click the extension → <span className="text-primary">Export → Export as JSON</span>.</li>
+              <li>Paste the copied JSON below.</li>
+            </ol>
           </div>
-          <p className="text-destructive/80">{startError}</p>
-          <Button type="button" size="sm" variant="outline" onClick={handleLaunch}
-            className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
-            Retry
+          <Textarea
+            value={pasteValue}
+            onChange={e => setPasteValue(e.target.value)}
+            placeholder='[{"name":"MUID","value":"...","domain":".bing.com",...}, ...]'
+            className="bg-black/50 border-border/50 font-mono text-xs min-h-[90px] focus-visible:ring-primary resize-none"
+            disabled={importCookies.isPending}
+          />
+          {pasteError && (
+            <p className="text-xs font-mono text-destructive">{pasteError}</p>
+          )}
+          <Button type="button"
+            disabled={!form.email || !form.name || !pasteValue.trim() || importCookies.isPending}
+            onClick={handlePasteImport}
+            className="w-full font-mono text-xs uppercase bg-primary/90 hover:bg-primary text-primary-foreground">
+            {importCookies.isPending
+              ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving…</>
+              : <><ClipboardPaste className="w-4 h-4 mr-2" /> Save Cookies</>}
           </Button>
         </div>
       )}
 
-      {capture.sessionId && (
-        <div className={`rounded border px-4 py-3 space-y-2 font-mono text-xs
-          ${isDone   ? 'border-green-500/30 bg-green-500/10'  :
-            isFailed ? 'border-destructive/30 bg-destructive/10' :
-                       'border-primary/30 bg-primary/5'}`}>
+      {/* Paste success */}
+      {importCookies.isSuccess && (
+        <div className="rounded border border-green-500/30 bg-green-500/10 px-4 py-3 space-y-1 font-mono text-xs">
           <div className="flex items-center gap-2">
-            {isDone
-              ? <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
-              : isFailed
-              ? <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
-              : <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />}
-            <span className={isDone ? 'text-green-300' : isFailed ? 'text-destructive' : 'text-primary'}>
-              {statusLabel[status?.status ?? 'opening']}
-            </span>
+            <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+            <span className="text-green-300">Cookies imported successfully</span>
           </div>
-          {isDone && (
-            <p className="text-green-400/80">
-              {status!.cookieCount} cookie{status!.cookieCount !== 1 ? 's' : ''} saved to{' '}
-              <span className="text-green-300">sessions/{form.email}/session_desktop.json</span>
-            </p>
+          <p className="text-green-400/80">
+            {importCookies.data.count} cookie{importCookies.data.count !== 1 ? 's' : ''} saved to{' '}
+            <span className="text-green-300">sessions/{form.email}/session_desktop.json</span>
+          </p>
+        </div>
+      )}
+
+      {/* ── Browser-launch mode ── */}
+      {captureMode === 'browser' && !importCookies.isSuccess && (
+        <>
+          {!capture.sessionId && (
+            <Button type="button"
+              disabled={!form.email || !form.name || capture.start.isPending}
+              onClick={handleLaunch}
+              className="w-full font-mono text-xs uppercase bg-primary/90 hover:bg-primary text-primary-foreground">
+              {capture.start.isPending
+                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Launching…</>
+                : <><Globe className="w-4 h-4 mr-2" /> Launch Login Browser</>}
+            </Button>
           )}
-          {isFailed && status?.error && (
-            <p className="text-destructive/80">{status.error}</p>
-          )}
-          {!isDone && !isFailed && (
-            <p className="text-muted-foreground">
-              A Chromium window has opened. Sign in, then wait — this dialog will update automatically.
-            </p>
-          )}
-          <div className="flex gap-2 pt-1">
-            {isFailed && (
+
+          {startError && (
+            <div className="rounded border border-destructive/30 bg-destructive/10 px-4 py-3 space-y-2 font-mono text-xs">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+                <span className="text-destructive">Failed to start capture session</span>
+              </div>
+              <p className="text-destructive/80">{startError}</p>
               <Button type="button" size="sm" variant="outline" onClick={handleLaunch}
                 className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
                 Retry
               </Button>
-            )}
-            {isActive && (
-              <Button type="button" size="sm" variant="outline" onClick={handleAbort}
-                className="font-mono text-xs border-destructive/30 text-destructive hover:bg-destructive/10">
-                Abort
-              </Button>
-            )}
-            {(isDone || isFailed) && (
-              <Button type="button" size="sm" variant="ghost" onClick={() => capture.reset()}
-                className="font-mono text-xs text-muted-foreground hover:text-white">
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+
+          {capture.sessionId && (
+            <div className={`rounded border px-4 py-3 space-y-2 font-mono text-xs
+              ${isDone   ? 'border-green-500/30 bg-green-500/10'  :
+                isFailed ? 'border-destructive/30 bg-destructive/10' :
+                           'border-primary/30 bg-primary/5'}`}>
+              <div className="flex items-center gap-2">
+                {isDone
+                  ? <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                  : isFailed
+                  ? <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+                  : <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />}
+                <span className={isDone ? 'text-green-300' : isFailed ? 'text-destructive' : 'text-primary'}>
+                  {statusLabel[status?.status ?? 'opening']}
+                </span>
+              </div>
+              {isDone && (
+                <p className="text-green-400/80">
+                  {status!.cookieCount} cookie{status!.cookieCount !== 1 ? 's' : ''} saved to{' '}
+                  <span className="text-green-300">sessions/{form.email}/session_desktop.json</span>
+                </p>
+              )}
+              {isFailed && status?.error && (
+                <p className="text-destructive/80">{status.error}</p>
+              )}
+              {!isDone && !isFailed && (
+                <p className="text-muted-foreground">
+                  A Chromium window has opened on the server. Sign in there, then wait — this dialog will update automatically.
+                </p>
+              )}
+              <div className="flex gap-2 pt-1">
+                {isFailed && (
+                  <Button type="button" size="sm" variant="outline" onClick={handleLaunch}
+                    className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
+                    Retry
+                  </Button>
+                )}
+                {isActive && (
+                  <Button type="button" size="sm" variant="outline" onClick={handleAbort}
+                    className="font-mono text-xs border-destructive/30 text-destructive hover:bg-destructive/10">
+                    Abort
+                  </Button>
+                )}
+                {(isDone || isFailed) && (
+                  <Button type="button" size="sm" variant="ghost" onClick={() => capture.reset()}
+                    className="font-mono text-xs text-muted-foreground hover:text-white">
+                    Reset
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

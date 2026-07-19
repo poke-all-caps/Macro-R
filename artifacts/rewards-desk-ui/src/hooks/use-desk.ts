@@ -200,6 +200,23 @@ export function useCookieCapture() {
   };
 }
 
+export function useImportCookies() {
+  return useMutation({
+    mutationFn: async ({ email, cookies }: { email: string; cookies: string }) => {
+      const res = await fetch('/api/desk/import-cookies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, cookies }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? 'Import failed');
+      }
+      return res.json() as Promise<{ saved: boolean; count: number; sessionFile: string }>;
+    },
+  });
+}
+
 export function useRunLogs() {
   const query = useGetRunLogs({
     query: {

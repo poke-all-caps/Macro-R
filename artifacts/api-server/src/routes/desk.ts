@@ -405,6 +405,54 @@ router.delete("/desk/seed-demo", (_req, res): void => {
   res.json({ removed: before - loadAccounts().length, total: loadAccounts().length });
 });
 
+// ─── Manual cookie import ─────────────────────────────────────────────────────
+
+// POST /desk/import-cookies — save a user-pasted cookie JSON blob to disk
+router.post("/desk/import-cookies", (req, res): void => {
+  const body = req.body as Record<string, unknown>;
+  const email   = (typeof body.email   === "string" ? body.email   : "").trim();
+  const cookies = typeof body.cookies === "string" ? body.cookies : "";
+
+  if (!email || !cookies) {
+    res.status(400).json({ error: "email and cookies are required" });
+    return;
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(cookies);
+  } catch {
+    res.status(400).json({ error: "Invalid JSON — paste the raw cookie array exported by Cookie-Editor." });
+    return;
+  }
+
+  if (!Array.isArray(parsed)) {
+    res.status(400).json({ error: "Expected a JSON array of cookie objects." });
+    return;
+  }
+
+  // Require at least one cookie from a Microsoft / Bing domain so we know the
+  // user exported from the right site.
+  const msCount = (parsed as Array<{ domain?: string }>).filter(c =>
+    typeof c.domain === "string" &&
+    (c.domain.includes(".microsoft.com") || c.domain.includes(".bing.com") || c.domain.includes(".live.com"))
+  ).length;
+
+  if (msCount === 0) {
+    res.status(400).json({
+      error: "No Microsoft / Bing cookies found. Make sure you exported from rewards.microsoft.com.",
+    });
+    return;
+  }
+
+  const sessionDir  = path.join(WORKSPACE_ROOT, "sessions", email);
+  fs.mkdirSync(sessionDir, { recursive: true });
+  const sessionFile = path.join(sessionDir, "session_desktop.json");
+  fs.writeFileSync(sessionFile, JSON.stringify(parsed, null, 2), "utf8");
+
+  res.json({ saved: true, count: (parsed as unknown[]).length, sessionFile });
+});
+
 // ─── Cookie-capture routes ────────────────────────────────────────────────────
 
 // POST /desk/capture-session — spawn the cookie-capture browser helper
