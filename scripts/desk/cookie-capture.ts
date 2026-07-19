@@ -17,7 +17,7 @@
 
 import path from 'path'
 import fs from 'fs'
-import rebrowser from 'patchright'
+import { chromium } from 'playwright'
 
 const [, , sessionId, email, statusFilePath] = process.argv
 
@@ -54,65 +54,60 @@ async function persistCookies(context: { cookies(): Promise<unknown[]> }): Promi
 async function main() {
     writeStatus({ status: 'opening' })
 
-    // Resolve patchright's own Chromium executable. Using the system Chrome
-    // causes a CDP connection hang because stealth patching requires the
-    // specific patchright build — not the user's installed browser.
-    let executablePath: string | undefined
-    try {
-        const exePath = rebrowser.chromium.executablePath()
-        // executablePath() resolves even when the binary hasn't been downloaded;
-        // check that the file actually exists before passing it.
-        if (fs.existsSync(exePath)) {
-            executablePath = exePath
-        }
-    } catch {
-        // ignore — will fall back to auto-detect below
-    }
+    writeStatus({ status: 'opening', step: 'launching' })
 
-    if (!executablePath) {
-        writeStatus({
-            status: 'failed',
-            error:
-                'Patchright Chromium not installed. Run this once:\n' +
-                '  node .\\node_modules\\.pnpm\\patchright@1.61.1\\node_modules\\patchright\\cli.js install chromium\n' +
-                'Then try again.',
-        })
-        process.exit(1)
-    }
-
-    // Tell the UI which binary we resolved so the user can verify it.
-    writeStatus({ status: 'opening', step: 'launching', executablePath })
-
-    // Give the browser 30 s to launch. If it hangs for any reason the process
-    // would otherwise spin forever at 'opening'.
+    // Cookie capture doesn't need stealth — use playwright with the
+    // pre-installed Microsoft Edge (available on every Windows machine).
+    // Falls back to bundled Chromium if Edge isn't found.
     const LAUNCH_TIMEOUT_MS = 30_000
-    const browser = await Promise.race([
-        rebrowser.chromium.launch({
-            headless: false,
-            executablePath,
-            args: [
-                '--no-first-run',
-                '--no-default-browser-check',
-                '--disable-blink-features=Attestation',
-                '--window-size=960,680',
-                '--window-position=120,80',
-            ],
-        }),
-        new Promise<never>((_, reject) =>
-            setTimeout(
-                () => reject(new Error(
-                    `Browser failed to open within 30 s.\nBinary used: ${executablePath}\n` +
-                    'Try: node .\\node_modules\\.pnpm\\patchright@1.61.1\\node_modules\\patchright\\cli.js install chromium'
-                )),
-                LAUNCH_TIMEOUT_MS
-            )
-        ),
-    ])
+    let browser
+    try {
+        browser = await Promise.race([
+            chromium.launch({
+                headless: false,
+                channel: 'msedge',
+                args: [
+                    '--no-first-run',
+                    '--no-default-browser-check',
+                    '--window-size=960,680',
+                    '--window-position=120,80',
+                ],
+            }),
+            new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error('__TIMEOUT__')), LAUNCH_TIMEOUT_MS)
+            ),
+        ])
+    } catch (edgeErr) {
+        const msg = edgeErr instanceof Error ? edgeErr.message : String(edgeErr)
+        if (msg === '__TIMEOUT__') {
+            writeStatus({ status: 'failed', error: 'Microsoft Edge failed to open within 30 s. Make sure Edge is installed (it ships with Windows 10/11).' })
+            process.exit(1)
+        }
+        // Edge not found — fall back to playwright's bundled Chromium
+        writeStatus({ status: 'opening', step: 'launching-chromium' })
+        browser = await Promise.race([
+            chromium.launch({
+                headless: false,
+                args: [
+                    '--no-first-run',
+                    '--no-default-browser-check',
+                    '--window-size=960,680',
+                    '--window-position=120,80',
+                ],
+            }),
+            new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error(
+                    'Browser failed to open within 30 s.\n' +
+                    'Run: pnpm exec playwright install chromium'
+                )), LAUNCH_TIMEOUT_MS)
+            ),
+        ])
+    }
 
-    writeStatus({ status: 'opening', step: 'creating-context', executablePath })
+    writeStatus({ status: 'opening', step: 'creating-context' })
     const context = await browser.newContext()
 
-    writeStatus({ status: 'opening', step: 'new-page', executablePath })
+    writeStatus({ status: 'opening', step: 'new-page' })
     const page = await context.newPage()
 
     // Set a title so the user knows which window to use
