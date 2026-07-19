@@ -199,27 +199,43 @@ function spawnBotProcess() {
 
   // Write bot stdout+stderr to a log file so crash errors are readable.
   const botLogPath = path.join(WORKSPACE_ROOT, "bot-crash.log");
-  const logFd = fs.openSync(botLogPath, "w");
+  fs.writeFileSync(botLogPath, ""); // clear previous run
   console.log(`[bot] Output → ${botLogPath}`);
 
-  const child = spawnTsx(tsxBin, ["src/index.ts", "--background"], {
-    cwd:      WORKSPACE_ROOT,
-    detached: true,
-    stdio:    ["ignore", logFd, logFd],
-    env:      { ...process.env, MSRB_UI_CHILD: "1" },
-  });
+  // On Windows, file-descriptor inheritance breaks through cmd.exe layers.
+  // Instead, embed shell redirection directly in the cmd.exe command string.
+  const isCmd = tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat");
+  let child;
+  if (isCmd) {
+    // cmd.exe /c "tsx.cmd" src/index.ts --background >> log 2>&1
+    const cmdStr = `"${tsxBin}" src/index.ts --background >> "${botLogPath}" 2>&1`;
+    child = spawn("cmd.exe", ["/c", cmdStr], {
+      cwd:      WORKSPACE_ROOT,
+      detached: true,
+      stdio:    "ignore",
+      env:      { ...process.env, MSRB_UI_CHILD: "1" },
+    });
+  } else {
+    const logFd = fs.openSync(botLogPath, "w");
+    child = spawn(tsxBin, ["src/index.ts", "--background"], {
+      cwd:      WORKSPACE_ROOT,
+      detached: true,
+      stdio:    ["ignore", logFd, logFd],
+      env:      { ...process.env, MSRB_UI_CHILD: "1" },
+    });
+    child.on("close", () => { try { fs.closeSync(logFd); } catch {} });
+  }
+
   child.on("error", (err) => {
-    try { fs.closeSync(logFd); } catch {}
     console.error(`[bot] Failed to start: ${err.message}`);
     _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "SPAWN-ERR",
                message: `Failed to start bot: ${err.message}` });
   });
   child.on("exit", (code) => {
-    try { fs.closeSync(logFd); } catch {}
     if (code !== 0) {
       console.error(`[bot] Exited with code ${code} — see bot-crash.log`);
       _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "BOT-CRASH",
-                 message: `Bot exited (code ${code}). Open bot-crash.log in the project folder for details.` });
+                 message: `Bot exited (code ${code}). Open bot-crash.log for details.` });
     }
   });
   child.unref();
