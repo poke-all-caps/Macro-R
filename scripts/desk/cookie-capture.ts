@@ -54,16 +54,59 @@ async function persistCookies(context: { cookies(): Promise<unknown[]> }): Promi
 async function main() {
     writeStatus({ status: 'opening' })
 
-    const browser = await rebrowser.chromium.launch({
-        headless: false,
-        args: [
-            '--no-first-run',
-            '--no-default-browser-check',
-            '--disable-blink-features=Attestation',
-            '--window-size=960,680',
-            '--window-position=120,80',
-        ],
-    })
+    // Resolve patchright's own Chromium executable. Using the system Chrome
+    // causes a CDP connection hang because stealth patching requires the
+    // specific patchright build — not the user's installed browser.
+    let executablePath: string | undefined
+    try {
+        const exePath = rebrowser.chromium.executablePath()
+        // executablePath() resolves even when the binary hasn't been downloaded;
+        // check that the file actually exists before passing it.
+        if (fs.existsSync(exePath)) {
+            executablePath = exePath
+        }
+    } catch {
+        // ignore — will fall back to auto-detect below
+    }
+
+    if (!executablePath) {
+        writeStatus({
+            status: 'failed',
+            error:
+                'Patchright Chromium not installed. Run this once in your project:\n' +
+                '  node .\\node_modules\\patchright\\cli.js install chromium\n' +
+                'Then try again.',
+        })
+        process.exit(1)
+    }
+
+    // Give the browser 30 s to launch. If it hangs for any reason the process
+    // would otherwise spin forever at 'opening'.
+    const LAUNCH_TIMEOUT_MS = 30_000
+    const browser = await Promise.race([
+        rebrowser.chromium.launch({
+            headless: false,
+            executablePath,
+            args: [
+                '--no-first-run',
+                '--no-default-browser-check',
+                '--disable-blink-features=Attestation',
+                '--window-size=960,680',
+                '--window-position=120,80',
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+            ],
+        }),
+        new Promise<never>((_, reject) =>
+            setTimeout(
+                () => reject(new Error(
+                    'Browser failed to open within 30 s. ' +
+                    'Run: node .\\node_modules\\patchright\\cli.js install chromium'
+                )),
+                LAUNCH_TIMEOUT_MS
+            )
+        ),
+    ])
 
     const context = await browser.newContext()
     const page = await context.newPage()
