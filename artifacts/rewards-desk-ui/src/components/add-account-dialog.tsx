@@ -7,13 +7,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Plus, Database, Eye, EyeOff, ShieldAlert, Network, Settings2,
-  Globe, CheckCircle2, Loader2, MonitorSmartphone, AlertCircle, ClipboardPaste,
+  Globe, CheckCircle2, Loader2, ClipboardPaste,
 } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogDescription,
   DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from '@/components/ui/dialog';
-import { useCookieCapture, useImportCookies, useAccounts } from '@/hooks/use-desk';
+import { useImportCookies, useAccounts } from '@/hooks/use-desk';
 import type { AccountInput, AccountProxy } from '@/hooks/use-desk';
 
 // ─── PasswordInput ────────────────────────────────────────────────────────────
@@ -129,6 +129,10 @@ function OptionsTab({ form, set }: { form: AccountInput; set: (p: Partial<Accoun
 
 // ─── CookieCapturePanel ───────────────────────────────────────────────────────
 
+const MS_LOGIN_URL =
+  'https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=11&wp=MBI_SSL' +
+  '&wreply=https%3A%2F%2Frewards.microsoft.com%2F&id=264080';
+
 function CookieCapturePanel({
   form, set, onCaptured,
 }: {
@@ -136,51 +140,25 @@ function CookieCapturePanel({
   set: (p: Partial<AccountInput>) => void;
   onCaptured: (cookieCount: number) => void;
 }) {
-  const capture     = useCookieCapture();
   const importCookies = useImportCookies();
-  const status      = capture.captureStatus;
 
-  const [captureMode, setCaptureMode] = useState<'browser' | 'paste'>('browser');
+  const [captureMode, setCaptureMode] = useState<'guide' | 'paste'>('guide');
   const [pasteValue, setPasteValue]   = useState('');
+  const [tabOpened, setTabOpened]     = useState(false);
 
-  const isDone   = status?.status === 'done';
-  const isFailed = status?.status === 'failed';
-  const isActive = !!capture.sessionId && !isDone && !isFailed;
-
-  if (isDone && status.cookieCount !== undefined) {
-    onCaptured(status.cookieCount);
-  }
   if (importCookies.isSuccess && importCookies.data?.count) {
     onCaptured(importCookies.data.count);
   }
 
-  const handleLaunch = () => {
-    if (!form.email || !form.name) return;
-    capture.reset();
-    capture.start.mutate(form.email);
-  };
-
-  const handleAbort = () => {
-    capture.abort.mutate(undefined as unknown as void);
-    capture.reset();
+  const handleOpenTab = () => {
+    window.open(MS_LOGIN_URL, '_blank', 'noopener,noreferrer');
+    setTabOpened(true);
   };
 
   const handlePasteImport = () => {
     if (!form.email || !form.name || !pasteValue.trim()) return;
     importCookies.mutate({ email: form.email, cookies: pasteValue.trim() });
   };
-
-  const statusLabel: Record<string, string> = {
-    opening:   'Opening browser window…',
-    waiting:   'Waiting for you to sign in to Microsoft Rewards…',
-    capturing: 'Capturing cookies…',
-    done:      'Cookies captured successfully',
-    failed:    'Capture failed',
-  };
-
-  const startError = !capture.sessionId && capture.start.isError
-    ? (capture.start.error instanceof Error ? capture.start.error.message : String(capture.start.error))
-    : null;
 
   const pasteError = importCookies.isError
     ? (importCookies.error instanceof Error ? importCookies.error.message : String(importCookies.error))
@@ -193,26 +171,73 @@ function CookieCapturePanel({
           placeholder="e.g. Primary Account"
           className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off" />
       </FieldRow>
-      <FieldRow label="Microsoft Email *" hint="Must match the account you'll sign into in the browser.">
+      <FieldRow label="Microsoft Email *" hint="Must match the account you sign into.">
         <Input type="email" value={form.email} onChange={e => set({ email: e.target.value })}
           placeholder="user@outlook.com"
           className="bg-black/50 border-border/50 font-mono focus-visible:ring-primary" autoComplete="off"
-          disabled={isActive || isDone || importCookies.isSuccess} />
+          disabled={importCookies.isSuccess} />
       </FieldRow>
 
       {/* Mode toggle */}
       {!importCookies.isSuccess && (
         <div className="flex rounded border border-border/40 overflow-hidden bg-black/20 p-0.5 gap-0.5">
+          <button type="button" onClick={() => setCaptureMode('guide')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-mono uppercase rounded transition-colors
+              ${captureMode === 'guide' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-white'}`}>
+            <Globe className="w-3.5 h-3.5" /> Sign In &amp; Export
+          </button>
           <button type="button" onClick={() => setCaptureMode('paste')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-mono uppercase rounded transition-colors
               ${captureMode === 'paste' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-white'}`}>
             <ClipboardPaste className="w-3.5 h-3.5" /> Paste Cookies
           </button>
-          <button type="button" onClick={() => { setCaptureMode('browser'); capture.reset(); }}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-mono uppercase rounded transition-colors
-              ${captureMode === 'browser' ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-white'}`}>
-            <Globe className="w-3.5 h-3.5" /> Launch Browser
-          </button>
+        </div>
+      )}
+
+      {/* ── Guide mode (opens real browser tab) ── */}
+      {captureMode === 'guide' && !importCookies.isSuccess && (
+        <div className="space-y-3">
+          {/* Step list */}
+          <div className="rounded border border-border/30 bg-black/30 px-3 py-3 text-xs font-mono text-muted-foreground space-y-2 leading-relaxed">
+            <p className="text-white/80 font-semibold text-[11px] uppercase tracking-wider">Step-by-step</p>
+            <ol className="space-y-2">
+              <li className="flex gap-2">
+                <span className={`shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${tabOpened ? 'bg-green-500/30 text-green-300' : 'bg-primary/20 text-primary'}`}>1</span>
+                <span>Click <span className="text-primary font-semibold">Open Microsoft Login</span> below — it opens a new browser tab where you sign in normally.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold bg-primary/20 text-primary">2</span>
+                <span>
+                  Install the free <span className="text-primary font-semibold">Cookie-Editor</span> extension
+                  {' '}(<a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Chrome</a>
+                  {' '}/ <a href="https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/" target="_blank" rel="noopener noreferrer" className="underline hover:text-white">Firefox</a>).
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold bg-primary/20 text-primary">3</span>
+                <span>On the <span className="text-primary">rewards.microsoft.com</span> tab after sign-in, click the Cookie-Editor icon → <span className="text-primary font-semibold">Export → Export as JSON</span>.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold bg-primary/20 text-primary">4</span>
+                <span>Switch to the <span className="text-primary font-semibold">Paste Cookies</span> tab here and paste the copied JSON.</span>
+              </li>
+            </ol>
+          </div>
+
+          <Button type="button"
+            disabled={!form.email || !form.name}
+            onClick={handleOpenTab}
+            className="w-full font-mono text-xs uppercase bg-primary/90 hover:bg-primary text-primary-foreground">
+            <Globe className="w-4 h-4 mr-2" />
+            {tabOpened ? 'Open Microsoft Login Again' : 'Open Microsoft Login'}
+          </Button>
+
+          {tabOpened && (
+            <div className="rounded border border-primary/20 bg-primary/5 px-3 py-2.5 text-xs font-mono text-primary/80 flex items-start gap-2">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary" />
+              <span>Tab opened. Sign in, export cookies with Cookie-Editor, then switch to <strong>Paste Cookies</strong> above to finish.</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -220,13 +245,8 @@ function CookieCapturePanel({
       {captureMode === 'paste' && !importCookies.isSuccess && (
         <div className="space-y-3">
           <div className="rounded border border-border/30 bg-black/30 px-3 py-2.5 text-xs font-mono text-muted-foreground space-y-1.5 leading-relaxed">
-            <p className="text-white/70 font-semibold">How to export cookies:</p>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>Open <span className="text-primary">rewards.microsoft.com</span> in your browser and sign in.</li>
-              <li>Install the <span className="text-primary">Cookie-Editor</span> extension (Chrome / Firefox).</li>
-              <li>Click the extension → <span className="text-primary">Export → Export as JSON</span>.</li>
-              <li>Paste the copied JSON below.</li>
-            </ol>
+            <p className="text-white/70 font-semibold">Paste your exported cookie JSON</p>
+            <p>Open <span className="text-primary">rewards.microsoft.com</span>, sign in, then use Cookie-Editor → <span className="text-primary">Export → Export as JSON</span>.</p>
           </div>
           <Textarea
             value={pasteValue}
@@ -249,7 +269,7 @@ function CookieCapturePanel({
         </div>
       )}
 
-      {/* Paste success */}
+      {/* Success */}
       {importCookies.isSuccess && (
         <div className="rounded border border-green-500/30 bg-green-500/10 px-4 py-3 space-y-1 font-mono text-xs">
           <div className="flex items-center gap-2">
@@ -257,100 +277,10 @@ function CookieCapturePanel({
             <span className="text-green-300">Cookies imported successfully</span>
           </div>
           <p className="text-green-400/80">
-            {importCookies.data.count} cookie{importCookies.data.count !== 1 ? 's' : ''} saved to{' '}
-            <span className="text-green-300">sessions/{form.email}/session_desktop.json</span>
+            {importCookies.data.count} cookie{importCookies.data.count !== 1 ? 's' : ''} saved for{' '}
+            <span className="text-green-300">{form.email}</span>
           </p>
         </div>
-      )}
-
-      {/* ── Browser-launch mode ── */}
-      {captureMode === 'browser' && !importCookies.isSuccess && (
-        <>
-          {!capture.sessionId && (
-            <Button type="button"
-              disabled={!form.email || !form.name || capture.start.isPending}
-              onClick={handleLaunch}
-              className="w-full font-mono text-xs uppercase bg-primary/90 hover:bg-primary text-primary-foreground">
-              {capture.start.isPending
-                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Launching…</>
-                : <><Globe className="w-4 h-4 mr-2" /> Launch Login Browser</>}
-            </Button>
-          )}
-
-          {startError && (
-            <div className="rounded border border-destructive/30 bg-destructive/10 px-4 py-3 space-y-2 font-mono text-xs">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
-                <span className="text-destructive">Failed to start capture session</span>
-              </div>
-              <p className="text-destructive/80">{startError}</p>
-              <Button type="button" size="sm" variant="outline" onClick={handleLaunch}
-                className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
-                Retry
-              </Button>
-            </div>
-          )}
-
-          {capture.sessionId && (
-            <div className={`rounded border px-4 py-3 space-y-2 font-mono text-xs
-              ${isDone   ? 'border-green-500/30 bg-green-500/10'  :
-                isFailed ? 'border-destructive/30 bg-destructive/10' :
-                           'border-primary/30 bg-primary/5'}`}>
-              <div className="flex items-center gap-2">
-                {isDone
-                  ? <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
-                  : isFailed
-                  ? <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
-                  : <Loader2 className="w-4 h-4 text-primary shrink-0 animate-spin" />}
-                <span className={isDone ? 'text-green-300' : isFailed ? 'text-destructive' : 'text-primary'}>
-                  {statusLabel[status?.status ?? 'opening']}
-                </span>
-              </div>
-              {isDone && (
-                <p className="text-green-400/80">
-                  {status!.cookieCount} cookie{status!.cookieCount !== 1 ? 's' : ''} saved to{' '}
-                  <span className="text-green-300">sessions/{form.email}/session_desktop.json</span>
-                </p>
-              )}
-              {isFailed && status?.error && (
-                <p className="text-destructive/80">{status.error}</p>
-              )}
-              {!isDone && !isFailed && (
-                <div className="text-muted-foreground space-y-1">
-                  {status?.status === 'waiting'
-                    ? <p>Sign in inside the Chromium window, then wait — this dialog updates automatically.</p>
-                    : status?.step
-                    ? <p>Step: <span className="text-primary/80">{status.step}</span></p>
-                    : <p>Starting…</p>
-                  }
-                  {status?.executablePath && (
-                    <p className="text-[10px] break-all text-muted-foreground/60">Binary: {status.executablePath}</p>
-                  )}
-                </div>
-              )}
-              <div className="flex gap-2 pt-1">
-                {isFailed && (
-                  <Button type="button" size="sm" variant="outline" onClick={handleLaunch}
-                    className="font-mono text-xs border-primary/30 text-primary hover:bg-primary/10">
-                    Retry
-                  </Button>
-                )}
-                {isActive && (
-                  <Button type="button" size="sm" variant="outline" onClick={handleAbort}
-                    className="font-mono text-xs border-destructive/30 text-destructive hover:bg-destructive/10">
-                    Abort
-                  </Button>
-                )}
-                {(isDone || isFailed) && (
-                  <Button type="button" size="sm" variant="ghost" onClick={() => capture.reset()}
-                    className="font-mono text-xs text-muted-foreground hover:text-white">
-                    Reset
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-        </>
       )}
     </div>
   );
@@ -480,7 +410,7 @@ export function AddAccountDialog({
                       ? 'bg-primary/20 text-primary'
                       : 'text-muted-foreground hover:text-white'}`}
                 >
-                  <MonitorSmartphone className="w-3.5 h-3.5" /> Capture Cookies
+                  <Globe className="w-3.5 h-3.5" /> Capture Cookies
                 </button>
               </div>
 
