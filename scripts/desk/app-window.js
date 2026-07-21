@@ -31,6 +31,9 @@ const OPEN_WINDOW = process.env.NO_WINDOW !== "1";
 /** Absolute path to the workspace root (two levels up from scripts/desk/). */
 const WORKSPACE_ROOT = path.resolve(__dirname, "../../");
 
+/** Root of the bot source package — spawn cwd and data root live here. */
+const BOT_ROOT = path.resolve(WORKSPACE_ROOT, "references", "bot-source");
+
 /** Pre-built UI lives at <project-root>/dist-desk/ */
 const UI_DIST = path.resolve(__dirname, "../../dist-desk");
 
@@ -101,7 +104,7 @@ function serveStatic(res, filePath) {
 // The bot process writes its port + token to data/agent/agent.json.
 // We read that file and send JSON-newline messages over a TCP socket.
 
-const AGENT_STATE_FILE = path.join(WORKSPACE_ROOT, "data", "agent", "agent.json");
+const AGENT_STATE_FILE = path.join(BOT_ROOT, "data", "agent", "agent.json");
 
 /** In-memory log buffer (most recent first, capped at 150). */
 const logBuffer = [];
@@ -195,23 +198,22 @@ function spawnBotProcess() {
   // Try tsx in every known location before falling back to global tsx.
   const tsxBin = resolveTsx();
 
-  const BOT_ENTRY = path.join("references", "bot-source", "index.ts");
-  console.log(`[bot] Spawning: ${tsxBin} ${BOT_ENTRY} --background`);
+  console.log(`[bot] Spawning: ${tsxBin} src/index.ts --background (cwd: ${BOT_ROOT})`);
 
   // Capture bot output via pipe so errors are always readable on all platforms.
-  const botLogPath = path.join(WORKSPACE_ROOT, "bot-crash.log");
+  const botLogPath = path.join(BOT_ROOT, "bot-crash.log");
   const logStream  = fs.createWriteStream(botLogPath, { flags: "w" });
   console.log(`[bot] Output → ${botLogPath}`);
 
   const isCmd = tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat");
   const child = isCmd
-    ? spawn("cmd.exe", ["/c", tsxBin, BOT_ENTRY, "--background"], {
-        cwd:   WORKSPACE_ROOT,
+    ? spawn("cmd.exe", ["/c", tsxBin, "src/index.ts", "--background"], {
+        cwd:   BOT_ROOT,
         stdio: ["ignore", "pipe", "pipe"],
         env:   { ...process.env, MSRB_UI_CHILD: "1" },
       })
-    : spawn(tsxBin, [BOT_ENTRY, "--background"], {
-        cwd:   WORKSPACE_ROOT,
+    : spawn(tsxBin, ["src/index.ts", "--background"], {
+        cwd:   BOT_ROOT,
         stdio: ["ignore", "pipe", "pipe"],
         env:   { ...process.env, MSRB_UI_CHILD: "1" },
       });

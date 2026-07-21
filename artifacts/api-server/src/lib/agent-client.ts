@@ -25,7 +25,10 @@ export const WORKSPACE_ROOT = path.resolve(
   '../../../../'
 );
 
-const AGENT_STATE_FILE = path.join(WORKSPACE_ROOT, 'data', 'agent', 'agent.json');
+/** Root of the bot source package — its cwd when spawned, and where data/ lives. */
+export const BOT_ROOT = path.join(WORKSPACE_ROOT, 'references', 'bot-source');
+
+const AGENT_STATE_FILE = path.join(BOT_ROOT, 'data', 'agent', 'agent.json');
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -208,13 +211,13 @@ export function spawnBotProcess(): void {
   // On Windows, .cmd files must be invoked via cmd.exe /c — spawning them
   // directly causes a silent CreateProcess failure.
   const isCmd = tsxBin.endsWith('.cmd') || tsxBin.endsWith('.bat');
-  const botEntry = path.join('references', 'bot-source', 'index.ts');
+  // Spawn from BOT_ROOT so Node resolves packages from references/bot-source/node_modules.
   const [spawnCmd, spawnArgs] = isCmd
-    ? ['cmd.exe', ['/c', tsxBin, botEntry, '--background']]
-    : [tsxBin,    [botEntry, '--background']];
+    ? ['cmd.exe', ['/c', tsxBin, 'src/index.ts', '--background']]
+    : [tsxBin,    ['src/index.ts', '--background']];
 
   const botProcess = spawn(spawnCmd, spawnArgs, {
-    cwd:      WORKSPACE_ROOT,
+    cwd:      BOT_ROOT,
     detached: true,
     stdio:    'ignore',
     shell:    false,
