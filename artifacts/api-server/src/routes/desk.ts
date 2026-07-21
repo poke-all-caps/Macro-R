@@ -46,14 +46,19 @@ const captureSessions = new Map<string, CaptureSession>();
 
 const CAPTURE_DIR = path.join(WORKSPACE_ROOT, "data", "agent");
 
-/** Resolve the tsx binary — prefer the api-server's own node_modules. */
+/** Resolve the tsx binary — prefers workspace-local copies; handles Windows .cmd extension. */
 function resolveTsx(): string {
+  // On Windows the executable is tsx.cmd (batch file). Passing a bare path to a
+  // bash-shebang tsx file fails silently because Windows can't execute it.
+  const isWin = process.platform === "win32";
+  const ext   = isWin ? ".cmd" : "";
+
   const candidates = [
-    path.join(WORKSPACE_ROOT, "artifacts", "api-server", "node_modules", ".bin", "tsx"),
-    path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx"),
-    "tsx",
+    path.join(WORKSPACE_ROOT, "artifacts", "api-server", "node_modules", ".bin", `tsx${ext}`),
+    path.join(WORKSPACE_ROOT, "node_modules", ".bin", `tsx${ext}`),
   ];
-  return candidates.find(p => p === "tsx" || fs.existsSync(p)) ?? "tsx";
+  const found = candidates.find(p => fs.existsSync(p));
+  return found ?? `tsx${ext}`;
 }
 
 function readCaptureStatus(statusFile: string): Record<string, unknown> | null {
@@ -476,6 +481,9 @@ router.post("/desk/capture-session", (req, res): void => {
 
   const child = spawn(tsxBin, [scriptPath, sessionId, email, statusFile], {
     cwd:   WORKSPACE_ROOT,
+    // On Windows, .cmd batch files require shell:true — without it, CreateProcess
+    // can't execute them and the spawn silently fails.
+    shell: process.platform === "win32",
     stdio: ["ignore", "ignore", "pipe"], // capture stderr for error reporting
     env:   { ...process.env },
   });
@@ -493,7 +501,9 @@ router.post("/desk/capture-session", (req, res): void => {
     } catch { /* best-effort */ }
   });
 
-  child.on("exit", (code: number | null) => {
+  // Use "close" (not "exit") so all stdio streams — including stderr — are
+  // guaranteed to be flushed before we read stderrBuf.
+  child.on("close", (code: number | null) => {
     const s = readCaptureStatus(statusFile);
     const currentStatus = s?.["status"] as string | undefined;
     if (currentStatus !== "done") {

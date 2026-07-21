@@ -181,20 +181,42 @@ export async function requestAgentStop(): Promise<boolean> {
  * Poll isAgentActive() after calling this to wait for it to be ready.
  */
 export function spawnBotProcess(): void {
-  // Prefer tsx from the api-server's own node_modules, then workspace root.
+  const isWindows = process.platform === 'win32';
+  const binDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../../../node_modules/.bin');
+
+  // Include both .cmd (Windows) and extensionless (Unix) candidates for each location.
   const candidates = [
-    path.join(path.dirname(fileURLToPath(import.meta.url)), '../../../../node_modules/.bin/tsx'),
+    path.join(binDir, 'tsx.cmd'),
+    path.join(binDir, 'tsx'),
+    path.join(WORKSPACE_ROOT, 'node_modules/.bin/tsx.cmd'),
     path.join(WORKSPACE_ROOT, 'node_modules/.bin/tsx'),
     'tsx', // global fallback
   ];
-  const tsxBin = candidates.find(p => {
+
+  // On Windows, skip extensionless bash scripts — they exist on disk but
+  // Node's CreateProcess cannot execute them. On non-Windows, skip .cmd/.bat.
+  const filtered = candidates.filter(p => {
+    if (p === 'tsx') return true;
+    if (isWindows) return p.endsWith('.cmd') || p.endsWith('.bat');
+    return !p.endsWith('.cmd') && !p.endsWith('.bat');
+  });
+
+  const tsxBin = filtered.find(p => {
     try { return p === 'tsx' || fs.existsSync(p); } catch { return false; }
   }) ?? 'tsx';
 
-  const botProcess = spawn(tsxBin, ['src/index.ts', '--background'], {
+  // On Windows, .cmd files must be invoked via cmd.exe /c — spawning them
+  // directly causes a silent CreateProcess failure.
+  const isCmd = tsxBin.endsWith('.cmd') || tsxBin.endsWith('.bat');
+  const [spawnCmd, spawnArgs] = isCmd
+    ? ['cmd.exe', ['/c', tsxBin, 'src/index.ts', '--background']]
+    : [tsxBin,    ['src/index.ts', '--background']];
+
+  const botProcess = spawn(spawnCmd, spawnArgs, {
     cwd:      WORKSPACE_ROOT,
     detached: true,
     stdio:    'ignore',
+    shell:    false,
     env:      { ...process.env },
   });
   // MUST handle 'error' or an ENOENT/EACCES will propagate as an unhandled

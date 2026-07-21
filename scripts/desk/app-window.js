@@ -225,7 +225,7 @@ function spawnBotProcess() {
     _pushLog({ userName: "DESK", level: "error", platform: "MAIN", title: "SPAWN-ERR",
                message: `Failed to start bot: ${err.message}` });
   });
-  child.on("exit", (code) => {
+  child.on("close", (code) => {
     logStream.end();
     if (code !== 0) {
       console.error(`[bot] Exited with code ${code} — see bot-crash.log`);
@@ -308,6 +308,7 @@ const DATA_DIR        = path.join(WORKSPACE_ROOT, "data");
 const CAPTURE_DIR     = path.join(DATA_DIR, "agent");
 
 function resolveTsx() {
+  const isWindows = process.platform === "win32";
   const candidates = [
     // workspace root (populated when running `pnpm install` at root)
     path.join(WORKSPACE_ROOT, "node_modules", ".bin", "tsx.cmd"),
@@ -321,7 +322,15 @@ function resolveTsx() {
     // global / PATH fallback
     "tsx",
   ];
-  return candidates.find((p) => {
+  // On Windows, skip extensionless bash scripts — they exist on disk (npm creates
+  // both) but Node's CreateProcess cannot execute them. On non-Windows, skip
+  // .cmd/.bat wrappers because they require cmd.exe and don't exist on Linux/macOS.
+  const filtered = candidates.filter((p) => {
+    if (p === "tsx") return true;
+    if (isWindows) return p.endsWith(".cmd") || p.endsWith(".bat");
+    return !p.endsWith(".cmd") && !p.endsWith(".bat");
+  });
+  return filtered.find((p) => {
     try { return p === "tsx" || fs.existsSync(p); } catch { return false; }
   }) ?? "tsx";
 }
@@ -642,7 +651,7 @@ async function handleRequest(req, res) {
           fs.writeFileSync(statusFile, JSON.stringify({ sessionId, email, status: "failed", error: err.message }, null, 2));
         } catch {}
       });
-      child.on("exit", (code) => {
+      child.on("close", (code) => {
         const s = readCaptureStatus(statusFile);
         if (s && s.status !== "done") {
           try {
