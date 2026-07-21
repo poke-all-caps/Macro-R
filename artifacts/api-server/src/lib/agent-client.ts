@@ -208,9 +208,10 @@ export function spawnBotProcess(): void {
   // On Windows, .cmd files must be invoked via cmd.exe /c — spawning them
   // directly causes a silent CreateProcess failure.
   const isCmd = tsxBin.endsWith('.cmd') || tsxBin.endsWith('.bat');
+  const botEntry = path.join('references', 'bot-source', 'index.ts');
   const [spawnCmd, spawnArgs] = isCmd
-    ? ['cmd.exe', ['/c', tsxBin, 'src/index.ts', '--background']]
-    : [tsxBin,    ['src/index.ts', '--background']];
+    ? ['cmd.exe', ['/c', tsxBin, botEntry, '--background']]
+    : [tsxBin,    [botEntry, '--background']];
 
   const botProcess = spawn(spawnCmd, spawnArgs, {
     cwd:      WORKSPACE_ROOT,
