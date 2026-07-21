@@ -198,7 +198,7 @@ function spawnBotProcess() {
   // Try tsx in every known location before falling back to global tsx.
   const tsxBin = resolveTsx();
 
-  console.log(`[bot] Spawning: ${tsxBin} src/index.ts --background (cwd: ${BOT_ROOT})`);
+  console.log(`[bot] Spawning: ${tsxBin} index.ts --background (cwd: ${BOT_ROOT})`);
 
   // Capture bot output via pipe so errors are always readable on all platforms.
   const botLogPath = path.join(BOT_ROOT, "bot-crash.log");
@@ -207,12 +207,12 @@ function spawnBotProcess() {
 
   const isCmd = tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat");
   const child = isCmd
-    ? spawn("cmd.exe", ["/c", tsxBin, "src/index.ts", "--background"], {
+    ? spawn("cmd.exe", ["/c", tsxBin, "index.ts", "--background"], {
         cwd:   BOT_ROOT,
         stdio: ["ignore", "pipe", "pipe"],
         env:   { ...process.env, MSRB_UI_CHILD: "1" },
       })
-    : spawn(tsxBin, ["src/index.ts", "--background"], {
+    : spawn(tsxBin, ["index.ts", "--background"], {
         cwd:   BOT_ROOT,
         stdio: ["ignore", "pipe", "pipe"],
         env:   { ...process.env, MSRB_UI_CHILD: "1" },

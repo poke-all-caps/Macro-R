@@ -179,7 +179,7 @@ export async function requestAgentStop(): Promise<boolean> {
 }
 
 /**
- * Spawns the bot as a detached background process (src/index.ts --background).
+ * Spawns the bot as a detached background process (index.ts --background).
  * The process writes data/agent/agent.json once its IPC server is listening.
  * Poll isAgentActive() after calling this to wait for it to be ready.
  */
@@ -213,8 +213,8 @@ export function spawnBotProcess(): void {
   const isCmd = tsxBin.endsWith('.cmd') || tsxBin.endsWith('.bat');
   // Spawn from BOT_ROOT so Node resolves packages from references/bot-source/node_modules.
   const [spawnCmd, spawnArgs] = isCmd
-    ? ['cmd.exe', ['/c', tsxBin, 'src/index.ts', '--background']]
-    : [tsxBin,    ['src/index.ts', '--background']];
+    ? ['cmd.exe', ['/c', tsxBin, 'index.ts', '--background']]
+    : [tsxBin,    ['index.ts', '--background']];
 
   const botProcess = spawn(spawnCmd, spawnArgs, {
     cwd:      BOT_ROOT,
