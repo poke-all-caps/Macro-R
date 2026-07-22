@@ -30,6 +30,9 @@ import {
   addAccount,
   updateAccount,
   deleteAccount,
+  addBotAccount,
+  updateBotAccount,
+  deleteBotAccount,
   loadLogs,
   appendLog,
   type DeskAccount,
@@ -161,6 +164,23 @@ router.post("/desk/accounts", (req, res): void => {
   }
   try {
     const account = addAccount({ email: parsed.data.email, name: parsed.data.name });
+    // Mirror credentials to references/bot-source/accounts.json so the bot engine
+    // picks up the real account instead of falling back to accounts.example.json.
+    try {
+      addBotAccount({
+        email:           parsed.data.email,
+        password:        parsed.data.password,
+        totpSecret:      parsed.data.totpSecret,
+        recoveryEmail:   parsed.data.recoveryEmail,
+        geoLocale:       parsed.data.geoLocale,
+        langCode:        parsed.data.langCode,
+        proxy:           parsed.data.proxy,
+        saveFingerprint: parsed.data.saveFingerprint,
+      });
+    } catch (botErr) {
+      // Not fatal — desk account was saved; warn but continue.
+      console.warn('[desk] addBotAccount failed:', botErr);
+    }
     res.status(201).json(account);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -181,6 +201,8 @@ router.patch("/desk/accounts/:id", (req, res): void => {
     return;
   }
   try {
+    // Capture old email before patching so we can mirror the rename to bot store.
+    const existing = loadAccounts().find(a => a.id === id);
     const patch: Partial<DeskAccount> = {};
     if (body.data.name)  patch.name  = body.data.name;
     if (body.data.email) patch.email = body.data.email;
@@ -190,6 +212,9 @@ router.patch("/desk/accounts/:id", (req, res): void => {
       patch.todayPoints      = 0;
     }
     const account = updateAccount(id, patch);
+    if (existing && body.data.email) {
+      try { updateBotAccount(existing.email, { email: body.data.email }); } catch { /* ignore */ }
+    }
     res.json(account);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
@@ -200,9 +225,14 @@ router.patch("/desk/accounts/:id", (req, res): void => {
 // DELETE /desk/accounts/:id
 router.delete("/desk/accounts/:id", (req, res): void => {
   const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  // Look up email before deletion so we can remove from bot store too.
+  const existing = loadAccounts().find(a => a.id === id);
   if (!deleteAccount(id)) {
     res.status(404).json({ error: "Account not found" });
     return;
+  }
+  if (existing) {
+    try { deleteBotAccount(existing.email); } catch { /* ignore */ }
   }
   res.json({ success: true });
 });

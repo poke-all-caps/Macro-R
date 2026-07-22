@@ -125,6 +125,125 @@ export function deleteAccount(id: string): boolean {
   return true;
 }
 
+// ── Bot account sync ──────────────────────────────────────────────────────────
+// Keeps references/bot-source/accounts.json in sync with desk UI changes.
+// The bot reads this file on startup; without it, it falls back to
+// accounts.example.json (which has placeholder email_2 entries).
+
+const BOT_ACCOUNTS_FILE = path.join(WORKSPACE_ROOT, 'references', 'bot-source', 'accounts.json');
+
+interface BotAccount {
+  email:           string;
+  enabled:         boolean;
+  password:        string;
+  totpSecret:      string;
+  recoveryEmail:   string;
+  geoLocale:       string;
+  langCode:        string;
+  dashboardMode:   string;
+  strictProxy:     string;
+  proxy: {
+    proxyAxios: boolean;
+    url:        string;
+    port:       number;
+    username:   string;
+    password:   string;
+  };
+  saveFingerprint: { mobile: boolean; desktop: boolean };
+}
+
+function loadBotAccounts(): BotAccount[] {
+  try {
+    return JSON.parse(fs.readFileSync(BOT_ACCOUNTS_FILE, 'utf8')) as BotAccount[];
+  } catch {
+    return [];
+  }
+}
+
+function saveBotAccounts(accounts: BotAccount[]): void {
+  const tmp = BOT_ACCOUNTS_FILE + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify(accounts, null, 2), 'utf8');
+  try {
+    fs.renameSync(tmp, BOT_ACCOUNTS_FILE);
+  } catch {
+    fs.copyFileSync(tmp, BOT_ACCOUNTS_FILE);
+    try { fs.unlinkSync(tmp); } catch { /* ignore */ }
+  }
+}
+
+export interface BotAccountFields {
+  email:           string;
+  password?:       string;
+  totpSecret?:     string;
+  recoveryEmail?:  string;
+  geoLocale?:      string;
+  langCode?:       string;
+  proxy?:          { url?: string; port?: number | string; username?: string; password?: string };
+  saveFingerprint?: { mobile?: boolean; desktop?: boolean };
+}
+
+export function addBotAccount(fields: BotAccountFields): void {
+  const accounts = loadBotAccounts();
+  if (accounts.find(a => a.email === fields.email)) return; // already exists — skip
+  const proxy = fields.proxy ?? {};
+  accounts.push({
+    email:           fields.email,
+    enabled:         true,
+    password:        fields.password        ?? '',
+    totpSecret:      fields.totpSecret      ?? '',
+    recoveryEmail:   fields.recoveryEmail   ?? '',
+    geoLocale:       fields.geoLocale       ?? 'auto',
+    langCode:        fields.langCode        ?? 'en',
+    dashboardMode:   'auto',
+    strictProxy:     'auto',
+    proxy: {
+      proxyAxios: true,
+      url:        proxy.url      ?? '',
+      port:       Number(proxy.port) || 0,
+      username:   proxy.username ?? '',
+      password:   proxy.password ?? '',
+    },
+    saveFingerprint: {
+      mobile:  Boolean(fields.saveFingerprint?.mobile),
+      desktop: Boolean(fields.saveFingerprint?.desktop),
+    },
+  });
+  saveBotAccounts(accounts);
+}
+
+export function updateBotAccount(currentEmail: string, patch: Partial<BotAccountFields>): void {
+  const accounts = loadBotAccounts();
+  const idx = accounts.findIndex(a => a.email === currentEmail);
+  if (idx === -1) return; // not in bot store — that's fine
+  const acc = accounts[idx];
+  if (patch.email         !== undefined) acc.email         = patch.email;
+  if (patch.password      !== undefined) acc.password      = patch.password;
+  if (patch.totpSecret    !== undefined) acc.totpSecret    = patch.totpSecret;
+  if (patch.recoveryEmail !== undefined) acc.recoveryEmail = patch.recoveryEmail;
+  if (patch.geoLocale     !== undefined) acc.geoLocale     = patch.geoLocale;
+  if (patch.langCode      !== undefined) acc.langCode      = patch.langCode;
+  if (patch.proxy !== undefined) {
+    acc.proxy = {
+      ...acc.proxy,
+      url:      patch.proxy.url      ?? acc.proxy.url,
+      port:     Number(patch.proxy.port) || acc.proxy.port,
+      username: patch.proxy.username ?? acc.proxy.username,
+      password: patch.proxy.password ?? acc.proxy.password,
+    };
+  }
+  if (patch.saveFingerprint !== undefined) {
+    acc.saveFingerprint = { ...acc.saveFingerprint, ...patch.saveFingerprint };
+  }
+  accounts[idx] = acc;
+  saveBotAccounts(accounts);
+}
+
+export function deleteBotAccount(email: string): void {
+  const accounts = loadBotAccounts();
+  const filtered = accounts.filter(a => a.email !== email);
+  if (filtered.length !== accounts.length) saveBotAccounts(filtered);
+}
+
 // ── Run logs ──────────────────────────────────────────────────────────────────
 
 export function loadLogs(): RunLog[] {

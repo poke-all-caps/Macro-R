@@ -37,6 +37,22 @@ export const ListAccountsResponse = zod.array(ListAccountsResponseItem);
 export const AddAccountBody = zod.object({
   email: zod.string(),
   name: zod.string(),
+  // Bot-engine credentials — passed through to references/bot-source/accounts.json
+  password:       zod.string().optional(),
+  totpSecret:     zod.string().optional(),
+  recoveryEmail:  zod.string().optional(),
+  geoLocale:      zod.string().optional(),
+  langCode:       zod.string().optional(),
+  proxy: zod.object({
+    url:      zod.string().optional(),
+    port:     zod.union([zod.string(), zod.number()]).optional(),
+    username: zod.string().optional(),
+    password: zod.string().optional(),
+  }).optional(),
+  saveFingerprint: zod.object({
+    mobile:  zod.boolean().optional(),
+    desktop: zod.boolean().optional(),
+  }).optional(),
 });
 
 /**
