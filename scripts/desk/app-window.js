@@ -184,14 +184,14 @@ async function requestAgentRun() {
   if (!state) return { accepted: false, reason: "Agent offline" };
   const response = await _sendMessage(state, { type: "run_now" }, 8000);
   if (!response) return { accepted: false, reason: "IPC timeout — agent may be busy" };
-  return { accepted: response.accepted === true, reason: response.reason };
+  return { accepted: response.type === "run_accepted", reason: response.reason };
 }
 
 async function requestAgentStop() {
   const state = await _readAgentState();
   if (!state) return false;
-  const response = await _sendMessage(state, { type: "stop" }, 5000);
-  return !!response?.stopped;
+  const response = await _sendMessage(state, { type: "stop_after_current" }, 5000);
+  return response?.type === "stop_accepted";
 }
 
 function spawnBotProcess() {

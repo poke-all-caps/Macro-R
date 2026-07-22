@@ -228,8 +228,8 @@ function clearLogs() {
 // These functions keep src/accounts.json (the file the bot actually reads) in
 // sync with any changes made through the desk UI.
 
-const BOT_ACCOUNTS_FILE = path.resolve(__dirname, "../../src/accounts.json");
-const BOT_ACCOUNTS_ENC_FILE = path.resolve(__dirname, "../../src/accounts.enc.json");
+const BOT_ACCOUNTS_FILE = path.resolve(__dirname, "../../references/bot-source/accounts.json");
+const BOT_ACCOUNTS_ENC_FILE = path.resolve(__dirname, "../../references/bot-source/accounts.enc.json");
 
 /**
  * Returns true when the bot store is encrypted (accounts.enc.json exists).
