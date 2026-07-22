@@ -1,5 +1,8 @@
 {pkgs}: {
   deps = [
+    pkgs.xorg.libxkbfile
+    pkgs.xorg.libXScrnSaver
+    pkgs.libxkbcommon
     pkgs.gtk3
     pkgs.alsa-lib
     pkgs.at-spi2-core

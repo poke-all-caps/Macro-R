@@ -37,6 +37,42 @@ function writeStatus(obj: Record<string, unknown>) {
     }
 }
 
+/**
+ * Translates a raw Patchright/OS error into a short, user-readable message.
+ * Returns null if no special handling is needed (caller uses raw message).
+ */
+function friendlyBrowserError(raw: string): string | null {
+    const r = raw.toLowerCase()
+    // Missing system libraries — common in cloud/server environments
+    if (
+        r.includes('libglib') ||
+        r.includes('cannot open shared object') ||
+        r.includes('error while loading shared') ||
+        r.includes('no such file or directory') && r.includes('chrome')
+    ) {
+        return (
+            'Browser capture requires a desktop environment. ' +
+            'Run the Desk locally on your Windows or Linux machine — ' +
+            'or use the "Paste Cookies" option to import cookies manually via Cookie-Editor.'
+        )
+    }
+    // No display / headless-only environment
+    if (r.includes('display') || r.includes('no display') || r.includes('cannot connect to x')) {
+        return (
+            'No display found. Browser capture requires a desktop with a screen. ' +
+            'Run the Desk locally on your machine, or use "Paste Cookies" instead.'
+        )
+    }
+    // Browser executable not found
+    if (r.includes('executable') && (r.includes("doesn't exist") || r.includes('does not exist') || r.includes('not found'))) {
+        return (
+            'Browser executable not found. ' +
+            'Run: pnpm exec patchright install chromium — then try again.'
+        )
+    }
+    return null
+}
+
 /** Save cookies from context to disk. Returns { count, sessionFile } or null on failure. */
 async function persistCookies(context: { cookies(): Promise<unknown[]> }): Promise<{ count: number; sessionFile: string } | null> {
     try {
@@ -138,8 +174,9 @@ async function main() {
                 ),
             ])
         } catch (chromiumErr) {
-            const chromiumMsg = chromiumErr instanceof Error ? chromiumErr.message : String(chromiumErr)
-            writeStatus({ status: 'failed', error: chromiumMsg })
+            const raw = chromiumErr instanceof Error ? chromiumErr.message : String(chromiumErr)
+            const friendly = friendlyBrowserError(raw)
+            writeStatus({ status: 'failed', error: friendly ?? raw.split('\n')[0].trim() })
             process.exit(1)
         }
     }
@@ -210,21 +247,8 @@ async function main() {
 
 main().catch(err => {
     const raw = err instanceof Error ? err.message : String(err)
-
-    // Distil the long Patchright error into one readable line.
-    let msg = raw.split('\n')[0].trim()
-
-    // Detect "no display" failures in headless/server environments.
-    if (
-        raw.includes('libglib') ||
-        raw.includes('cannot open shared object') ||
-        raw.includes('DISPLAY') ||
-        raw.includes('no display') ||
-        raw.toLowerCase().includes('error while loading shared')
-    ) {
-        msg = 'Cookie capture requires a desktop environment with a display. Run the bot locally on your Windows/Linux desktop machine.'
-    }
-
+    const friendly = friendlyBrowserError(raw)
+    const msg = friendly ?? raw.split('\n')[0].trim()
     writeStatus({ status: 'failed', error: msg })
     process.exit(1)
 })
