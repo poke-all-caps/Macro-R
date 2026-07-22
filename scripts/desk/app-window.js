@@ -125,7 +125,7 @@ async function _readAgentState() {
       !state.port   ||
       !state.token  ||
       !state.pid    ||
-      state.cwd !== WORKSPACE_ROOT
+      state.cwd !== BOT_ROOT
     ) {
       await fs.promises.rm(AGENT_STATE_FILE, { force: true }).catch(() => {});
       return null;
