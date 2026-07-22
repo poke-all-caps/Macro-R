@@ -30,6 +30,11 @@ export async function writeFileAtomic(
     }
 
     try {
+        // Windows does not allow rename() to overwrite an existing file; remove
+        // the destination first so the swap is always possible cross-platform.
+        if (process.platform === 'win32') {
+            await fs.promises.rm(filePath, { force: true }).catch(() => undefined)
+        }
         await fs.promises.rename(tempPath, filePath)
     } catch (error) {
         await fs.promises.rm(tempPath, { force: true }).catch(() => undefined)

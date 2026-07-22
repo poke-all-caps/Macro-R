@@ -125,7 +125,7 @@ async function _readAgentState() {
       !state.port   ||
       !state.token  ||
       !state.pid    ||
-      state.cwd !== BOT_ROOT
+      path.resolve(state.cwd) !== path.resolve(BOT_ROOT)
     ) {
       await fs.promises.rm(AGENT_STATE_FILE, { force: true }).catch(() => {});
       return null;
@@ -207,12 +207,12 @@ function spawnBotProcess() {
 
   const isCmd = tsxBin.endsWith(".cmd") || tsxBin.endsWith(".bat");
   const child = isCmd
-    ? spawn("cmd.exe", ["/c", tsxBin, "index.ts", "--background"], {
+    ? spawn("cmd.exe", ["/c", tsxBin, "index.ts", "--background", "--stop-existing"], {
         cwd:   BOT_ROOT,
         stdio: ["ignore", "pipe", "pipe"],
         env:   { ...process.env, MSRB_UI_CHILD: "1" },
       })
-    : spawn(tsxBin, ["index.ts", "--background"], {
+    : spawn(tsxBin, ["index.ts", "--background", "--stop-existing"], {
         cwd:   BOT_ROOT,
         stdio: ["ignore", "pipe", "pipe"],
         env:   { ...process.env, MSRB_UI_CHILD: "1" },

@@ -73,7 +73,7 @@ async function readAgentState(): Promise<AgentRuntimeState | null> {
     !state.port ||
     !state.token ||
     !state.pid ||
-    state.cwd !== BOT_ROOT
+    path.resolve(state.cwd) !== path.resolve(BOT_ROOT)
   ) {
     await fs.promises.rm(AGENT_STATE_FILE, { force: true }).catch(() => undefined);
     return null;
@@ -213,8 +213,8 @@ export function spawnBotProcess(): void {
   const isCmd = tsxBin.endsWith('.cmd') || tsxBin.endsWith('.bat');
   // Spawn from BOT_ROOT so Node resolves packages from references/bot-source/node_modules.
   const [spawnCmd, spawnArgs] = isCmd
-    ? ['cmd.exe', ['/c', tsxBin, 'index.ts', '--background']]
-    : [tsxBin,    ['index.ts', '--background']];
+    ? ['cmd.exe', ['/c', tsxBin, 'index.ts', '--background', '--stop-existing']]
+    : [tsxBin,    ['index.ts', '--background', '--stop-existing']];
 
   const botProcess = spawn(spawnCmd, spawnArgs, {
     cwd:      BOT_ROOT,
