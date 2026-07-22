@@ -66,14 +66,14 @@ function parseJson<T>(raw: string): T | null {
 async function readAgentState(): Promise<AgentRuntimeState | null> {
   const raw = await fs.promises.readFile(AGENT_STATE_FILE, 'utf8').catch(() => '');
   const state = parseJson<AgentRuntimeState>(raw);
-  // Validate: version, port, token, pid, cwd must match workspace root
+  // Validate: version, port, token, pid, cwd must match bot root
   if (
     !state ||
     state.version !== 1 ||
     !state.port ||
     !state.token ||
     !state.pid ||
-    state.cwd !== WORKSPACE_ROOT
+    state.cwd !== BOT_ROOT
   ) {
     await fs.promises.rm(AGENT_STATE_FILE, { force: true }).catch(() => undefined);
     return null;
